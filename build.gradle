@@ -1,0 +1,55 @@
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    group 'com.codejune'
+    version '1.3.24'
+
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    java {
+        withSourcesJar()
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+
+                pom {
+                    developers {
+                        developer {
+                            id = 'CodeJune'
+                            name = 'CodeJune'
+                            email = '1476253236@qq.com'
+                        }
+                    }
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            mavenLocal()
+
+//            maven {
+//                url 'https://packages.aliyun.com/maven/repository/2137025-release-ae6xsV'
+//                credentials {
+//                    username '613c3bc8a300e314f854bfd4'
+//                    password 'HNsb9RanXzmR'
+//                }
+//            }
+        }
+    }
+}

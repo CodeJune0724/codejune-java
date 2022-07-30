@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':codejune-common')
+    implementation group: 'com.jcraft', name: 'jsch', version: '0.1.55'
+    implementation group: 'commons-net', name: 'commons-net', version: '3.8.0'
+}

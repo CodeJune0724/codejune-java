@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(':codejune-common')
+    implementation group: 'org.dom4j', name: 'dom4j', version: '2.1.3'
+
+    compileOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.7.2'
+}
