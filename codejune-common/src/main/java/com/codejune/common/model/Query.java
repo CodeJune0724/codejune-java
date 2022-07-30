@@ -39,20 +39,9 @@ public class Query implements ModelAble<Query> {
         return this;
     }
 
-    public Filter getFilter() {
-        if (filter == null) {
-            filter = new Filter();
-        }
-        return filter;
-    }
-
     public Query setFilter(Filter filter) {
         this.filter = filter;
         return this;
-    }
-
-    public Sort getSort() {
-        return sort;
     }
 
     public Query setSort(Sort sort) {
@@ -60,6 +49,35 @@ public class Query implements ModelAble<Query> {
         return this;
     }
 
+    /**
+     * 获取filter
+     *
+     * @return Filter
+     * */
+    public Filter filter() {
+        if (filter == null) {
+            filter = new Filter();
+        }
+        return filter;
+    }
+
+    /**
+     * 获取sort
+     *
+     * @return Sort
+     * */
+    public Sort sort() {
+        if (sort == null) {
+            sort = new Sort();
+        }
+        return sort;
+    }
+
+    /**
+     * 设置key处理
+     *
+     * @return this
+     * */
     public Query setKeyHandler(KeyHandler keyHandler) {
         if (keyHandler == null) {
             return this;

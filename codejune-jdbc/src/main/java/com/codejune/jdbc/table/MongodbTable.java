@@ -93,7 +93,7 @@ public final class MongodbTable implements Table {
         }
 
         MongoCollection<Document> collection = getMongoCollection(getName());
-        Document filterDocument = formatFilter(query.getFilter());
+        Document filterDocument = formatFilter(query.filter());
 
         QueryResult<Map<String, Object>> result = new QueryResult<>();
         result.setCount(collection.countDocuments(filterDocument));
@@ -110,7 +110,7 @@ public final class MongodbTable implements Table {
 
         // 排序
         if (query.isSort()) {
-            Sort sort = query.getSort();
+            Sort sort = query.sort();
             int sortInt;
             if (sort.getOrderBy() == Sort.OderBy.ASC) {
                 sortInt = 1;
