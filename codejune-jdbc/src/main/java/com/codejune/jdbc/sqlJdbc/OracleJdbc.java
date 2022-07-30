@@ -306,7 +306,7 @@ public class OracleJdbc extends SqlJdbc {
             String sql = "SELECT * FROM " + tableName;
 
             // 数据过滤
-            Filter filter = query.getFilter();
+            Filter filter = query.filter();
             columnFilter(filter);
             if (filter != null) {
                 sql = sql + " " + SqlUtil.toWhere(filter, jdbcType);
@@ -319,7 +319,7 @@ public class OracleJdbc extends SqlJdbc {
 
             // 排序
             if (query.isSort()) {
-                Sort sort = query.getSort();
+                Sort sort = query.sort();
                 sql = StringUtil.append(sql, " ORDER BY ", sort.getColumn(), " ", sort.getOrderBy().name());
             }
 
