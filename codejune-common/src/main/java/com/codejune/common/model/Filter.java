@@ -210,7 +210,7 @@ public final class Filter implements ModelAble<Filter> {
      * */
     public static final class Item {
 
-        private final Type type;
+        private Type type;
 
         private String key;
 
@@ -228,6 +228,10 @@ public final class Filter implements ModelAble<Filter> {
 
         public Type getType() {
             return type;
+        }
+
+        public void setType(Type type) {
+            this.type = type;
         }
 
         public String getKey() {
