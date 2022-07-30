@@ -1,4 +1,4 @@
-rootProject.name = 'codejune-jar'
+rootProject.name = 'codejune-java'
 
 include ':codejune-common'
 include ':codejune-excel'

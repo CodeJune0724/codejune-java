@@ -41,15 +41,13 @@ subprojects {
         }
 
         repositories {
-            mavenLocal()
-
-//            maven {
-//                url 'https://packages.aliyun.com/maven/repository/2137025-release-ae6xsV'
-//                credentials {
-//                    username '613c3bc8a300e314f854bfd4'
-//                    password 'HNsb9RanXzmR'
-//                }
-//            }
+            maven {
+                url 'https://packages.aliyun.com/maven/repository/2137025-release-ae6xsV'
+                credentials {
+                    username '613c3bc8a300e314f854bfd4'
+                    password 'HNsb9RanXzmR'
+                }
+            }
         }
     }
 }

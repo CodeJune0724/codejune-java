@@ -20,5 +20,5 @@ read -p "检查是否存在冲突:" isOk
 if [ ${isOk}=="1" ]; then
     # 后置步骤
 	chmod 777 gradlew
-	gradlew clean publish
+	./gradlew clean publish
 fi
