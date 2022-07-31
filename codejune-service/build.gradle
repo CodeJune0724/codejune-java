@@ -1,5 +1,4 @@
 dependencies {
-    implementation project(':codejune-common')
-
+    api project(':codejune-common')
     compileOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.7.2'
 }
