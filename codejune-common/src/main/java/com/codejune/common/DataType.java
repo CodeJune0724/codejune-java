@@ -311,4 +311,25 @@ public enum DataType {
         return findDataTypeList.get(0);
     }
 
+    /**
+     * toString
+     *
+     * @param object object
+     *
+     * @return String
+     * */
+    public static String toString(Object object) {
+        if (object == null) {
+            return null;
+        }
+        DataType dataType = DataType.toDataType(object.getClass());
+        if (dataType == DataType.DOUBLE) {
+            return BigDecimal.valueOf((Double) object).toString();
+        }
+        if (dataType == DataType.MAP) {
+            return JsonUtil.toJsonString(object);
+        }
+        return object.toString();
+    }
+
 }

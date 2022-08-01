@@ -4,7 +4,7 @@ import com.codejune.common.ClassInfo;
 import com.codejune.common.DataType;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
-import java.math.BigDecimal;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -82,15 +82,22 @@ public final class ObjectUtil {
         if (object == null) {
             return true;
         }
-        if (object instanceof List) {
-            return ((List<?>) object).size() == 0;
+        if (object instanceof Optional) {
+            return !((Optional<?>) object).isPresent();
+        }
+        if (object instanceof CharSequence) {
+            return ((CharSequence) object).length() == 0;
+        }
+        if (object.getClass().isArray()) {
+            return Array.getLength(object) == 0;
+        }
+        if (object instanceof Collection) {
+            return ((Collection<?>) object).isEmpty();
         }
         if (object instanceof Map) {
-            if (ObjectUtil.parse(object, Map.class).isEmpty()) {
-                return true;
-            }
+            return ((Map<?, ?>) object).isEmpty();
         }
-        return StringUtil.isEmpty(object);
+        return false;
     }
 
     /**
@@ -101,17 +108,7 @@ public final class ObjectUtil {
      * @return String
      * */
     public static String toString(Object object) {
-        if (object == null) {
-            return null;
-        }
-        DataType dataType = DataType.toDataType(object.getClass());
-        if (dataType == DataType.DOUBLE) {
-            return new BigDecimal(parse(object, double.class).toString()).toString();
-        }
-        if (dataType == DataType.MAP) {
-            return JsonUtil.toJsonString(object);
-        }
-        return object.toString();
+        return DataType.toString(object);
     }
 
     /**
