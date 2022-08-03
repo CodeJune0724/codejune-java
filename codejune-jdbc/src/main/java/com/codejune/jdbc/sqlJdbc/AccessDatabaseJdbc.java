@@ -7,7 +7,6 @@ import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.jdbc.SqlJdbc;
 import com.codejune.jdbc.table.SqlTable;
-import com.codejune.common.model.Column;
 import com.codejune.common.model.Filter;
 import com.codejune.common.model.Query;
 import com.codejune.common.model.QueryResult;
@@ -21,6 +20,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.codejune.jdbc.Column;
 
 /**
  * AccessDatabaseJdbc
@@ -263,9 +263,14 @@ public class AccessDatabaseJdbc extends SqlJdbc {
                     throw new InfoException(e);
                 }
 
-                result.add(new Column(name, sqlType, length, isPrimaryKey));
+                result.add(new Column(name, null, sqlType, length, isPrimaryKey));
             }
             return result;
+        }
+
+        @Override
+        public String getRemark() {
+            return new OracleJdbc(accessDatabaseJdbc.getConnection()).getTable(tableName).getRemark();
         }
 
         @Override

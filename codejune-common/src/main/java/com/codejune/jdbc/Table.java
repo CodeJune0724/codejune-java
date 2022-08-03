@@ -3,6 +3,7 @@ package com.codejune.jdbc;
 import com.codejune.common.model.Filter;
 import com.codejune.common.model.Query;
 import com.codejune.common.model.QueryResult;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,21 @@ public interface Table {
      * @return 受影响的行数
      * */
     long insert(List<Map<String, Object>> data);
+
+    /**
+     * 插入数据
+     *
+     * @param data 数据
+     *
+     * @return 受影响的行数
+     * */
+    default long insert(Map<String, Object> data) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        if (data != null) {
+            list.add(data);
+        }
+        return insert(list);
+    }
 
     /**
      * 删除数据
