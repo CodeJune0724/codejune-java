@@ -249,7 +249,7 @@ public abstract class SqlJdbc implements Jdbc {
         // 获取字段
         ResultSet columnResultSet = null;
         try {
-            columnResultSet = databaseMetaData.getColumns(connection.getCatalog(), null, tableName.toUpperCase(), null);
+            columnResultSet = databaseMetaData.getColumns(connection.getCatalog(), schema, originTableName, null);
             while (columnResultSet.next()) {
                 String name = columnResultSet.getString("COLUMN_NAME");
                 String remark = columnResultSet.getString("REMARKS");
