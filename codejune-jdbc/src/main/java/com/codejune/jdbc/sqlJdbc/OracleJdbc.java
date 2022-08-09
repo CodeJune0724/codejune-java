@@ -14,6 +14,7 @@ import com.codejune.common.util.StringUtil;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
+import com.codejune.jdbc.Column;
 
 /**
  * OracleJdbc
@@ -77,7 +78,12 @@ public class OracleJdbc extends SqlJdbc {
 
     private static Connection getConnection(String host, int port, String sid, String username, String password) {
         try {
-            return DriverManager.getConnection("jdbc:oracle:thin:@" + host + ":" + port + ":" + sid, username, password);
+            String url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + sid;
+            Properties properties = new Properties();
+            properties.put("user", username);
+            properties.put("password", password);
+            properties.put("remarksReporting","true");
+            return DriverManager.getConnection(url, properties);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
@@ -232,6 +238,33 @@ public class OracleJdbc extends SqlJdbc {
         }
 
         @Override
+        public String getRemark() {
+            ResultSet resultSet = null;
+            try {
+                DatabaseMetaData metaData = this.oracleJdbc.getConnection().getMetaData();
+                String schema;
+                String originTableName;
+                if (this.tableName.contains(".")) {
+                    String[] split = this.tableName.split("\\.");
+                    schema = split[0];
+                    originTableName = split[1];
+                } else {
+                    schema = null;
+                    originTableName = this.tableName;
+                }
+                resultSet = metaData.getTables(null, schema == null ? null : schema.toUpperCase(), originTableName, new String[]{"TABLE", "REMARKS"});
+                while (resultSet.next()) {
+                    return resultSet.getString("REMARKS");
+                }
+                return null;
+            } catch (Exception e) {
+                throw new InfoException(e);
+            } finally {
+                close(resultSet);
+            }
+        }
+
+        @Override
         public String getName() {
             return tableName;
         }
@@ -246,7 +279,9 @@ public class OracleJdbc extends SqlJdbc {
             if (StringUtil.isEmpty(tableName)) {
                 throw new InfoException("表名不能为空");
             }
-            columnFilter(filter);
+            if (filter != null) {
+                filter.filterKey(getColumns());
+            }
             String deleteSql = "DELETE FROM " + tableName + " " + SqlUtil.toWhere(filter);
             return oracleJdbc.execute(deleteSql);
         }
@@ -263,7 +298,7 @@ public class OracleJdbc extends SqlJdbc {
                 filter = new Filter();
             }
 
-            columnFilter(filter);
+            filter.filterKey(getColumns());
 
             // 根据字段类型转换数据
             Set<String> keySet = setData.keySet();
@@ -307,10 +342,8 @@ public class OracleJdbc extends SqlJdbc {
 
             // 数据过滤
             Filter filter = query.filter();
-            columnFilter(filter);
-            if (filter != null) {
-                sql = sql + " " + SqlUtil.toWhere(filter, jdbcType);
-            }
+            filter.filterKey(getColumns());
+            sql = sql + " " + SqlUtil.toWhere(filter, jdbcType);
 
             // count
             String countSql = StringUtil.append("SELECT COUNT(*) C FROM (", sql, ")");

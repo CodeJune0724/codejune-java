@@ -1,8 +1,7 @@
 package com.codejune.jdbc.table;
 
+import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Table;
-import com.codejune.common.model.Column;
-import com.codejune.common.model.Filter;
 import com.codejune.common.util.StringUtil;
 import java.util.List;
 
@@ -36,15 +35,10 @@ public interface SqlTable extends Table {
     }
 
     /**
-     * 过滤filter中不存在的字段
+     * 获取表备注
      *
-     * @param filter filter
+     * @return 表备注
      * */
-    default void columnFilter(Filter filter) {
-        if (filter == null) {
-            return;
-        }
-        filter.filterKey(getColumns());
-    }
+    String getRemark();
 
 }

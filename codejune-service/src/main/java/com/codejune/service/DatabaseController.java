@@ -51,4 +51,9 @@ public interface DatabaseController {
      * */
     ResponseResult deleteList(List<Object> requestBody);
 
+    /**
+     * 获取详情
+     * */
+    ResponseResult id(Object id);
+
 }

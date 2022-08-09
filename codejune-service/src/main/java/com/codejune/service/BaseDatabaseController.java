@@ -5,8 +5,7 @@ import com.codejune.common.model.Query;
 import com.codejune.common.model.ResponseResult;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +65,12 @@ public class BaseDatabaseController<T extends BasePO> implements DatabaseControl
         }
         databaseService.delete(tList);
         return ResponseResult.returnTrue();
+    }
+
+    @GetMapping("{id}")
+    @Override
+    public ResponseResult id(@PathVariable(required = false) Object id) {
+        return ResponseResult.returnTrue(databaseService.id(id));
     }
 
 }

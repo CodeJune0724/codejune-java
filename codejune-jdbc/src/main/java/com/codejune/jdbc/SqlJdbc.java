@@ -4,7 +4,6 @@ import com.codejune.common.ClassInfo;
 import com.codejune.Jdbc;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.model.Charset;
-import com.codejune.common.model.Column;
 import com.codejune.common.model.Query;
 import com.codejune.common.model.QueryResult;
 import com.codejune.common.util.StringUtil;
@@ -209,56 +208,61 @@ public abstract class SqlJdbc implements Jdbc {
         }
         List<Column> result = new ArrayList<>();
 
-        // 获取主键
-        List<String> primaryKeyList = new ArrayList<>();
-        ResultSet primaryKeysResultSet = null;
+        DatabaseMetaData databaseMetaData;
         try {
-            DatabaseMetaData databaseMetaData = connection.getMetaData();
-            String username;
-            String tb;
-            if (tableName.contains(".")) {
-                username = tableName.split("\\.")[0];
-                tb = tableName.substring(tableName.indexOf(".") + 1);
-            } else {
-                username = databaseMetaData.getUserName();
-                tb = tableName;
-            }
-            if (StringUtil.isEmpty(username)) {
-                username = null;
-            }
-            primaryKeysResultSet = databaseMetaData.getPrimaryKeys(null, username, tb);
-            while (primaryKeysResultSet.next()) {
-                primaryKeyList.add(primaryKeysResultSet.getString("COLUMN_NAME"));
-            }
+            databaseMetaData = connection.getMetaData();
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            close(primaryKeysResultSet);
+            throw new InfoException(e);
         }
 
-        String sql = "SELECT * FROM " + tableName + " WHERE 1 != 1";
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
+        String schema;
+        String originTableName;
         try {
-            preparedStatement = connection.prepareStatement(sql);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet != null) {
-                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-                int columnCount = resultSetMetaData.getColumnCount();
-                for (int i = 1; i <= columnCount; i++) {
-                    String name = resultSetMetaData.getColumnName(i);
-                    int sqlType = resultSetMetaData.getColumnType(i);
-                    int length = resultSetMetaData.getPrecision(i);
-                    boolean isPrimaryKey = primaryKeyList.contains(name);
-                    result.add(new Column(name, sqlType, length, isPrimaryKey));
-                }
+            if (tableName.contains(".")) {
+                schema = tableName.split("\\.")[0];
+                originTableName = tableName.substring(tableName.indexOf(".") + 1);
+            } else {
+                schema = databaseMetaData.getUserName();
+                originTableName = tableName;
+            }
+            if (StringUtil.isEmpty(schema)) {
+                originTableName = null;
+            }
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+
+        // 获取主键
+        ResultSet primaryKeyResultSet = null;
+        List<String> primaryKeyList = new ArrayList<>();
+        try {
+            primaryKeyResultSet = databaseMetaData.getPrimaryKeys(connection.getCatalog(), schema, originTableName);
+            while (primaryKeyResultSet.next()) {
+                primaryKeyList.add(primaryKeyResultSet.getString("COLUMN_NAME"));
+            }
+        } catch (Exception e) {
+            throw new InfoException(e);
+        } finally {
+            close(primaryKeyResultSet);
+        }
+
+        // 获取字段
+        ResultSet columnResultSet = null;
+        try {
+            columnResultSet = databaseMetaData.getColumns(connection.getCatalog(), null, tableName.toUpperCase(), null);
+            while (columnResultSet.next()) {
+                String name = columnResultSet.getString("COLUMN_NAME");
+                String remark = columnResultSet.getString("REMARKS");
+                int sqlType = columnResultSet.getInt("DATA_TYPE");
+                int length = columnResultSet.getInt("COLUMN_SIZE");
+                boolean isPrimaryKey = primaryKeyList.contains(name);
+                result.add(new Column(name, remark, sqlType, length, isPrimaryKey));
             }
             return result;
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new InfoException(e);
         } finally {
-            close(resultSet);
-            close(preparedStatement);
+            close(columnResultSet);
         }
     }
 
