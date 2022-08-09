@@ -28,6 +28,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
 
     public Excel() {
         workbook = new SXSSFWorkbook(-1);
+        this.addSheet("Sheet1");
     }
 
     public Excel(String path) {

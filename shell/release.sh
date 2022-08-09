@@ -1,10 +1,12 @@
 #!/bin/bash
 
+set -e
+cd $(dirname $0)
+cd ..
+
 branch=$1
 mainBranch=$2
 
-cd $(dirname $0)
-cd ..
 git checkout ${mainBranch}
 git merge --squash ${branch}
 
