@@ -182,12 +182,16 @@ public final class File extends FileInfo {
      * 复制文件
      *
      * @param copyPath 复制路径
+     * @param fileName 文件名
      *
      * @return File
      * */
-    public File copy(String copyPath) {
+    public File copy(String copyPath, String fileName) {
         if (StringUtil.isEmpty(copyPath)) {
             return null;
+        }
+        if (StringUtil.isEmpty(fileName)) {
+            fileName = getName();
         }
         java.io.File copyPathFile = new java.io.File(copyPath);
         if (copyPathFile.exists() && copyPathFile.isFile()) {
@@ -198,7 +202,7 @@ public final class File extends FileInfo {
         }
 
         // 先删除，再生成
-        java.io.File file = new java.io.File(copyPath, getName());
+        java.io.File file = new java.io.File(copyPath, fileName);
         if (file.exists()) {
             new File(file).delete();
         }
@@ -221,12 +225,16 @@ public final class File extends FileInfo {
             List<File> files = files();
             if (files != null) {
                 for (File f : files) {
-                    f.copy(file.getAbsolutePath());
+                    f.copy(file.getAbsolutePath(), null);
                 }
             }
         }
 
         return result;
+    }
+
+    public File copy(String copyPath) {
+        return  copy(copyPath, null);
     }
 
     /**
