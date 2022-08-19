@@ -5,6 +5,7 @@ import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.KeyHandler;
 import com.codejune.common.util.ObjectUtil;
+import com.codejune.common.util.StringUtil;
 import java.util.*;
 
 /**
@@ -117,7 +118,7 @@ public final class Filter implements ModelAble<Filter> {
      *
      * @return Filter
      * */
-    public Filter filterKey(Collection<?> keyList) {
+    public Filter filter(Collection<?> keyList) {
         if (ObjectUtil.isEmpty(keyList)) {
             return this;
         }
@@ -137,7 +138,7 @@ public final class Filter implements ModelAble<Filter> {
             return this;
         }
         for (Filter filter : this.or) {
-            filter.filterKey(keyList);
+            filter.filter(keyList);
         }
         List<Item> list = new ArrayList<>();
         for (Item item : this.and) {
@@ -147,6 +148,86 @@ public final class Filter implements ModelAble<Filter> {
         }
         this.and.clear();
         this.and.addAll(list);
+        return this;
+    }
+
+    /**
+     * 通过key获取
+     *
+     * @param key key
+     *
+     * @return List
+     * */
+    public List<Item> getItem(String key) {
+        List<Item> result = new ArrayList<>();
+        if (StringUtil.isEmpty(key)) {
+            return result;
+        }
+        for (Filter filter : getOr()) {
+            result.addAll(filter.getItem(key));
+        }
+        for (Item item : getAnd()) {
+            if (key.equals(item.getKey())) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 通过key删除
+     *
+     * @param key key
+     *
+     * @return this
+     * */
+    public Filter deleteItem(String key) {
+        if (StringUtil.isEmpty(key)) {
+            return this;
+        }
+        for (Filter filter : getOr()) {
+            filter.deleteItem(key);
+        }
+        List<Item> newItem = new ArrayList<>();
+        for (Item item : getAnd()) {
+            if (!key.equals(item.getKey())) {
+                newItem.add(item);
+            }
+        }
+        this.and.clear();
+        this.and.addAll(newItem);
+        return this;
+    }
+
+    /**
+     * 通过ItemList删除
+     *
+     * @param itemList itemList
+     *
+     * @return this
+     * */
+    public Filter deleteItem(List<Item> itemList) {
+        if (ObjectUtil.isEmpty(itemList)) {
+            return this;
+        }
+        for (Item item : itemList) {
+            deleteItem(item);
+        }
+        return this;
+    }
+
+    /**
+     * 通过Item删除
+     *
+     * @param item item
+     *
+     * @return this
+     * */
+    public Filter deleteItem(Item item) {
+        if (item == null) {
+            return this;
+        }
+        deleteItem(item.getKey());
         return this;
     }
 
