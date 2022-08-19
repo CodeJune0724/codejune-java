@@ -7,7 +7,6 @@ import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.JsonUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
-import oracle.sql.TIMESTAMP;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -196,10 +195,7 @@ public enum DataType {
             }
             if (new ClassInfo(tClass).isInstanceof(Date.class)) {
                 Date date = null;
-                if (object instanceof TIMESTAMP) {
-                    TIMESTAMP timestamp = (TIMESTAMP) object;
-                    date = timestamp.dateValue();
-                } else if (object instanceof Number) {
+                if (object instanceof Number) {
                     date = new Date(ObjectUtil.parse(object, Long.class));
                 } else if (object.getClass() == Date.class) {
                     date = (Date) object;

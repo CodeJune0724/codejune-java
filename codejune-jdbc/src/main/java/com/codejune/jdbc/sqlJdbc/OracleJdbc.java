@@ -280,7 +280,7 @@ public class OracleJdbc extends SqlJdbc {
                 throw new InfoException("表名不能为空");
             }
             if (filter != null) {
-                filter.filterKey(getColumns());
+                filter.filter(getColumns());
             }
             String deleteSql = "DELETE FROM " + tableName + " " + SqlUtil.toWhere(filter);
             return oracleJdbc.execute(deleteSql);
@@ -298,7 +298,7 @@ public class OracleJdbc extends SqlJdbc {
                 filter = new Filter();
             }
 
-            filter.filterKey(getColumns());
+            filter.filter(getColumns());
 
             // 根据字段类型转换数据
             Set<String> keySet = setData.keySet();
@@ -342,7 +342,7 @@ public class OracleJdbc extends SqlJdbc {
 
             // 数据过滤
             Filter filter = query.filter();
-            filter.filterKey(getColumns());
+            filter.filter(getColumns());
             sql = sql + " " + SqlUtil.toWhere(filter, jdbcType);
 
             // count

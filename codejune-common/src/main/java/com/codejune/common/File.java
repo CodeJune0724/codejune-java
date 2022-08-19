@@ -4,7 +4,6 @@ import com.codejune.common.exception.InfoException;
 import com.codejune.common.model.FileInfo;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -142,23 +141,6 @@ public final class File extends FileInfo {
      * */
     public void setData(String data) {
         setData(data, false);
-    }
-
-    /**
-     * 写入数据
-     *
-     * @param multipartFile multipartFile
-     * */
-    public void setData(MultipartFile multipartFile) {
-        InputStream inputStream = null;
-        try {
-            inputStream = multipartFile.getInputStream();
-            setData(inputStream);
-        } catch (IOException e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(inputStream);
-        }
     }
 
     /**
