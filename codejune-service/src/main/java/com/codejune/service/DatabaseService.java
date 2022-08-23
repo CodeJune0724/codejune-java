@@ -35,7 +35,7 @@ public interface DatabaseService<T extends BasePO> {
      *
      * @return T
      * */
-    default T id(Object id) {
+    default T queryById(Object id) {
         if (id == null) {
             throw new InfoException("id not found");
         }
