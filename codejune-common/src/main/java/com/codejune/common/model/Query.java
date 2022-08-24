@@ -40,9 +40,23 @@ public class Query implements ModelAble<Query> {
         return this;
     }
 
+    public Filter filter() {
+        if (filter == null) {
+            filter = new Filter();
+        }
+        return filter;
+    }
+
     public Query setFilter(Filter filter) {
         this.filter = filter;
         return this;
+    }
+
+    public List<Sort> sort() {
+        if (sort == null) {
+            sort = new ArrayList<>();
+        }
+        return sort;
     }
 
     public Query setSort(List<Sort> sort) {
@@ -57,30 +71,6 @@ public class Query implements ModelAble<Query> {
      * */
     public boolean isPage() {
         return page != null && size != null && page > 0 && size > 0;
-    }
-
-    /**
-     * 获取filter
-     *
-     * @return Filter
-     * */
-    public Filter filter() {
-        if (filter == null) {
-            filter = new Filter();
-        }
-        return filter;
-    }
-
-    /**
-     * 获取sort
-     *
-     * @return Sort
-     * */
-    public List<Sort> sort() {
-        if (sort == null) {
-            sort = new ArrayList<>();
-        }
-        return sort;
     }
 
     /**

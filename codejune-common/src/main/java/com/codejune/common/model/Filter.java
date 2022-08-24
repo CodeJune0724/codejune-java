@@ -26,11 +26,7 @@ public final class Filter implements ModelAble<Filter> {
     }
 
     public List<Item> getAnd() {
-        if (config != null) {
-            if (config.isCleanNull()) {
-                this.cleanNull();
-            }
-        }
+        init();
         return and;
     }
 
@@ -282,6 +278,14 @@ public final class Filter implements ModelAble<Filter> {
      * */
     public static Filter parse(Object object) {
         return new Filter().assignment(object);
+    }
+
+    private void init() {
+        if (config != null) {
+            if (config.isCleanNull()) {
+                this.cleanNull();
+            }
+        }
     }
 
     /**
