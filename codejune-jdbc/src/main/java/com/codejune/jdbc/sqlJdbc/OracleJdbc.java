@@ -352,8 +352,13 @@ public class OracleJdbc extends SqlJdbc {
 
             // 排序
             if (query.isSort()) {
-                Sort sort = query.sort();
-                sql = StringUtil.append(sql, " ORDER BY ", sort.getColumn(), " ", sort.getOrderBy().name());
+                String orderBy = "ORDER BY";
+                List<Sort> sortList = query.sort();
+                for (Sort sort : sortList) {
+                    orderBy = StringUtil.append(orderBy, " ", sort.getColumn(), " ", sort.getOrderBy().name(), ",");
+                }
+                orderBy = orderBy.substring(0, orderBy.length() - 1);
+                sql = StringUtil.append(sql, " ", orderBy);
             }
 
             // 分页查询

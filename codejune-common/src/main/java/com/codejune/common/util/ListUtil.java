@@ -114,4 +114,21 @@ public final class ListUtil {
         return result;
     }
 
+    /**
+     * list转成string
+     *
+     * @param tList tList
+     * @param stringHandler 转换方法
+     * @param split 分隔符
+     * @param <T> 航行
+     * */
+    public static <T> String toString(List<T> tList, StringHandler<T> stringHandler, String split) {
+
+    }
+
+    public interface StringHandler<T> {
+        String toString(T t);
+
+    }
+
 }
