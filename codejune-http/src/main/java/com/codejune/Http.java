@@ -1,6 +1,5 @@
 package com.codejune;
 
-import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.DownloadHandler;
 import com.codejune.common.util.IOUtil;
@@ -91,6 +90,7 @@ public final class Http {
 
             URL url = new URL(this.url);
             httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod(type.name());
 
             // 设置请求头
             Set<String> keys = this.header.keySet();
@@ -259,36 +259,10 @@ public final class Http {
     }
 
     public enum Type {
-        GET("GET"),
-        POST("POST"),
-        PUT("PUT"),
-        DELETE("DELETE");
-
-        private final String type;
-
-        Type(String type) {
-            this.type = type;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        private static Type getInstance(String type) {
-            if ("POST".equals(type) || "post".equals(type)) {
-                return POST;
-            }
-            if ("GET".equals(type) || "get".equals(type)) {
-                return GET;
-            }
-            if ("PUT".equals(type) || "put".equals(type)) {
-                return PUT;
-            }
-            if ("DELETE".equals(type) || "delete".equals(type)) {
-                return DELETE;
-            }
-            throw new ErrorException("type未配置");
-        }
+        GET,
+        POST,
+        PUT,
+        DELETE
     }
 
 }
