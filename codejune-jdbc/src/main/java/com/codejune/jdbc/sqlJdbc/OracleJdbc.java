@@ -3,6 +3,7 @@ package com.codejune.jdbc.sqlJdbc;
 import com.codejune.common.DataType;
 import com.codejune.Jdbc;
 import com.codejune.common.exception.InfoException;
+import com.codejune.common.util.ListUtil;
 import com.codejune.jdbc.handler.IdHandler;
 import com.codejune.jdbc.SqlJdbc;
 import com.codejune.jdbc.table.SqlTable;
@@ -352,13 +353,7 @@ public class OracleJdbc extends SqlJdbc {
 
             // 排序
             if (query.isSort()) {
-                String orderBy = "ORDER BY";
-                List<Sort> sortList = query.sort();
-                for (Sort sort : sortList) {
-                    orderBy = StringUtil.append(orderBy, " ", sort.getColumn(), " ", sort.getOrderBy().name(), ",");
-                }
-                orderBy = orderBy.substring(0, orderBy.length() - 1);
-                sql = StringUtil.append(sql, " ", orderBy);
+                sql = StringUtil.append(sql, " ORDER BY ", ListUtil.toString(query.sort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
             }
 
             // 分页查询

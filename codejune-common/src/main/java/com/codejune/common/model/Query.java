@@ -84,6 +84,20 @@ public class Query implements ModelAble<Query> {
     }
 
     /**
+     * 添加sort
+     *
+     * @param sort sort
+     *
+     * @return this
+     * */
+    public Query addSort(Sort sort) {
+        if (sort != null) {
+            this.sort().add(sort);
+        }
+        return this;
+    }
+
+    /**
      * 是否排序
      *
      * @return 是否排序

@@ -123,7 +123,20 @@ public final class ListUtil {
      * @param <T> 航行
      * */
     public static <T> String toString(List<T> tList, StringHandler<T> stringHandler, String split) {
-
+        if (tList == null) {
+            return null;
+        }
+        if (stringHandler == null) {
+            stringHandler = ObjectUtil::toString;
+        }
+        if (split == null) {
+            split = "";
+        }
+        String result = "";
+        for (T t : tList) {
+            result = StringUtil.append(result, stringHandler.toString(t), split);
+        }
+        return result.substring(0, result.length() - split.length());
     }
 
     public interface StringHandler<T> {
