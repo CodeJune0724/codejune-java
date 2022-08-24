@@ -110,14 +110,16 @@ public final class MongodbTable implements Table {
 
         // 排序
         if (query.isSort()) {
-            Sort sort = query.sort();
-            int sortInt;
-            if (sort.getOrderBy() == Sort.OderBy.ASC) {
-                sortInt = 1;
-            } else {
-                sortInt = -1;
+            List<Sort> sortList = query.sort();
+            for (Sort sort : sortList) {
+                int sortInt;
+                if (sort.getOrderBy() == Sort.OderBy.ASC) {
+                    sortInt = 1;
+                } else {
+                    sortInt = -1;
+                }
+                queryData = queryData.sort(new Document().append(sort.getColumn(), sortInt));
             }
-            queryData = queryData.sort(new Document().append(sort.getColumn(), sortInt));
         }
 
         List<Map<String, Object>> data = new ArrayList<>();

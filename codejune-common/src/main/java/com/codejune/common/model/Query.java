@@ -3,7 +3,8 @@ package com.codejune.common.model;
 import com.codejune.common.ModelAble;
 import com.codejune.common.handler.KeyHandler;
 import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,7 +20,7 @@ public class Query implements ModelAble<Query> {
 
     private Filter filter;
 
-    private Sort sort;
+    private List<Sort> sort;
 
     public Integer getPage() {
         return page;
@@ -44,9 +45,18 @@ public class Query implements ModelAble<Query> {
         return this;
     }
 
-    public Query setSort(Sort sort) {
+    public Query setSort(List<Sort> sort) {
         this.sort = sort;
         return this;
+    }
+
+    /**
+     * 是否分页
+     *
+     * @return 分页返回true
+     * */
+    public boolean isPage() {
+        return page != null && size != null && page > 0 && size > 0;
     }
 
     /**
@@ -66,11 +76,34 @@ public class Query implements ModelAble<Query> {
      *
      * @return Sort
      * */
-    public Sort sort() {
+    public List<Sort> sort() {
         if (sort == null) {
-            sort = new Sort();
+            sort = new ArrayList<>();
         }
         return sort;
+    }
+
+    /**
+     * 添加sort
+     *
+     * @param sort sort
+     *
+     * @return this
+     * */
+    public Query addSort(Sort sort) {
+        if (sort != null) {
+            this.sort().add(sort);
+        }
+        return this;
+    }
+
+    /**
+     * 是否排序
+     *
+     * @return 是否排序
+     * */
+    public boolean isSort() {
+        return !ObjectUtil.isEmpty(sort);
     }
 
     /**
@@ -86,27 +119,11 @@ public class Query implements ModelAble<Query> {
             this.filter.setKey(keyHandler);
         }
         if (this.sort != null) {
-            this.sort.setKey(keyHandler);
+            for (Sort item : sort) {
+                item.setKey(keyHandler);
+            }
         }
         return this;
-    }
-
-    /**
-     * 是否分页
-     *
-     * @return 分页返回true
-     * */
-    public boolean isPage() {
-        return page != null && size != null && page > 0 && size > 0;
-    }
-
-    /**
-     * 是否排序
-     *
-     * @return 是否排序
-     * */
-    public boolean isSort() {
-        return sort != null && !StringUtil.isEmpty(sort.getColumn()) && sort.getOrderBy() != null;
     }
 
     @Override
