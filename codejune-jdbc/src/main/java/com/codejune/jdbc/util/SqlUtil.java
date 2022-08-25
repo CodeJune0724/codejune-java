@@ -5,7 +5,7 @@ import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.KeyHandler;
 import com.codejune.jdbc.sqlJdbc.AccessDatabaseJdbc;
 import com.codejune.jdbc.sqlJdbc.OracleJdbc;
-import com.codejune.common.model.Filter;
+import com.codejune.jdbc.Filter;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -35,7 +35,7 @@ public final class SqlUtil {
         if (object instanceof Map<?, ?>) {
             map = (Map<?, ?>) object;
         } else {
-            map = ObjectUtil.parse(object, Map.class);
+            map = ObjectUtil.transform(object, Map.class);
         }
 
         String sql = "INSERT INTO " + tableName + "(";

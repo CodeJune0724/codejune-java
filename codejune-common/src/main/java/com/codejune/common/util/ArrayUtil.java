@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ListUtil
+ * ArrayUtil
  *
  * @author ZJ
  * */
-public final class ListUtil {
+public final class ArrayUtil {
 
     /**
      * 指定元素向前移动一位
@@ -109,7 +109,7 @@ public final class ListUtil {
         }
         List<T> result = new ArrayList<>();
         for (Object item : list) {
-            result.add(ObjectUtil.parse(item, tClass));
+            result.add(ObjectUtil.transform(item, tClass));
         }
         return result;
     }

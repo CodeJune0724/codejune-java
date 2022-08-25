@@ -4,9 +4,9 @@ import com.codejune.Jdbc;
 import com.codejune.common.Pool;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.model.Filter;
-import com.codejune.common.model.Query;
-import com.codejune.common.model.QueryResult;
+import com.codejune.jdbc.Filter;
+import com.codejune.jdbc.Query;
+import com.codejune.jdbc.QueryResult;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -158,8 +158,8 @@ public abstract class Database {
                 if (!isId) {
                     t.setId(database.actualGetNextId(this));
                 }
-                Map<String, Object> map = MapUtil.filterKey(ObjectUtil.parseMap(t, String.class, Object.class), columnList);
-                map = MapUtil.parseToGeneric(MapUtil.transformKey(map, fieldToColumnKeyHandler), String.class, Object.class);
+                Map<String, Object> map = MapUtil.filterKey(MapUtil.parse(t, String.class, Object.class), columnList);
+                map = MapUtil.transformGeneric(MapUtil.transformKey(map, fieldToColumnKeyHandler), String.class, Object.class);
                 if (isId) {
                     table.update(new Filter().and(Filter.Item.equals(BasePO.idName(), t.getId())), map);
                 } else {

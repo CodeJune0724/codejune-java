@@ -1,9 +1,8 @@
-package com.codejune.common.model;
+package com.codejune.jdbc;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.KeyHandler;
 import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -60,9 +59,9 @@ public final class QueryResult<T> {
         result.setCount(this.count);
         List<E> data = new ArrayList<>();
         for (T t : this.data) {
-            Map<String, Object> parse = ObjectUtil.parseMap(t, String.class, Object.class);
+            Map<String, Object> parse = MapUtil.parse(t, String.class, Object.class);
             Map<?, ?> map = MapUtil.transformKey(parse, keyHandler);
-            data.add(MapUtil.parse(map, eClass));
+            data.add(MapUtil.transform(map, eClass));
         }
         result.setData(data);
         return result;

@@ -1,4 +1,4 @@
-package com.codejune.common.model;
+package com.codejune.jdbc;
 
 import com.codejune.common.ModelAble;
 import com.codejune.common.handler.KeyHandler;
@@ -40,9 +40,23 @@ public class Query implements ModelAble<Query> {
         return this;
     }
 
+    public Filter filter() {
+        if (filter == null) {
+            filter = new Filter();
+        }
+        return filter;
+    }
+
     public Query setFilter(Filter filter) {
         this.filter = filter;
         return this;
+    }
+
+    public List<Sort> sort() {
+        if (sort == null) {
+            sort = new ArrayList<>();
+        }
+        return sort;
     }
 
     public Query setSort(List<Sort> sort) {
@@ -57,30 +71,6 @@ public class Query implements ModelAble<Query> {
      * */
     public boolean isPage() {
         return page != null && size != null && page > 0 && size > 0;
-    }
-
-    /**
-     * 获取filter
-     *
-     * @return Filter
-     * */
-    public Filter filter() {
-        if (filter == null) {
-            filter = new Filter();
-        }
-        return filter;
-    }
-
-    /**
-     * 获取sort
-     *
-     * @return Sort
-     * */
-    public List<Sort> sort() {
-        if (sort == null) {
-            sort = new ArrayList<>();
-        }
-        return sort;
     }
 
     /**
@@ -128,7 +118,7 @@ public class Query implements ModelAble<Query> {
 
     @Override
     public Query assignment(Object object) {
-        ObjectUtil.assignment(this, ObjectUtil.parse(object, Map.class));
+        ObjectUtil.assignment(this, ObjectUtil.transform(object, Map.class));
         return this;
     }
 

@@ -93,7 +93,7 @@ public abstract class FastThreadExecutor<T> {
         if (!(num instanceof Number)) {
             return;
         }
-        Integer integer = ObjectUtil.parse(num, Integer.class);
+        Integer integer = ObjectUtil.transform(num, Integer.class);
         ThreadExecutor threadExecutor = getThreadExecutor();
         try {
             threadExecutor.startAwait(integer);

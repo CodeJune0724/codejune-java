@@ -2,7 +2,7 @@ package com.codejune.uiAuto.webDriver;
 
 import com.codejune.common.SystemOS;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.common.util.MapUtil;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -61,7 +61,7 @@ public final class ChromeWebDriver extends BaseWebDriver {
         // 实例化驱动
         try {
             chromeDriver = new ChromeDriver(chromeOptions);
-            chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", ObjectUtil.parseMap("{\"source\":\"Object.defineProperty(navigator, 'webdriver', {       get: () => undefined     })\"}", String.class, Object.class));
+            chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", MapUtil.parse("{\"source\":\"Object.defineProperty(navigator, 'webdriver', {       get: () => undefined     })\"}", String.class, Object.class));
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }

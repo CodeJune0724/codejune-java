@@ -38,7 +38,7 @@ public class JsonUtil {
      *
      * @return T
      * */
-    public static <T> T parseObject(Object data, Class<T> tClass) {
+    public static <T> T parse(Object data, Class<T> tClass) {
         if (data == null) {
             return  null;
         }
@@ -59,11 +59,11 @@ public class JsonUtil {
     public static boolean isJson(String data) {
         if (!StringUtil.isEmpty(data)) {
             try {
-                JsonUtil.parseObject(data, Map.class);
+                JsonUtil.parse(data, Map.class);
                 return true;
             } catch (Exception e) {
                 try {
-                    JsonUtil.parseObject(data, List.class);
+                    JsonUtil.parse(data, List.class);
                     return true;
                 } catch (Exception ignored) {}
             }
