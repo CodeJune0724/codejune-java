@@ -95,7 +95,7 @@ public final class StringUtil {
      *
      * @return Double
      * */
-    public static Double parseDouble(String data) {
+    public static Double transformDouble(String data) {
         return ObjectUtil.transform(data, Double.class);
     }
 
