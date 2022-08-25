@@ -1,4 +1,4 @@
-package com.codejune.common.model;
+package com.codejune.jdbc;
 
 import com.codejune.common.ModelAble;
 import com.codejune.common.handler.KeyHandler;

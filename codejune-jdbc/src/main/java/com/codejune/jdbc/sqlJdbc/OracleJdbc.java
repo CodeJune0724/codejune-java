@@ -4,10 +4,9 @@ import com.codejune.common.DataType;
 import com.codejune.Jdbc;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ListUtil;
+import com.codejune.jdbc.*;
 import com.codejune.jdbc.handler.IdHandler;
-import com.codejune.jdbc.SqlJdbc;
 import com.codejune.jdbc.table.SqlTable;
-import com.codejune.common.model.*;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.util.SqlUtil;
@@ -15,7 +14,6 @@ import com.codejune.common.util.StringUtil;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
-import com.codejune.jdbc.Column;
 
 /**
  * OracleJdbc

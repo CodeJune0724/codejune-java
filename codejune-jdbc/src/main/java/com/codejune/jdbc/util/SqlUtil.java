@@ -5,7 +5,7 @@ import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.KeyHandler;
 import com.codejune.jdbc.sqlJdbc.AccessDatabaseJdbc;
 import com.codejune.jdbc.sqlJdbc.OracleJdbc;
-import com.codejune.common.model.Filter;
+import com.codejune.jdbc.Filter;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;

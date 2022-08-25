@@ -1,8 +1,5 @@
 package com.codejune.jdbc;
 
-import com.codejune.common.model.Filter;
-import com.codejune.common.model.Query;
-import com.codejune.common.model.QueryResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

@@ -1,8 +1,5 @@
 package com.codejune.common.handler;
 
-import com.codejune.common.model.Filter;
-import com.codejune.common.model.Query;
-import com.codejune.jdbc.Table;
 import java.util.List;
 
 /**
@@ -19,15 +16,6 @@ public abstract class DataPageHandler<T> {
     public DataPageHandler(int size, QueryData<T> queryData) {
         this.size = size;
         this.queryData = queryData;
-    }
-
-    @SuppressWarnings("unchecked")
-    public DataPageHandler(int size, Table table, Filter filter) {
-        this(size, (page, size1) -> (List<T>) table.query(new Query().setPage(page).setSize(size1).setFilter(filter)).getData());
-    }
-
-    public DataPageHandler(int size, Table table) {
-        this(size, table, null);
     }
 
     /**

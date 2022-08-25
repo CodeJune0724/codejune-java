@@ -1,9 +1,10 @@
-package com.codejune.common.model;
+package com.codejune.jdbc;
 
 import com.codejune.common.ModelAble;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.KeyHandler;
+import com.codejune.common.model.Column;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import java.util.*;
@@ -120,7 +121,7 @@ public final class Filter implements ModelAble<Filter> {
         }
         List<String> strings = new ArrayList<>();
         for (Object o : keyList) {
-            if (o instanceof Column) {
+            if (o instanceof com.codejune.common.model.Column) {
                 strings.add(((Column) o).getName());
             } else if (o instanceof java.lang.reflect.Field) {
                 strings.add(((java.lang.reflect.Field) o).getName());
