@@ -1,5 +1,6 @@
 package com.codejune.jdbc.sqlJdbc;
 
+import com.codejune.common.util.ArrayUtil;
 import com.healthmarketscience.jackcess.*;
 import com.codejune.common.DataType;
 import com.codejune.common.File;
@@ -10,7 +11,6 @@ import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.Filter;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
-import com.codejune.common.util.ListUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.IOException;
@@ -201,7 +201,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
                     columnBuilderList.add(columnBuilder);
                     index++;
                 }
-                ListUtil.move(columnBuilderList, p, 0);
+                ArrayUtil.move(columnBuilderList, p, 0);
 
                 // 获取表数据
                 List<Map<String, Object>> tableData;

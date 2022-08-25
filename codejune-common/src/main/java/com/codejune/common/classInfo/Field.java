@@ -66,7 +66,7 @@ public final class Field {
             return;
         }
         try {
-            this.field.set(object, DataType.parse(data, getClassInfo().getOriginClass()));
+            this.field.set(object, DataType.transform(data, getClassInfo().getOriginClass()));
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }

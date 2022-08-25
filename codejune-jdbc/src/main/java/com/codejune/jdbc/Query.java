@@ -118,7 +118,7 @@ public class Query implements ModelAble<Query> {
 
     @Override
     public Query assignment(Object object) {
-        ObjectUtil.assignment(this, ObjectUtil.parse(object, Map.class));
+        ObjectUtil.assignment(this, ObjectUtil.transform(object, Map.class));
         return this;
     }
 

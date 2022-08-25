@@ -3,7 +3,7 @@ package com.codejune;
 import com.codejune.common.Closeable;
 import com.codejune.common.handler.DownloadHandler;
 import com.codejune.common.model.FileInfo;
-import com.codejune.common.util.ListUtil;
+import com.codejune.common.util.ArrayUtil;
 import java.io.File;
 import java.util.List;
 
@@ -83,7 +83,7 @@ public abstract class Ftp implements Closeable {
                 FileInfo fileInfoI = result.get(i);
                 FileInfo fileInfoJ = result.get(j);
                 if (fileInfoI.getUpdateTime().getTime() < fileInfoJ.getUpdateTime().getTime()) {
-                    ListUtil.move(result, j, i);
+                    ArrayUtil.move(result, j, i);
                 }
             }
         }

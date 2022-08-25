@@ -86,7 +86,7 @@ public final class HttpResponseResult<T> implements ModelAble<HttpResponseResult
 
     @Override
     public HttpResponseResult<T> assignment(Object object) {
-        HttpResponseResult<?> parse = ObjectUtil.parse(object, HttpResponseResult.class);
+        HttpResponseResult<?> parse = ObjectUtil.transform(object, HttpResponseResult.class);
         this.setCode(parse.getCode());
         this.setHeader(parse.getHeader());
         return this;

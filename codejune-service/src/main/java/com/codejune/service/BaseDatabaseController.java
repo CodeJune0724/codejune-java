@@ -30,7 +30,7 @@ public class BaseDatabaseController<T extends BasePO> implements DatabaseControl
     @PostMapping("save")
     @Override
     public ResponseResult save(@RequestBody(required = false) Map<String, Object> requestBody) {
-        return ResponseResult.returnTrue(null, null, databaseService.save(MapUtil.parse(requestBody, databaseService.getGenericClass())));
+        return ResponseResult.returnTrue(null, null, databaseService.save(MapUtil.transform(requestBody, databaseService.getGenericClass())));
     }
 
     @PostMapping("saveList")
@@ -41,7 +41,7 @@ public class BaseDatabaseController<T extends BasePO> implements DatabaseControl
         }
         List<T> tList = new ArrayList<>();
         for (Object o : requestBody) {
-            tList.add(ObjectUtil.parse(o, databaseService.getGenericClass()));
+            tList.add(ObjectUtil.transform(o, databaseService.getGenericClass()));
         }
         return ResponseResult.returnTrue(null, null, databaseService.save(tList));
     }
@@ -49,7 +49,7 @@ public class BaseDatabaseController<T extends BasePO> implements DatabaseControl
     @PostMapping("delete")
     @Override
     public ResponseResult delete(@RequestBody(required = false) Map<String, Object> requestBody) {
-        databaseService.delete(MapUtil.parse(requestBody, databaseService.getGenericClass()));
+        databaseService.delete(MapUtil.transform(requestBody, databaseService.getGenericClass()));
         return ResponseResult.returnTrue();
     }
 
@@ -61,7 +61,7 @@ public class BaseDatabaseController<T extends BasePO> implements DatabaseControl
         }
         List<T> tList = new ArrayList<>();
         for (Object o : requestBody) {
-            tList.add(ObjectUtil.parse(o, databaseService.getGenericClass()));
+            tList.add(ObjectUtil.transform(o, databaseService.getGenericClass()));
         }
         databaseService.delete(tList);
         return ResponseResult.returnTrue();

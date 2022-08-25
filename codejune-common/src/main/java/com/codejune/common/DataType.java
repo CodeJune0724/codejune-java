@@ -84,18 +84,18 @@ public enum DataType {
     }
 
     /**
-     * 转成指定的类
+     * 转换
      *
      * @param object object
      * @param dataType dataType
      *
      * @return Object
      * */
-    public static Object parse(Object object, DataType dataType) {
+    public static Object transform(Object object, DataType dataType) {
         if (dataType == null) {
             return object;
         }
-        return parse(object, dataType.aClass);
+        return transform(object, dataType.aClass);
     }
 
     /**
@@ -106,7 +106,7 @@ public enum DataType {
      *
      * @return Object
      * */
-    public static Object parse(Object object, Class<?> tClass) {
+    public static Object transform(Object object, Class<?> tClass) {
         try {
             if (tClass == null || object == null) {
                 return null;
@@ -191,12 +191,12 @@ public enum DataType {
                 return Boolean.valueOf(objectS);
             }
             if (new ClassInfo(tClass).isInstanceof(Collection.class)) {
-                return JsonUtil.parseObject(object, tClass);
+                return JsonUtil.parse(object, tClass);
             }
             if (new ClassInfo(tClass).isInstanceof(Date.class)) {
                 Date date = null;
                 if (object instanceof Number) {
-                    date = new Date(ObjectUtil.parse(object, Long.class));
+                    date = new Date(ObjectUtil.transform(object, Long.class));
                 } else if (object.getClass() == Date.class) {
                     date = (Date) object;
                 } else {
@@ -223,7 +223,7 @@ public enum DataType {
                     throw new InfoException("object is Number");
                 }
                 if (object instanceof String) {
-                    return JsonUtil.parseObject(object, tClass);
+                    return JsonUtil.parse(object, tClass);
                 }
                 Map<String, Object> result = new LinkedHashMap<>();
                 ClassInfo classInfo = new ClassInfo(object.getClass());
@@ -252,7 +252,7 @@ public enum DataType {
                 ModelAble<?> modelAble = (ModelAble<?>) result;
                 return modelAble.assignment(object);
             }
-            Map<?, ?> objectMap = (Map<?, ?>) parse(object, Map.class);
+            Map<?, ?> objectMap = (Map<?, ?>) transform(object, Map.class);
             if (objectMap == null) {
                 throw new InfoException("object is not parse");
             }

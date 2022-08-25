@@ -24,23 +24,8 @@ public final class ObjectUtil {
      * @return T
      * */
     @SuppressWarnings("unchecked")
-    public static <T> T parse(Object object, Class<T> tClass) {
-        return (T) DataType.parse(object, tClass);
-    }
-
-    /**
-     * 转成Map
-     *
-     * @param object object
-     * @param tClass tClass
-     * @param eClass eClass
-     * @param <T> T
-     * @param <E> E
-     *
-     * @return Map
-     * */
-    public static <T, E> Map<T, E> parseMap(Object object, Class<T> tClass, Class<E> eClass) {
-        return MapUtil.parseToGeneric(parse(object, Map.class), tClass, eClass);
+    public static <T> T transform(Object object, Class<T> tClass) {
+        return (T) DataType.transform(object, tClass);
     }
 
     /**
@@ -65,7 +50,7 @@ public final class ObjectUtil {
         if (aClass == String.class || aClass == Double.class || aClass == Integer.class || aClass == Long.class) {
             String data = toString(object);
             if (data != null && data.length() > length) {
-                return ObjectUtil.parse(data.substring(0, length), object.getClass());
+                return ObjectUtil.transform(data.substring(0, length), object.getClass());
             }
         }
         return object;
@@ -208,7 +193,7 @@ public final class ObjectUtil {
         if (o2DataType != DataType.MAP && o2DataType != DataType.OBJECT) {
             return;
         }
-        Map<?, ?> o2Map = parse(o2, Map.class);
+        Map<?, ?> o2Map = transform(o2, Map.class);
         switch (o1DataType) {
             case MAP:
                 Map<Object, Object> o1Map = (Map<Object, Object>) o1;

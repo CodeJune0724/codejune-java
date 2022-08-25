@@ -3,7 +3,7 @@ package com.codejune.jdbc.sqlJdbc;
 import com.codejune.common.DataType;
 import com.codejune.Jdbc;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.util.ListUtil;
+import com.codejune.common.util.ArrayUtil;
 import com.codejune.jdbc.*;
 import com.codejune.jdbc.handler.IdHandler;
 import com.codejune.jdbc.table.SqlTable;
@@ -181,11 +181,11 @@ public class OracleJdbc extends SqlJdbc {
                         if (filedData == null) {
                             preparedStatement.setNull(index, column.getSqlType());
                         } else if (column.getDataType() == DataType.DATE) {
-                            preparedStatement.setTimestamp(index, new Timestamp(((Date) DataType.parse(filedData, column.getDataType())).getTime()));
+                            preparedStatement.setTimestamp(index, new Timestamp(((Date) DataType.transform(filedData, column.getDataType())).getTime()));
                         } else if (column.getDataType() == DataType.OBJECT) {
                             preparedStatement.setObject(index, filedData);
                         } else {
-                            preparedStatement.setObject(index, DataType.parse(filedData, column.getDataType()));
+                            preparedStatement.setObject(index, DataType.transform(filedData, column.getDataType()));
                         }
                     }
                     preparedStatement.addBatch();
@@ -318,7 +318,7 @@ public class OracleJdbc extends SqlJdbc {
                 if (column != null) {
                     dataType = column.getDataType();
                 }
-                value = DataType.parse(value, dataType);
+                value = DataType.transform(value, dataType);
                 setData.put(key, value);
             }
 
@@ -351,7 +351,7 @@ public class OracleJdbc extends SqlJdbc {
 
             // 排序
             if (query.isSort()) {
-                sql = StringUtil.append(sql, " ORDER BY ", ListUtil.toString(query.sort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
+                sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.sort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
             }
 
             // 分页查询

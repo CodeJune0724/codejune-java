@@ -158,8 +158,8 @@ public abstract class Database {
                 if (!isId) {
                     t.setId(database.actualGetNextId(this));
                 }
-                Map<String, Object> map = MapUtil.filterKey(ObjectUtil.parseMap(t, String.class, Object.class), columnList);
-                map = MapUtil.parseToGeneric(MapUtil.transformKey(map, fieldToColumnKeyHandler), String.class, Object.class);
+                Map<String, Object> map = MapUtil.filterKey(MapUtil.parse(t, String.class, Object.class), columnList);
+                map = MapUtil.transformGeneric(MapUtil.transformKey(map, fieldToColumnKeyHandler), String.class, Object.class);
                 if (isId) {
                     table.update(new Filter().and(Filter.Item.equals(BasePO.idName(), t.getId())), map);
                 } else {

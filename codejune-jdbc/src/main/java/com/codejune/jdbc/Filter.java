@@ -5,6 +5,7 @@ import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.KeyHandler;
 import com.codejune.common.model.Column;
+import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import java.util.*;
@@ -233,19 +234,19 @@ public final class Filter implements ModelAble<Filter> {
         if (object == null) {
             return null;
         }
-        Map<String, Object> map = ObjectUtil.parseMap(object, String.class, Object.class);
+        Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
         Set<String> keySet = map.keySet();
         for (String key : keySet) {
             Object value = map.get(key);
             if ("$config".equals(key)) {
-                this.setConfig(ObjectUtil.parse(value, Config.class));
+                this.setConfig(ObjectUtil.transform(value, Config.class));
             } else if ("$or".equals(key)) {
                 for (Object map1 : (List<?>) value) {
-                    this.or(new Filter().assignment(ObjectUtil.parseMap(map1, String.class, Object.class)));
+                    this.or(new Filter().assignment(MapUtil.parse(map1, String.class, Object.class)));
                 }
             } else {
                 if (value instanceof Map) {
-                    Map<String, Object> map1 = ObjectUtil.parseMap(value, String.class, Object.class);
+                    Map<String, Object> map1 = MapUtil.parse(value, String.class, Object.class);
                     Set<String> keySet1 = map1.keySet();
                     for (String key1 : keySet1) {
                         Item.Type type = null;

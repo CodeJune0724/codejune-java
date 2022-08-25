@@ -11,6 +11,32 @@ import java.util.*;
 public final class MapUtil {
 
     /**
+     * 转成Map
+     *
+     * @param object object
+     * @param tClass tClass
+     * @param eClass eClass
+     * @param <T> T
+     * @param <E> E
+     *
+     * @return Map
+     * */
+    public static <T, E> Map<T, E> parse(Object object, Class<T> tClass, Class<E> eClass) {
+        return transformGeneric(parse(object), tClass, eClass);
+    }
+
+    /**
+     * 转成Map
+     *
+     * @param object object
+     *
+     * @return Map
+     * */
+    public static Map<?,?> parse(Object object) {
+        return ObjectUtil.transform(object, Map.class);
+    }
+
+    /**
      * 将map转成object
      *
      * @param <T> T
@@ -19,8 +45,8 @@ public final class MapUtil {
      *
      * @return T
      * */
-    public static <T> T parse(Map<?, ?> map, Class<T> tClass) {
-        return ObjectUtil.parse(map, tClass);
+    public static <T> T transform(Map<?, ?> map, Class<T> tClass) {
+        return ObjectUtil.transform(map, tClass);
     }
 
     /**
@@ -38,7 +64,7 @@ public final class MapUtil {
             return null;
         }
         Object o = map.get(key);
-        return ObjectUtil.parse(o, tClass);
+        return ObjectUtil.transform(o, tClass);
     }
 
     /**
@@ -81,7 +107,7 @@ public final class MapUtil {
      * @return Map
      * */
     @SuppressWarnings("unchecked")
-    public static <T, E> Map<T, E> parseToGeneric(Map<?, ?> map, Class<T> tClass, Class<E> eClass) {
+    public static <T, E> Map<T, E> transformGeneric(Map<?, ?> map, Class<T> tClass, Class<E> eClass) {
         if (map == null || tClass == null || eClass == null) {
             return null;
         }
@@ -89,7 +115,7 @@ public final class MapUtil {
         Map<Object, Object> parse = (Map<Object, Object>) map;
         Set<Object> keySet = parse.keySet();
         for (Object key : keySet) {
-            result.put(ObjectUtil.parse(key, tClass), ObjectUtil.parse(parse.get(key), eClass));
+            result.put(ObjectUtil.transform(key, tClass), ObjectUtil.transform(parse.get(key), eClass));
         }
         return result;
     }

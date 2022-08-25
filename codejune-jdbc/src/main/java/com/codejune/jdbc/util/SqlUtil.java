@@ -35,7 +35,7 @@ public final class SqlUtil {
         if (object instanceof Map<?, ?>) {
             map = (Map<?, ?>) object;
         } else {
-            map = ObjectUtil.parse(object, Map.class);
+            map = ObjectUtil.transform(object, Map.class);
         }
 
         String sql = "INSERT INTO " + tableName + "(";
