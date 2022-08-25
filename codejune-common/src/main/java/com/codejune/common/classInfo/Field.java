@@ -3,7 +3,14 @@ package com.codejune.common.classInfo;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.DataType;
 import com.codejune.common.exception.InfoException;
+import com.codejune.common.util.ArrayUtil;
+import com.codejune.common.util.MapUtil;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 字段
@@ -66,7 +73,17 @@ public final class Field {
             return;
         }
         try {
-            this.field.set(object, DataType.transform(data, getClassInfo().getOriginClass()));
+            ClassInfo classInfo = getClassInfo();
+            List<ClassInfo> genericClass = getGenericClass();
+            Object setData;
+            if (classInfo.equals(List.class) && genericClass.size() >= 1) {
+                setData = ArrayUtil.parse(data, genericClass.get(0).getOriginClass());
+            } else if (classInfo.equals(Map.class) && genericClass.size() >= 2) {
+                setData = MapUtil.parse(data, genericClass.get(0).getOriginClass(), genericClass.get(1).getOriginClass());
+            } else {
+                setData = DataType.transform(data, classInfo.getOriginClass());
+            }
+            this.field.set(object, setData);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
@@ -108,12 +125,21 @@ public final class Field {
     }
 
     /**
-     * 获取类型
+     * 获取泛型
      *
-     * @return 类型
+     * @return 所有泛型
      * */
-    public Class<?> getType() {
-        return this.field.getType();
+    public List<ClassInfo> getGenericClass() {
+        List<ClassInfo> result = new ArrayList<>();
+        Type genericType = this.field.getGenericType();
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) genericType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            for (Type type : actualTypeArguments) {
+                result.add(new ClassInfo(type));
+            }
+        }
+        return result;
     }
 
 }

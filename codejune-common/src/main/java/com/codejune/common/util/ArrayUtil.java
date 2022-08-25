@@ -100,7 +100,7 @@ public final class ArrayUtil {
      *
      * @return List
      * */
-    public static <T> List<T> parseToGeneric(List<?> list, Class<T> tClass) {
+    public static <T> List<T> parse(List<?> list, Class<T> tClass) {
         if (list == null) {
             return null;
         }
@@ -112,6 +112,19 @@ public final class ArrayUtil {
             result.add(ObjectUtil.transform(item, tClass));
         }
         return result;
+    }
+
+    /**
+     * 转换泛型
+     *
+     * @param object object
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return List
+     * */
+    public static <T> List<T> parse(Object object, Class<T> tClass) {
+        return parse(ObjectUtil.transform(object, List.class), tClass);
     }
 
     /**

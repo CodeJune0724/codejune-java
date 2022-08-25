@@ -8,6 +8,7 @@ import com.codejune.common.util.StringUtil;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,14 @@ public final class ClassInfo {
             this.aClass = (Class<?>) type;
         } else if (type instanceof ParameterizedType) {
             this.aClass = (Class<?>) ((ParameterizedType) type).getRawType();
+        } else if (type instanceof WildcardType) {
+            WildcardType wildcardType = (WildcardType) type;
+            Type[] lowerBounds = wildcardType.getLowerBounds();
+            if (lowerBounds.length != 0) {
+                aClass = (Class<?>) lowerBounds[0];
+            } else {
+                aClass = (Class<?>) wildcardType.getUpperBounds()[0];
+            }
         } else {
             throw new ErrorException("class未配置");
         }

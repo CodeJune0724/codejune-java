@@ -122,7 +122,7 @@ public final class Filter implements ModelAble<Filter> {
         }
         List<String> strings = new ArrayList<>();
         for (Object o : keyList) {
-            if (o instanceof com.codejune.common.model.Column) {
+            if (o instanceof Column) {
                 strings.add(((Column) o).getName());
             } else if (o instanceof java.lang.reflect.Field) {
                 strings.add(((java.lang.reflect.Field) o).getName());
