@@ -1,6 +1,6 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.exception.ErrorException;
 
 /**
  * 系统类型配置
@@ -38,14 +38,14 @@ public enum SystemOS {
      *
      * @return 当前系统类型
      * */
-    public static SystemOS getCurrentSystemOS() {
+    public static SystemOS currentSystemOS() {
         String osName = System.getProperty("os.name");
         for (SystemOS systemOS : SystemOS.values()) {
             if (osName.contains(systemOS.osName)) {
                 return systemOS;
             }
         }
-        throw new InfoException("未找到系统类型");
+        throw new ErrorException("未找到系统类型");
     }
 
 }
