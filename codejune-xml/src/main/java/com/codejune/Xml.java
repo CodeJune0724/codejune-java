@@ -126,17 +126,17 @@ public final class Xml {
     }
 
     /**
-     * 写入文件
+     * 保存
      *
      * @param file file
      * @param isFormat 是否格式化
      * */
-    public void toFile(java.io.File file, boolean isFormat) {
+    public void save(java.io.File file, boolean isFormat) {
         new File(file, File.FileType.FILE).setData(toString(isFormat));
     }
 
-    public void toFile(java.io.File file) {
-        toFile(file, true);
+    public void save(java.io.File file) {
+        save(file, true);
     }
 
     public static final class Element implements Iterable<Element> {

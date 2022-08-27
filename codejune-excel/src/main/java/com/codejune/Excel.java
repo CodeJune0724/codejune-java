@@ -165,11 +165,11 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     }
 
     /**
-     * 写入文件
+     * 保存
      *
      * @param file file
      * */
-    public void toFile(File file) {
+    public void save(File file) {
         if (file == null) {
             return;
         }
