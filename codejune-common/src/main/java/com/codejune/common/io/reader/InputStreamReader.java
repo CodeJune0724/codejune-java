@@ -3,21 +3,26 @@ package com.codejune.common.io.reader;
 import com.codejune.common.Progress;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.AbstractReader;
-import com.codejune.common.listener.BinaryReadListener;
+import com.codejune.common.listener.InputStreamReadListener;
 import com.codejune.common.listener.ProgressListener;
 import java.io.InputStream;
 
 /**
- * 二进制读取器
+ * 输入流读取器
  *
  * @author ZJ
  * */
-public final class BinaryReader extends AbstractReader {
+public final class InputStreamReader extends AbstractReader {
+
+    private final InputStream inputStream;
 
     private int readSize = 1024;
 
-    public BinaryReader(InputStream inputStream) {
-        super(inputStream);
+    public InputStreamReader(InputStream inputStream) {
+        if (inputStream == null) {
+            throw new InfoException("inputStream is null");
+        }
+        this.inputStream = inputStream;
     }
 
     public void setReadSize(int readSize) {
@@ -25,14 +30,14 @@ public final class BinaryReader extends AbstractReader {
     }
 
     /**
-     * 读字节
+     * 读取
      *
-     * @param binaryReadListener readListener
+     * @param inputStreamReadListener inputStreamReadListener
      * @param progressListener progressListener
      * */
-    public void read(BinaryReadListener binaryReadListener, ProgressListener progressListener) {
-        if (binaryReadListener == null) {
-            binaryReadListener = (bytes, size) -> {};
+    public void read(InputStreamReadListener inputStreamReadListener, ProgressListener progressListener) {
+        if (inputStreamReadListener == null) {
+            inputStreamReadListener = (bytes, size) -> {};
         }
         if (progressListener == null) {
             progressListener = data -> {};
@@ -48,13 +53,22 @@ public final class BinaryReader extends AbstractReader {
             byte[] bytes = new byte[this.readSize];
             int size = this.inputStream.read(bytes);
             while (size != -1) {
-                binaryReadListener.listen(bytes, size);
+                inputStreamReadListener.listen(bytes, size);
                 progress.add(size);
                 size = this.inputStream.read(bytes);
             }
         } catch (Exception e) {
             throw new InfoException(e);
         }
+    }
+
+    /**
+     * 读取
+     *
+     * @param inputStreamReadListener inputStreamReadListener
+     * */
+    public void read(InputStreamReadListener inputStreamReadListener) {
+        read(inputStreamReadListener, null);
     }
 
 }

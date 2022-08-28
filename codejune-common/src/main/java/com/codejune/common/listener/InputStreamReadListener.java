@@ -5,7 +5,7 @@ package com.codejune.common.listener;
  *
  * @author ZJ
  * */
-public interface BinaryReadListener {
+public interface InputStreamReadListener {
 
     /**
      * 监听操作

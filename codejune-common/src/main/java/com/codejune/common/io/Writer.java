@@ -1,7 +1,7 @@
 package com.codejune.common.io;
 
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.io.reader.BinaryReader;
+import com.codejune.common.io.reader.InputStreamReader;
 import com.codejune.common.listener.ProgressListener;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,9 +38,9 @@ public final class Writer {
         if (inputStream == null) {
             return;
         }
-        BinaryReader binaryReader = new BinaryReader(inputStream);
-        binaryReader.setReadSize(this.writeSize);
-        binaryReader.read((bytes, size) -> {
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        inputStreamReader.setReadSize(this.writeSize);
+        inputStreamReader.read((bytes, size) -> {
             try {
                 outputStream.write(bytes, 0, size);
             } catch (Exception e) {

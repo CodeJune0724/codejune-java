@@ -2,7 +2,7 @@ package com.codejune.common.os;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.Writer;
-import com.codejune.common.io.reader.TextReader;
+import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.*;
@@ -129,8 +129,8 @@ public final class File implements FileInfo {
         InputStream inputStream = null;
         try {
             inputStream = getInputStream();
-            TextReader textReader = new TextReader(inputStream);
-            return textReader.read();
+            TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
+            return textInputStreamReader.read();
         } finally {
             IOUtil.close(inputStream);
         }
