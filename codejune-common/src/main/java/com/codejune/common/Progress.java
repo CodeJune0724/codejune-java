@@ -21,7 +21,7 @@ public abstract class Progress implements ProgressListener {
             throw new InfoException("size is < 0");
         }
         this.totalSize = totalSize;
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             while (true) {
                 if (currentSize >= totalSize) {
                     break;
@@ -29,7 +29,9 @@ public abstract class Progress implements ProgressListener {
                 ThreadUtil.sleep(listenInterval);
                 listen(Progress.this);
             }
-        }).start();
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public Progress(long size) {

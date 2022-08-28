@@ -56,7 +56,7 @@ public final class TextReader extends AbstractReader {
             String line = bufferedReader.readLine();
             while (line != null) {
                 textReadListener.listen(line);
-                progress.add(line.length());
+                progress.add(line.getBytes().length);
                 line = bufferedReader.readLine();
             }
         } catch (Exception e) {
