@@ -5,11 +5,12 @@ import ch.ethz.ssh2.Session;
 import com.codejune.Shell;
 import com.codejune.common.Closeable;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.listener.InputStreamListener;
-import com.codejune.common.model.Charset;
-import com.codejune.common.model.ResponseResult;
+import com.codejune.common.ResponseResult;
+import com.codejune.common.io.reader.TextReader;
+import com.codejune.common.listener.TextReadListener;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
+import java.io.InputStream;
 
 /**
  * LinuxShell
@@ -33,25 +34,44 @@ public final class LinuxShell implements Shell, Closeable {
     }
 
     @Override
-    public ResponseResult command(String command, InputStreamListener inputStreamListener) {
+    public ResponseResult command(String command, TextReadListener textReadListener) {
         if (StringUtil.isEmpty(command)) {
-            return null;
+            return new ResponseResult();
+        }
+        if (textReadListener == null) {
+            textReadListener = data -> {};
         }
         Session session = null;
+        InputStream inputStream = null;
+        final TextReadListener finalTextReadListener = textReadListener;
         try {
             session = this.connection.openSession();
             session.execCommand(command);
-            String out = IOUtil.toString(session.getStdout(), Charset.UTF_8, inputStreamListener);
-            if(StringUtil.isEmpty(out)){
-                out = IOUtil.toString(session.getStderr(), Charset.UTF_8, inputStreamListener);
+            inputStream = session.getStdout();
+            final String[] out = {""};
+            if (inputStream != null) {
+                TextReader textReader = new TextReader(inputStream);
+                textReader.read(data -> {
+                    finalTextReadListener.listen(data);
+                    out[0] = StringUtil.append(out[0], data);
+                });
             }
-            return ResponseResult.returnFalse(session.getExitStatus(), null, out);
+            if (StringUtil.isEmpty(out[0])) {
+                inputStream = session.getStderr();
+                TextReader textReader = new TextReader(inputStream);
+                textReader.read(data -> {
+                    finalTextReadListener.listen(data);
+                    out[0] = StringUtil.append(out[0], data);
+                });
+            }
+            return ResponseResult.returnFalse(session.getExitStatus(), null, out[0]);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         } finally {
             if (session != null) {
                 session.close();
             }
+            IOUtil.close(inputStream);
         }
     }
 

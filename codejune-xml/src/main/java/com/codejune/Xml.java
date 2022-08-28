@@ -1,8 +1,9 @@
 package com.codejune;
 
-import com.codejune.common.File;
 import com.codejune.common.exception.InfoException;
+import com.codejune.common.os.File;
 import com.codejune.common.util.IOUtil;
+import com.codejune.common.util.StringUtil;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -26,6 +27,9 @@ public final class Xml {
     private final Document document;
 
     public Xml(String data) {
+        if (StringUtil.isEmpty(data)) {
+            throw new InfoException("xml data is null");
+        }
         SAXReader reader = new SAXReader();
         ByteArrayInputStream byteArrayInputStream = null;
         try {
@@ -39,7 +43,7 @@ public final class Xml {
     }
 
     public Xml(java.io.File file) {
-        this(new File(file, File.FileType.FILE).getData());
+        this(file.exists() ? new File(file).read() : null);
     }
 
     public Xml() {
@@ -132,7 +136,7 @@ public final class Xml {
      * @param isFormat 是否格式化
      * */
     public void save(java.io.File file, boolean isFormat) {
-        new File(file, File.FileType.FILE).setData(toString(isFormat));
+        new File(file).write(toString(isFormat));
     }
 
     public void save(java.io.File file) {

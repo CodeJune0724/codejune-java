@@ -3,7 +3,7 @@ package com.codejune.jdbc;
 import com.codejune.common.ClassInfo;
 import com.codejune.Jdbc;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.model.Charset;
+import com.codejune.common.Charset;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.handler.ColumnToFieldKeyHandler;
 import com.codejune.jdbc.handler.FieldToColumnKeyHandler;

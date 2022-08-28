@@ -49,7 +49,7 @@ public abstract class Progress implements ProgressListener {
      *
      * @param size 大小
      * */
-    public final void addProgress(long size) {
+    public final void add(long size) {
         if (size < 0) {
             return;
         }

@@ -1,6 +1,7 @@
 package com.codejune.common.util;
 
-import com.codejune.common.File;
+import com.codejune.common.os.File;
+import com.codejune.common.os.Folder;
 
 /**
  * FileUtil
@@ -20,10 +21,10 @@ public final class FileUtil {
         }
         if (file.exists()) {
             if (file.isFile()) {
-                new File(file, File.FileType.FILE).delete();
+                new File(file).delete();
             }
             if (file.isDirectory()) {
-                new File(file, File.FileType.DIR).delete();
+                new Folder(file.getAbsolutePath()).delete();
             }
         }
     }

@@ -2,7 +2,7 @@ package com.codejune.common.util;
 
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.model.DateType;
+import com.codejune.common.DateType;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package com.codejune.common.model;
+package com.codejune.common;
 
 import com.codejune.common.util.JsonUtil;
 

@@ -1,13 +1,17 @@
 package com.codejune.ftp;
 
+import com.codejune.common.os.FileInfo;
+import com.codejune.ftp.os.File;
+import com.codejune.ftp.os.Folder;
 import com.jcraft.jsch.*;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.DownloadHandler;
-import com.codejune.common.model.FileInfo;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -81,7 +85,7 @@ public final class Sftp extends com.codejune.Ftp {
     }
 
     @Override
-    public void upload(String path, String name, File file) {
+    public void upload(String path, String name, java.io.File file) {
         InputStream inputStream = null;
         try {
             inputStream = Files.newInputStream(file.toPath());
@@ -107,50 +111,75 @@ public final class Sftp extends com.codejune.Ftp {
             Vector<?> ls = this.channelSftp.ls(path);
             for (Object o : ls) {
                 ChannelSftp.LsEntry lsEntry = (ChannelSftp.LsEntry) o;
-                if (".".equals(lsEntry.getFilename()) || "..".equals(lsEntry.getFilename())) {
+                SftpATTRS sftpATTRS = lsEntry.getAttrs();
+                boolean isFile = !sftpATTRS.isDir();
+                String name = lsEntry.getFilename();
+                if (".".equals(name) || "..".equals(name)) {
                     continue;
                 }
-                SftpATTRS attrs = lsEntry.getAttrs();
-                boolean isFile = !attrs.isDir();
-                String name = lsEntry.getFilename();
-                Date updateTime = DateUtil.parse(attrs.getMtimeString(), "EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
-                result.add(new FileInfo(isFile, path, name, updateTime) {
-                    @Override
-                    public long getSize() {
-                        if (isFile()) {
-                            return lsEntry.getAttrs().getSize();
-                        } else {
-                            long result = 0L;
-                            List<FileInfo> ls1 = baseLs(getAbsolutePath());
-                            for (FileInfo fileInfo : ls1) {
+                String filePath = path + "/" + name;
+                Date updateTime = DateUtil.parse(sftpATTRS.getMtimeString(), "EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+                FileInfo fileInfo;
+                if (isFile) {
+                    fileInfo = new File() {
+                        @Override
+                        public InputStream getInputStream() {
+                            try {
+                                return channelSftp.get(filePath);
+                            } catch (Exception e) {
+                                throw new InfoException(e);
+                            }
+                        }
+
+                        @Override
+                        public String name() {
+                            return name;
+                        }
+
+                        @Override
+                        public String path() {
+                            return filePath;
+                        }
+
+                        @Override
+                        public Date getUpdateTime() {
+                            return updateTime;
+                        }
+
+                        @Override
+                        public long getSize() {
+                            return sftpATTRS.getSize();
+                        }
+                    };
+                } else {
+                    fileInfo = new Folder() {
+                        @Override
+                        public String name() {
+                            return name;
+                        }
+
+                        @Override
+                        public String path() {
+                            return filePath;
+                        }
+
+                        @Override
+                        public Date getUpdateTime() {
+                            return updateTime;
+                        }
+
+                        @Override
+                        public long getSize() {
+                            long result = 0;
+                            List<FileInfo> fileInfoList = baseLs(this.path());
+                            for (FileInfo fileInfo : fileInfoList) {
                                 result = result + fileInfo.getSize();
                             }
                             return result;
                         }
-                    }
-
-                    @Override
-                    public String getData() {
-                        InputStream inputStream = null;
-                        try {
-                            if (!lsEntry.getAttrs().isDir()) {
-                                inputStream = channelSftp.get(path + "/" + lsEntry.getFilename());
-                            }
-                            return IOUtil.toString(inputStream);
-                        } catch (Exception e) {
-                          throw new InfoException(e.getMessage());
-                        } finally {
-                            IOUtil.close(inputStream);
-                        }
-                    }
-                });
-            }
-            List<FileInfo> resultTemp = new ArrayList<>(result);
-            result = new ArrayList<>();
-            for (FileInfo fileInfo : resultTemp) {
-                if (!".".equals(fileInfo.getName()) && !"..".equals(fileInfo.getName())) {
-                    result.add(fileInfo);
+                    };
                 }
+                result.add(fileInfo);
             }
             return result;
         } catch (Exception e) {
