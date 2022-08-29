@@ -23,11 +23,12 @@ public abstract class Progress implements ProgressListener {
         this.totalSize = totalSize;
         Thread thread = new Thread(() -> {
             while (true) {
+                listen(Progress.this);
+                ThreadUtil.sleep(listenInterval);
                 if (currentSize >= totalSize) {
+                    listen(Progress.this);
                     break;
                 }
-                ThreadUtil.sleep(listenInterval);
-                listen(Progress.this);
             }
         });
         thread.setDaemon(true);

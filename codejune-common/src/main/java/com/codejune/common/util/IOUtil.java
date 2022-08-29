@@ -1,7 +1,12 @@
 package com.codejune.common.util;
 
 import com.codejune.common.exception.InfoException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
 
 /**
  * IOUtil
@@ -72,6 +77,24 @@ public final class IOUtil {
             writer.close();
         } catch (IOException e) {
             throw new InfoException(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取输入流
+     *
+     * @param file file
+     *
+     * @return InputStream
+     * */
+    public static InputStream getInputStream(java.io.File file) {
+        if (!FileUtil.exist(file)) {
+            throw new InfoException("文件不存在");
+        }
+        try {
+            return Files.newInputStream(file.toPath());
+        } catch (Exception e) {
+            throw new InfoException(e);
         }
     }
 

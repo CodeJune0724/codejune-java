@@ -1,12 +1,9 @@
 package com.codejune.common.io.reader;
 
-import com.codejune.common.Progress;
 import com.codejune.common.Range;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.io.AbstractReader;
-import com.codejune.common.listener.InputStreamReadListener;
-import com.codejune.common.listener.ProgressListener;
-import java.io.File;
+import com.codejune.common.io.DataBuffer;
+import com.codejune.common.util.IOUtil;
 import java.io.RandomAccessFile;
 
 /**
@@ -14,34 +11,30 @@ import java.io.RandomAccessFile;
  *
  * @author ZJ
  * */
-public final class FileReader extends AbstractReader {
+public final class FileReader extends InputStreamReader {
 
-    private final File file;
+    private final java.io.File file;
 
-    private int readSize = 1024;
-
-    public FileReader(File file) {
-        if (file == null) {
-            throw new InfoException("file is null");
-        }
-        if (!file.isFile() || !file.exists()) {
-            throw new InfoException("file不存在");
-        }
+    public FileReader(java.io.File file) {
+        super(IOUtil.getInputStream(file));
         this.file = file;
     }
 
-    public void setReadSize(int readSize) {
-        this.readSize = readSize;
+    @Override
+    public void read() {
+        try {
+            super.read();
+        } finally {
+            IOUtil.close(inputStream);
+        }
     }
 
     /**
      * 读取
      *
      * @param range 读取范围
-     * @param inputStreamReadListener inputStreamReadListener
-     * @param progressListener progressListener
      * */
-    public void read(Range range, InputStreamReadListener inputStreamReadListener, ProgressListener progressListener) {
+    public void read(Range range) {
         if (range == null) {
             range = new Range(0, null);
         }
@@ -49,28 +42,14 @@ public final class FileReader extends AbstractReader {
         if (difference != null && difference == 0) {
             return;
         }
-        if (inputStreamReadListener == null) {
-            inputStreamReadListener = (bytes, size) -> {};
-        }
-        if (progressListener == null) {
-            progressListener = data -> {};
-        }
         RandomAccessFile randomAccessFile = null;
-        final ProgressListener finalProgressListener = progressListener;
         try {
             randomAccessFile = new RandomAccessFile(this.file, "r");
-            Progress progress = new Progress(difference == null ? randomAccessFile.length() : difference) {
-                @Override
-                public void listen(Progress data) {
-                    finalProgressListener.listen(data);
-                }
-            };
             randomAccessFile.seek(range.getStart());
             byte[] bytes = new byte[this.readSize];
             int size = randomAccessFile.read(bytes);
             while (size != -1) {
-                inputStreamReadListener.listen(bytes, size);
-                progress.add(size);
+                readListener.listen(new DataBuffer(bytes, size));
                 if (range.getEnd() != null && randomAccessFile.getFilePointer() >= range.getEnd()) {
                     break;
                 }
@@ -87,25 +66,6 @@ public final class FileReader extends AbstractReader {
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * 读取
-     *
-     * @param range 读取范围
-     * @param inputStreamReadListener inputStreamReadListener
-     * */
-    public void read(Range range, InputStreamReadListener inputStreamReadListener) {
-        read(range, inputStreamReadListener, null);
-    }
-
-    /**
-     * 读取
-     *
-     * @param inputStreamReadListener inputStreamReadListener
-     * */
-    public void read(InputStreamReadListener inputStreamReadListener) {
-        read(null, inputStreamReadListener);
     }
 
 }

@@ -1,30 +1,26 @@
 package com.codejune.common.io;
 
+import com.codejune.common.Progress;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.reader.InputStreamReader;
 import com.codejune.common.listener.ProgressListener;
+import com.codejune.common.listener.ReadListener;
+
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * 写入
  *
  * @author ZJ
  * */
-public final class Writer {
+public abstract class Writer {
 
-    public final OutputStream outputStream;
+    protected int writeSize = 1024;
 
-    private int writeSize = 1024;
-
-    public Writer(OutputStream outputStream) {
-        if (outputStream == null) {
-            throw new InfoException("outputStream is null");
+    public final void setWriteSize(int writeSize) {
+        if (writeSize <= 0) {
+            return;
         }
-        this.outputStream = outputStream;
-    }
-
-    public void setWriteSize(int writeSize) {
         this.writeSize = writeSize;
     }
 
@@ -39,23 +35,37 @@ public final class Writer {
             return;
         }
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        inputStreamReader.setReadSize(this.writeSize);
-        inputStreamReader.read((bytes, size) -> {
-            try {
-                outputStream.write(bytes, 0, size);
-            } catch (Exception e) {
-                throw new InfoException(e);
+        inputStreamReader.setReadSize(writeSize);
+        Progress progress = null;
+        if (progressListener != null) {
+            final ProgressListener finalProgressListener = progressListener;
+            progress = new Progress(inputStreamReader.getSize()) {
+                @Override
+                public void listen(Progress data) {
+                    finalProgressListener.listen(data);
+                }
+            };
+        }
+        inputStreamReader.setReadListener(new ReadListener<DataBuffer>() {
+            @Override
+            public void listen(DataBuffer data) {
+
             }
-        }, progressListener);
+        });
+        inputStreamReader.read();
     }
 
     /**
      * 写入
      *
-     * @param inputStream inputStream
+     * @param dataBuffer dataBuffer
      * */
-    public void write(InputStream inputStream) {
-        write(inputStream, null);
+    public void write(DataBuffer dataBuffer) {
+        try {
+            this.outputStream.write(dataBuffer.getBytes(), 0, dataBuffer.getLength());
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
     }
 
     /**

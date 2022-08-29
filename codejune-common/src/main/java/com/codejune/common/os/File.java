@@ -6,7 +6,6 @@ import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.*;
-import java.nio.file.Files;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -65,19 +64,6 @@ public final class File implements FileInfo {
     @Override
     public long getSize() {
         return this.file.length();
-    }
-
-    /**
-     * 获取输入流
-     *
-     * @return InputStream
-     * */
-    public InputStream getInputStream() {
-        try {
-            return Files.newInputStream(this.file.toPath());
-        } catch (Exception e) {
-            throw new InfoException(e);
-        }
     }
 
     /**

@@ -3,8 +3,8 @@ package com.codejune.common.listener;
 import com.codejune.common.Listener;
 
 /**
- * 文件读取监听器
+ * ReadListener
  *
  * @author ZJ
  * */
-public interface TextInputStreamReadListener extends Listener<String> {}
+public interface ReadListener<T> extends Listener<T> {}

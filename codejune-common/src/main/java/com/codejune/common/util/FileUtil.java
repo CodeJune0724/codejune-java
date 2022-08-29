@@ -29,4 +29,15 @@ public final class FileUtil {
         }
     }
 
+    /**
+     * 是否存在
+     *
+     * @param file file
+     *
+     * @return 是否存在
+     * */
+    public static boolean exist(java.io.File file) {
+        return file != null && file.exists();
+    }
+
 }
