@@ -39,19 +39,6 @@ public abstract class Reader<T> {
     }
 
     /**
-     * 获取大小
-     *
-     * @return 大小
-     * */
-    public final long getSize() {
-        try {
-            return this.inputStream.available();
-        } catch (Exception e) {
-            throw new InfoException(e);
-        }
-    }
-
-    /**
      * 读取
      * */
     public abstract void read();

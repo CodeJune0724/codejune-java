@@ -17,7 +17,7 @@ public class InputStreamReader extends Reader<DataBuffer> {
     }
 
     @Override
-    public void read() {
+    public final void read() {
         try {
             byte[] bytes = new byte[this.readSize];
             int size = this.inputStream.read(bytes);

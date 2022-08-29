@@ -1,5 +1,6 @@
 package com.codejune.common.io.reader;
 
+import com.codejune.common.Closeable;
 import com.codejune.common.Range;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.DataBuffer;
@@ -11,7 +12,7 @@ import java.io.RandomAccessFile;
  *
  * @author ZJ
  * */
-public final class FileReader extends InputStreamReader {
+public final class FileReader extends InputStreamReader implements Closeable {
 
     private final java.io.File file;
 
@@ -21,12 +22,8 @@ public final class FileReader extends InputStreamReader {
     }
 
     @Override
-    public void read() {
-        try {
-            super.read();
-        } finally {
-            IOUtil.close(inputStream);
-        }
+    public void close() {
+        IOUtil.close(inputStream);
     }
 
     /**
@@ -58,13 +55,7 @@ public final class FileReader extends InputStreamReader {
         } catch (Exception e) {
             throw new InfoException(e);
         } finally {
-            try {
-                if (randomAccessFile != null) {
-                    randomAccessFile.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            IOUtil.close(randomAccessFile);
         }
     }
 

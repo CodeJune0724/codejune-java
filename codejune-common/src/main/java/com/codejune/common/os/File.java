@@ -1,8 +1,8 @@
 package com.codejune.common.os;
 
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.io.Writer;
 import com.codejune.common.io.reader.TextInputStreamReader;
+import com.codejune.common.io.writer.OutputStreamWriter;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.*;
@@ -67,28 +67,6 @@ public final class File implements FileInfo {
     }
 
     /**
-     * 获取输出流
-     *
-     * @return OutputStream
-     * */
-    public OutputStream getOutputStream(boolean append) {
-        try {
-            return new FileOutputStream(this.file, append);
-        } catch (Exception e) {
-            throw new InfoException(e);
-        }
-    }
-
-    /**
-     * 获取输出流
-     *
-     * @return OutputStream
-     * */
-    public OutputStream getOutputStream() {
-        return getOutputStream(false);
-    }
-
-    /**
      * 删除
      * */
     public void delete() {
@@ -107,16 +85,16 @@ public final class File implements FileInfo {
     }
 
     /**
-     * 读取数据
+     * 获取数据
      *
      * @return 文件数据
      * */
-    public String read() {
+    public String getData() {
         InputStream inputStream = null;
         try {
-            inputStream = getInputStream();
+            inputStream = IOUtil.getInputStream(file);
             TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-            return textInputStreamReader.read();
+            return textInputStreamReader.getData();
         } finally {
             IOUtil.close(inputStream);
         }
@@ -131,8 +109,8 @@ public final class File implements FileInfo {
     public void write(InputStream inputStream, boolean append) {
         OutputStream outputStream = null;
         try {
-            outputStream = getOutputStream(append);
-            Writer writer = new Writer(outputStream);
+            outputStream = IOUtil.getOutputStream(file, append);
+            OutputStreamWriter writer = new OutputStreamWriter(outputStream);
             writer.write(inputStream);
         } finally {
             IOUtil.close(outputStream);
@@ -216,7 +194,7 @@ public final class File implements FileInfo {
         File result = new File(copyFile);
         InputStream inputStream = null;
         try {
-            inputStream = this.getInputStream();
+            inputStream = IOUtil.getInputStream(file);
             result.write(inputStream);
         } finally {
             IOUtil.close(inputStream);

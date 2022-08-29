@@ -2,6 +2,7 @@ package com.codejune;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.os.File;
+import com.codejune.common.util.FileUtil;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import org.dom4j.Attribute;
@@ -43,7 +44,7 @@ public final class Xml {
     }
 
     public Xml(java.io.File file) {
-        this(file.exists() ? new File(file).read() : null);
+        this(FileUtil.exist(file) ? new File(file).getData() : null);
     }
 
     public Xml() {

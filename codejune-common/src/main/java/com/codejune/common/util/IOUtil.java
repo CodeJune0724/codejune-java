@@ -1,11 +1,7 @@
 package com.codejune.common.util;
 
 import com.codejune.common.exception.InfoException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.nio.file.Files;
 
 /**
@@ -81,6 +77,22 @@ public final class IOUtil {
     }
 
     /**
+     * 关闭randomAccessFile
+     *
+     * @param randomAccessFile randomAccessFile
+     * */
+    public static void close(RandomAccessFile randomAccessFile) {
+        if (randomAccessFile == null) {
+            return;
+        }
+        try {
+            randomAccessFile.close();
+        } catch (IOException e) {
+            throw new InfoException(e.getMessage());
+        }
+    }
+
+    /**
      * 获取输入流
      *
      * @param file file
@@ -96,6 +108,36 @@ public final class IOUtil {
         } catch (Exception e) {
             throw new InfoException(e);
         }
+    }
+
+    /**
+     * 获取输出流
+     *
+     * @param file file
+     * @param append 是否追加
+     *
+     * @return OutputStream
+     * */
+    public static OutputStream getOutputStream(java.io.File file, boolean append) {
+        if (!FileUtil.exist(file)) {
+            throw new InfoException("文件不存在");
+        }
+        try {
+            return new FileOutputStream(file, append);
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
+    /**
+     * 获取输出流
+     *
+     * @param file file
+     *
+     * @return OutputStream
+     * */
+    public static OutputStream getOutputStream(java.io.File file) {
+        return getOutputStream(file, false);
     }
 
 }

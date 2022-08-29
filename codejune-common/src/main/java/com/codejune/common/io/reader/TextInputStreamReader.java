@@ -79,7 +79,10 @@ public final class TextInputStreamReader extends Reader<String> {
     public String getData() {
         StringBuilder result = new StringBuilder();
         TextInputStreamReader textInputStreamReader = new TextInputStreamReader(this.inputStream);
-        textInputStreamReader.setReadListener(result::append);
+        textInputStreamReader.setReadListener(data -> {
+            result.append(data);
+            TextInputStreamReader.this.readListener.listen(data);
+        });
         textInputStreamReader.read();
         return result.toString();
     }

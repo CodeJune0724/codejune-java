@@ -2,7 +2,7 @@ package com.codejune;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.DownloadHandler;
-import com.codejune.common.io.reader.TextReader;
+import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.JsonUtil;
 import com.codejune.common.util.StringUtil;
@@ -159,7 +159,7 @@ public final class Http {
         HttpResponseResult<String> result = new HttpResponseResult<>();
         send(data, httpResponseResult -> {
             result.assignment(httpResponseResult);
-            result.setBody(new TextReader(httpResponseResult.getBody()).read());
+            result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
         });
         return result;
     }
@@ -254,7 +254,7 @@ public final class Http {
             if (httpResponseResult.isFlag()) {
                 finalDownloadHandler.download(httpResponseResult.getBody());
             } else {
-                throw new InfoException(new TextReader(httpResponseResult.getBody()).read());
+                throw new InfoException(new TextInputStreamReader(httpResponseResult.getBody()).getData());
             }
         });
     }
