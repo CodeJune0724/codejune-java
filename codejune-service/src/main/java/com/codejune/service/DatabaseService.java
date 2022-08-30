@@ -39,7 +39,7 @@ public interface DatabaseService<T extends BasePO> {
         if (id == null) {
             throw new InfoException("id not found");
         }
-        QueryResult<T> query = query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.idField().getName(), id))));
+        QueryResult<T> query = query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.getIdField().getName(), id))));
         if (query.getCount() == 0) {
             throw new InfoException("id not found");
         }

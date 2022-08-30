@@ -340,7 +340,7 @@ public class OracleJdbc extends SqlJdbc {
             String sql = "SELECT * FROM " + tableName;
 
             // 数据过滤
-            Filter filter = query.filter();
+            Filter filter = query.getFilter();
             filter.filter(getColumns());
             sql = sql + " " + SqlUtil.toWhere(filter, jdbcType);
 
@@ -351,7 +351,7 @@ public class OracleJdbc extends SqlJdbc {
 
             // 排序
             if (query.isSort()) {
-                sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.sort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
+                sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
             }
 
             // 分页查询

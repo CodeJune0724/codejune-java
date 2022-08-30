@@ -69,7 +69,7 @@ public class BaseDatabaseController<T extends BasePO> implements DatabaseControl
 
     @GetMapping("{id}")
     @Override
-    public ResponseResult id(@PathVariable(required = false) Object id) {
+    public ResponseResult getDetails(@PathVariable(required = false) Object id) {
         return ResponseResult.returnTrue(databaseService.queryById(id));
     }
 

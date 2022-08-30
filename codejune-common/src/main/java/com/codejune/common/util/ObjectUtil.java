@@ -110,7 +110,7 @@ public final class ObjectUtil {
         if (t == null) {
             return null;
         }
-        DataType dataType = DataType.toDataType(t.getClass());
+        DataType dataType = DataType.parse(t.getClass());
         String tString = ObjectUtil.toString(t);
         if (StringUtil.isEmpty(tString)) {
             return t;
@@ -188,8 +188,8 @@ public final class ObjectUtil {
         if (o1 == null || o2 == null) {
             return;
         }
-        DataType o1DataType = DataType.toDataType(o1.getClass());
-        DataType o2DataType = DataType.toDataType(o2.getClass());
+        DataType o1DataType = DataType.parse(o1.getClass());
+        DataType o2DataType = DataType.parse(o2.getClass());
         if (o2DataType != DataType.MAP && o2DataType != DataType.OBJECT) {
             return;
         }

@@ -38,7 +38,7 @@ public enum SystemOS {
      *
      * @return 当前系统类型
      * */
-    public static SystemOS currentSystemOS() {
+    public static SystemOS getCurrentSystemOS() {
         String osName = System.getProperty("os.name");
         for (SystemOS systemOS : SystemOS.values()) {
             if (osName.contains(systemOS.osName)) {

@@ -103,6 +103,9 @@ public final class IOUtil {
         if (!FileUtil.exist(file)) {
             throw new InfoException("文件不存在");
         }
+        if (!file.isFile()) {
+            throw new InfoException("非文件");
+        }
         try {
             return Files.newInputStream(file.toPath());
         } catch (Exception e) {

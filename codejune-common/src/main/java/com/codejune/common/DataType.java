@@ -284,7 +284,7 @@ public enum DataType {
      *
      * @return DataType
      * */
-    public static DataType toDataType(Class<?> aClass) {
+    public static DataType parse(Class<?> aClass) {
         if (aClass == null) {
             return null;
         }
@@ -318,7 +318,7 @@ public enum DataType {
         if (object == null) {
             return null;
         }
-        DataType dataType = DataType.toDataType(object.getClass());
+        DataType dataType = DataType.parse(object.getClass());
         if (dataType == DataType.DOUBLE) {
             return BigDecimal.valueOf((Double) object).toString();
         }

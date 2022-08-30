@@ -22,7 +22,7 @@ public final class FieldToColumnKeyHandler implements KeyHandler {
     private final Map<String, String> newKeyMap = new HashMap<>();
 
     public FieldToColumnKeyHandler(Class<?> c, String idName) {
-        if (DataType.toDataType(c) != DataType.OBJECT) {
+        if (DataType.parse(c) != DataType.OBJECT) {
             return;
         }
         List<Field> fields = new ClassInfo(c).getFields();

@@ -40,7 +40,7 @@ public class Query implements ModelAble<Query> {
         return this;
     }
 
-    public Filter filter() {
+    public Filter getFilter() {
         if (filter == null) {
             filter = new Filter();
         }
@@ -52,7 +52,7 @@ public class Query implements ModelAble<Query> {
         return this;
     }
 
-    public List<Sort> sort() {
+    public List<Sort> getSort() {
         if (sort == null) {
             sort = new ArrayList<>();
         }
@@ -82,7 +82,7 @@ public class Query implements ModelAble<Query> {
      * */
     public Query addSort(Sort sort) {
         if (sort != null) {
-            this.sort().add(sort);
+            this.getSort().add(sort);
         }
         return this;
     }

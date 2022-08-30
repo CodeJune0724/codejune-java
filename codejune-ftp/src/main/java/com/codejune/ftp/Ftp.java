@@ -107,12 +107,12 @@ public final class Ftp extends com.codejune.Ftp {
                         }
 
                         @Override
-                        public String name() {
+                        public String getName() {
                             return name;
                         }
 
                         @Override
-                        public String path() {
+                        public String getPath() {
                             return filePath;
                         }
 
@@ -129,12 +129,12 @@ public final class Ftp extends com.codejune.Ftp {
                 } else {
                     fileInfo = new Folder() {
                         @Override
-                        public String name() {
+                        public String getName() {
                             return name;
                         }
 
                         @Override
-                        public String path() {
+                        public String getPath() {
                             return filePath;
                         }
 
@@ -146,7 +146,7 @@ public final class Ftp extends com.codejune.Ftp {
                         @Override
                         public long getSize() {
                             long result = 0;
-                            List<FileInfo> fileInfoList = baseLs(this.path());
+                            List<FileInfo> fileInfoList = baseLs(this.getPath());
                             for (FileInfo fileInfo : fileInfoList) {
                                 result = result + fileInfo.getSize();
                             }

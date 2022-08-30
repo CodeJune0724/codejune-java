@@ -31,12 +31,12 @@ public final class Folder implements FileInfo {
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return new java.io.File(path).getName();
     }
 
     @Override
-    public String path() {
+    public String getPath() {
         return path;
     }
 
@@ -137,14 +137,14 @@ public final class Folder implements FileInfo {
             return null;
         }
         if (StringUtil.isEmpty(newName)) {
-            newName = name();
+            newName = getName();
         }
         Folder result = new Folder(new java.io.File(copyPath, newName).getAbsolutePath());
         for (File file : fileList()) {
-            file.copy(result.path());
+            file.copy(result.getPath());
         }
         for (Folder folder : folderList()) {
-            folder.copy(result.path());
+            folder.copy(result.getPath());
         }
         return result;
     }
@@ -169,7 +169,7 @@ public final class Folder implements FileInfo {
         if (StringUtil.isEmpty(name)) {
             return;
         }
-        java.io.File file = new java.io.File(this.path());
+        java.io.File file = new java.io.File(this.getPath());
         java.io.File newFile = new java.io.File(file.getParent(), name);
         if (!file.renameTo(newFile)) {
             throw new InfoException("重命名失败");

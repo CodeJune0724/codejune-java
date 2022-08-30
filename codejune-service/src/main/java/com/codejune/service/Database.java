@@ -161,14 +161,14 @@ public abstract class Database {
                 Map<String, Object> map = MapUtil.filterKey(MapUtil.parse(t, String.class, Object.class), columnList);
                 map = MapUtil.transformGeneric(MapUtil.transformKey(map, fieldToColumnKeyHandler), String.class, Object.class);
                 if (isId) {
-                    table.update(new Filter().and(Filter.Item.equals(BasePO.idName(), t.getId())), map);
+                    table.update(new Filter().and(Filter.Item.equals(BasePO.getIdName(), t.getId())), map);
                 } else {
                     table.insert(Collections.singletonList(map));
                 }
             } finally {
                 this.database.pool.returnObject(jdbc);
             }
-            QueryResult<T> query = query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.idField().getName(), t.getId()))));
+            QueryResult<T> query = query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.getIdField().getName(), t.getId()))));
             if (query.getCount() == 0) {
                 return null;
             }
@@ -208,7 +208,7 @@ public abstract class Database {
             Jdbc jdbc = this.database.pool.get();
             try {
                 com.codejune.jdbc.Table table = jdbc.getTable(getCompleteTableName());
-                table.delete(new Filter().and(Filter.Item.equals(BasePO.idName(), id)));
+                table.delete(new Filter().and(Filter.Item.equals(BasePO.getIdName(), id)));
             } finally {
                 this.database.pool.returnObject(jdbc);
             }
@@ -230,7 +230,7 @@ public abstract class Database {
         }
 
         private String getCompleteTableName() {
-            String result = BasePO.tableName(basePOClass);
+            String result = BasePO.getTableName(basePOClass);
             if (!StringUtil.isEmpty(database.databaseName)) {
                 result = database.databaseName + "." + result;
             }

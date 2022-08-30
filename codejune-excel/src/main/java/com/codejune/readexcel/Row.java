@@ -18,7 +18,12 @@ public final class Row implements Iterable<Cell> {
         this.cellNum = row.getLastCellNum();
     }
 
-    public short getCellNum() {
+    /**
+     * 获取列大小
+     *
+     * @return 列大小
+     * */
+    public short getCellSize() {
         return cellNum;
     }
 

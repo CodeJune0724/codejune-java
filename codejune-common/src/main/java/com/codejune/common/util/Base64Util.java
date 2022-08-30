@@ -64,7 +64,7 @@ public final class Base64Util {
     public static String encode(File file) {
         InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(file);
+            inputStream = IOUtil.getInputStream(file);
             byte[] bytes = new byte[inputStream.available()];
             int read = inputStream.read(bytes);
             if (read > 0) {

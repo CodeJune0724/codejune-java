@@ -44,12 +44,12 @@ public final class File implements FileInfo {
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return this.file.getName();
     }
 
     @Override
-    public String path() {
+    public String getPath() {
         return this.file.getAbsolutePath();
     }
 
@@ -184,7 +184,7 @@ public final class File implements FileInfo {
             return null;
         }
         if (StringUtil.isEmpty(fileName)) {
-            fileName = name();
+            fileName = getName();
         }
         new Folder(copyPath);
         java.io.File copyFile = new java.io.File(copyPath, fileName);

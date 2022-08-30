@@ -23,7 +23,7 @@ public final class ColumnToFieldKeyHandler implements KeyHandler {
     private final Map<String, String> newKeyMap = new HashMap<>();
 
     public ColumnToFieldKeyHandler(Class<?> c) {
-        if (DataType.toDataType(c) != DataType.OBJECT) {
+        if (DataType.parse(c) != DataType.OBJECT) {
             return;
         }
         List<Field> fields = new ClassInfo(c).getFields();
@@ -31,7 +31,7 @@ public final class ColumnToFieldKeyHandler implements KeyHandler {
             String key = field.getName();
             String newKey;
             if (field.isAnnotation(Id.class)) {
-                newKey = BasePO.idName();
+                newKey = BasePO.getIdName();
             } else if (field.isAnnotation(Column.class)) {
                 newKey = field.getAnnotation(Column.class).name();
             } else {
