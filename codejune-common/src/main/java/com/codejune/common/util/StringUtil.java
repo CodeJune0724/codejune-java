@@ -88,15 +88,4 @@ public final class StringUtil {
         return result.toString();
     }
 
-    /**
-     * 转成double
-     *
-     * @param data data
-     *
-     * @return Double
-     * */
-    public static Double transformDouble(String data) {
-        return ObjectUtil.transform(data, Double.class);
-    }
-
 }

@@ -30,7 +30,7 @@ public abstract class BasePO {
      *
      * @return Id字段
      * */
-    public static java.lang.reflect.Field idField() {
+    public static java.lang.reflect.Field getIdField() {
         List<Field> allFields = new ClassInfo(BasePO.class).getFields();
         for (Field field : allFields) {
             if (field.getOriginField().isAnnotationPresent(Id.class)) {
@@ -45,8 +45,8 @@ public abstract class BasePO {
      *
      * @return id名称
      * */
-    public static String idName() {
-        return idField().getAnnotation(Id.class).name();
+    public static String getIdName() {
+        return getIdField().getAnnotation(Id.class).name();
     }
 
     /**
@@ -82,7 +82,7 @@ public abstract class BasePO {
             throw new InfoException("c is null");
         }
         List<java.lang.reflect.Field> result = new ArrayList<>();
-        result.add(idField());
+        result.add(getIdField());
         result.addAll(getColumnFields(c));
         return result;
     }
@@ -94,7 +94,7 @@ public abstract class BasePO {
      *
      * @return 表名
      * */
-    public static String tableName(Class<? extends BasePO> c) {
+    public static String getTableName(Class<? extends BasePO> c) {
         if (c == null) {
             throw new InfoException("c is null");
         }

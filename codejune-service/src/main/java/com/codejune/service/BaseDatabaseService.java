@@ -76,7 +76,7 @@ public class BaseDatabaseService<T extends BasePO> implements DatabaseService<T>
         if (saveEntity == null) {
             return null;
         }
-        return query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.idName(), saveEntity.getId())))).getData().get(0);
+        return query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.getIdName(), saveEntity.getId())))).getData().get(0);
     }
 
     @Override

@@ -45,7 +45,7 @@ public final class FirefoxWebDriver extends BaseWebDriver {
         firefoxOptions.setHeadless(!isShow);
 
         // linux开启沙盒
-        if (SystemOS.currentSystemOS() == SystemOS.LINUX) {
+        if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
             options.add("--no-sandbox");
         }
 

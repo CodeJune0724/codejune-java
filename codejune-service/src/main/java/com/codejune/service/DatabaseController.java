@@ -54,6 +54,6 @@ public interface DatabaseController {
     /**
      * 获取详情
      * */
-    ResponseResult id(Object id);
+    ResponseResult getDetails(Object id);
 
 }

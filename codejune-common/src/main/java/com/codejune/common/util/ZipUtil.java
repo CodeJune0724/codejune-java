@@ -2,6 +2,8 @@ package com.codejune.common.util;
 
 import com.codejune.common.exception.InfoException;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -20,7 +22,7 @@ public final class ZipUtil {
      * @param dirs 源文件或者文件夹
      * @param outFile 输出文件
      * */
-    public static void toZip(String[] dirs, File outFile) {
+    public static void zip(String[] dirs, File outFile) {
         if (outFile.exists()) {
             throw new InfoException("压缩文件已存在");
         }
@@ -32,17 +34,17 @@ public final class ZipUtil {
             }
         }
         try {
-            toZip(dirs, outFile.getAbsolutePath());
+            zip(dirs, outFile.getAbsolutePath());
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
     }
 
-    private static void toZip(String[] srcDir, String outDir) {
+    private static void zip(String[] srcDir, String outDir) {
         OutputStream out = null;
         ZipOutputStream zos = null;
         try {
-            out = new FileOutputStream(outDir);
+            out = Files.newOutputStream(Paths.get(outDir));
             zos = new ZipOutputStream(out);
             List<File> sourceFileList = new ArrayList<>();
             for (String dir : srcDir) {

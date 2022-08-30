@@ -76,14 +76,14 @@ public final class Sheet implements Iterable<Row> {
      *
      * @return 最后的行号
      * */
-    public int getRowNum() {
+    public int getRowSize() {
         return this.sheet.getLastRowNum() + 1;
     }
 
     @Override
     public Iterator<Row> iterator() {
         List<Row> rows = new ArrayList<>();
-        for (int i = 0; i < getRowNum(); i++) {
+        for (int i = 0; i < getRowSize(); i++) {
             rows.add(getRow(i));
         }
         int[] i = new int[] {0};

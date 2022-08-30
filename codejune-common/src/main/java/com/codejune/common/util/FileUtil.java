@@ -40,4 +40,26 @@ public final class FileUtil {
         return file != null && file.exists();
     }
 
+    /**
+     * 是否是文件
+     *
+     * @param file file
+     *
+     * @return 是否是文件
+     * */
+    public static boolean isFile(java.io.File file) {
+        return exist(file) && file.isFile();
+    }
+
+    /**
+     * 是否是文件夹
+     *
+     * @param file file
+     *
+     * @return 是否是文件
+     * */
+    public static boolean isFolder(java.io.File file) {
+        return exist(file) && file.isDirectory();
+    }
+
 }

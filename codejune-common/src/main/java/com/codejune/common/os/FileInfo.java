@@ -14,14 +14,14 @@ public interface FileInfo {
      *
      * @return 文件名
      * */
-    String name();
+    String getName();
 
     /**
      * 获取路径
      *
      * @return 路径
      * */
-    String path();
+    String getPath();
 
     /**
      * 获取更新时间

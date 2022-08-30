@@ -50,7 +50,7 @@ public final class ChromeWebDriver extends BaseWebDriver {
         chromeOptions.setHeadless(!isShow);
 
         // linux系统设置沙盒模式
-        if (SystemOS.currentSystemOS() == SystemOS.LINUX) {
+        if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
             chromeOptions.addArguments("no-sandbox");
         }
 
