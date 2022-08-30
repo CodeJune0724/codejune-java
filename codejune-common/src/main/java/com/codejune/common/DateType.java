@@ -1,4 +1,4 @@
-package com.codejune.common.model;
+package com.codejune.common;
 
 /**
  * 日期类型

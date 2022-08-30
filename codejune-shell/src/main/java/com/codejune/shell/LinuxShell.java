@@ -5,11 +5,12 @@ import ch.ethz.ssh2.Session;
 import com.codejune.Shell;
 import com.codejune.common.Closeable;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.listener.InputStreamListener;
-import com.codejune.common.model.Charset;
-import com.codejune.common.model.ResponseResult;
+import com.codejune.common.ResponseResult;
+import com.codejune.common.io.reader.TextInputStreamReader;
+import com.codejune.common.listener.ReadListener;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
+import java.io.InputStream;
 
 /**
  * LinuxShell
@@ -33,17 +34,27 @@ public final class LinuxShell implements Shell, Closeable {
     }
 
     @Override
-    public ResponseResult command(String command, InputStreamListener inputStreamListener) {
+    public ResponseResult command(String command, ReadListener<String> readListener) {
         if (StringUtil.isEmpty(command)) {
-            return null;
+            return new ResponseResult();
         }
         Session session = null;
+        InputStream inputStream = null;
         try {
             session = this.connection.openSession();
             session.execCommand(command);
-            String out = IOUtil.toString(session.getStdout(), Charset.UTF_8, inputStreamListener);
-            if(StringUtil.isEmpty(out)){
-                out = IOUtil.toString(session.getStderr(), Charset.UTF_8, inputStreamListener);
+            inputStream = session.getStdout();
+            String out = null;
+            if (inputStream != null) {
+                TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
+                textInputStreamReader.setReadListener(readListener);
+                out = textInputStreamReader.getData();
+            }
+            if (StringUtil.isEmpty(out)) {
+                inputStream = session.getStderr();
+                TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
+                textInputStreamReader.setReadListener(readListener);
+                out = textInputStreamReader.getData();
             }
             return ResponseResult.returnFalse(session.getExitStatus(), null, out);
         } catch (Exception e) {
@@ -52,6 +63,7 @@ public final class LinuxShell implements Shell, Closeable {
             if (session != null) {
                 session.close();
             }
+            IOUtil.close(inputStream);
         }
     }
 

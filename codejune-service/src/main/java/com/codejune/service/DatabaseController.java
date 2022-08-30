@@ -1,6 +1,6 @@
 package com.codejune.service;
 
-import com.codejune.common.model.ResponseResult;
+import com.codejune.common.ResponseResult;
 import java.util.List;
 import java.util.Map;
 

@@ -16,12 +16,11 @@ public enum DriverType {
      * CHROME
      * */
     CHROME((boolean isShow) -> {
-//        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         ChromeOptions chromeOptions = new ChromeOptions();
         if (isShow) {
             chromeOptions.setHeadless(true);
         }
-        if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
+        if (SystemOS.currentSystemOS() == SystemOS.LINUX) {
             chromeOptions.addArguments("--no-sandbox");
         }
         return chromeOptions;
@@ -31,12 +30,11 @@ public enum DriverType {
      * FIREBOX
      * */
     FIREBOX((boolean isShow) -> {
-//        DesiredCapabilities desiredCapabilities = DesiredCapabilities.firefox();
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         if (isShow) {
             firefoxOptions.setHeadless(true);
         }
-        if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
+        if (SystemOS.currentSystemOS() == SystemOS.LINUX) {
             firefoxOptions.addArguments("--no-sandbox");
         }
         return firefoxOptions;

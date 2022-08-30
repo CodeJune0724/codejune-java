@@ -4,7 +4,6 @@ import com.codejune.common.ModelAble;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.KeyHandler;
-import com.codejune.common.model.Column;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;

@@ -1,9 +1,9 @@
 package com.codejune.jdbc.sqlJdbc;
 
+import com.codejune.common.os.File;
 import com.codejune.common.util.ArrayUtil;
 import com.healthmarketscience.jackcess.*;
 import com.codejune.common.DataType;
-import com.codejune.common.File;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.jdbc.SqlJdbc;
@@ -123,7 +123,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
             } else {
                 throw new InfoException("文件名错误");
             }
-            new File(file, File.FileType.FILE);
+            new File(file);
             try {
                 Database database = DatabaseBuilder.create(fileFormat, file);
                 if (database != null) {

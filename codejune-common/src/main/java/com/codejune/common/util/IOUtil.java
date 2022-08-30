@@ -1,11 +1,8 @@
 package com.codejune.common.util;
 
-import com.codejune.common.Progress;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.listener.InputStreamListener;
-import com.codejune.common.listener.ProgressListener;
-import com.codejune.common.model.Charset;
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * IOUtil
@@ -80,90 +77,67 @@ public final class IOUtil {
     }
 
     /**
-     * 将流转成字符串
+     * 关闭randomAccessFile
      *
-     * @param inputStream inputStream
-     * @param charset 字符编码
-     * @param inputStreamListener 监听器
-     *
-     * @return 字符串
+     * @param randomAccessFile randomAccessFile
      * */
-    public static String toString(InputStream inputStream, Charset charset, InputStreamListener inputStreamListener) {
-        if (inputStream == null) {
-            return null;
+    public static void close(RandomAccessFile randomAccessFile) {
+        if (randomAccessFile == null) {
+            return;
         }
-        if (inputStreamListener == null) {
-            inputStreamListener = data -> {};
-        }
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
         try {
-            inputStreamReader = new InputStreamReader(inputStream, charset.getName());
-            bufferedReader = new BufferedReader(inputStreamReader);
-            String line = bufferedReader.readLine();
-            String result = line == null ? null : "";
-            while (line != null) {
-                inputStreamListener.listen(line);
-                result = StringUtil.append(result, line, "\n");
-                line = bufferedReader.readLine();
-            }
-            return result;
-        } catch (Exception e) {
+            randomAccessFile.close();
+        } catch (IOException e) {
             throw new InfoException(e.getMessage());
-        } finally {
-            close(inputStreamReader);
-            close(bufferedReader);
         }
-    }
-
-    public static String toString(InputStream inputStream, Charset charset) {
-        return toString(inputStream, charset, null);
-    }
-
-    public static String toString(InputStream inputStream) {
-        return toString(inputStream, Charset.UTF_8);
     }
 
     /**
-     * 写入数据
+     * 获取输入流
      *
-     * @param outputStream 输出流
-     * @param inputStream 输入流
-     * @param progressListener 进度监听
+     * @param file file
+     *
+     * @return InputStream
      * */
-    public static void write(OutputStream outputStream, InputStream inputStream, ProgressListener progressListener) {
-        if (outputStream == null || inputStream == null) {
-            return;
+    public static InputStream getInputStream(java.io.File file) {
+        if (!FileUtil.exist(file)) {
+            throw new InfoException("文件不存在");
         }
-        if (progressListener == null) {
-            progressListener = data -> {};
-        }
-        Progress progress;
         try {
-            ProgressListener finalProgressListener = progressListener;
-            progress = new Progress(inputStream.available()) {
-                @Override
-                public void listen(Progress data) {
-                    finalProgressListener.listen(data);
-                }
-            };
-            byte[] bytes = new byte[1024];
-            int read = inputStream.read(bytes);
-            while (read != -1) {
-                progress.addProgress(read);
-                outputStream.write(bytes, 0, read);
-                read = inputStream.read(bytes);
-            }
-            outputStream.flush();
-        } catch (IOException e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(outputStream);
+            return Files.newInputStream(file.toPath());
+        } catch (Exception e) {
+            throw new InfoException(e);
         }
     }
 
-    public static void write(OutputStream outputStream, InputStream inputStream) {
-        write(outputStream, inputStream, null);
+    /**
+     * 获取输出流
+     *
+     * @param file file
+     * @param append 是否追加
+     *
+     * @return OutputStream
+     * */
+    public static OutputStream getOutputStream(java.io.File file, boolean append) {
+        if (!FileUtil.exist(file)) {
+            throw new InfoException("文件不存在");
+        }
+        try {
+            return new FileOutputStream(file, append);
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
+    /**
+     * 获取输出流
+     *
+     * @param file file
+     *
+     * @return OutputStream
+     * */
+    public static OutputStream getOutputStream(java.io.File file) {
+        return getOutputStream(file, false);
     }
 
 }

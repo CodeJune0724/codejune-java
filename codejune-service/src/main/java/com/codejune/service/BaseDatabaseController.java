@@ -2,7 +2,7 @@ package com.codejune.service;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.jdbc.Query;
-import com.codejune.common.model.ResponseResult;
+import com.codejune.common.ResponseResult;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import org.springframework.web.bind.annotation.*;

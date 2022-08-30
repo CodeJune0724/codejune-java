@@ -2,9 +2,11 @@ package com.codejune.ftp;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.DownloadHandler;
-import com.codejune.common.model.FileInfo;
+import com.codejune.common.os.FileInfo;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
+import com.codejune.ftp.os.File;
+import com.codejune.ftp.os.Folder;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import java.io.*;
@@ -66,7 +68,7 @@ public final class Ftp extends com.codejune.Ftp {
     }
 
     @Override
-    public void upload(String path, String name, File file) {
+    public void upload(String path, String name, java.io.File file) {
         InputStream inputStream = null;
         try {
             inputStream = Files.newInputStream(file.toPath());
@@ -87,51 +89,72 @@ public final class Ftp extends com.codejune.Ftp {
             for (FTPFile file : ftpFiles) {
                 boolean isFile = !file.isDirectory();
                 String name = file.getName();
+                String filePath = path + "/" + file.getName();
                 Date updateTime = file.getTimestamp().getTime();
-                result.add(new FileInfo(isFile, path, name, updateTime) {
-                    @Override
-                    public long getSize() {
-                        if (isFile()) {
+                if (".".equals(name) || "..".equals(name)) {
+                    continue;
+                }
+                FileInfo fileInfo;
+                if (isFile) {
+                    fileInfo = new File() {
+                        @Override
+                        public InputStream getInputStream() {
+                            try {
+                                return ftpClient.retrieveFileStream(filePath);
+                            } catch (Exception e) {
+                                throw new InfoException(e);
+                            }
+                        }
+
+                        @Override
+                        public String name() {
+                            return name;
+                        }
+
+                        @Override
+                        public String path() {
+                            return filePath;
+                        }
+
+                        @Override
+                        public Date getUpdateTime() {
+                            return updateTime;
+                        }
+
+                        @Override
+                        public long getSize() {
                             return file.getSize();
-                        } else {
-                            long result = 0L;
-                            List<FileInfo> ls1 = baseLs(getAbsolutePath());
-                            for (FileInfo fileInfo : ls1) {
+                        }
+                    };
+                } else {
+                    fileInfo = new Folder() {
+                        @Override
+                        public String name() {
+                            return name;
+                        }
+
+                        @Override
+                        public String path() {
+                            return filePath;
+                        }
+
+                        @Override
+                        public Date getUpdateTime() {
+                            return updateTime;
+                        }
+
+                        @Override
+                        public long getSize() {
+                            long result = 0;
+                            List<FileInfo> fileInfoList = baseLs(this.path());
+                            for (FileInfo fileInfo : fileInfoList) {
                                 result = result + fileInfo.getSize();
                             }
                             return result;
                         }
-                    }
-
-                    @Override
-                    public String getData() {
-                        InputStream inputStream = null;
-                        try {
-                            if (!file.isDirectory()) {
-                                inputStream = ftpClient.retrieveFileStream(path + "/" + file.getName());
-                            }
-                            return IOUtil.toString(inputStream);
-                        } catch (Exception e) {
-                            throw new InfoException(e.getMessage());
-                        } finally {
-                            IOUtil.close(inputStream);
-                            if (inputStream != null) {
-                                try {
-                                    ftpClient.completePendingCommand();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            List<FileInfo> resultTemp = new ArrayList<>(result);
-            result = new ArrayList<>();
-            for (FileInfo fileInfo : resultTemp) {
-                if (!".".equals(fileInfo.getName()) && !"..".equals(fileInfo.getName())) {
-                    result.add(fileInfo);
+                    };
                 }
+                result.add(fileInfo);
             }
             return result;
         } catch (Exception e) {
@@ -149,7 +172,7 @@ public final class Ftp extends com.codejune.Ftp {
         }
         InputStream inputStream = null;
         try {
-            inputStream = this.ftpClient.retrieveFileStream(new File(path, fileName).getAbsolutePath());
+            inputStream = this.ftpClient.retrieveFileStream(new java.io.File(path, fileName).getAbsolutePath());
             downloadHandler.download(inputStream);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());

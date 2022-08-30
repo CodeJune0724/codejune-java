@@ -8,12 +8,26 @@ import java.sql.Types;
  *
  * @author ZJ
  * */
-public class Column extends com.codejune.common.model.Column {
+public class Column {
+
+    private String name;
+
+    private String remark;
+
+    private DataType dataType;
+
+    private int length;
+
+    private boolean isPrimaryKey;
 
     private int sqlType;
 
     public Column(String name, String remark, DataType dataType, int length, boolean isPrimaryKey) {
-        super(name, remark, dataType, length, isPrimaryKey);
+        this.name = name;
+        this.remark = remark;
+        this.dataType = dataType;
+        this.length = length;
+        this.isPrimaryKey = isPrimaryKey;
         this.sqlType = getSqlType(dataType);
     }
 
@@ -21,10 +35,45 @@ public class Column extends com.codejune.common.model.Column {
         this(name, remark, getDataType(sqlType), length, isPrimaryKey);
     }
 
-    @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public DataType getDataType() {
+        return dataType;
+    }
+
     public void setDataType(DataType dataType) {
-        super.setDataType(dataType);
+        this.dataType = dataType;
         this.sqlType = getSqlType(dataType);
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public boolean isPrimaryKey() {
+        return isPrimaryKey;
+    }
+
+    public void setPrimaryKey(boolean primaryKey) {
+        isPrimaryKey = primaryKey;
     }
 
     public int getSqlType() {

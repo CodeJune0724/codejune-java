@@ -2,7 +2,7 @@ package com.codejune;
 
 import com.codejune.common.Closeable;
 import com.codejune.common.handler.DownloadHandler;
-import com.codejune.common.model.FileInfo;
+import com.codejune.common.os.FileInfo;
 import com.codejune.common.util.ArrayUtil;
 import java.io.File;
 import java.util.List;
