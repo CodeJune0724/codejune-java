@@ -51,11 +51,8 @@ public final class Folder implements FileInfo {
     @Override
     public long getSize() {
         long result = 0;
-        for (File file : fileList()) {
-            result = result + file.getSize();
-        }
-        for (Folder folder : folderList()) {
-            result = result + folder.getSize();
+        for (FileInfo fileInfo :getChildren()) {
+            result = result + fileInfo.getSize();
         }
         return result;
     }
@@ -65,7 +62,7 @@ public final class Folder implements FileInfo {
      *
      * @return 所有文件夹
      * */
-    public List<Folder> folderList() {
+    public List<Folder> getFolderList() {
         List<Folder> result = new ArrayList<>();
         java.io.File file = new java.io.File(this.path);
         java.io.File[] files = file.listFiles();
@@ -85,7 +82,7 @@ public final class Folder implements FileInfo {
      *
      * @return 所有文件
      * */
-    public List<File> fileList() {
+    public List<File> getFileList() {
         List<File> result = new ArrayList<>();
         java.io.File file = new java.io.File(this.path);
         java.io.File[] files = file.listFiles();
@@ -101,13 +98,25 @@ public final class Folder implements FileInfo {
     }
 
     /**
+     * 获取子文件
+     *
+     * @return 子文件集合
+     * */
+    public List<FileInfo> getChildren() {
+        List<FileInfo> result = new ArrayList<>();
+        result.addAll(getFolderList());
+        result.addAll(getFileList());
+        return result;
+    }
+
+    /**
      * 删除
      * */
     public void delete() {
-        for (File file : fileList()) {
+        for (File file : getFileList()) {
             file.delete();
         }
-        for (Folder folder : folderList()) {
+        for (Folder folder : getFolderList()) {
             folder.delete();
         }
         if (!new java.io.File(this.path).delete()) {
@@ -140,10 +149,10 @@ public final class Folder implements FileInfo {
             newName = getName();
         }
         Folder result = new Folder(new java.io.File(copyPath, newName).getAbsolutePath());
-        for (File file : fileList()) {
+        for (File file : getFileList()) {
             file.copy(result.getPath());
         }
-        for (Folder folder : folderList()) {
+        for (Folder folder : getFolderList()) {
             folder.copy(result.getPath());
         }
         return result;
