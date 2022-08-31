@@ -22,7 +22,7 @@ public final class ZipUtil {
      * @param dirs 源文件或者文件夹
      * @param outFile 输出文件
      * */
-    public static void zip(String[] dirs, File outFile) {
+    public static void zip(List<String> dirs, File outFile) {
         if (outFile.exists()) {
             throw new InfoException("压缩文件已存在");
         }
@@ -40,14 +40,14 @@ public final class ZipUtil {
         }
     }
 
-    private static void zip(String[] srcDir, String outDir) {
+    private static void zip(List<String> dirs, String outDir) {
         OutputStream out = null;
         ZipOutputStream zos = null;
         try {
             out = Files.newOutputStream(Paths.get(outDir));
             zos = new ZipOutputStream(out);
             List<File> sourceFileList = new ArrayList<>();
-            for (String dir : srcDir) {
+            for (String dir : dirs) {
                 File sourceFile = new File(dir);
                 sourceFileList.add(sourceFile);
             }
