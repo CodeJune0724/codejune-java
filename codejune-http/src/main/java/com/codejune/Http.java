@@ -1,30 +1,28 @@
 package com.codejune;
 
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.DownloadHandler;
 import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.util.IOUtil;
-import com.codejune.common.util.JsonUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.common.util.*;
+import com.codejune.http.ContentType;
 import com.codejune.http.HttpResponseResult;
 import com.codejune.http.HttpResponseResultHandler;
+import com.codejune.http.Type;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
+import org.apache.http.client.methods.*;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,15 +37,42 @@ public final class Http {
 
     private final Type type;
 
-    private Map<String, String> header = new LinkedHashMap<>();
+    private final Map<String, String> header = new HashMap<>();
 
-    public Http(String url, Type type) {
-        this.url = url;
-        this.type = type;
+    private ContentType contentType;
 
-        // 默认请求头
+    private Object body;
+
+    {
         header.put("accept", "*/*");
         header.put("connection", "Keep-Alive");
+    }
+
+    public Http(String url, Type type) {
+        if (StringUtil.isEmpty(url)) {
+            throw new InfoException("url is null");
+        }
+        if (type == null) {
+            throw new InfoException("type is null");
+        }
+        this.url = url;
+        this.type = type;
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.contentType = contentType;
+        String key = "Content-type";
+        if (this.contentType == null) {
+            this.header.remove(key);
+        } else {
+            if (contentType != ContentType.FORM_DATA) {
+                this.header.put(key, contentType.getContentType());
+            }
+        }
+    }
+
+    public void setBody(Object body) {
+        this.body = body;
     }
 
     /**
@@ -61,178 +86,89 @@ public final class Http {
     }
 
     /**
-     * 设置请求头
-     *
-     * @param header header
-     * */
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
-    }
-
-    /**
-     * 设置json请求头
-     * */
-    public void setContentTypeByJson() {
-        this.addHeader("Content-Type", "application/json");
-    }
-
-    /**
      * 发送
      *
-     * @param data 数据
-     * @param httpResponseResultHandler 发送结果处理
+     * @param httpResponseResultHandler httpResponseResultHandler
      * */
-    public void send(String data, HttpResponseResultHandler httpResponseResultHandler) {
-        HttpURLConnection httpURLConnection = null;
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
+    public void send(HttpResponseResultHandler httpResponseResultHandler) {
+        CloseableHttpClient closeableHttpClient = null;
+        CloseableHttpResponse closeableHttpResponse = null;
+        HttpEntity httpEntity = null;
+        HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
         try {
-            HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
-
-            URL url = new URL(this.url);
-            httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestMethod(type.name());
-
-            // 设置请求头
-            Set<String> keys = this.header.keySet();
-            for (String key : keys) {
-                httpURLConnection.setRequestProperty(key, this.header.get(key));
-            }
-
-            // 开启输入输出
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setDoInput(true);
-
-            // 输出数据
-            if (!StringUtil.isEmpty(data)) {
-                outputStream = httpURLConnection.getOutputStream();
-                outputStream.write(data.getBytes());
-            }
-
-            int status = httpURLConnection.getResponseCode();
-            httpResponseResult.setCode(status);
-            if (status == 200) {
-                inputStream = httpURLConnection.getInputStream();
-            } else {
-                inputStream = httpURLConnection.getErrorStream();
-            }
-
-            // 获取响应头
-            Set<String> responseHeaderKeySet = httpURLConnection.getHeaderFields().keySet();
-            for (String key : responseHeaderKeySet) {
-                if (StringUtil.isEmpty(key)) {
-                    continue;
+            closeableHttpClient = HttpClients.createDefault();
+            HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = new HttpEntityEnclosingRequestBase() {
+                @Override
+                public String getMethod() {
+                    return type.name();
                 }
-                httpResponseResult.addHeader(key, httpURLConnection.getHeaderField(key));
+            };
+            httpEntityEnclosingRequestBase.setURI(URI.create(url));
+            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().setConnectTimeout(10000).build());
+
+            // 请求头
+            Set<String> keySet = header.keySet();
+            for (String key : keySet) {
+                httpEntityEnclosingRequestBase.setHeader(key, header.get(key));
             }
 
-            // 获取响应数据
-            httpResponseResult.setBody(inputStream);
+            // 请求体
+            if (body != null) {
+                switch (contentType) {
+                    case APPLICATION_JSON:
+                        httpEntity = new StringEntity(JsonUtil.toJsonString(body), "UTF-8");
+                        break;
+                    case FORM_DATA:
+                        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
+                        Map<String, Object> mapBody = MapUtil.transformGeneric(MapUtil.parse(body), String.class, Object.class);
+                        for (String key : mapBody.keySet()) {
+                            Object value = mapBody.get(key);
+                            if (value == null) {
+                                continue;
+                            }
+                            if (value instanceof File) {
+                                FileBody fileBody = new FileBody((File) value);
+                                multipartEntityBuilder = multipartEntityBuilder.addPart(key, fileBody);
+                            } else {
+                                multipartEntityBuilder.addTextBody(key, ObjectUtil.toString(value), org.apache.http.entity.ContentType.create("text/plain", StandardCharsets.UTF_8));
+                            }
+                        }
+                        httpEntity = multipartEntityBuilder.build();
+                        break;
+                    default:
+                        httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
+                        break;
+                }
+            }
+            httpEntityEnclosingRequestBase.setEntity(httpEntity);
 
-            // 处理
+            // 执行
+            closeableHttpResponse = closeableHttpClient.execute(httpEntityEnclosingRequestBase);
+
+            httpResponseResult.setCode(closeableHttpResponse.getStatusLine().getStatusCode());
+            Header[] allHeaders = closeableHttpResponse.getAllHeaders();
+            for (Header header : allHeaders) {
+                httpResponseResult.addHeader(header.getName(), header.getValue());
+            }
+            httpResponseResult.setBody(closeableHttpResponse.getEntity().getContent());
+
             if (httpResponseResultHandler == null) {
                 httpResponseResultHandler = httpResponseResult1 -> {};
             }
             httpResponseResultHandler.handler(httpResponseResult);
         } catch (Exception e) {
-            throw new InfoException(e);
-        } finally {
-            if (httpURLConnection != null) {
-                httpURLConnection.disconnect();
-            }
-            IOUtil.close(inputStream);
-            IOUtil.close(outputStream);
-        }
-    }
-
-    /**
-     * 发送body
-     *
-     * @param data 请求数据
-     *
-     * @return 响应结果
-     * */
-    public HttpResponseResult<String> sendBody(String data) {
-        if (JsonUtil.isJson(data)) {
-            setContentTypeByJson();
-        }
-        HttpResponseResult<String> result = new HttpResponseResult<>();
-        send(data, httpResponseResult -> {
-            result.assignment(httpResponseResult);
-            result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
-        });
-        return result;
-    }
-
-    /**
-     * 发送表单数据
-     *
-     * @param formData 表单数据
-     *
-     * @return 响应
-     * */
-    public HttpResponseResult<String> sendFormData(Map<String, Object> formData) {
-        CloseableHttpClient httpClient = null;
-        CloseableHttpResponse response = null;
-        HttpEntity httpEntity = null;
-        HttpResponseResult<String> result = new HttpResponseResult<>();
-        try {
-            httpClient = HttpClients.createDefault();
-            HttpPost httpPost = new HttpPost(this.url);
-            httpPost.setConfig(RequestConfig.custom().setConnectTimeout(5000).build());
-            Set<String> keySet = this.header.keySet();
-            for (String key : keySet) {
-                httpPost.setHeader(key, header.get(key));
-            }
-            MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
-            for (String key : formData.keySet()) {
-                Object value = formData.get(key);
-                if (value == null) {
-                    continue;
-                }
-                if (value instanceof File) {
-                    FileBody fileBody = new FileBody((File) value);
-                    multipartEntityBuilder = multipartEntityBuilder.addPart(key, fileBody);
-                } else {
-                    multipartEntityBuilder.addPart(key, new StringBody(value.toString(), ContentType.MULTIPART_FORM_DATA));
-                }
-            }
-            HttpEntity reqEntity = multipartEntityBuilder.build();
-            httpPost.setEntity(reqEntity);
-            response = httpClient.execute(httpPost);
-            int statusCode = response.getStatusLine().getStatusCode();
-            result.setCode(statusCode);
-            Header[] allHeaders = response.getAllHeaders();
-            for (Header header : allHeaders) {
-                result.addHeader(header.getName(), header.getValue());
-            }
-            httpEntity = response.getEntity();
-            String responseBody = null;
-            if (httpEntity != null) {
-                responseBody = EntityUtils.toString(httpEntity, StandardCharsets.UTF_8);
-            }
-            result.setBody(responseBody);
-            return result;
-        } catch (Exception e) {
             throw new InfoException(e.getMessage());
         } finally {
-            try {
-                if (response != null) {
-                    response.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (httpClient != null) {
-                    httpClient.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            IOUtil.close(httpResponseResult.getBody());
             try {
                 if (httpEntity != null) {
                     EntityUtils.consume(httpEntity);
+                }
+                if (closeableHttpResponse != null) {
+                    closeableHttpResponse.close();
+                }
+                if (closeableHttpClient != null) {
+                    closeableHttpClient.close();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -241,29 +177,17 @@ public final class Http {
     }
 
     /**
-     * 下载文件
+     * 发送
      *
-     * @param downloadHandler downloadHandler
+     * @return HttpResponseResult
      * */
-    public void download(DownloadHandler downloadHandler) {
-        if (downloadHandler == null) {
-            downloadHandler = inputStream -> {};
-        }
-        DownloadHandler finalDownloadHandler = downloadHandler;
-        send(null, httpResponseResult -> {
-            if (httpResponseResult.isFlag()) {
-                finalDownloadHandler.download(httpResponseResult.getBody());
-            } else {
-                throw new InfoException(new TextInputStreamReader(httpResponseResult.getBody()).getData());
-            }
+    public HttpResponseResult<String> send() {
+        HttpResponseResult<String> result = new HttpResponseResult<>();
+        send(httpResponseResult -> {
+            result.assignment(httpResponseResult);
+            result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
         });
-    }
-
-    public enum Type {
-        GET,
-        POST,
-        PUT,
-        DELETE
+        return result;
     }
 
 }
