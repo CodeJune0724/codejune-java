@@ -1,5 +1,7 @@
 package com.codejune.jdbc.table;
 
+import com.codejune.common.exception.ErrorException;
+import com.codejune.common.util.MapUtil;
 import com.codejune.jdbc.*;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
@@ -153,7 +155,6 @@ public final class MongodbTable implements Table {
         for (Filter.Item item : and) {
             String key = item.getKey();
             Object formatItem = formatItem(item);
-            Object newValue;
             if (formatItem instanceof Map) {
                 Document document;
                 if (formatItem instanceof Document) {
@@ -166,11 +167,14 @@ public final class MongodbTable implements Table {
                 for (Object k : objects) {
                     document.put(k.toString(), formatItemMap.get(k));
                 }
-                newValue = document;
+
+                if (result.get(key) != null) {
+                    document.putAll(MapUtil.transformGeneric((Map<?, ?>) result.get(key), String.class, Object.class));
+                }
+                result.put(key, document);
             } else {
-                newValue = formatItem;
+                throw new ErrorException("formatItem is error");
             }
-            result.put(key, newValue);
         }
 
         return result;
@@ -197,7 +201,8 @@ public final class MongodbTable implements Table {
                 result.put("$lte", value);
                 break;
             case EQUALS:
-                return value;
+                result.put("$eq", value);
+                break;
             case NOT_EQUALS:
                 result.put("$ne", value);
                 break;
