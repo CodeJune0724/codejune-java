@@ -28,31 +28,27 @@ public final class BaseWebElement implements WebElement {
     }
 
     @Override
-    public void click() {
-        this.click(true);
-    }
-
-    @Override
     public void click(boolean waitIsClick) {
-        // 不等待点击元素
         if (!waitIsClick) {
-            click(this.seleniumElement);
+            baseClick();
             return;
         }
-
-        // 等待元素可以点击之后点击
         long startTime = new Date().getTime() + 10000L;
         while (true) {
             long nowTime = new Date().getTime();
             if (startTime < nowTime) {
                 throw new InfoException("元素点击超时");
             }
-
             try {
-                click(this.seleniumElement);
+                baseClick();
                 break;
             } catch (Exception ignored) {}
         }
+    }
+
+    @Override
+    public void click() {
+        this.click(true);
     }
 
     @Override
@@ -212,9 +208,10 @@ public final class BaseWebElement implements WebElement {
         return this.seleniumElement;
     }
 
-    private void click(org.openqa.selenium.WebElement webElement) {
+    private void baseClick() {
+        this.webDriver.executeScript("arguments[0].scrollIntoView();", seleniumElement);
         try {
-            webElement.click();
+            seleniumElement.click();
         } catch (Exception e) {
             try {
                 this.event("click");

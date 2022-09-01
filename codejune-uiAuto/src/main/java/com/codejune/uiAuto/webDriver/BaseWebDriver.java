@@ -75,9 +75,9 @@ public abstract class BaseWebDriver implements com.codejune.uiAuto.WebDriver {
     }
 
     @Override
-    public final void executeScript(String script) {
+    public final void executeScript(String script, Object... ags) {
         JavascriptExecutor js = (JavascriptExecutor) this.seleniumWebDriver;
-        js.executeScript(script);
+        js.executeScript(script, ags);
     }
 
     @Override
@@ -141,6 +141,11 @@ public abstract class BaseWebDriver implements com.codejune.uiAuto.WebDriver {
     @Override
     public boolean isExist(Selector selector) {
         return isExist(selector, 10000);
+    }
+
+    @Override
+    public void scrollDown(int px) {
+        executeScript("window.scrollBy(0, " + px + ")");
     }
 
     private List<WebElement> findElements(Selector selector, long millisecond, long startTime) {

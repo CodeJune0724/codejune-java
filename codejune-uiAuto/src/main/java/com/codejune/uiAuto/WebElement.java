@@ -12,15 +12,15 @@ public interface WebElement {
 
     /**
      * 点击元素
-     * */
-    void click();
-
-    /**
-     * 点击元素
      *
      * @param waitIsClick 是否等待至元素可点击，timeout：10s
      * */
     void click(boolean waitIsClick);
+
+    /**
+     * 点击元素
+     * */
+    void click();
 
     /**
      * 输入框输入参数

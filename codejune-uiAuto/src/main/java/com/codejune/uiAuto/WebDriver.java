@@ -69,8 +69,9 @@ public interface WebDriver extends Closeable {
      * 执行脚本
      *
      * @param script script
+     * @param ags ags
      * */
-    void executeScript(String script);
+    void executeScript(String script, Object... ags);
 
     /**
      * 切换iframe
@@ -143,5 +144,12 @@ public interface WebDriver extends Closeable {
      * @return 是否存在
      * */
     boolean isExist(Selector selector);
+
+    /**
+     * 滚动下拉条
+     *
+     * @param px 滚动距离
+     * */
+    void scrollDown(int px);
 
 }
