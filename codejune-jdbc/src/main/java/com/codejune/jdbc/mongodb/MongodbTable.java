@@ -25,13 +25,13 @@ import java.util.regex.Pattern;
  * */
 public final class MongodbTable implements Table {
 
-    private final MongoDatabase mongoDatabase;
-
     private final String tableName;
 
+    private final MongoCollection<Document> mongoCollection;
+
     public MongodbTable(MongoDatabase mongoDatabase, String tableName) {
-        this.mongoDatabase = mongoDatabase;
         this.tableName = tableName;
+        mongoCollection = mongoDatabase.getCollection(tableName);
     }
 
     /**
@@ -40,7 +40,7 @@ public final class MongodbTable implements Table {
      * @return 所有的索引
      * */
     public List<Map<String, Object>> getIndexList() {
-        ListIndexesIterable<Document> documents = getMongoCollection().listIndexes();
+        ListIndexesIterable<Document> documents = mongoCollection.listIndexes();
         List<Map<String, Object>> result = new ArrayList<>();
         for (Document document : documents) {
             result.add(new LinkedHashMap<>(document));
@@ -57,7 +57,7 @@ public final class MongodbTable implements Table {
         if (index == null) {
             return;
         }
-        getMongoCollection().createIndex(new Document(index));
+        mongoCollection.createIndex(new Document(index));
     }
 
     /**
@@ -69,7 +69,7 @@ public final class MongodbTable implements Table {
         if (index == null) {
             return;
         }
-        getMongoCollection().dropIndex(new Document(index));
+        mongoCollection.dropIndex(new Document(index));
     }
 
     @Override
@@ -83,7 +83,6 @@ public final class MongodbTable implements Table {
             if (ObjectUtil.isEmpty(data)) {
                 return 0;
             }
-            MongoCollection<Document> collection = getMongoCollection();
             List<Document> documents = new ArrayList<>();
             for (Map<String, Object> map : data) {
                 if (map.isEmpty()) {
@@ -91,7 +90,7 @@ public final class MongodbTable implements Table {
                 }
                 documents.add(new Document(map));
             }
-            collection.insertMany(documents);
+            mongoCollection.insertMany(documents);
             return data.size();
         } catch (Exception e) {
             throw new InfoException(e);
@@ -101,8 +100,7 @@ public final class MongodbTable implements Table {
     @Override
     public long delete(Filter filter) {
         try {
-            MongoCollection<Document> collection = getMongoCollection();
-            DeleteResult deleteResult = collection.deleteMany(formatFilter(filter));
+            DeleteResult deleteResult = mongoCollection.deleteMany(formatFilter(filter));
             return deleteResult.getDeletedCount();
         } catch (Exception e) {
             throw new InfoException(e);
@@ -112,11 +110,10 @@ public final class MongodbTable implements Table {
     @Override
     public long update(Filter filter, Map<String, Object> setData) {
         try {
-            MongoCollection<Document> collection = getMongoCollection();
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.upsert(true);
             BasicDBObject updateSetValue = new BasicDBObject("$set", setData);
-            UpdateResult updateResult = collection.updateMany(formatFilter(filter), updateSetValue, updateOptions);
+            UpdateResult updateResult = mongoCollection.updateMany(formatFilter(filter), updateSetValue, updateOptions);
             return updateResult.getModifiedCount();
         } catch (Exception e) {
             throw new InfoException(e);
@@ -124,28 +121,21 @@ public final class MongodbTable implements Table {
     }
 
     @Override
-    public QueryResult<Map<String, Object>> query(Query query) {
+    public long count(Filter filter) {
+        return mongoCollection.countDocuments(formatFilter(filter));
+    }
+
+    @Override
+    public List<Map<String, Object>> queryData(Query query) {
         if (query == null) {
             query = new Query();
         }
+        FindIterable<Document> queryData = mongoCollection.find(formatFilter(query.getFilter()));
 
-        MongoCollection<Document> collection = getMongoCollection();
-        Document filterDocument = formatFilter(query.getFilter());
-
-        QueryResult<Map<String, Object>> result = new QueryResult<>();
-        result.setCount(collection.countDocuments(filterDocument));
-
-        FindIterable<Document> queryData = collection.find();
-
-        // 过滤
-        queryData = queryData.filter(filterDocument);
-
-        // 分页
         if (query.isPage()) {
             queryData = queryData.limit(query.getSize()).skip(query.getSize() * (query.getPage() - 1));
         }
 
-        // 排序
         if (query.isSort()) {
             List<Sort> sortList = query.getSort();
             for (Sort sort : sortList) {
@@ -159,17 +149,12 @@ public final class MongodbTable implements Table {
             }
         }
 
-        List<Map<String, Object>> data = new ArrayList<>();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (Document document : queryData) {
             Map<String, Object> map = new LinkedHashMap<>(document);
-            data.add(map);
+            result.add(map);
         }
-        result.setData(data);
         return result;
-    }
-
-    private MongoCollection<Document> getMongoCollection() {
-        return mongoDatabase.getCollection(tableName);
     }
 
     private static Document formatFilter(Filter filter) {

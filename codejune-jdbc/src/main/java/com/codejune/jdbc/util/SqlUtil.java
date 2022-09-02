@@ -213,7 +213,7 @@ public final class SqlUtil {
                 break;
             case EQUALS:
                 if (value == null) {
-                    result = key + " IS " + formatValue(value);
+                    result = key + " IS " + formatValue(null);
                 } else {
                     if (jdbcType == AccessDatabaseJdbc.class) {
                         if (value instanceof Number) {

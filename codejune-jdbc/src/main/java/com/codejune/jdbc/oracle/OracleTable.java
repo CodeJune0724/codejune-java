@@ -1,6 +1,5 @@
 package com.codejune.jdbc.oracle;
 
-import com.codejune.Jdbc;
 import com.codejune.common.DataType;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
@@ -9,7 +8,6 @@ import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Filter;
 import com.codejune.jdbc.Query;
-import com.codejune.jdbc.QueryResult;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.JdbcUtil;
 import com.codejune.jdbc.util.SqlUtil;
@@ -29,61 +27,19 @@ public final class OracleTable implements SqlTable {
 
     private final String tableName;
 
+    private List<Column> columnList = null;
+
     OracleTable(OracleJdbc oracleJdbc, String tableName) {
         this.oracleJdbc = oracleJdbc;
         this.tableName = tableName;
     }
 
-    /**
-     * 查询
-     *
-     * @param query query
-     * @param jdbcType jdbcType
-     *
-     * @return QueryResult
-     * */
-    public QueryResult<Map<String, Object>> query(Query query, Class<? extends Jdbc> jdbcType) {
-        if (query == null) {
-            query = new Query();
-        }
-
-        QueryResult<Map<String, Object>> queryResult = new QueryResult<>();
-        String sql = "SELECT * FROM " + tableName;
-
-        // 数据过滤
-        Filter filter = query.getFilter();
-        filter.filter(getColumns());
-        sql = sql + " " + SqlUtil.toWhere(filter, jdbcType);
-
-        // count
-        String countSql = StringUtil.append("SELECT COUNT(*) C FROM (", sql, ")");
-        List<Map<String, Object>> countData = oracleJdbc.queryBySql(countSql);
-        queryResult.setCount(Long.parseLong(countData.get(0).get("C").toString()));
-
-        // 排序
-        if (query.isSort()) {
-            sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
-        }
-
-        // 分页查询
-        if (query.isPage()) {
-            Integer page = query.getPage();
-            Integer size = query.getSize();
-            sql = StringUtil.append("SELECT ROWNUM R, T.* FROM (", sql, ") T");
-            sql = StringUtil.append("SELECT * FROM (SELECT T.* FROM (", sql, ") T WHERE R <= ", (page * size) + "", ") WHERE R >= ", (size * (page - 1) + 1) + "");
-        }
-
-        List<String> field = new ArrayList<>();
-        field.add("R");
-        List<Map<String, Object>> data = oracleJdbc.queryBySql(sql, field);
-        queryResult.setData(data);
-
-        return queryResult;
-    }
-
     @Override
     public List<Column> getColumns() {
-        return oracleJdbc.getColumns(this.tableName);
+        if (columnList == null) {
+            columnList = oracleJdbc.getColumns(this.tableName);
+        }
+        return columnList;
     }
 
     @Override
@@ -247,8 +203,44 @@ public final class OracleTable implements SqlTable {
     }
 
     @Override
-    public QueryResult<Map<String, Object>> query(Query query) {
-        return query(query, null);
+    public long count(Filter filter) {
+        if (filter == null) {
+            filter = new Filter();
+        }
+        String sql = "SELECT * FROM " + tableName;
+        filter.filter(getColumns());
+        sql = sql + " " + SqlUtil.toWhere(filter);
+
+        String countSql = StringUtil.append("SELECT COUNT(*) C FROM (", sql, ")");
+        List<Map<String, Object>> countData = oracleJdbc.queryBySql(countSql);
+        return Long.parseLong(countData.get(0).get("C").toString());
+    }
+
+    @Override
+    public List<Map<String, Object>> queryData(Query query) {
+        if (query == null) {
+            query = new Query();
+        }
+        String sql = "SELECT * FROM " + tableName;
+
+        Filter filter = query.getFilter();
+        filter.filter(getColumns());
+        sql = sql + " " + SqlUtil.toWhere(filter);
+
+        if (query.isSort()) {
+            sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
+        }
+
+        if (query.isPage()) {
+            Integer page = query.getPage();
+            Integer size = query.getSize();
+            sql = StringUtil.append("SELECT ROWNUM R, T.* FROM (", sql, ") T");
+            sql = StringUtil.append("SELECT * FROM (SELECT T.* FROM (", sql, ") T WHERE R <= ", (page * size) + "", ") WHERE R >= ", (size * (page - 1) + 1) + "");
+        }
+
+        List<String> field = new ArrayList<>();
+        field.add("R");
+        return oracleJdbc.queryBySql(sql, field);
     }
 
 }
