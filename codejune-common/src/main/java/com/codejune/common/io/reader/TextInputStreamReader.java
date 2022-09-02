@@ -80,11 +80,11 @@ public final class TextInputStreamReader extends Reader<String> {
         StringBuilder result = new StringBuilder();
         TextInputStreamReader textInputStreamReader = new TextInputStreamReader(this.inputStream);
         textInputStreamReader.setReadListener(data -> {
-            result.append(data);
+            result.append(data).append("\n");
             TextInputStreamReader.this.readListener.listen(data);
         });
         textInputStreamReader.read();
-        return result.toString();
+        return result.substring(0, result.length() - 1);
     }
 
 }

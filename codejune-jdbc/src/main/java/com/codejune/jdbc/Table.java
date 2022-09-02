@@ -71,13 +71,39 @@ public interface Table {
     long update(Filter filter, Map<String, Object> setData);
 
     /**
+     * 统计
+     *
+     * @param filter filter
+     *
+     * @return 数量
+     * */
+    long count(Filter filter);
+
+    /**
+     * 查询数据
+     *
+     * @param query query
+     *
+     * @return List
+     * */
+    List<Map<String, Object>> queryData(Query query);
+
+    /**
      * 查询
      *
      * @param query query
      *
      * @return QueryResult
      * */
-    QueryResult<Map<String, Object>> query(Query query);
+    default QueryResult<Map<String, Object>> query(Query query) {
+        if (query == null) {
+            query = new Query();
+        }
+        QueryResult<Map<String, Object>> result = new QueryResult<>();
+        result.setCount(count(query.getFilter()));
+        result.setData(queryData(query));
+        return result;
+    }
 
     /**
      * 查询
