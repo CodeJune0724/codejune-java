@@ -1,10 +1,11 @@
-package com.codejune.jdbc.table;
+package com.codejune.jdbc.mongodb;
 
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.util.MapUtil;
 import com.codejune.jdbc.*;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
@@ -33,6 +34,44 @@ public final class MongodbTable implements Table {
         this.tableName = tableName;
     }
 
+    /**
+     * 获取索引
+     *
+     * @return 所有的索引
+     * */
+    public List<Map<String, Object>> getIndexList() {
+        ListIndexesIterable<Document> documents = getMongoCollection().listIndexes();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Document document : documents) {
+            result.add(new LinkedHashMap<>(document));
+        }
+        return result;
+    }
+
+    /**
+     * 添加索引
+     *
+     * @param index index
+     * */
+    public void addIndex(Map<String, Object> index) {
+        if (index == null) {
+            return;
+        }
+        getMongoCollection().createIndex(new Document(index));
+    }
+
+    /**
+     * 删除索引
+     *
+     * @param index index
+     * */
+    public void deleteIndex(Map<String, Object> index) {
+        if (index == null) {
+            return;
+        }
+        getMongoCollection().dropIndex(new Document(index));
+    }
+
     @Override
     public String getName() {
         return this.tableName;
@@ -44,7 +83,7 @@ public final class MongodbTable implements Table {
             if (ObjectUtil.isEmpty(data)) {
                 return 0;
             }
-            MongoCollection<Document> collection = getMongoCollection(getName());
+            MongoCollection<Document> collection = getMongoCollection();
             List<Document> documents = new ArrayList<>();
             for (Map<String, Object> map : data) {
                 if (map.isEmpty()) {
@@ -62,7 +101,7 @@ public final class MongodbTable implements Table {
     @Override
     public long delete(Filter filter) {
         try {
-            MongoCollection<Document> collection = getMongoCollection(getName());
+            MongoCollection<Document> collection = getMongoCollection();
             DeleteResult deleteResult = collection.deleteMany(formatFilter(filter));
             return deleteResult.getDeletedCount();
         } catch (Exception e) {
@@ -73,7 +112,7 @@ public final class MongodbTable implements Table {
     @Override
     public long update(Filter filter, Map<String, Object> setData) {
         try {
-            MongoCollection<Document> collection = getMongoCollection(getName());
+            MongoCollection<Document> collection = getMongoCollection();
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.upsert(true);
             BasicDBObject updateSetValue = new BasicDBObject("$set", setData);
@@ -90,7 +129,7 @@ public final class MongodbTable implements Table {
             query = new Query();
         }
 
-        MongoCollection<Document> collection = getMongoCollection(getName());
+        MongoCollection<Document> collection = getMongoCollection();
         Document filterDocument = formatFilter(query.getFilter());
 
         QueryResult<Map<String, Object>> result = new QueryResult<>();
@@ -129,7 +168,7 @@ public final class MongodbTable implements Table {
         return result;
     }
 
-    private MongoCollection<Document> getMongoCollection(String tableName) {
+    private MongoCollection<Document> getMongoCollection() {
         return mongoDatabase.getCollection(tableName);
     }
 

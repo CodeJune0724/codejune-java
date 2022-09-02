@@ -1,10 +1,9 @@
-package com.codejune.jdbc;
+package com.codejune.jdbc.mongodb;
 
 import com.mongodb.*;
 import com.mongodb.MongoClient;
 import com.mongodb.client.*;
 import com.codejune.Jdbc;
-import com.codejune.jdbc.table.MongodbTable;
 import com.codejune.common.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;

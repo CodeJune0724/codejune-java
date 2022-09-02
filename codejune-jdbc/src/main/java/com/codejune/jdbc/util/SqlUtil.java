@@ -3,12 +3,12 @@ package com.codejune.jdbc.util;
 import com.codejune.Jdbc;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.KeyHandler;
-import com.codejune.jdbc.sqlJdbc.AccessDatabaseJdbc;
-import com.codejune.jdbc.sqlJdbc.OracleJdbc;
 import com.codejune.jdbc.Filter;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
+import com.codejune.jdbc.access.AccessDatabaseJdbc;
+import com.codejune.jdbc.oracle.OracleJdbc;
 import java.util.*;
 
 /**
@@ -228,7 +228,7 @@ public final class SqlUtil {
                 break;
             case NOT_EQUALS:
                 if (value == null) {
-                    result = key + " IS NOT " + formatValue(value);
+                    result = key + " IS NOT " + formatValue(null);
                 } else {
                     result = key + " != " + formatValue(value);
                 }
@@ -267,7 +267,7 @@ public final class SqlUtil {
         } else {
             String s = ObjectUtil.toString(value);
             if (s == null) {
-                return formatValue(s);
+                return formatValue(null);
             }
             s = s.replaceAll("'", "''");
             return "'" + s + "'";

@@ -7,6 +7,7 @@ import com.codejune.common.Charset;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.handler.ColumnToFieldKeyHandler;
 import com.codejune.jdbc.handler.FieldToColumnKeyHandler;
+import com.codejune.jdbc.util.JdbcUtil;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -61,7 +62,7 @@ public abstract class SqlJdbc implements Jdbc {
         } catch (SQLException e) {
             throw new InfoException(e.getMessage());
         } finally {
-            close(preparedStatement);
+            JdbcUtil.close(preparedStatement);
         }
     }
 
@@ -100,8 +101,8 @@ public abstract class SqlJdbc implements Jdbc {
         } catch (SQLException e) {
             throw new InfoException(e.getMessage() + "：" + sql);
         } finally {
-            close(resultSet);
-            close(preparedStatement);
+            JdbcUtil.close(resultSet);
+            JdbcUtil.close(preparedStatement);
         }
 
         return result;
@@ -241,7 +242,7 @@ public abstract class SqlJdbc implements Jdbc {
         } catch (Exception e) {
             throw new InfoException(e);
         } finally {
-            close(primaryKeyResultSet);
+            JdbcUtil.close(primaryKeyResultSet);
         }
 
         // 获取字段
@@ -260,7 +261,7 @@ public abstract class SqlJdbc implements Jdbc {
         } catch (Exception e) {
             throw new InfoException(e);
         } finally {
-            close(columnResultSet);
+            JdbcUtil.close(columnResultSet);
         }
     }
 
@@ -271,29 +272,9 @@ public abstract class SqlJdbc implements Jdbc {
         }
         try {
             this.connection.close();
-            this.connection= null;
+            this.connection = null;
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
-        }
-    }
-
-    protected static void close(PreparedStatement preparedStatement) {
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (Exception e) {
-                throw new InfoException(e.getMessage());
-            }
-        }
-    }
-
-    protected static void close(ResultSet resultSet) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (Exception e) {
-                throw new InfoException(e.getMessage());
-            }
         }
     }
 
