@@ -33,7 +33,21 @@ public final class ThreadUtil {
      * @return 线程池
      * */
     public static ThreadPoolExecutor getThreadPoolExecutor(int num) {
+        if (num <= 0) {
+            throw new InfoException("线程数 <= 0");
+        }
         return new ThreadPoolExecutor(num, num, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>());
+    }
+
+    /**
+     * 关闭线程池
+     *
+     * @param threadPoolExecutor threadPoolExecutor
+     * */
+    public static void close(ThreadPoolExecutor threadPoolExecutor) {
+        if (threadPoolExecutor != null) {
+            threadPoolExecutor.shutdown();
+        }
     }
 
 }
