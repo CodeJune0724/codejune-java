@@ -152,6 +152,24 @@ public final class ArrayUtil {
         return result.substring(0, result.length() - split.length());
     }
 
+    /**
+     * 生成序列
+     *
+     * @param size 大小
+     *
+     * @return 序列
+     * */
+    public static List<Integer> createSequence(int size) {
+        List<Integer> result = new ArrayList<>();
+        if (size <= 0) {
+            return result;
+        }
+        for (int i = 0; i < size; i++) {
+            result.add(i);
+        }
+        return result;
+    }
+
     public interface StringHandler<T> {
         String toString(T t);
 
