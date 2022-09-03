@@ -16,6 +16,8 @@ public abstract class FastThreadExecutor<T> {
 
     private final int threadNum;
 
+    private final ThreadExecutor threadExecutor;
+
     private final long timeout;
 
     public FastThreadExecutor(int threadNum, long timeout) {
@@ -23,11 +25,25 @@ public abstract class FastThreadExecutor<T> {
             throw new InfoException("threadNum <= 0");
         }
         this.threadNum = threadNum;
+        this.threadExecutor = null;
         this.timeout = timeout;
     }
 
     public FastThreadExecutor(int threadNum) {
         this(threadNum, -1);
+    }
+
+    public FastThreadExecutor(ThreadExecutor threadExecutor, long timeout) {
+        if (threadExecutor == null) {
+            throw new InfoException("threadExecutor is null");
+        }
+        this.threadNum = 0;
+        this.threadExecutor = threadExecutor;
+        this.timeout = timeout;
+    }
+
+    public FastThreadExecutor(ThreadExecutor threadExecutor) {
+        this(threadExecutor, -1);
     }
 
     /**
@@ -46,14 +62,23 @@ public abstract class FastThreadExecutor<T> {
         if (ObjectUtil.isEmpty(collection)) {
             return;
         }
-        ThreadExecutor threadExecutor = new ThreadExecutor(threadNum);
-        threadExecutor.startAwait(collection.size());
-        for (T t : collection) {
-            threadExecutor.execute(() -> handler(t));
+        ThreadExecutor threadExecutor;
+        if (this.threadExecutor != null) {
+            threadExecutor = new ThreadExecutor(this.threadExecutor.getThreadPoolExecutor());
+        } else {
+            threadExecutor = new ThreadExecutor(this.threadNum);
         }
-        List<Throwable> await = threadExecutor.await(timeout);
-        if (!ObjectUtil.isEmpty(await)) {
-            throw new InfoException(await);
+        try {
+            threadExecutor.startAwait(collection.size());
+            for (T t : collection) {
+                threadExecutor.execute(() -> handler(t));
+            }
+            List<Throwable> await = threadExecutor.await(timeout);
+            if (!ObjectUtil.isEmpty(await)) {
+                throw new InfoException(await);
+            }
+        } finally {
+            threadExecutor.close();
         }
     }
 

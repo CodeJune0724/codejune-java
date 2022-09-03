@@ -17,12 +17,23 @@ public final class ThreadExecutor implements Closeable {
 
     private final ThreadPoolExecutor threadPoolExecutor;
 
+    private final boolean isNew;
+
     private CountDownLatch countDownLatch = null;
 
     private final List<Throwable> throwableList = new ArrayList<>();
 
     public ThreadExecutor(int threadNum) {
         this.threadPoolExecutor = ThreadUtil.getThreadPoolExecutor(threadNum);
+        this.isNew = true;
+    }
+
+    public ThreadExecutor(ThreadPoolExecutor threadPoolExecutor) {
+        if (threadPoolExecutor == null) {
+            throw new InfoException("threadPoolExecutor is null");
+        }
+        this.threadPoolExecutor = threadPoolExecutor;
+        this.isNew = false;
     }
 
     /**
@@ -88,9 +99,15 @@ public final class ThreadExecutor implements Closeable {
         return await(-1);
     }
 
+    public ThreadPoolExecutor getThreadPoolExecutor() {
+        return threadPoolExecutor;
+    }
+
     @Override
     public void close() {
-        this.threadPoolExecutor.shutdown();
+        if (isNew) {
+            ThreadUtil.close(this.threadPoolExecutor);
+        }
     }
 
 }
