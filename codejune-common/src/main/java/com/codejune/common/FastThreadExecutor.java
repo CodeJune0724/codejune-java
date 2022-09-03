@@ -16,8 +16,6 @@ public abstract class FastThreadExecutor<T> {
 
     private final int threadNum;
 
-    private final ThreadExecutor threadExecutor;
-
     private final long timeout;
 
     public FastThreadExecutor(int threadNum, long timeout) {
@@ -25,25 +23,11 @@ public abstract class FastThreadExecutor<T> {
             throw new InfoException("threadNum <= 0");
         }
         this.threadNum = threadNum;
-        this.threadExecutor = null;
         this.timeout = timeout;
     }
 
     public FastThreadExecutor(int threadNum) {
         this(threadNum, -1);
-    }
-
-    public FastThreadExecutor(ThreadExecutor threadExecutor, long timeout) {
-        if (threadExecutor == null) {
-            throw new InfoException("threadExecutor is null");
-        }
-        this.threadNum = 0;
-        this.threadExecutor = threadExecutor;
-        this.timeout = timeout;
-    }
-
-    public FastThreadExecutor(ThreadExecutor threadExecutor) {
-        this(threadExecutor, -1);
     }
 
     /**
@@ -62,66 +46,15 @@ public abstract class FastThreadExecutor<T> {
         if (ObjectUtil.isEmpty(collection)) {
             return;
         }
-        ThreadExecutor threadExecutor = getThreadExecutor();
-        try {
-            threadExecutor.startAwait(collection.size());
-            for (T t : collection) {
-                threadExecutor.execute(() -> {
-                    handler(t);
-                });
-            }
-            List<Throwable> await = threadExecutor.await(timeout);
-            if (!ObjectUtil.isEmpty(await)) {
-                throw new InfoException(await);
-            }
-        } finally {
-            if (isClose()) {
-                threadExecutor.close();
-            }
+        ThreadExecutor threadExecutor = new ThreadExecutor(threadNum);
+        threadExecutor.startAwait(collection.size());
+        for (T t : collection) {
+            threadExecutor.execute(() -> handler(t));
         }
-    }
-
-    /**
-     * 开始执行
-     *
-     * @param num 要遍历的次数
-     * */
-    public final void run(T num) {
-        if (num == null) {
-            return;
+        List<Throwable> await = threadExecutor.await(timeout);
+        if (!ObjectUtil.isEmpty(await)) {
+            throw new InfoException(await);
         }
-        if (!(num instanceof Number)) {
-            return;
-        }
-        Integer integer = ObjectUtil.transform(num, Integer.class);
-        ThreadExecutor threadExecutor = getThreadExecutor();
-        try {
-            threadExecutor.startAwait(integer);
-            for (int i = 0; i < integer; i++) {
-                threadExecutor.execute(() -> {
-                    handler(null);
-                });
-            }
-            List<Throwable> await = threadExecutor.await(timeout);
-            if (!ObjectUtil.isEmpty(await)) {
-                throw new InfoException(await);
-            }
-        } finally {
-            if (isClose()) {
-                threadExecutor.close();
-            }
-        }
-    }
-
-    private ThreadExecutor getThreadExecutor() {
-        if (this.threadExecutor == null) {
-            return new ThreadExecutor(this.threadNum);
-        }
-        return this.threadExecutor;
-    }
-
-    private boolean isClose() {
-        return this.threadExecutor == null;
     }
 
 }
