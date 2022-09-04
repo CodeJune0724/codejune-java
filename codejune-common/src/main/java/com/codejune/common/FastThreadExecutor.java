@@ -71,7 +71,7 @@ public abstract class FastThreadExecutor<T> {
         try {
             threadExecutor.startAwait(collection.size());
             for (T t : collection) {
-                threadExecutor.execute(() -> handler(t));
+                threadExecutor.run(() -> handler(t));
             }
             List<Throwable> await = threadExecutor.await(timeout);
             if (!ObjectUtil.isEmpty(await)) {

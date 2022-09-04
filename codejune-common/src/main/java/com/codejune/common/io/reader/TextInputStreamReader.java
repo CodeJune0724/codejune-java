@@ -5,6 +5,7 @@ import com.codejune.common.Range;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.Reader;
 import com.codejune.common.util.IOUtil;
+import com.codejune.common.util.ObjectUtil;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -84,7 +85,7 @@ public final class TextInputStreamReader extends Reader<String> {
             TextInputStreamReader.this.readListener.listen(data);
         });
         textInputStreamReader.read();
-        return result.substring(0, result.length() - 1);
+        return ObjectUtil.toString(ObjectUtil.subString(result.toString(), result.length() - 1));
     }
 
 }

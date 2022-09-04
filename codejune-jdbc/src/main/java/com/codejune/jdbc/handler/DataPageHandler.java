@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public abstract class DataPageHandler extends com.codejune.common.handler.DataPageHandler<Map<String, Object>> {
+public abstract class DataPageHandler extends com.codejune.common.DataPageExecutor<Map<String, Object>> {
 
     public DataPageHandler(int size, Table table, Filter filter) {
         super(size, (page, size1) -> table.query(new Query().setPage(page).setSize(size1).setFilter(filter)).getData());
