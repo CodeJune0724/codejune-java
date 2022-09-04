@@ -1,4 +1,4 @@
-package com.codejune.common.handler;
+package com.codejune.common;
 
 import java.util.List;
 
@@ -7,13 +7,13 @@ import java.util.List;
  *
  * @author ZJ
  * */
-public abstract class DataPageHandler<T> {
+public abstract class DataPageExecutor<T> {
 
     private final int size;
 
     private final QueryData<T> queryData;
 
-    public DataPageHandler(int size, QueryData<T> queryData) {
+    public DataPageExecutor(int size, QueryData<T> queryData) {
         this.size = size;
         this.queryData = queryData;
     }

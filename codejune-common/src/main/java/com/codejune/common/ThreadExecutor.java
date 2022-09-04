@@ -41,7 +41,7 @@ public final class ThreadExecutor implements Closeable {
      *
      * @param runnable runnable
      * */
-    public void execute(Runnable runnable) {
+    public void run(Runnable runnable) {
         threadPoolExecutor.execute(() -> {
             try {
                 runnable.run();
