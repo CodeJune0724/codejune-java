@@ -116,7 +116,9 @@ public final class OracleTable implements SqlTable {
                 for (Column column : allColumn) {
                     index++;
                     Object filedData = map.get(column.getName());
-                    filedData = ObjectUtil.subString(filedData, column.getLength());
+                    if (column.getDataType() != DataType.DATE) {
+                        filedData = ObjectUtil.subString(filedData, column.getLength());
+                    }
                     if (filedData == null) {
                         preparedStatement.setNull(index, column.getSqlType());
                     } else if (column.getDataType() == DataType.DATE) {
