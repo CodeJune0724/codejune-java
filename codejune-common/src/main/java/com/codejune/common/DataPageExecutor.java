@@ -1,5 +1,7 @@
 package com.codejune.common;
 
+import com.codejune.common.exception.InfoException;
+import com.codejune.common.util.ObjectUtil;
 import java.util.List;
 
 /**
@@ -13,9 +15,19 @@ public abstract class DataPageExecutor<T> {
 
     private final QueryData<T> queryData;
 
-    public DataPageExecutor(int size, QueryData<T> queryData) {
+    private final long count;
+
+    public DataPageExecutor(int size, QueryData<T> queryData, long count) {
+        if (size <= 0) {
+            throw new InfoException("size <= 0");
+        }
         this.size = size;
         this.queryData = queryData;
+        this.count = count;
+    }
+
+    public DataPageExecutor(int size, QueryData<T> queryData) {
+        this(size, queryData, -1);
     }
 
     /**
@@ -33,12 +45,23 @@ public abstract class DataPageExecutor<T> {
             return;
         }
         for (int i = 1; ; i++) {
-            List<T> data = queryData.query(i, size);
-            if (data == null || data.size() == 0) {
-                break;
+            int size;
+            if (count > 0) {
+                size = (int) count - ((i - 1) * this.size);
+                if (size <= 0) {
+                    break;
+                }
+                if (size >= this.size) {
+                    size = this.size;
+                }
             } else {
-                handler(data);
+                size = this.size;
             }
+            List<T> data = queryData.query(i, size);
+            if (count <= 0 && ObjectUtil.isEmpty(data)) {
+                break;
+            }
+            handler(data);
         }
     }
 
