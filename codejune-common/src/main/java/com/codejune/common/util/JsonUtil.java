@@ -22,6 +22,12 @@ public class JsonUtil {
      * @return json字符串
      * */
     public static String toJsonString(Object Object) {
+        if (Object == null) {
+            return null;
+        }
+        if (Object instanceof String) {
+            return ObjectUtil.toString(Object);
+        }
         try {
             return JSON.toJSONString(Object, SerializerFeature.WriteMapNullValue);
         } catch (Exception e) {
