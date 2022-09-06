@@ -1,7 +1,9 @@
 package com.codejune.jdbc;
 
+import com.codejune.common.DataType;
 import com.codejune.common.ModelAble;
 import com.codejune.common.handler.KeyHandler;
+import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +120,14 @@ public class Query implements ModelAble<Query> {
 
     @Override
     public Query assignment(Object object) {
-        ObjectUtil.assignment(this, ObjectUtil.transform(object, Map.class));
+        Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
+        Object sort = MapUtil.getValue(map, "sort", Object.class);
+        if (DataType.parse(sort.getClass()) == DataType.MAP) {
+            List<Map<?, ?>> list = new ArrayList<>();
+            list.add(MapUtil.parse(sort));
+            map.put("sort", list);
+        }
+        ObjectUtil.assignment(this, map);
         return this;
     }
 
