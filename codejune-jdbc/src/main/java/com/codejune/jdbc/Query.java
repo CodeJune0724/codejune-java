@@ -122,7 +122,7 @@ public class Query implements ModelAble<Query> {
     public Query assignment(Object object) {
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
         Object sort = MapUtil.getValue(map, "sort", Object.class);
-        if (DataType.parse(sort.getClass()) == DataType.MAP) {
+        if (sort != null && DataType.parse(sort.getClass()) == DataType.MAP) {
             List<Map<?, ?>> list = new ArrayList<>();
             list.add(MapUtil.parse(sort));
             map.put("sort", list);
