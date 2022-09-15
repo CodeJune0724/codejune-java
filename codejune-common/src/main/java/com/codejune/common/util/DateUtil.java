@@ -93,25 +93,25 @@ public final class DateUtil {
      *
      * @return 对应的毫秒数
      * */
-    public static long parseMillisecond(long date, DateType dateType) {
+    public static long transformMillisecond(long date, DateType dateType) {
         if (date == 0 || dateType == null) {
             return 0L;
         }
         switch (dateType) {
             case YEAR:
-                return parseMillisecond(date * 365, DateType.DAY);
+                return transformMillisecond(date * 365, DateType.DAY);
             case MONTH:
-                return parseMillisecond(date * 30, DateType.DAY);
+                return transformMillisecond(date * 30, DateType.DAY);
             case week:
-                return parseMillisecond(date * 7, DateType.DAY);
+                return transformMillisecond(date * 7, DateType.DAY);
             case DAY:
-                return parseMillisecond(date * 24, DateType.HOUR);
+                return transformMillisecond(date * 24, DateType.HOUR);
             case HOUR:
-                return parseMillisecond(date * 60, DateType.MINUTE);
+                return transformMillisecond(date * 60, DateType.MINUTE);
             case MINUTE:
-                return parseMillisecond(date * 60, DateType.SECOND);
+                return transformMillisecond(date * 60, DateType.SECOND);
             case SECOND:
-                return parseMillisecond(date * 1000, DateType.MILLISECOND);
+                return transformMillisecond(date * 1000, DateType.MILLISECOND);
             case MILLISECOND:
                 return date;
             default:
