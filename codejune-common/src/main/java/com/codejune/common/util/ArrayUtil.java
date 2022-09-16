@@ -2,6 +2,7 @@ package com.codejune.common.util;
 
 import com.codejune.common.exception.InfoException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -130,13 +131,13 @@ public final class ArrayUtil {
     /**
      * list转成string
      *
-     * @param tList tList
+     * @param collection collection
      * @param stringHandler 转换方法
      * @param split 分隔符
      * @param <T> 航行
      * */
-    public static <T> String toString(List<T> tList, StringHandler<T> stringHandler, String split) {
-        if (tList == null) {
+    public static <T> String toString(Collection<T> collection, StringHandler<T> stringHandler, String split) {
+        if (collection == null) {
             return null;
         }
         if (stringHandler == null) {
@@ -146,7 +147,7 @@ public final class ArrayUtil {
             split = "";
         }
         String result = "";
-        for (T t : tList) {
+        for (T t : collection) {
             result = StringUtil.append(result, stringHandler.toString(t), split);
         }
         return result.substring(0, result.length() - split.length());
