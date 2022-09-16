@@ -137,7 +137,7 @@ public final class ArrayUtil {
      * @param <T> 航行
      * */
     public static <T> String toString(Collection<T> collection, StringHandler<T> stringHandler, String split) {
-        if (collection == null) {
+        if (ObjectUtil.isEmpty(collection)) {
             return null;
         }
         if (stringHandler == null) {
