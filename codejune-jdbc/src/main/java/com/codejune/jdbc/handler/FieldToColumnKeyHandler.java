@@ -3,7 +3,7 @@ package com.codejune.jdbc.handler;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.DataType;
 import com.codejune.common.classInfo.Field;
-import com.codejune.common.handler.KeyHandler;
+import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import javax.persistence.Column;
@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public final class FieldToColumnKeyHandler implements KeyHandler {
+public final class FieldToColumnKeyHandler implements ObjectHandler {
 
     private final Map<String, String> newKeyMap = new HashMap<>();
 
@@ -41,7 +41,7 @@ public final class FieldToColumnKeyHandler implements KeyHandler {
     }
 
     @Override
-    public Object getNewKey(Object key) {
+    public Object getNewObject(Object key) {
         String result = this.newKeyMap.get(ObjectUtil.toString(key));
         if (StringUtil.isEmpty(result)) {
             return key;

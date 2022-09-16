@@ -2,7 +2,7 @@ package com.codejune.jdbc;
 
 import com.codejune.common.DataType;
 import com.codejune.common.ModelAble;
-import com.codejune.common.handler.KeyHandler;
+import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import java.util.ArrayList;
@@ -103,7 +103,7 @@ public class Query implements ModelAble<Query> {
      *
      * @return this
      * */
-    public Query setKeyHandler(KeyHandler keyHandler) {
+    public Query setKeyHandler(ObjectHandler keyHandler) {
         if (keyHandler == null) {
             return this;
         }

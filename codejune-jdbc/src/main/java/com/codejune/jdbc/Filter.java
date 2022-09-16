@@ -3,7 +3,7 @@ package com.codejune.jdbc;
 import com.codejune.common.ModelAble;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.KeyHandler;
+import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -74,17 +74,17 @@ public final class Filter implements ModelAble<Filter> {
     /**
      * 设置新的key
      *
-     * @param keyHandler keyHandler
+     * @param objectHandler objectHandler
      * */
-    public void setKey(KeyHandler keyHandler) {
-        if (keyHandler == null) {
+    public void setKey(ObjectHandler objectHandler) {
+        if (objectHandler == null) {
             return;
         }
         for (Filter filter : or) {
-            filter.setKey(keyHandler);
+            filter.setKey(objectHandler);
         }
         for (Item item : and) {
-            item.key = ObjectUtil.toString(keyHandler.getNewKey(item.key));
+            item.key = ObjectUtil.toString(objectHandler.getNewObject(item.key));
         }
     }
 
