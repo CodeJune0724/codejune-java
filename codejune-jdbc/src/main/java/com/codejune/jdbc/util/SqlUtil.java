@@ -262,8 +262,7 @@ public final class SqlUtil {
         if (value instanceof Date) {
             return "TO_DATE('" + DateUtil.format((Date) value, DateUtil.DEFAULT_DATE_FORMAT) + "', 'yyyy-mm-dd hh24:mi:ss')";
         } else if (value instanceof ObjectHandler) {
-            ObjectHandler objectHandler = (ObjectHandler) value;
-            return formatValue(objectHandler.getNewObject(value));
+            return ObjectUtil.toString(((ObjectHandler) value).getNewObject(value));
         } else {
             String s = ObjectUtil.toString(value);
             if (s == null) {
