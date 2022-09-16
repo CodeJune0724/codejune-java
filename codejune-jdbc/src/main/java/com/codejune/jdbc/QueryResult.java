@@ -1,7 +1,7 @@
 package com.codejune.jdbc;
 
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.KeyHandler;
+import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.MapUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,18 +39,18 @@ public final class QueryResult<T> {
      *
      * @param eClass eClass
      * @param <E> E
-     * @param keyHandler keyHandler
+     * @param objectHandler objectHandler
      *
      * @return QueryResult
      * */
-    public <E> QueryResult<E> parse(Class<E> eClass, KeyHandler keyHandler) {
+    public <E> QueryResult<E> parse(Class<E> eClass, ObjectHandler objectHandler) {
         if (eClass == null) {
             throw new InfoException("eClass不能为空");
         }
-        if (keyHandler == null) {
-            keyHandler = new KeyHandler() {
+        if (objectHandler == null) {
+            objectHandler = new ObjectHandler() {
                 @Override
-                public Object getNewKey(Object key) {
+                public Object getNewObject(Object key) {
                     return key;
                 }
             };
@@ -60,7 +60,7 @@ public final class QueryResult<T> {
         List<E> data = new ArrayList<>();
         for (T t : this.data) {
             Map<String, Object> parse = MapUtil.parse(t, String.class, Object.class);
-            Map<?, ?> map = MapUtil.transformKey(parse, keyHandler);
+            Map<?, ?> map = MapUtil.transformKey(parse, objectHandler);
             data.add(MapUtil.transform(map, eClass));
         }
         result.setData(data);

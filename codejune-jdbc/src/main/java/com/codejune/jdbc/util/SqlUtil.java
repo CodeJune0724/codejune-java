@@ -2,7 +2,7 @@ package com.codejune.jdbc.util;
 
 import com.codejune.Jdbc;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.KeyHandler;
+import com.codejune.common.handler.ObjectHandler;
 import com.codejune.jdbc.Filter;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -261,9 +261,9 @@ public final class SqlUtil {
         }
         if (value instanceof Date) {
             return "TO_DATE('" + DateUtil.format((Date) value, DateUtil.DEFAULT_DATE_FORMAT) + "', 'yyyy-mm-dd hh24:mi:ss')";
-        } else if (value instanceof KeyHandler) {
-            KeyHandler keyHandler = (KeyHandler) value;
-            return formatValue(keyHandler.getNewKey(value));
+        } else if (value instanceof ObjectHandler) {
+            ObjectHandler objectHandler = (ObjectHandler) value;
+            return formatValue(objectHandler.getNewObject(value));
         } else {
             String s = ObjectUtil.toString(value);
             if (s == null) {

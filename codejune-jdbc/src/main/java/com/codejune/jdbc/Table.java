@@ -80,6 +80,15 @@ public interface Table {
     long count(Filter filter);
 
     /**
+     * 统计
+     *
+     * @return 数量
+     * */
+    default long count() {
+        return count(null);
+    }
+
+    /**
      * 查询数据
      *
      * @param query query
@@ -87,6 +96,15 @@ public interface Table {
      * @return List
      * */
     List<Map<String, Object>> queryData(Query query);
+
+    /**
+     * 查询数据
+     *
+     * @return List
+     * */
+    default List<Map<String, Object>> queryData() {
+        return queryData(null);
+    }
 
     /**
      * 查询

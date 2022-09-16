@@ -1,20 +1,20 @@
 package com.codejune.common.handler;
 
 /**
- * KeyHandler
+ * ObjectHandler
  *
  * @author ZJ
  * */
-public interface KeyHandler {
+public interface ObjectHandler {
 
     /**
-     * 获取新key
+     * 获取新Object
      *
      * @param key key
      *
      * @return 新key
      * */
-    default Object getNewKey(Object key) {
+    default Object getNewObject(Object key) {
         return key;
     }
 

@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.handler.KeyHandler;
+import com.codejune.common.handler.ObjectHandler;
 import java.util.*;
 
 /**
@@ -71,22 +71,22 @@ public final class MapUtil {
      * 转换key
      *
      * @param map map
-     * @param keyHandler keyHandler
+     * @param objectHandler keyHandler
      * @param <T> T
      *
      * @return Map
      * */
-    public static <T> Map<?, T> transformKey(Map<?, T> map, KeyHandler keyHandler) {
+    public static <T> Map<?, T> transformKey(Map<?, T> map, ObjectHandler objectHandler) {
         if (map == null) {
             return null;
         }
-        if (keyHandler == null) {
-            keyHandler = new KeyHandler() {};
+        if (objectHandler == null) {
+            objectHandler = new ObjectHandler() {};
         }
         Map<Object, T> result = new HashMap<>();
         Set<?> keySet = new HashSet<>(map.keySet());
         for (Object key : keySet) {
-            Object newKey = keyHandler.getNewKey(key);
+            Object newKey = objectHandler.getNewObject(key);
             if (newKey == null) {
                 continue;
             }
@@ -130,9 +130,9 @@ public final class MapUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> Map<String, T> transformKeyToHump(Map<String, T> map) {
-        KeyHandler keyHandler = new KeyHandler() {
+        ObjectHandler keyHandler = new ObjectHandler() {
             @Override
-            public Object getNewKey(Object key) {
+            public Object getNewObject(Object key) {
                 return StringUtil.underlineToHump(ObjectUtil.toString(key));
             }
         };
@@ -149,9 +149,9 @@ public final class MapUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> Map<String, T> transformKeyToUnderline(Map<String, T> map) {
-        KeyHandler keyHandler = new KeyHandler() {
+        ObjectHandler keyHandler = new ObjectHandler() {
             @Override
-            public Object getNewKey(Object key) {
+            public Object getNewObject(Object key) {
                 return StringUtil.humpToUnderline(ObjectUtil.toString(key));
             }
         };
