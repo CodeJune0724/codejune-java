@@ -109,6 +109,7 @@ public class Column {
         switch (sqlType) {
             case Types.CHAR:
             case Types.VARCHAR:
+            case Types.NVARCHAR:
                 return DataType.STRING;
             case Types.LONGVARCHAR:
                 return DataType.LONG_STRING;
