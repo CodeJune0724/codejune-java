@@ -53,6 +53,10 @@ public interface DatabaseController {
 
     /**
      * 获取详情
+     *
+     * @param id id
+     *
+     * @return ResponseResult
      * */
     ResponseResult getDetails(Object id);
 

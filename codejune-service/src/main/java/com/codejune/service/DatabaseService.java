@@ -111,6 +111,17 @@ public interface DatabaseService<T extends BasePO> {
     }
 
     /**
+     * 获取详情
+     *
+     * @param id id
+     *
+     * @return Object
+     */
+    default Object getDetails(Object id) {
+        return queryById(id);
+    }
+
+    /**
      * 获取泛型类
      *
      * @return 泛型类
