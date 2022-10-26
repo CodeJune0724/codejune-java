@@ -10,7 +10,7 @@ import com.codejune.common.util.StringUtil;
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class BasePOService<T extends BasePO> implements POService<T> {
+public class BasePOService<T extends BasePO<ID>, ID> implements POService<T, ID> {
 
     private final Database database;
 
@@ -28,6 +28,9 @@ public class BasePOService<T extends BasePO> implements POService<T> {
 
     @Override
     public T save(T t) {
+        if (t == null) {
+            throw new InfoException("参数缺失");
+        }
         List<Field> columnFields = BasePO.getColumnFields(getGenericClass());
         for (Field field : columnFields) {
             Column column = field.getAnnotation(Column.class);
@@ -80,7 +83,7 @@ public class BasePOService<T extends BasePO> implements POService<T> {
     }
 
     @Override
-    public void delete(Object id) {
+    public void delete(ID id) {
         database.switchTable(getGenericClass()).delete(id);
     }
 
