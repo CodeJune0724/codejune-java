@@ -8,7 +8,7 @@ import com.codejune.common.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface DatabaseService<T extends BasePO> {
+public interface POService<T extends BasePO> {
 
     /**
      * 查询

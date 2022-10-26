@@ -10,67 +10,61 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BaseDatabaseController<T extends BasePO> implements DatabaseController {
+public class POController<T extends BasePO> {
 
-    protected final DatabaseService<T> databaseService;
+    protected final POService<T> poService;
 
-    public BaseDatabaseController(DatabaseService<T> databaseService) {
-        if (databaseService == null) {
-            throw new InfoException("databaseService is null");
+    public POController(POService<T> poService) {
+        if (poService == null) {
+            throw new InfoException("poService is null");
         }
-        this.databaseService = databaseService;
+        this.poService = poService;
     }
 
     @PostMapping("query")
-    @Override
     public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody) {
-        return ResponseResult.returnTrue(null, null, databaseService.query(Query.parse(requestBody)));
+        return ResponseResult.returnTrue(null, null, poService.query(Query.parse(requestBody)));
     }
 
     @PostMapping("save")
-    @Override
     public ResponseResult save(@RequestBody(required = false) Map<String, Object> requestBody) {
-        return ResponseResult.returnTrue(null, null, databaseService.save(MapUtil.transform(requestBody, databaseService.getGenericClass())));
+        return ResponseResult.returnTrue(null, null, poService.save(MapUtil.transform(requestBody, poService.getGenericClass())));
     }
 
     @PostMapping("saveList")
-    @Override
     public ResponseResult saveList(@RequestBody(required = false) List<Object> requestBody) {
         if (requestBody == null) {
             return ResponseResult.returnTrue();
         }
         List<T> tList = new ArrayList<>();
         for (Object o : requestBody) {
-            tList.add(ObjectUtil.transform(o, databaseService.getGenericClass()));
+            tList.add(ObjectUtil.transform(o, poService.getGenericClass()));
         }
-        return ResponseResult.returnTrue(null, null, databaseService.save(tList));
+        return ResponseResult.returnTrue(null, null, poService.save(tList));
     }
 
     @PostMapping("delete")
-    @Override
     public ResponseResult delete(@RequestBody(required = false) Map<String, Object> requestBody) {
-        databaseService.delete(MapUtil.transform(requestBody, databaseService.getGenericClass()));
+        poService.delete(MapUtil.transform(requestBody, poService.getGenericClass()));
         return ResponseResult.returnTrue();
     }
 
     @PostMapping("deleteList")
-    @Override
     public ResponseResult deleteList(@RequestBody(required = false) List<Object> requestBody) {
         if (requestBody == null) {
             return ResponseResult.returnTrue();
         }
         List<T> tList = new ArrayList<>();
         for (Object o : requestBody) {
-            tList.add(ObjectUtil.transform(o, databaseService.getGenericClass()));
+            tList.add(ObjectUtil.transform(o, poService.getGenericClass()));
         }
-        databaseService.delete(tList);
+        poService.delete(tList);
         return ResponseResult.returnTrue();
     }
 
     @GetMapping("{id}")
-    @Override
     public ResponseResult getDetails(@PathVariable(required = false) Object id) {
-        return ResponseResult.returnTrue(databaseService.getDetails(id));
+        return ResponseResult.returnTrue(poService.getDetails(id));
     }
 
 }
