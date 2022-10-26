@@ -16,6 +16,8 @@ public @interface Column {
 
     String name();
 
+    String remark() default "";
+
     int length() default -1;
 
     boolean required() default false;
