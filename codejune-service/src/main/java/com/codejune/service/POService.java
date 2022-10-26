@@ -39,7 +39,7 @@ public interface POService<T extends BasePO> {
         if (id == null) {
             throw new InfoException("id not found");
         }
-        QueryResult<T> query = query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.getIdField().getName(), id))));
+        QueryResult<T> query = query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.getIdField().getName(), ObjectUtil.transform(id, getIdClass())))));
         if (query.getCount() == 0) {
             throw new InfoException("id not found");
         }
@@ -127,5 +127,14 @@ public interface POService<T extends BasePO> {
      * @return 泛型类
      * */
     Class<T> getGenericClass();
+
+    /**
+     * 获取id类型
+     *
+     * @return id数据类型
+     * */
+    default Class<?> getIdClass() {
+        return Object.class;
+    }
 
 }
