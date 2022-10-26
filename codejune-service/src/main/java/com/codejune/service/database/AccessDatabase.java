@@ -32,7 +32,7 @@ public class AccessDatabase extends Database {
         List<Class<?>> scan = PackageUtil.scan(packageName, tCLass);
         for (Class<?> c : scan) {
             if (c.toString().startsWith("class") && new ClassInfo(c).isInstanceof(BasePO.class)) {
-                Class<? extends BasePO> basePoC = (Class<? extends BasePO>) c;
+                Class<? extends BasePO<?>> basePoC = (Class<? extends BasePO<?>>) c;
                 String tableName = BasePO.getTableName(basePoC);
                 List<com.codejune.jdbc.Column> columnList = new ArrayList<>();
                 columnList.add(new com.codejune.jdbc.Column(BasePO.getIdName(), null, DataType.INT, -1, true));

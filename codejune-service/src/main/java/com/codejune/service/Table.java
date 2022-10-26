@@ -16,4 +16,6 @@ public @interface Table {
 
     String name();
 
+    String remark() default "";
+
 }

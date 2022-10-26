@@ -12,16 +12,16 @@ import java.util.List;
  *
  * @author ZJ
  * */
-public abstract class BasePO {
+public abstract class BasePO<ID> {
 
     @Id(name = "ID")
-    private Object id;
+    private ID id;
 
-    public Object getId() {
+    public ID getId() {
         return id;
     }
 
-    public void setId(Object id) {
+    public void setId(ID id) {
         this.id = id;
     }
 
@@ -56,7 +56,7 @@ public abstract class BasePO {
      *
      * @return 字段
      * */
-    public static List<java.lang.reflect.Field> getColumnFields(Class<? extends BasePO> c) {
+    public static List<java.lang.reflect.Field> getColumnFields(Class<? extends BasePO<?>> c) {
         if (c == null) {
             throw new InfoException("c is null");
         }
@@ -77,7 +77,7 @@ public abstract class BasePO {
      *
      * @return 字段
      * */
-    public static List<java.lang.reflect.Field> getAllFields(Class<? extends BasePO> c) {
+    public static List<java.lang.reflect.Field> getAllFields(Class<? extends BasePO<?>> c) {
         if (c == null) {
             throw new InfoException("c is null");
         }
@@ -94,7 +94,7 @@ public abstract class BasePO {
      *
      * @return 表名
      * */
-    public static String getTableName(Class<? extends BasePO> c) {
+    public static String getTableName(Class<? extends BasePO<?>> c) {
         if (c == null) {
             throw new InfoException("c is null");
         }

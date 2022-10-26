@@ -8,7 +8,7 @@ import com.codejune.common.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface POService<T extends BasePO> {
+public interface POService<T extends BasePO<ID>, ID> {
 
     /**
      * 查询
@@ -35,11 +35,11 @@ public interface POService<T extends BasePO> {
      *
      * @return T
      * */
-    default T queryById(Object id) {
+    default T queryById(ID id) {
         if (id == null) {
             throw new InfoException("id not found");
         }
-        QueryResult<T> query = query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.getIdField().getName(), ObjectUtil.transform(id, getIdClass())))));
+        QueryResult<T> query = query(new Query().setFilter(new Filter().and(Filter.Item.equals(BasePO.getIdField().getName(), id))));
         if (query.getCount() == 0) {
             throw new InfoException("id not found");
         }
@@ -82,7 +82,7 @@ public interface POService<T extends BasePO> {
      *
      * @param id id
      * */
-    void delete(Object id);
+    void delete(ID id);
 
     /**
      * 删除
@@ -117,7 +117,7 @@ public interface POService<T extends BasePO> {
      *
      * @return Object
      */
-    default Object getDetails(Object id) {
+    default Object getDetails(ID id) {
         return queryById(id);
     }
 
@@ -127,14 +127,5 @@ public interface POService<T extends BasePO> {
      * @return 泛型类
      * */
     Class<T> getGenericClass();
-
-    /**
-     * 获取id类型
-     *
-     * @return id数据类型
-     * */
-    default Class<?> getIdClass() {
-        return Object.class;
-    }
 
 }

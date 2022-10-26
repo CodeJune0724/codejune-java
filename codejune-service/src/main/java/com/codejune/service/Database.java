@@ -46,7 +46,7 @@ public abstract class Database {
      *
      * @return Table
      * */
-    public final <T extends BasePO> Table<T> switchTable(Class<T> basePOClass) {
+    public final <T extends BasePO<ID>, ID> Table<T, ID> switchTable(Class<T> basePOClass) {
         return new Table<>(this, basePOClass);
     }
 
@@ -58,7 +58,7 @@ public abstract class Database {
      *
      * @return 下一个id的值
      * */
-    public <T extends BasePO> Object getNextId(Table<T> table) {
+    public <T extends BasePO<ID>, ID> ID getNextId(Table<T, ID> table) {
         return null;
     }
 
@@ -71,13 +71,13 @@ public abstract class Database {
         return null;
     }
 
-    private <T extends BasePO> Object actualGetNextId(Table<T> table) {
-        Object nextId = getNextId(table);
+    @SuppressWarnings("unchecked")
+    private <T extends BasePO<ID>, ID> ID actualGetNextId(Table<T, ID> table) {
+        ID nextId = getNextId(table);
         if (nextId != null) {
             return nextId;
         }
-        nextId = getNextId();
-        return nextId;
+        return (ID) getNextId();
     }
 
     /**
@@ -85,7 +85,7 @@ public abstract class Database {
      *
      * @author ZJ
      * */
-    public static final class Table<T extends BasePO> {
+    public static final class Table<T extends BasePO<ID>, ID> {
 
         private final Database database;
 
@@ -201,7 +201,7 @@ public abstract class Database {
          *
          * @param id id
          * */
-        public void delete(Object id) {
+        public void delete(ID id) {
             if (id == null) {
                 return;
             }
