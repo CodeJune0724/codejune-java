@@ -23,8 +23,14 @@ public final class ZipUtil {
      * @param outFile 输出文件
      * */
     public static void zip(List<String> dirs, File outFile) {
+        if (ObjectUtil.isEmpty(dirs)) {
+            return;
+        }
+        if (outFile == null) {
+            throw new InfoException("outFile is null");
+        }
         if (outFile.exists()) {
-            throw new InfoException("压缩文件已存在");
+            FileUtil.delete(outFile);
         }
         File parent = outFile.getParentFile();
         if (!parent.exists()) {
@@ -53,7 +59,7 @@ public final class ZipUtil {
             }
             compress(sourceFileList, zos);
         } catch (Exception e) {
-            throw new RuntimeException("zip error from ZipUtils", e);
+            throw new InfoException(e);
         } finally {
             if (zos != null) {
                 try {
