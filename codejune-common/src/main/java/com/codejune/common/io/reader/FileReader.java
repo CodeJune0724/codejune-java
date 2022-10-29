@@ -3,7 +3,7 @@ package com.codejune.common.io.reader;
 import com.codejune.common.Closeable;
 import com.codejune.common.Range;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.io.DataBuffer;
+import com.codejune.common.io.ByteBuffer;
 import com.codejune.common.util.IOUtil;
 import java.io.RandomAccessFile;
 
@@ -46,7 +46,7 @@ public final class FileReader extends InputStreamReader implements Closeable {
             byte[] bytes = new byte[this.readSize];
             int size = randomAccessFile.read(bytes);
             while (size != -1) {
-                readListener.listen(new DataBuffer(bytes, size));
+                readListener.listen(new ByteBuffer(bytes, size));
                 if (range.getEnd() != null && randomAccessFile.getFilePointer() >= range.getEnd()) {
                     break;
                 }
