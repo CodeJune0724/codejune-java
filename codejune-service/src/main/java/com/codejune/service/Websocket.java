@@ -1,5 +1,6 @@
 package com.codejune.service;
 
+import com.codejune.common.ResponseResult;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.JsonUtil;
 import javax.websocket.*;
@@ -7,61 +8,59 @@ import java.nio.ByteBuffer;
 
 public class Websocket {
 
+    private Session session;
+
     /**
      * onOpen
      *
      * @param session session
      * */
     @OnOpen
-    public void onOpen(Session session) {}
+    public void onOpen(Session session) {
+        this.session = session;
+    }
 
     /**
      * onMessage
      *
-     * @param session session
      * @param message message
      * */
     @OnMessage
-    public void onMessage(Session session, String message) {}
+    public void onMessage(String message) {}
 
     /**
      * onMessage
      *
-     * @param session session
      * @param byteBuffer byteBuffer
      * */
     @OnMessage
-    public void onMessage(Session session, ByteBuffer byteBuffer) {}
+    public void onMessage(ByteBuffer byteBuffer) {}
 
     /**
      * onClose
-     *
-     * @param session session
      * */
     @OnClose
-    public void onClose(Session session) {}
+    public void onClose() {}
 
     /**
      * onError
      *
-     * @param session session
      * @param throwable throwable
      * */
     @OnError
-    public void onError(Session session, Throwable throwable) {}
+    public void onError(Throwable throwable) {}
 
     /**
      * 发送
      *
-     * @param session session
      * @param message message
      * */
-    public final void send(Session session, String message) {
+    public final void send(Object message) {
         if (session == null) {
             return;
         }
         try {
-            session.getBasicRemote().sendText(message);
+            session.getBasicRemote().sendText(JsonUtil.toJsonString(message));
         } catch (Exception e) {
             throw new InfoException(e);
         }
@@ -70,10 +69,9 @@ public class Websocket {
     /**
      * 发送
      *
-     * @param session session
      * @param byteBuffer byteBuffer
      * */
-    public final void send(Session session, ByteBuffer byteBuffer) {
+    public final void send(ByteBuffer byteBuffer) {
         if (session == null) {
             return;
         }
@@ -85,17 +83,29 @@ public class Websocket {
     }
 
     /**
-     * 发送
+     * 发送成功
      *
-     * @param session session
-     * @param object byteBuffer
+     * @param message message
      * */
-    public final void sendToJson(Session session, Object object) {
-        if (session == null) {
-            return;
-        }
+    public final void sendSuccess(Object message) {
+        send(JsonUtil.toJsonString(ResponseResult.returnTrue(message)));
+    }
+
+    /**
+     * 发送失败
+     *
+     * @param message message
+     * */
+    public final void sendError(Object message) {
+        send(JsonUtil.toJsonString(ResponseResult.returnFalse(null, null, message)));
+    }
+
+    /**
+     * 关闭
+     * */
+    public final void close() {
         try {
-            session.getBasicRemote().sendText(JsonUtil.toJsonString(object));
+            session.close();
         } catch (Exception e) {
             throw new InfoException(e);
         }
