@@ -20,17 +20,17 @@ public class POController<T extends BasePO<ID>, ID> {
 
     @PostMapping("query")
     public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody) {
-        return ResponseResult.returnTrue(null, null, poService.query(Query.parse(requestBody)));
+        return ResponseResult.returnTrue(poService.query(Query.parse(requestBody)));
     }
 
     @PostMapping("save")
     public ResponseResult save(@RequestBody(required = false) T requestBody) {
-        return ResponseResult.returnTrue(null, null, poService.save(requestBody));
+        return ResponseResult.returnTrue(poService.save(requestBody));
     }
 
     @PostMapping("saveList")
     public ResponseResult saveList(@RequestBody(required = false) List<T> requestBody) {
-        return ResponseResult.returnTrue(null, null, poService.save(requestBody));
+        return ResponseResult.returnTrue(poService.save(requestBody));
     }
 
     @PostMapping("delete")

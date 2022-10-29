@@ -1,7 +1,7 @@
 package com.codejune.common.io.reader;
 
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.io.DataBuffer;
+import com.codejune.common.io.ByteBuffer;
 import com.codejune.common.io.Reader;
 import java.io.InputStream;
 
@@ -10,7 +10,7 @@ import java.io.InputStream;
  *
  * @author ZJ
  * */
-public class InputStreamReader extends Reader<DataBuffer> {
+public class InputStreamReader extends Reader<ByteBuffer> {
 
     public InputStreamReader(InputStream inputStream) {
         super(inputStream);
@@ -22,7 +22,7 @@ public class InputStreamReader extends Reader<DataBuffer> {
             byte[] bytes = new byte[this.readSize];
             int size = this.inputStream.read(bytes);
             while (size != -1) {
-                readListener.listen(new DataBuffer(bytes, size));
+                readListener.listen(new ByteBuffer(bytes, size));
                 size = this.inputStream.read(bytes);
             }
         } catch (Exception e) {

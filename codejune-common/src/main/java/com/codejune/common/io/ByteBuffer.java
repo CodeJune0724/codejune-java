@@ -5,13 +5,13 @@ package com.codejune.common.io;
  *
  * @author ZJ
  * */
-public class DataBuffer {
+public class ByteBuffer {
 
     private final byte[] bytes;
 
     private final int length;
 
-    public DataBuffer(byte[] bytes, int length) {
+    public ByteBuffer(byte[] bytes, int length) {
         this.bytes = bytes;
         this.length = length;
     }

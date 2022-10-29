@@ -43,18 +43,18 @@ public class Writer {
     /**
      * 写入
      *
-     * @param dataBuffer dataBuffer
+     * @param byteBuffer byteBuffer
      * */
-    public final void write(DataBuffer dataBuffer) {
-        if (dataBuffer == null) {
+    public final void write(ByteBuffer byteBuffer) {
+        if (byteBuffer == null) {
             return;
         }
         try {
-            this.outputStream.write(dataBuffer.getBytes(), 0, dataBuffer.getLength());
+            this.outputStream.write(byteBuffer.getBytes(), 0, byteBuffer.getLength());
         } catch (Exception e) {
             throw new InfoException(e);
         }
-        writeListener.listen(dataBuffer);
+        writeListener.listen(byteBuffer);
     }
 
     /**
@@ -81,7 +81,7 @@ public class Writer {
         if (bytes == null) {
             return;
         }
-        write(new DataBuffer(bytes, bytes.length));
+        write(new ByteBuffer(bytes, bytes.length));
     }
 
 }

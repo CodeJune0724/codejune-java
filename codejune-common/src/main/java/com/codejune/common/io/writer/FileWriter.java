@@ -5,6 +5,7 @@ import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.Writer;
 import com.codejune.common.io.reader.InputStreamReader;
 import com.codejune.common.util.IOUtil;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -18,9 +19,13 @@ public final class FileWriter extends Writer implements Closeable {
 
     private final File file;
 
-    public FileWriter(File file) {
-        super(IOUtil.getOutputStream(file));
+    public FileWriter(File file, boolean append) {
+        super(IOUtil.getOutputStream(file, append));
         this.file = file;
+    }
+
+    public FileWriter(File file) {
+        this(file, false);
     }
 
     @Override
@@ -43,7 +48,7 @@ public final class FileWriter extends Writer implements Closeable {
         }
         RandomAccessFile randomAccessFile = null;
         try {
-            randomAccessFile = new RandomAccessFile(this.file, "w");
+            randomAccessFile = new RandomAccessFile(this.file, "rw");
             randomAccessFile.seek(position);
             final RandomAccessFile finalRandomAccessFile = randomAccessFile;
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -60,6 +65,24 @@ public final class FileWriter extends Writer implements Closeable {
             throw new InfoException(e);
         } finally {
             IOUtil.close(randomAccessFile);
+        }
+    }
+
+    /**
+     * 写入
+     *
+     * @param bytes bytes
+     * @param position 指定位置
+     * */
+    public void write(byte[] bytes, long position) {
+        if (bytes == null) {
+            return;
+        }
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+        try {
+            write(byteArrayInputStream, position);
+        } finally {
+            IOUtil.close(byteArrayInputStream);
         }
     }
 
