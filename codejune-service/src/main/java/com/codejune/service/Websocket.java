@@ -97,7 +97,7 @@ public class Websocket {
      * @param message message
      * */
     public final void sendError(Object message) {
-        send(JsonUtil.toJsonString(ResponseResult.returnFalse(null, null, message)));
+        send(JsonUtil.toJsonString(ResponseResult.returnFalse(null, message, null)));
     }
 
     /**
