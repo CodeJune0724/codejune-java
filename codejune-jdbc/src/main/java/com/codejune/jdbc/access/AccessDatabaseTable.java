@@ -55,6 +55,27 @@ public final class AccessDatabaseTable implements SqlTable {
 
             com.healthmarketscience.jackcess.Table table = accessDatabaseJdbc.database.getTable(tableName);
 
+            if (table != null) {
+                List<Column> columns = getColumns();
+                boolean exist = true;
+                for (Column column : columnList) {
+                    boolean columnExist = false;
+                    for (Column originColumn : columns) {
+                        if (originColumn.getName().equals(column.getName())) {
+                            columnExist = true;
+                            break;
+                        }
+                    }
+                    if (!columnExist) {
+                        exist = false;
+                        break;
+                    }
+                }
+                if (exist) {
+                    return;
+                }
+            }
+
             // 所有字段
             List<ColumnBuilder> columnBuilderList = new ArrayList<>();
             int p = 0;
