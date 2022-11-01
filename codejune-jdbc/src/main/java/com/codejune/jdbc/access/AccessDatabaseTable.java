@@ -61,7 +61,7 @@ public final class AccessDatabaseTable implements SqlTable {
                 for (Column column : columnList) {
                     boolean columnExist = false;
                     for (Column originColumn : columns) {
-                        if (originColumn.getName().equals(column.getName())) {
+                        if (originColumn.getName().equals(column.getName()) && originColumn.getDataType() == column.getDataType()) {
                             columnExist = true;
                             break;
                         }
