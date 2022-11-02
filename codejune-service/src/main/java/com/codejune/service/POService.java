@@ -111,6 +111,11 @@ public interface POService<T extends BasePO<ID>, ID> {
     }
 
     /**
+     * 删除
+     * */
+    void delete();
+
+    /**
      * 获取详情
      *
      * @param id id

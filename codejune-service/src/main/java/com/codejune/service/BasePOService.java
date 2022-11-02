@@ -88,6 +88,11 @@ public class BasePOService<T extends BasePO<ID>, ID> implements POService<T, ID>
     }
 
     @Override
+    public void delete() {
+        database.switchTable(getGenericClass()).delete();
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public Class<T> getGenericClass() {
         ClassInfo classInfo = new ClassInfo(this.getClass());
