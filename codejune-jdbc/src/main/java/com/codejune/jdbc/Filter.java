@@ -309,6 +309,9 @@ public final class Filter implements ModelAble<Filter> {
         public Item(Type type, Object key, Object value) {
             this.type = type;
             this.key = ObjectUtil.toString(key);
+            if (value instanceof ObjectHandler) {
+                value = ((ObjectHandler) value).getNewObject(null);
+            }
             this.value = value;
         }
 
