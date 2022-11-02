@@ -229,6 +229,19 @@ public abstract class Database {
             delete(t.getId());
         }
 
+        /**
+         * 删除
+         * */
+        public void delete() {
+            Jdbc jdbc = this.database.pool.get();
+            try {
+                com.codejune.jdbc.Table table = jdbc.getTable(getCompleteTableName());
+                table.delete();
+            } finally {
+                this.database.pool.returnObject(jdbc);
+            }
+        }
+
         private String getCompleteTableName() {
             String result = BasePO.getTableName(basePOClass);
             if (!StringUtil.isEmpty(database.databaseName)) {
