@@ -261,6 +261,8 @@ public final class SqlUtil {
         }
         if (value instanceof Date) {
             return "TO_DATE('" + DateUtil.format((Date) value, DateUtil.DEFAULT_DATE_FORMAT) + "', 'yyyy-mm-dd hh24:mi:ss')";
+        } if (value instanceof Number) {
+            return ObjectUtil.toString(value);
         } else if (value instanceof ObjectHandler) {
             return ObjectUtil.toString(((ObjectHandler) value).getNewObject(value));
         } else {
