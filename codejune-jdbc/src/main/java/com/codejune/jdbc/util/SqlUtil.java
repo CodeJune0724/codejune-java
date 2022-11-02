@@ -216,10 +216,10 @@ public final class SqlUtil {
                     result = key + " IS " + formatValue(null);
                 } else {
                     if (jdbcType == AccessDatabaseJdbc.class) {
-                        if (value instanceof Number) {
-                            result = key + " = " + formatValue(value);
-                        } else {
+                        if (value instanceof String) {
                             result = "StrComp(" + key + ", " + formatValue(value) + ", 0) = 0";
+                        } else {
+                            result = key + " = " + formatValue(value);
                         }
                     } else {
                         result = key + " = " + formatValue(value);
