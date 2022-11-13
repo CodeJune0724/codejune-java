@@ -238,7 +238,7 @@ public final class SqlUtil {
      * @return 查询数据语句
      * */
     public static String parseQueryData(String tableName, Query query) {
-        return parseQueryData(tableName, query);
+        return parseQueryData(tableName, query, null);
     }
 
     private static String formatFilter(Filter filter, Class<? extends Jdbc> jdbcType) {
