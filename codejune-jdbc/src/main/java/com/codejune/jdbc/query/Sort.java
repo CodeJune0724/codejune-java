@@ -1,4 +1,4 @@
-package com.codejune.jdbc;
+package com.codejune.jdbc.query;
 
 import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.ObjectUtil;

@@ -1,4 +1,4 @@
-package com.codejune.jdbc;
+package com.codejune.jdbc.query;
 
 import com.codejune.common.ModelAble;
 import com.codejune.common.classInfo.Field;
@@ -7,6 +7,7 @@ import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
+import com.codejune.jdbc.Column;
 import java.util.*;
 
 /**

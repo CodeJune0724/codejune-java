@@ -95,7 +95,7 @@ public class OracleJdbc extends SqlJdbc {
             Properties properties = new Properties();
             properties.put("user", username);
             properties.put("password", password);
-            properties.put("remarksReporting","true");
+            properties.put("remarksReporting", "true");
             return DriverManager.getConnection(url, properties);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());

@@ -5,13 +5,12 @@ import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Column;
-import com.codejune.jdbc.Filter;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
 import com.codejune.jdbc.oracle.OracleJdbc;
 import com.codejune.jdbc.oracle.OracleTable;
+import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.SqlUtil;
 import com.healthmarketscience.jackcess.ColumnBuilder;
@@ -158,16 +157,7 @@ public final class AccessDatabaseTable implements SqlTable {
      * @return 数量
      * */
     public long count(Filter filter, boolean isCase) {
-        if (filter == null) {
-            filter = new Filter();
-        }
-        String sql = "SELECT * FROM " + tableName;
-        filter.filter(getColumns());
-        sql = sql + " " + SqlUtil.toWhere(filter, isCase ? AccessDatabaseJdbc.class : null);
-
-        String countSql = StringUtil.append("SELECT COUNT(*) C FROM (", sql, ")");
-        List<Map<String, Object>> countData = accessDatabaseJdbc.queryBySql(countSql);
-        return Long.parseLong(countData.get(0).get("C").toString());
+        return Long.parseLong(accessDatabaseJdbc.queryBySql(SqlUtil.parseCount(tableName, filter, isCase ? AccessDatabaseJdbc.class : null)).get(0).get("C").toString());
     }
 
     /**
@@ -179,29 +169,7 @@ public final class AccessDatabaseTable implements SqlTable {
      * @return 数量
      * */
     public List<Map<String, Object>> queryData(Query query, boolean isCase) {
-        if (query == null) {
-            query = new Query();
-        }
-        String sql = "SELECT * FROM " + tableName;
-
-        Filter filter = query.getFilter();
-        filter.filter(getColumns());
-        sql = sql + " " + SqlUtil.toWhere(filter, isCase ? AccessDatabaseJdbc.class : null);
-
-        if (query.isSort()) {
-            sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
-        }
-
-        if (query.isPage()) {
-            Integer page = query.getPage();
-            Integer size = query.getSize();
-            sql = StringUtil.append("SELECT ROWNUM R, T.* FROM (", sql, ") T");
-            sql = StringUtil.append("SELECT * FROM (SELECT T.* FROM (", sql, ") T WHERE R <= ", (page * size) + "", ") WHERE R >= ", (size * (page - 1) + 1) + "");
-        }
-
-        List<String> field = new ArrayList<>();
-        field.add("R");
-        return accessDatabaseJdbc.queryBySql(sql, field);
+        return accessDatabaseJdbc.queryBySql(SqlUtil.parseQueryData(tableName, query, isCase ? AccessDatabaseJdbc.class : null), ArrayUtil.parse("R"));
     }
 
     @Override

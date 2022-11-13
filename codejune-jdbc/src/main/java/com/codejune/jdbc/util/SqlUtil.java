@@ -3,12 +3,14 @@ package com.codejune.jdbc.util;
 import com.codejune.Jdbc;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.ObjectHandler;
-import com.codejune.jdbc.Filter;
+import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
+import com.codejune.jdbc.Query;
 import com.codejune.jdbc.access.AccessDatabaseJdbc;
 import com.codejune.jdbc.oracle.OracleJdbc;
+import com.codejune.jdbc.query.Filter;
 import java.util.*;
 
 /**
@@ -158,6 +160,85 @@ public final class SqlUtil {
             sql = StringUtil.append(sql, " ", toWhere(filter, OracleJdbc.class));
         }
         return sql;
+    }
+
+    /**
+     * 生成count查询语句
+     *
+     * @param tableName 表名
+     * @param filter filter
+     * @param jdbcType jdbcType
+     *
+     * @return count查询语句
+     * */
+    public static String parseCount(String tableName, Filter filter, Class<? extends Jdbc> jdbcType) {
+        if (StringUtil.isEmpty(tableName)) {
+            throw new InfoException("表名不能为空");
+        }
+        return "SELECT COUNT(*) C FROM " + tableName + " " + SqlUtil.toWhere(filter, jdbcType);
+    }
+
+    /**
+     * 生成count查询语句
+     *
+     * @param tableName 表名
+     * @param filter filter
+     *
+     * @return count查询语句
+     * */
+    public static String parseCount(String tableName, Filter filter) {
+        return parseCount(tableName, filter, null);
+    }
+
+    /**
+     * 生成查询数据语句
+     *
+     * @param tableName 表名
+     * @param query query
+     * @param jdbcType jdbcType
+     *
+     * @return 查询数据语句
+     * */
+    public static String parseQueryData(String tableName, Query query, Class<? extends Jdbc> jdbcType) {
+        if (StringUtil.isEmpty(tableName)) {
+            throw new InfoException("表名不能为空");
+        }
+        if (query == null) {
+            query = new Query();
+        }
+        String sql = "SELECT " + (query.getField().size() == 0 ? "*" : ArrayUtil.toString(query.getField(), field -> {
+            String result = "";
+            if (!StringUtil.isEmpty(field.getName())) {
+                result = field.getName();
+            }
+            if (!StringUtil.isEmpty(field.getAlias())) {
+                result = result + " " + field.getAlias();
+            }
+            return result;
+        }, ", ")) + " FROM " + tableName;
+        sql = sql + " " + SqlUtil.toWhere(query.getFilter(), jdbcType);
+        if (query.isSort()) {
+            sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
+        }
+        if (query.isPage()) {
+            Integer page = query.getPage();
+            Integer size = query.getSize();
+            sql = StringUtil.append("SELECT ROWNUM R, T.* FROM (", sql, ") T");
+            sql = StringUtil.append("SELECT * FROM (SELECT * FROM (", sql, ") WHERE R <= ", (page * size) + "", ") WHERE R >= ", (size * (page - 1) + 1) + "");
+        }
+        return sql;
+    }
+
+    /**
+     * 生成查询数据语句
+     *
+     * @param tableName 表名
+     * @param query query
+     *
+     * @return 查询数据语句
+     * */
+    public static String parseQueryData(String tableName, Query query) {
+        return parseQueryData(tableName, query);
     }
 
     private static String formatFilter(Filter filter, Class<? extends Jdbc> jdbcType) {

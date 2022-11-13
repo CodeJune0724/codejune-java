@@ -1,5 +1,6 @@
 package com.codejune.jdbc;
 
+import com.codejune.jdbc.query.Filter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

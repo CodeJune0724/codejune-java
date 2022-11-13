@@ -2,11 +2,11 @@ package com.codejune.service;
 
 import com.codejune.common.ClassInfo;
 import com.codejune.common.exception.InfoException;
-import com.codejune.jdbc.Filter;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
+import com.codejune.jdbc.query.Filter;
 import java.lang.reflect.Field;
 import java.util.List;
 
