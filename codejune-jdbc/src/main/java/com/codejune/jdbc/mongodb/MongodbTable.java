@@ -110,7 +110,7 @@ public final class MongodbTable implements Table {
     }
 
     @Override
-    public long update(Filter filter, Map<String, Object> setData) {
+    public long update(Map<String, Object> setData, Filter filter) {
         try {
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.upsert(true);

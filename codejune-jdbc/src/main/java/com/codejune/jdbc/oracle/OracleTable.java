@@ -10,7 +10,7 @@ import com.codejune.jdbc.Query;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.JdbcUtil;
-import com.codejune.jdbc.util.SqlUtil;
+import com.codejune.jdbc.util.SqlBuilder;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -153,20 +153,13 @@ public final class OracleTable implements SqlTable {
 
     @Override
     public long delete(Filter filter) {
-        if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("表名不能为空");
-        }
-        String deleteSql = "DELETE FROM " + tableName + " " + SqlUtil.toWhere(filter);
-        return oracleJdbc.execute(deleteSql);
+        return oracleJdbc.execute(new SqlBuilder(tableName, OracleJdbc.class).parseDeleteSql(filter));
     }
 
     @Override
-    public long update(Filter filter, Map<String, Object> setData) {
-        if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("表名不能为空");
-        }
-        if (setData == null) {
-            setData = new HashMap<>();
+    public long update(Map<String, Object> setData, Filter filter) {
+        if (ObjectUtil.isEmpty(setData)) {
+            return 0;
         }
 
         // 根据字段类型转换数据
@@ -192,18 +185,22 @@ public final class OracleTable implements SqlTable {
             setData.put(key, value);
         }
 
-        String updateSql = SqlUtil.parseUpdateSql(tableName, filter, setData);
-        return oracleJdbc.execute(updateSql);
+        return oracleJdbc.execute(new SqlBuilder(tableName, OracleJdbc.class).parseUpdateSql(setData, filter));
     }
 
     @Override
     public long count(Filter filter) {
-        return Long.parseLong(oracleJdbc.queryBySql(SqlUtil.parseCount(tableName, filter)).get(0).get("C").toString());
+        return Long.parseLong(oracleJdbc.queryBySql(
+                new SqlBuilder(tableName, OracleJdbc.class).parseCountSql(filter)
+        ).get(0).get("C").toString());
     }
 
     @Override
     public List<Map<String, Object>> queryData(Query query) {
-        return oracleJdbc.queryBySql(SqlUtil.parseQueryData(tableName, query), ArrayUtil.parse("R"));
+        return oracleJdbc.queryBySql(
+                new SqlBuilder(tableName, OracleJdbc.class).parseQueryDataSql(query),
+                ArrayUtil.parse("R")
+        );
     }
 
 }

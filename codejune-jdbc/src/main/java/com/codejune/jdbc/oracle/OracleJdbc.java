@@ -61,7 +61,7 @@ public class OracleJdbc extends SqlJdbc {
         ResultSet resultSet = null;
         try {
             DatabaseMetaData metaData = getConnection().getMetaData();
-            resultSet = metaData.getTables(null, database.toUpperCase(), null, new String[]{"TABLE"});
+            resultSet = metaData.getTables(database, database.toUpperCase(), null, new String[]{"TABLE"});
             while (resultSet.next()) {
                 String resTableName = resultSet.getString("TABLE_NAME");
                 result.add(getTable(database + "." + resTableName));

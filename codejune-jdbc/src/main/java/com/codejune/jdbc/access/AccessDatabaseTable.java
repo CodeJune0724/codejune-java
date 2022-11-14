@@ -12,7 +12,7 @@ import com.codejune.jdbc.oracle.OracleJdbc;
 import com.codejune.jdbc.oracle.OracleTable;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
-import com.codejune.jdbc.util.SqlUtil;
+import com.codejune.jdbc.util.SqlBuilder;
 import com.healthmarketscience.jackcess.ColumnBuilder;
 import com.healthmarketscience.jackcess.TableBuilder;
 import java.io.IOException;
@@ -157,7 +157,9 @@ public final class AccessDatabaseTable implements SqlTable {
      * @return 数量
      * */
     public long count(Filter filter, boolean isCase) {
-        return Long.parseLong(accessDatabaseJdbc.queryBySql(SqlUtil.parseCount(tableName, filter, isCase ? AccessDatabaseJdbc.class : null)).get(0).get("C").toString());
+        return Long.parseLong(accessDatabaseJdbc.queryBySql(
+                new SqlBuilder(tableName, isCase ? AccessDatabaseJdbc.class : OracleJdbc.class).parseCountSql(filter)
+        ).get(0).get("C").toString());
     }
 
     /**
@@ -169,7 +171,10 @@ public final class AccessDatabaseTable implements SqlTable {
      * @return 数量
      * */
     public List<Map<String, Object>> queryData(Query query, boolean isCase) {
-        return accessDatabaseJdbc.queryBySql(SqlUtil.parseQueryData(tableName, query, isCase ? AccessDatabaseJdbc.class : null), ArrayUtil.parse("R"));
+        return accessDatabaseJdbc.queryBySql(
+                new SqlBuilder(tableName, isCase ? AccessDatabaseJdbc.class : OracleJdbc.class).parseQueryDataSql(query),
+                ArrayUtil.parse("R")
+        );
     }
 
     @Override
@@ -230,12 +235,12 @@ public final class AccessDatabaseTable implements SqlTable {
     }
 
     @Override
-    public long update(Filter filter, Map<String, Object> setData) {
+    public long update(Map<String, Object> setData, Filter filter) {
         OracleTable table = new OracleJdbc(accessDatabaseJdbc.getConnection()).getTable(tableName);
         if (table == null) {
             return 0;
         }
-        return table.update(filter, setData);
+        return table.update(setData, filter);
     }
 
     @Override

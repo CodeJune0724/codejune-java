@@ -161,7 +161,7 @@ public abstract class Database {
                 Map<String, Object> map = MapUtil.filterKey(MapUtil.parse(t, String.class, Object.class), columnList);
                 map = MapUtil.transformGeneric(MapUtil.transformKey(map, fieldToColumnKeyHandler), String.class, Object.class);
                 if (isId) {
-                    table.update(new Filter().and(Filter.Item.equals(BasePO.getIdName(), t.getId())), map);
+                    table.update(map, new Filter().and(Filter.Item.equals(BasePO.getIdName(), t.getId())));
                 } else {
                     table.insert(Collections.singletonList(map));
                 }
