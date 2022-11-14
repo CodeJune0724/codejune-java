@@ -138,8 +138,12 @@ public final class SqlBuilder {
         if (query.isPage()) {
             Integer page = query.getPage();
             Integer size = query.getSize();
-            sql = StringUtil.append("SELECT ROWNUM R, T.* FROM (", sql, ") T");
-            sql = StringUtil.append("SELECT * FROM (SELECT * FROM (", sql, ") WHERE R <= ", (page * size) + "", ") WHERE R >= ", (size * (page - 1) + 1) + "");
+            if (jdbcType == MysqlJdbc.class) {
+                sql = StringUtil.append("SELECT * FROM (", sql, ") T LIMIT ", ((page - 1) * size) + "", ", ", size + "");
+            } else {
+                sql = StringUtil.append("SELECT ROWNUM R, T.* FROM (", sql, ") T");
+                sql = StringUtil.append("SELECT * FROM (SELECT * FROM (", sql, ") WHERE R <= ", (page * size) + "", ") WHERE R >= ", (size * (page - 1) + 1) + "");
+            }
         }
         return sql;
     }

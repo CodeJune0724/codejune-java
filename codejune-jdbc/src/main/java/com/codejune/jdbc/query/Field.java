@@ -15,16 +15,18 @@ public final class Field {
         return name;
     }
 
-    public void setName(String name) {
+    public Field setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getAlias() {
         return alias;
     }
 
-    public void setAlias(String alias) {
+    public Field setAlias(String alias) {
         this.alias = alias;
+        return this;
     }
 
 }

@@ -4,8 +4,6 @@ import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.SqlJdbc;
-import com.codejune.jdbc.Table;
-import com.codejune.jdbc.oracle.OracleTable;
 import com.codejune.jdbc.util.JdbcUtil;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -62,12 +60,12 @@ public class MysqlJdbc extends SqlJdbc {
     }
 
     @Override
-    public List<? extends Table> getTables() {
-        List<OracleTable> result = new ArrayList<>();
-        List<Map<String, Object>> users = queryBySql("SELECT * FROM DBA_USERS");
-        for (Map<String, Object> map : users) {
-            String username = MapUtil.getValue(map, "USERNAME", String.class);
-            List<OracleTable> tables = getTables(username);
+    public List<MysqlTable> getTables() {
+        List<MysqlTable> result = new ArrayList<>();
+        List<Map<String, Object>> databaseList = queryBySql("SHOW DATABASES");
+        for (Map<String, Object> item : databaseList) {
+            String database = MapUtil.getValue(item, "Database", String.class);
+            List<MysqlTable> tables = getTables(database);
             if (tables == null) {
                 continue;
             }

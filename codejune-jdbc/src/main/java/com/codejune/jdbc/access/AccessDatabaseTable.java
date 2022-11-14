@@ -34,11 +34,14 @@ public final class AccessDatabaseTable implements SqlTable {
 
     private List<Column> columnList = null;
 
+    private final OracleJdbc oracleJdbc;
+
     private static final Object OBJECT = new Object();
 
     AccessDatabaseTable(AccessDatabaseJdbc accessDatabaseJdbc, String tableName) {
         this.accessDatabaseJdbc = accessDatabaseJdbc;
         this.tableName = tableName;
+        this.oracleJdbc = new OracleJdbc(accessDatabaseJdbc.getConnection());
     }
 
     /**
@@ -206,7 +209,8 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public String getRemark() {
-        return new OracleJdbc(accessDatabaseJdbc.getConnection()).getTable(tableName).getRemark();
+
+        return oracleJdbc.getTable(tableName).getRemark();
     }
 
     @Override
@@ -216,7 +220,7 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public long insert(List<Map<String, Object>> data) {
-        OracleTable table = new OracleJdbc(accessDatabaseJdbc.getConnection()).getTable(tableName);
+        OracleTable table = oracleJdbc.getTable(tableName);
         if (table == null) {
             return 0;
         }
@@ -227,7 +231,7 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public long delete(Filter filter) {
-        OracleTable table = new OracleJdbc(accessDatabaseJdbc.getConnection()).getTable(tableName);
+        OracleTable table = oracleJdbc.getTable(tableName);
         if (table == null) {
             return 0;
         }
@@ -236,7 +240,7 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public long update(Map<String, Object> setData, Filter filter) {
-        OracleTable table = new OracleJdbc(accessDatabaseJdbc.getConnection()).getTable(tableName);
+        OracleTable table = oracleJdbc.getTable(tableName);
         if (table == null) {
             return 0;
         }
