@@ -4,4 +4,5 @@ dependencies {
     api group: 'org.mongodb', name: 'mongo-java-driver', version: '3.12.11'
     api group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.7.2'
     api group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.15.0.0.1'
+    api group: 'mysql', name: 'mysql-connector-java', version: '8.0.31'
 }
