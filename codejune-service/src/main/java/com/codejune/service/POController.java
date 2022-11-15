@@ -18,31 +18,54 @@ public class POController<T extends BasePO<ID>, ID> {
         this.poService = poService;
     }
 
-    @PostMapping("query")
-    public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody) {
-        return ResponseResult.returnTrue(poService.query(Query.parse(requestBody)));
-    }
-
-    @PostMapping("save")
+    @PostMapping()
     public ResponseResult save(@RequestBody(required = false) T requestBody) {
+        if (requestBody != null) {
+            requestBody.setId(null);
+        }
         return ResponseResult.returnTrue(poService.save(requestBody));
     }
 
     @PostMapping("saveList")
     public ResponseResult saveList(@RequestBody(required = false) List<T> requestBody) {
+        if (requestBody != null) {
+            for (T t : requestBody) {
+                t.setId(null);
+            }
+        }
         return ResponseResult.returnTrue(poService.save(requestBody));
     }
 
-    @PostMapping("delete")
-    public ResponseResult delete(@RequestBody(required = false) T requestBody) {
-        poService.delete(requestBody);
+    @DeleteMapping("{id}")
+    public ResponseResult delete(@PathVariable(required = false) ID id) {
+        poService.delete(id);
         return ResponseResult.returnTrue();
     }
 
-    @PostMapping("deleteList")
-    public ResponseResult deleteList(@RequestBody(required = false) List<T> requestBody) {
-        poService.delete(requestBody);
+    @DeleteMapping("deleteList")
+    public ResponseResult deleteList(@RequestBody(required = false) List<ID> requestBody) {
+        if (requestBody != null) {
+            for (ID id : requestBody) {
+                poService.delete(id);
+            }
+        }
         return ResponseResult.returnTrue();
+    }
+
+    @PutMapping("{id}")
+    public ResponseResult update(@PathVariable(required = false) ID id, @RequestBody(required = false) T requestBody) {
+        if (id == null) {
+            throw new InfoException("参数缺失");
+        }
+        if (requestBody != null) {
+            requestBody.setId(id);
+        }
+        return ResponseResult.returnTrue(poService.save(requestBody));
+    }
+
+    @PostMapping("query")
+    public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody) {
+        return ResponseResult.returnTrue(poService.query(Query.parse(requestBody)));
     }
 
     @GetMapping("{id}")
