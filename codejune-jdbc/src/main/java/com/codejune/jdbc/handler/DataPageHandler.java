@@ -1,8 +1,8 @@
 package com.codejune.jdbc.handler;
 
-import com.codejune.jdbc.Filter;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.Table;
+import com.codejune.jdbc.query.Filter;
 import java.util.Map;
 
 /**

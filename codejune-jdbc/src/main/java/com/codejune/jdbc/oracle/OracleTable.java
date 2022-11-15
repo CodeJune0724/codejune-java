@@ -6,11 +6,11 @@ import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Column;
-import com.codejune.jdbc.Filter;
 import com.codejune.jdbc.Query;
+import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.JdbcUtil;
-import com.codejune.jdbc.util.SqlUtil;
+import com.codejune.jdbc.util.SqlBuilder;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -153,29 +153,14 @@ public final class OracleTable implements SqlTable {
 
     @Override
     public long delete(Filter filter) {
-        if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("表名不能为空");
-        }
-        if (filter != null) {
-            filter.filter(getColumns());
-        }
-        String deleteSql = "DELETE FROM " + tableName + " " + SqlUtil.toWhere(filter);
-        return oracleJdbc.execute(deleteSql);
+        return oracleJdbc.execute(new SqlBuilder(tableName, OracleJdbc.class).parseDeleteSql(filter));
     }
 
     @Override
-    public long update(Filter filter, Map<String, Object> setData) {
-        if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("表名不能为空");
+    public long update(Map<String, Object> setData, Filter filter) {
+        if (ObjectUtil.isEmpty(setData)) {
+            return 0;
         }
-        if (setData == null) {
-            setData = new HashMap<>();
-        }
-        if (filter == null) {
-            filter = new Filter();
-        }
-
-        filter.filter(getColumns());
 
         // 根据字段类型转换数据
         Set<String> keySet = setData.keySet();
@@ -200,49 +185,22 @@ public final class OracleTable implements SqlTable {
             setData.put(key, value);
         }
 
-        String updateSql = SqlUtil.parseUpdateSql(tableName, filter, setData);
-        return oracleJdbc.execute(updateSql);
+        return oracleJdbc.execute(new SqlBuilder(tableName, OracleJdbc.class).parseUpdateSql(setData, filter));
     }
 
     @Override
     public long count(Filter filter) {
-        if (filter == null) {
-            filter = new Filter();
-        }
-        String sql = "SELECT * FROM " + tableName;
-        filter.filter(getColumns());
-        sql = sql + " " + SqlUtil.toWhere(filter);
-
-        String countSql = StringUtil.append("SELECT COUNT(*) C FROM (", sql, ")");
-        List<Map<String, Object>> countData = oracleJdbc.queryBySql(countSql);
-        return Long.parseLong(countData.get(0).get("C").toString());
+        return Long.parseLong(oracleJdbc.queryBySql(
+                new SqlBuilder(tableName, OracleJdbc.class).parseCountSql(filter)
+        ).get(0).get("C").toString());
     }
 
     @Override
     public List<Map<String, Object>> queryData(Query query) {
-        if (query == null) {
-            query = new Query();
-        }
-        String sql = "SELECT * FROM " + tableName;
-
-        Filter filter = query.getFilter();
-        filter.filter(getColumns());
-        sql = sql + " " + SqlUtil.toWhere(filter);
-
-        if (query.isSort()) {
-            sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
-        }
-
-        if (query.isPage()) {
-            Integer page = query.getPage();
-            Integer size = query.getSize();
-            sql = StringUtil.append("SELECT ROWNUM R, T.* FROM (", sql, ") T");
-            sql = StringUtil.append("SELECT * FROM (SELECT T.* FROM (", sql, ") T WHERE R <= ", (page * size) + "", ") WHERE R >= ", (size * (page - 1) + 1) + "");
-        }
-
-        List<String> field = new ArrayList<>();
-        field.add("R");
-        return oracleJdbc.queryBySql(sql, field);
+        return oracleJdbc.queryBySql(
+                new SqlBuilder(tableName, OracleJdbc.class).parseQueryDataSql(query),
+                ArrayUtil.parse("R")
+        );
     }
 
 }

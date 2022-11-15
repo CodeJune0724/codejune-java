@@ -61,7 +61,7 @@ public class OracleJdbc extends SqlJdbc {
         ResultSet resultSet = null;
         try {
             DatabaseMetaData metaData = getConnection().getMetaData();
-            resultSet = metaData.getTables(null, database.toUpperCase(), null, new String[]{"TABLE"});
+            resultSet = metaData.getTables(database, database.toUpperCase(), null, new String[]{"TABLE"});
             while (resultSet.next()) {
                 String resTableName = resultSet.getString("TABLE_NAME");
                 result.add(getTable(database + "." + resTableName));
@@ -95,7 +95,7 @@ public class OracleJdbc extends SqlJdbc {
             Properties properties = new Properties();
             properties.put("user", username);
             properties.put("password", password);
-            properties.put("remarksReporting","true");
+            properties.put("remarksReporting", "true");
             return DriverManager.getConnection(url, properties);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());

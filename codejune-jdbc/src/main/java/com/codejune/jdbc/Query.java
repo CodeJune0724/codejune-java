@@ -5,6 +5,9 @@ import com.codejune.common.ModelAble;
 import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
+import com.codejune.jdbc.query.Field;
+import com.codejune.jdbc.query.Filter;
+import com.codejune.jdbc.query.Sort;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,8 @@ public class Query implements ModelAble<Query> {
     private Filter filter;
 
     private List<Sort> sort;
+
+    private List<Field> field;
 
     public Integer getPage() {
         return page;
@@ -63,6 +68,18 @@ public class Query implements ModelAble<Query> {
 
     public Query setSort(List<Sort> sort) {
         this.sort = sort;
+        return this;
+    }
+
+    public List<Field> getField() {
+        if (field == null) {
+            field = new ArrayList<>();
+        }
+        return field;
+    }
+
+    public Query setField(List<Field> field) {
+        this.field = field;
         return this;
     }
 
@@ -114,6 +131,20 @@ public class Query implements ModelAble<Query> {
             for (Sort item : sort) {
                 item.setKey(keyHandler);
             }
+        }
+        return this;
+    }
+
+    /**
+     * 添加field
+     *
+     * @param field field
+     *
+     * @return this
+     * */
+    public Query addField(Field field) {
+        if (field != null) {
+            this.getField().add(field);
         }
         return this;
     }

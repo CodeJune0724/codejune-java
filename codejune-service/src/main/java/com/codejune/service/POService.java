@@ -1,10 +1,10 @@
 package com.codejune.service;
 
 import com.codejune.common.exception.InfoException;
-import com.codejune.jdbc.Filter;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
 import com.codejune.common.util.ObjectUtil;
+import com.codejune.jdbc.query.Filter;
 import java.util.ArrayList;
 import java.util.List;
 

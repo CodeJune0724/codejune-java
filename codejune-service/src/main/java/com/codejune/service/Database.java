@@ -4,12 +4,12 @@ import com.codejune.Jdbc;
 import com.codejune.common.Pool;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
-import com.codejune.jdbc.Filter;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
+import com.codejune.jdbc.query.Filter;
 import com.codejune.service.handler.ColumnToFieldKeyHandler;
 import com.codejune.service.handler.FieldToColumnKeyHandler;
 import java.lang.reflect.Field;
@@ -161,7 +161,7 @@ public abstract class Database {
                 Map<String, Object> map = MapUtil.filterKey(MapUtil.parse(t, String.class, Object.class), columnList);
                 map = MapUtil.transformGeneric(MapUtil.transformKey(map, fieldToColumnKeyHandler), String.class, Object.class);
                 if (isId) {
-                    table.update(new Filter().and(Filter.Item.equals(BasePO.getIdName(), t.getId())), map);
+                    table.update(map, new Filter().and(Filter.Item.equals(BasePO.getIdName(), t.getId())));
                 } else {
                     table.insert(Collections.singletonList(map));
                 }

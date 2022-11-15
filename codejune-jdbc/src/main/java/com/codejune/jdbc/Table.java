@@ -1,5 +1,6 @@
 package com.codejune.jdbc;
 
+import com.codejune.jdbc.query.Filter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,12 +64,12 @@ public interface Table {
     /**
      * 修改数据
      *
-     * @param filter 数据过滤
      * @param setData 设置的数据
+     * @param filter 数据过滤
      *
      * @return 受影响的行数
      * */
-    long update(Filter filter, Map<String, Object> setData);
+    long update(Map<String, Object> setData, Filter filter);
 
     /**
      * 统计

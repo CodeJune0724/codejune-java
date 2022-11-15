@@ -1,9 +1,7 @@
 package com.codejune.common.util;
 
 import com.codejune.common.exception.InfoException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * ArrayUtil
@@ -126,6 +124,22 @@ public final class ArrayUtil {
      * */
     public static <T> List<T> parse(Object object, Class<T> tClass) {
         return parse(ObjectUtil.transform(object, List.class), tClass);
+    }
+
+    /**
+     * 转换成list
+     *
+     * @param ts ts
+     * @param <T> 泛型
+     *
+     * @return List
+     * */
+    @SafeVarargs
+    public static <T> List<T> parse(T... ts) {
+        if (ts == null) {
+            return null;
+        }
+        return Arrays.asList(ts);
     }
 
     /**

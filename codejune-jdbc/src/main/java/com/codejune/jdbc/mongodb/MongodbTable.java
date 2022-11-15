@@ -3,6 +3,8 @@ package com.codejune.jdbc.mongodb;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.util.MapUtil;
 import com.codejune.jdbc.*;
+import com.codejune.jdbc.query.Filter;
+import com.codejune.jdbc.query.Sort;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.ListIndexesIterable;
@@ -108,7 +110,7 @@ public final class MongodbTable implements Table {
     }
 
     @Override
-    public long update(Filter filter, Map<String, Object> setData) {
+    public long update(Map<String, Object> setData, Filter filter) {
         try {
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.upsert(true);
