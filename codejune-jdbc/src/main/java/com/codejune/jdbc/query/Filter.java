@@ -1,6 +1,6 @@
 package com.codejune.jdbc.query;
 
-import com.codejune.common.ModelAble;
+import com.codejune.common.Builder;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.handler.ObjectHandler;
@@ -15,7 +15,7 @@ import java.util.*;
  *
  * @author ZJ
  * */
-public final class Filter implements ModelAble<Filter> {
+public final class Filter implements Builder<Filter> {
 
     private final List<Filter> or = new ArrayList<>();
 
@@ -230,7 +230,7 @@ public final class Filter implements ModelAble<Filter> {
     }
 
     @Override
-    public Filter assignment(Object object) {
+    public Filter build(Object object) {
         if (object == null) {
             return null;
         }
@@ -242,7 +242,7 @@ public final class Filter implements ModelAble<Filter> {
                 this.setConfig(ObjectUtil.transform(value, Config.class));
             } else if ("$or".equals(key)) {
                 for (Object map1 : (List<?>) value) {
-                    this.or(new Filter().assignment(MapUtil.parse(map1, String.class, Object.class)));
+                    this.or(new Filter().build(MapUtil.parse(map1, String.class, Object.class)));
                 }
             } else {
                 if (value instanceof Map) {
@@ -279,7 +279,7 @@ public final class Filter implements ModelAble<Filter> {
      * @return Filter
      * */
     public static Filter parse(Object object) {
-        return new Filter().assignment(object);
+        return new Filter().build(object);
     }
 
     private void init() {

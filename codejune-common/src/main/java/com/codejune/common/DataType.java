@@ -1,12 +1,10 @@
 package com.codejune.common;
 
 import com.codejune.common.classInfo.Field;
+import com.codejune.common.classInfo.Method;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.util.DateUtil;
-import com.codejune.common.util.JsonUtil;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.common.util.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -229,7 +227,14 @@ public enum DataType {
                 ClassInfo classInfo = new ClassInfo(object.getClass());
                 List<Field> allFields = classInfo.getFields();
                 for (Field field : allFields) {
-                    result.put(field.getName(), field.getData(object));
+                    Object value = field.getData(object);
+                    Method method = classInfo.getMethod(BeanUtil.getGetterMethodName(field.getName(), parse(field.getClassInfo().getOriginClass())));
+                    if (method != null) {
+                        try {
+                            value = method.execute(object);
+                        } catch (Exception ignored) {}
+                    }
+                    result.put(field.getName(), value);
                 }
                 return result;
             }
@@ -248,26 +253,36 @@ public enum DataType {
             } catch (Exception e) {
                 return null;
             }
-            if (result instanceof ModelAble) {
-                ModelAble<?> modelAble = (ModelAble<?>) result;
-                return modelAble.assignment(object);
+            if (result instanceof Builder) {
+                Builder<?> builder = (Builder<?>) result;
+                return builder.build(object);
             }
             Map<?, ?> objectMap = (Map<?, ?>) transform(object, Map.class);
             if (objectMap == null) {
                 throw new InfoException("object is not parse");
             }
             Set<? extends Map.Entry<?, ?>> entries = objectMap.entrySet();
+            ClassInfo classInfo = new ClassInfo(tClass);
+            List<Field> allFields = classInfo.getFields();
             for (Map.Entry<?, ?> entry : entries) {
                 Object key = entry.getKey();
                 if (StringUtil.isEmpty(key)) {
                     continue;
                 }
                 Object value = entry.getValue();
-                ClassInfo classInfo = new ClassInfo(tClass);
-                List<Field> allFields = classInfo.getFields();
                 for (Field field : allFields) {
                     if (key.equals(field.getName())) {
-                        field.setData(result, value);
+                        Method method = classInfo.getMethod(BeanUtil.getSetterMethodName(field.getName()));
+                        boolean isExecuteMethod = false;
+                        if (method != null) {
+                            try {
+                                method.execute(result, value);
+                                isExecuteMethod = true;
+                            } catch (Exception ignored) {}
+                        }
+                        if (isExecuteMethod) {
+                            field.setData(result, value);
+                        }
                     }
                 }
             }

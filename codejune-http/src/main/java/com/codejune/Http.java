@@ -184,7 +184,7 @@ public final class Http {
     public HttpResponseResult<String> send() {
         HttpResponseResult<String> result = new HttpResponseResult<>();
         send(httpResponseResult -> {
-            result.assignment(httpResponseResult);
+            result.build(httpResponseResult);
             result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
         });
         return result;

@@ -1,19 +1,19 @@
 package com.codejune.common;
 
 /**
- * ModelAble
+ * 生成器
  *
  * @author ZJ
  * */
-public interface ModelAble<T> {
+public interface Builder<T> {
 
     /**
-     * 给对象赋值
+     * 生成
      *
      * @param object 参数
      *
-     * @return this
+     * @return 新对象
      * */
-    T assignment(Object object);
+    T build(Object object);
 
 }

@@ -1,6 +1,6 @@
 package com.codejune.http;
 
-import com.codejune.common.ModelAble;
+import com.codejune.common.Builder;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.RegexUtil;
@@ -14,7 +14,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public final class HttpResponseResult<T> implements ModelAble<HttpResponseResult<T>> {
+public final class HttpResponseResult<T> implements Builder<HttpResponseResult<T>> {
 
     private boolean flag;
 
@@ -85,7 +85,7 @@ public final class HttpResponseResult<T> implements ModelAble<HttpResponseResult
     }
 
     @Override
-    public HttpResponseResult<T> assignment(Object object) {
+    public HttpResponseResult<T> build(Object object) {
         HttpResponseResult<?> parse = ObjectUtil.transform(object, HttpResponseResult.class);
         this.setCode(parse.getCode());
         this.setHeader(parse.getHeader());
