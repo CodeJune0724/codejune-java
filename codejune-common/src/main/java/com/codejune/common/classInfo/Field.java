@@ -73,7 +73,7 @@ public final class Field {
             return;
         }
         try {
-            ClassInfo classInfo = getClassInfo();
+            ClassInfo classInfo = new ClassInfo(getType());
             List<ClassInfo> genericClass = getGenericClass();
             Object setData;
             if (classInfo.equals(List.class) && genericClass.size() >= 1) {
@@ -90,12 +90,12 @@ public final class Field {
     }
 
     /**
-     * 获取ClassInfo
+     * 获取类型
      *
      * @return ClassInfo
      * */
-    public ClassInfo getClassInfo() {
-        return new ClassInfo(this.field.getType());
+    public Class<?> getType() {
+        return this.field.getType();
     }
 
     /**
