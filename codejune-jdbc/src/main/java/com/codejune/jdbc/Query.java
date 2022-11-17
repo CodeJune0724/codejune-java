@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public class Query implements Builder<Query> {
+public class Query implements Builder {
 
     private Integer page;
 
@@ -150,7 +150,7 @@ public class Query implements Builder<Query> {
     }
 
     @Override
-    public Query build(Object object) {
+    public void build(Object object) {
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
         Object sort = MapUtil.getValue(map, "sort", Object.class);
         if (sort != null && DataType.parse(sort.getClass()) == DataType.MAP) {
@@ -159,7 +159,6 @@ public class Query implements Builder<Query> {
             map.put("sort", list);
         }
         ObjectUtil.assignment(this, map);
-        return this;
     }
 
     /**
@@ -170,7 +169,9 @@ public class Query implements Builder<Query> {
      * @return Query
      * */
     public static Query parse(Object object) {
-        return new Query().build(object);
+        Query result = new Query();
+        result.build(object);
+        return result;
     }
 
 }

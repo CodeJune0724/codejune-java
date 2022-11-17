@@ -5,15 +5,13 @@ package com.codejune.common;
  *
  * @author ZJ
  * */
-public interface Builder<T> {
+public interface Builder {
 
     /**
      * 生成
      *
      * @param object 参数
-     *
-     * @return 新对象
      * */
-    T build(Object object);
+    void build(Object object);
 
 }
