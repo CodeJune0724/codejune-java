@@ -1,7 +1,7 @@
 package com.codejune.jdbc;
 
+import com.codejune.common.Builder;
 import com.codejune.common.DataType;
-import com.codejune.common.ModelAble;
 import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public class Query implements ModelAble<Query> {
+public class Query implements Builder<Query> {
 
     private Integer page;
 
@@ -150,7 +150,7 @@ public class Query implements ModelAble<Query> {
     }
 
     @Override
-    public Query assignment(Object object) {
+    public Query build(Object object) {
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
         Object sort = MapUtil.getValue(map, "sort", Object.class);
         if (sort != null && DataType.parse(sort.getClass()) == DataType.MAP) {
@@ -170,7 +170,7 @@ public class Query implements ModelAble<Query> {
      * @return Query
      * */
     public static Query parse(Object object) {
-        return new Query().assignment(object);
+        return new Query().build(object);
     }
 
 }

@@ -39,10 +39,12 @@ public final class Method {
      *
      * @param object 需要执行的对象
      * @param data 参数
+     *
+     * @return 执行结果
      * */
-    public void execute(Object object, Object... data) {
+    public Object execute(Object object, Object... data) {
         try {
-            this.method.invoke(object, data);
+            return this.method.invoke(object, data);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
