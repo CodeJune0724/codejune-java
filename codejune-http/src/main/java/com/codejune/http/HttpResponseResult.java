@@ -14,7 +14,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public final class HttpResponseResult<T> implements Builder<HttpResponseResult<T>> {
+public final class HttpResponseResult<T> implements Builder {
 
     private boolean flag;
 
@@ -85,11 +85,10 @@ public final class HttpResponseResult<T> implements Builder<HttpResponseResult<T
     }
 
     @Override
-    public HttpResponseResult<T> build(Object object) {
+    public void build(Object object) {
         HttpResponseResult<?> parse = ObjectUtil.transform(object, HttpResponseResult.class);
         this.setCode(parse.getCode());
         this.setHeader(parse.getHeader());
-        return this;
     }
 
 }

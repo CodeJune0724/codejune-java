@@ -254,8 +254,8 @@ public enum DataType {
                 return null;
             }
             if (result instanceof Builder) {
-                Builder<?> builder = (Builder<?>) result;
-                return builder.build(object);
+                ((Builder) result).build(object);
+                return result;
             }
             Map<?, ?> objectMap = (Map<?, ?>) transform(object, Map.class);
             if (objectMap == null) {

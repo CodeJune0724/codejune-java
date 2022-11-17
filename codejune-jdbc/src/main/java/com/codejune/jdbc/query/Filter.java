@@ -15,7 +15,7 @@ import java.util.*;
  *
  * @author ZJ
  * */
-public final class Filter implements Builder<Filter> {
+public final class Filter implements Builder {
 
     private final List<Filter> or = new ArrayList<>();
 
@@ -230,9 +230,9 @@ public final class Filter implements Builder<Filter> {
     }
 
     @Override
-    public Filter build(Object object) {
+    public void build(Object object) {
         if (object == null) {
-            return null;
+            return;
         }
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
         Set<String> keySet = map.keySet();
@@ -242,7 +242,7 @@ public final class Filter implements Builder<Filter> {
                 this.setConfig(ObjectUtil.transform(value, Config.class));
             } else if ("$or".equals(key)) {
                 for (Object map1 : (List<?>) value) {
-                    this.or(new Filter().build(MapUtil.parse(map1, String.class, Object.class)));
+                    this.or(Filter.parse(MapUtil.parse(map1, String.class, Object.class)));
                 }
             } else {
                 if (value instanceof Map) {
@@ -268,7 +268,6 @@ public final class Filter implements Builder<Filter> {
                 }
             }
         }
-        return this;
     }
 
     /**
@@ -279,7 +278,9 @@ public final class Filter implements Builder<Filter> {
      * @return Filter
      * */
     public static Filter parse(Object object) {
-        return new Filter().build(object);
+        Filter result = new Filter();
+        result.build(object);
+        return result;
     }
 
     private void init() {
