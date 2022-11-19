@@ -1,8 +1,10 @@
 package com.codejune.jdbc.mongodb;
 
 import com.codejune.common.exception.ErrorException;
+import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.jdbc.*;
+import com.codejune.jdbc.query.Field;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.Sort;
 import com.mongodb.BasicDBObject;
@@ -134,6 +136,17 @@ public final class MongodbTable implements Table {
         }
         FindIterable<Document> queryData = mongoCollection.find(formatFilter(query.getFilter()));
 
+        Map<String, String> fieldMap = new HashMap<>();
+        if (!ObjectUtil.isEmpty(query.getField())) {
+            Document document = new Document();
+            for (Field field : query.getField()) {
+                String name = field.getName();
+                document.put(name, 1);
+                fieldMap.put(name, field.getAlias());
+            }
+            queryData = queryData.projection(document);
+        }
+
         if (query.isPage()) {
             queryData = queryData.limit(query.getSize()).skip(query.getSize() * (query.getPage() - 1));
         }
@@ -154,6 +167,19 @@ public final class MongodbTable implements Table {
         List<Map<String, Object>> result = new ArrayList<>();
         for (Document document : queryData) {
             Map<String, Object> map = new LinkedHashMap<>(document);
+            if (!ObjectUtil.isEmpty(fieldMap)) {
+                map = MapUtil.transformGeneric(MapUtil.transformKey(map, new ObjectHandler() {
+                    @Override
+                    public Object getNewObject(Object key) {
+                        String result = fieldMap.get(ObjectUtil.toString(key));
+                        if (ObjectUtil.isEmpty(result)) {
+                            return key;
+                        } else {
+                            return result;
+                        }
+                    }
+                }), String.class, Object.class);
+            }
             result.add(map);
         }
         return result;
