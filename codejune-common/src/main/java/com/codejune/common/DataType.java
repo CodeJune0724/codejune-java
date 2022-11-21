@@ -229,16 +229,14 @@ public enum DataType {
                 for (Field field : allFields) {
                     Object value = field.getData(object);
                     Method method = classInfo.getMethod(BeanUtil.getGetterMethodName(field.getName(), parse(field.getType())));
-                    boolean isExecuteMethod = false;
                     if (method != null) {
-                        isExecuteMethod = true;
                         try {
                             value = method.execute(object);
-                        } catch (Exception ignored) {}
+                        } catch (Exception e) {
+                            value = null;
+                        }
                     }
-                    if (!isExecuteMethod) {
-                        result.put(field.getName(), transform(value, field.getType()));
-                    }
+                    result.put(field.getName(), transform(value, field.getType()));
                 }
                 return result;
             }
