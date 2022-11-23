@@ -1,6 +1,7 @@
 package com.codejune.jdbc.access;
 
 import com.codejune.common.os.File;
+import com.codejune.jdbc.oracle.OracleJdbc;
 import com.healthmarketscience.jackcess.*;
 import com.codejune.common.exception.InfoException;
 import com.codejune.jdbc.SqlJdbc;
@@ -22,10 +23,13 @@ public class AccessDatabaseJdbc extends SqlJdbc {
 
     private final java.io.File file;
 
+    protected OracleJdbc oracleJdbc;
+
     public AccessDatabaseJdbc(java.io.File file) {
         super(getConnection(file));
         this.file = file;
         reload(false);
+        this.oracleJdbc = new OracleJdbc(this.getConnection());
     }
 
     @Override
@@ -74,6 +78,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
         if (isReloadConnection) {
             this.close();
             setConnection(getConnection(this.file));
+            this.oracleJdbc.setConnection(this.getConnection());
         }
         try {
             if (this.database != null) {
