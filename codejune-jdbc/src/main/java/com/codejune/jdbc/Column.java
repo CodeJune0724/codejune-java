@@ -121,6 +121,7 @@ public class Column {
             case Types.DOUBLE:
                 return DataType.DOUBLE;
             case Types.BIT:
+            case Types.BOOLEAN:
                 return DataType.BOOLEAN;
             case Types.TINYINT:
             case Types.INTEGER:

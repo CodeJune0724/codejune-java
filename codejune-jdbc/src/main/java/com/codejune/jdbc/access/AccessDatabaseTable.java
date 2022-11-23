@@ -197,6 +197,9 @@ public final class AccessDatabaseTable implements SqlTable {
                 boolean isPrimaryKey = column.isAutoNumber();
                 try {
                     sqlType = column.getSQLType();
+                    if (column.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
+                        sqlType = Types.BOOLEAN;
+                    }
                 } catch (Exception e) {
                     throw new InfoException(e);
                 }
