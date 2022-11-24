@@ -4,6 +4,7 @@ import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.ByteBuffer;
 import com.codejune.common.io.Reader;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * 输入流读取器
@@ -22,7 +23,7 @@ public class InputStreamReader extends Reader<ByteBuffer> {
             byte[] bytes = new byte[this.readSize];
             int size = this.inputStream.read(bytes);
             while (size != -1) {
-                readListener.listen(new ByteBuffer(bytes, size));
+                readListener.listen(new ByteBuffer(Arrays.copyOf(bytes, size), size));
                 size = this.inputStream.read(bytes);
             }
         } catch (Exception e) {
