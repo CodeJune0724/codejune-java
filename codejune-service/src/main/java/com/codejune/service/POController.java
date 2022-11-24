@@ -4,6 +4,7 @@ import com.codejune.common.exception.InfoException;
 import com.codejune.jdbc.Query;
 import com.codejune.common.ResponseResult;
 import org.springframework.web.bind.annotation.*;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,8 @@ public class POController<T extends BasePO<ID>, ID> {
     }
 
     @PostMapping()
-    public ResponseResult save(@RequestBody(required = false) T requestBody) {
+    public ResponseResult save(@RequestBody(required = false) T requestBody, HttpServletRequest httpServletRequest) {
+        beforeHandler(httpServletRequest);
         if (requestBody != null) {
             requestBody.setId(null);
         }
@@ -27,7 +29,8 @@ public class POController<T extends BasePO<ID>, ID> {
     }
 
     @PostMapping("saveList")
-    public ResponseResult saveList(@RequestBody(required = false) List<T> requestBody) {
+    public ResponseResult saveList(@RequestBody(required = false) List<T> requestBody, HttpServletRequest httpServletRequest) {
+        beforeHandler(httpServletRequest);
         if (requestBody != null) {
             for (T t : requestBody) {
                 t.setId(null);
@@ -37,13 +40,15 @@ public class POController<T extends BasePO<ID>, ID> {
     }
 
     @DeleteMapping("{id}")
-    public ResponseResult delete(@PathVariable(required = false) ID id) {
+    public ResponseResult delete(@PathVariable(required = false) ID id, HttpServletRequest httpServletRequest) {
+        beforeHandler(httpServletRequest);
         poService.delete(id);
         return ResponseResult.returnTrue();
     }
 
     @DeleteMapping("deleteList")
-    public ResponseResult deleteList(@RequestBody(required = false) List<ID> requestBody) {
+    public ResponseResult deleteList(@RequestBody(required = false) List<ID> requestBody, HttpServletRequest httpServletRequest) {
+        beforeHandler(httpServletRequest);
         if (requestBody != null) {
             for (ID id : requestBody) {
                 poService.delete(id);
@@ -53,7 +58,8 @@ public class POController<T extends BasePO<ID>, ID> {
     }
 
     @PutMapping("{id}")
-    public ResponseResult update(@PathVariable(required = false) ID id, @RequestBody(required = false) T requestBody) {
+    public ResponseResult update(@PathVariable(required = false) ID id, @RequestBody(required = false) T requestBody, HttpServletRequest httpServletRequest) {
+        beforeHandler(httpServletRequest);
         if (id == null) {
             throw new InfoException("参数缺失");
         }
@@ -64,13 +70,22 @@ public class POController<T extends BasePO<ID>, ID> {
     }
 
     @PostMapping("query")
-    public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody) {
+    public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody, HttpServletRequest httpServletRequest) {
+        beforeHandler(httpServletRequest);
         return ResponseResult.returnTrue(poService.query(Query.parse(requestBody)));
     }
 
     @GetMapping("{id}")
-    public ResponseResult getDetails(@PathVariable(required = false) ID id) {
+    public ResponseResult getDetails(@PathVariable(required = false) ID id, HttpServletRequest httpServletRequest) {
+        beforeHandler(httpServletRequest);
         return ResponseResult.returnTrue(poService.getDetails(id));
     }
+
+    /**
+     * 前置处理
+     *
+     * @param httpServletRequest httpServletRequest
+     * */
+    public void beforeHandler(HttpServletRequest httpServletRequest) {}
 
 }

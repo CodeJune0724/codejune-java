@@ -204,7 +204,10 @@ public final class AccessDatabaseTable implements SqlTable {
                 columnList.add(new Column(name, null, sqlType, length, isPrimaryKey));
             }
         }
-        return columnList;
+        if (columnList == null) {
+            return null;
+        }
+        return new ArrayList<>(columnList);
     }
 
     @Override

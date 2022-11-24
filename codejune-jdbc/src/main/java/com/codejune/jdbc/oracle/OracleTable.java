@@ -39,7 +39,10 @@ public final class OracleTable implements SqlTable {
         if (columnList == null) {
             columnList = oracleJdbc.getColumns(this.tableName);
         }
-        return columnList;
+        if (columnList == null) {
+            return null;
+        }
+        return new ArrayList<>(columnList);
     }
 
     @Override
