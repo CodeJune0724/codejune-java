@@ -187,25 +187,26 @@ public final class AccessDatabaseTable implements SqlTable {
             } catch (Exception e) {
                 throw new InfoException(e);
             }
-            for (com.healthmarketscience.jackcess.Column column : columns) {
-                String name = column.getName();
+            for (com.healthmarketscience.jackcess.Column jackcessColumn : columns) {
+                String name = jackcessColumn.getName();
                 int sqlType;
-                int length = column.getLength();
-                boolean isPrimaryKey = column.isAutoNumber();
+                int length = jackcessColumn.getLength();
+                boolean isPrimaryKey = jackcessColumn.isAutoNumber();
                 try {
-                    sqlType = column.getSQLType();
-                    if (column.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
+                    sqlType = jackcessColumn.getSQLType();
+                    if (jackcessColumn.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
                         sqlType = Types.BOOLEAN;
                     }
                 } catch (Exception e) {
                     throw new InfoException(e);
                 }
-
-                columnList.add(new Column(name, null, sqlType, length, isPrimaryKey));
+                Column column = new Column();
+                column.setName(name);
+                column.setSqlType(sqlType);
+                column.setLength(length);
+                column.setPrimaryKey(isPrimaryKey);
+                columnList.add(column);
             }
-        }
-        if (columnList == null) {
-            return null;
         }
         return new ArrayList<>(columnList);
     }

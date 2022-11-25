@@ -1,8 +1,11 @@
 package com.codejune.jdbc.mysql;
 
 import com.codejune.common.exception.InfoException;
+import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
+import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
+import com.codejune.jdbc.Column;
 import com.codejune.jdbc.SqlJdbc;
 import com.codejune.jdbc.util.JdbcUtil;
 import java.sql.Connection;
@@ -27,6 +30,45 @@ public class MysqlJdbc extends SqlJdbc {
 
     public MysqlJdbc(Connection connection) {
         super(connection);
+    }
+
+    @Override
+    public void createTable(String tableName, String tableRemark, List<Column> columnList) {
+        if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
+            throw new InfoException("建表参数缺失");
+        }
+        String sql = "CREATE TABLE " + tableName + "(\n";
+        sql = StringUtil.append(sql, ArrayUtil.toString(columnList, column -> {
+            String result = "\t" + column.getName() + " ";
+            switch (column.getDataType()) {
+                case INT:
+                    result = result + "INT";
+                    break;
+                case STRING:
+                    result = result + "VARCHAR(" + column.getLength() + ")";
+                    break;
+                case DATE:
+                    result = result + "DATETIME";
+                    break;
+            }
+            if (!column.isNullable()) {
+                result = result + " NOT NULL";
+            }
+            if (column.isPrimaryKey()) {
+                result = result + " PRIMARY KEY";
+            }
+            if (column.isAutoincrement()) {
+                result = result + " AUTO_INCREMENT";
+            }
+            if (!StringUtil.isEmpty(column.getRemark())) {
+                result = result + " COMMENT '" + column.getRemark() + "'";
+            }
+            return result;
+        }, ",\n"), "\n)");
+        if (!StringUtil.isEmpty(tableRemark)) {
+            sql = StringUtil.append(sql, " COMMENT='" + tableRemark + "'");
+        }
+        execute(sql);
     }
 
     @Override

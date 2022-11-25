@@ -251,11 +251,15 @@ public abstract class SqlJdbc implements Jdbc {
             columnResultSet = databaseMetaData.getColumns(connection.getCatalog(), schema, originTableName, null);
             while (columnResultSet.next()) {
                 String name = columnResultSet.getString("COLUMN_NAME");
-                String remark = columnResultSet.getString("REMARKS");
-                int sqlType = columnResultSet.getInt("DATA_TYPE");
-                int length = columnResultSet.getInt("COLUMN_SIZE");
-                boolean isPrimaryKey = primaryKeyList.contains(name);
-                result.add(new Column(name, remark, sqlType, length, isPrimaryKey));
+                Column column = new Column();
+                column.setName(name);
+                column.setRemark(columnResultSet.getString("REMARKS"));
+                column.setSqlType(columnResultSet.getInt("DATA_TYPE"));
+                column.setLength(columnResultSet.getInt("COLUMN_SIZE"));
+                column.setPrimaryKey(primaryKeyList.contains(name));
+                column.setNullable("YES".equals(columnResultSet.getString("IS_NULLABLE")));
+                column.setAutoincrement("YES".equals(columnResultSet.getString("IS_AUTOINCREMENT")));
+                result.add(column);
             }
             return result;
         } catch (Exception e) {
@@ -263,6 +267,27 @@ public abstract class SqlJdbc implements Jdbc {
         } finally {
             JdbcUtil.close(columnResultSet);
         }
+    }
+
+    /**
+     * 新建表
+     *
+     * @param tableName 表名
+     * @param tableRemark 表备注
+     * @param columnList columnList
+     * */
+    public abstract void createTable(String tableName, String tableRemark, List<Column> columnList);
+
+    /**
+     * 删除表
+     *
+     * @param tableName 表名
+     * */
+    public void deleteTable(String tableName) {
+        if (StringUtil.isEmpty(tableName)) {
+            return;
+        }
+        execute("DROP TABLE " + tableName);
     }
 
     @Override

@@ -18,22 +18,13 @@ public class Column {
 
     private int length;
 
-    private boolean isPrimaryKey;
+    private boolean primaryKey;
+
+    private boolean nullable = true;
+
+    private boolean autoincrement;
 
     private int sqlType;
-
-    public Column(String name, String remark, DataType dataType, int length, boolean isPrimaryKey) {
-        this.name = name;
-        this.remark = remark;
-        this.dataType = dataType;
-        this.length = length;
-        this.isPrimaryKey = isPrimaryKey;
-        this.sqlType = getSqlType(dataType);
-    }
-
-    public Column(String name, String remark, int sqlType, int length, boolean isPrimaryKey) {
-        this(name, remark, getDataType(sqlType), length, isPrimaryKey);
-    }
 
     public String getName() {
         return name;
@@ -55,11 +46,6 @@ public class Column {
         return dataType;
     }
 
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
-        this.sqlType = getSqlType(dataType);
-    }
-
     public int getLength() {
         return length;
     }
@@ -69,20 +55,51 @@ public class Column {
     }
 
     public boolean isPrimaryKey() {
-        return isPrimaryKey;
+        return primaryKey;
     }
 
     public void setPrimaryKey(boolean primaryKey) {
-        isPrimaryKey = primaryKey;
+        this.primaryKey = primaryKey;
+    }
+
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
+    }
+
+    public boolean isAutoincrement() {
+        return autoincrement;
+    }
+
+    public void setAutoincrement(boolean autoincrement) {
+        this.autoincrement = autoincrement;
     }
 
     public int getSqlType() {
         return sqlType;
     }
 
+    /**
+     * setDataType
+     *
+     * @param dataType dataType
+     * */
+    public void setDataType(DataType dataType) {
+        this.dataType = dataType;
+        this.sqlType = getSqlType(dataType);
+    }
+
+    /**
+     * setSqlType
+     *
+     * @param sqlType sqlType
+     * */
     public void setSqlType(int sqlType) {
         this.sqlType = sqlType;
-        this.setDataType(getDataType(sqlType));
+        this.dataType = getDataType(sqlType);
     }
 
     private static int getSqlType(DataType dataType) {

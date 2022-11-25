@@ -1,6 +1,8 @@
 package com.codejune.jdbc.oracle;
 
 import com.codejune.common.exception.InfoException;
+import com.codejune.common.util.ArrayUtil;
+import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.*;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.StringUtil;
@@ -21,6 +23,44 @@ public class OracleJdbc extends SqlJdbc {
 
     public OracleJdbc(Connection connection) {
         super(connection);
+    }
+
+    @Override
+    public void createTable(String tableName, String tableRemark, List<Column> columnList) {
+        if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
+            throw new InfoException("建表参数缺失");
+        }
+        String sql = "CREATE TABLE " + tableName + "(\n";
+        sql = StringUtil.append(sql, ArrayUtil.toString(columnList, column -> {
+            String result = "\t" + column.getName() + " ";
+            switch (column.getDataType()) {
+                case INT:
+                    result = result + "NUMBER(" + column.getLength() + ")";
+                    break;
+                case STRING:
+                    result = result + "VARCHAR2(" + column.getLength() + ")";
+                    break;
+                case DATE:
+                    result = result + "DATETIME";
+                    break;
+            }
+            if (!column.isNullable()) {
+                result = result + " NOT NULL";
+            }
+            if (column.isPrimaryKey()) {
+                result = result + " PRIMARY KEY";
+            }
+            return result;
+        }, ",\n"), "\n)");
+        execute(sql);
+        if (!StringUtil.isEmpty(tableRemark)) {
+            execute("COMMENT ON TABLE " + tableName + " IS '" + tableRemark + "'");
+        }
+        for (Column column : columnList) {
+            if (!StringUtil.isEmpty(column.getRemark())) {
+                execute("COMMENT ON COLUMN " + tableName + "." + column.getName() + " IS '" + column.getRemark() + "'");
+            }
+        }
     }
 
     /**
