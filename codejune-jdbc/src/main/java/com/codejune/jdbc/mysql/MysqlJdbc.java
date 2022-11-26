@@ -1,5 +1,6 @@
 package com.codejune.jdbc.mysql;
 
+import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
@@ -50,6 +51,11 @@ public class MysqlJdbc extends SqlJdbc {
                 case DATE:
                     result = result + "DATETIME";
                     break;
+                case DOUBLE:
+                    result = result + "DOUBLE";
+                    break;
+                default:
+                    throw new ErrorException("column.getDataType()未配置");
             }
             if (!column.isNullable()) {
                 result = result + " NOT NULL";
