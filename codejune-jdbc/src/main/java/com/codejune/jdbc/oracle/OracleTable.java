@@ -42,7 +42,7 @@ public final class OracleTable implements SqlTable {
         if (columnList == null) {
             return new ArrayList<>();
         }
-        return new ArrayList<>(columnList);
+        return ObjectUtil.clone(columnList);
     }
 
     @Override

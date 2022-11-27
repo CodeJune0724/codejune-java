@@ -24,15 +24,21 @@ public final class Filter implements Builder {
     private Config config;
 
     public List<Filter> getOr() {
-        return or;
+        return ObjectUtil.clone(or);
     }
 
     public List<Item> getAnd() {
-        init();
-        return and;
+        Filter filter = ObjectUtil.clone(this);
+        if (getConfig().cleanNull) {
+            filter.cleanNull();
+        }
+        return filter.and;
     }
 
     public Config getConfig() {
+        if (config == null) {
+            config = new Config();
+        }
         return config;
     }
 
@@ -77,9 +83,9 @@ public final class Filter implements Builder {
      *
      * @param objectHandler objectHandler
      * */
-    public void setKey(ObjectHandler objectHandler) {
+    public Filter setKey(ObjectHandler objectHandler) {
         if (objectHandler == null) {
-            return;
+            return this;
         }
         for (Filter filter : or) {
             filter.setKey(objectHandler);
@@ -87,6 +93,7 @@ public final class Filter implements Builder {
         for (Item item : and) {
             item.key = ObjectUtil.toString(objectHandler.getNewObject(item.key));
         }
+        return this;
     }
 
     /**
@@ -281,14 +288,6 @@ public final class Filter implements Builder {
         Filter result = new Filter();
         result.build(object);
         return result;
-    }
-
-    private void init() {
-        if (config != null) {
-            if (config.isCleanNull()) {
-                this.cleanNull();
-            }
-        }
     }
 
     /**

@@ -208,7 +208,7 @@ public final class AccessDatabaseTable implements SqlTable {
                 columnList.add(column);
             }
         }
-        return new ArrayList<>(columnList);
+        return ObjectUtil.clone(columnList);
     }
 
     @Override
