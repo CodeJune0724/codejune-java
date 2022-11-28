@@ -2,6 +2,7 @@ package com.codejune.jdbc;
 
 import com.codejune.common.ClassInfo;
 import com.codejune.Jdbc;
+import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.Charset;
 import com.codejune.common.util.StringUtil;
@@ -12,6 +13,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
+import javax.persistence.Id;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
@@ -133,34 +135,24 @@ public abstract class SqlJdbc implements Jdbc {
         if (query == null) {
             query = new Query();
         }
-
-        ClassInfo classInfo = new ClassInfo(jpaRepository);
-        ClassInfo superClass = classInfo.getSuperClass(JpaRepository.class);
+        ClassInfo superClass = new ClassInfo(jpaRepository).getSuperClass(JpaRepository.class);
         if (superClass == null || !superClass.existsGenericClass()) {
             throw new InfoException("jpaRepository传入错误");
         }
-        ClassInfo TCLass = superClass.getGenericClass().get(0);
-        Class<?> aClass = TCLass.getOriginClass();
-        javax.persistence.Table table = aClass.getAnnotation(javax.persistence.Table.class);
-        if (table == null) {
+        Class<?> aClass = superClass.getGenericClass().get(0).getOriginClass();
+        javax.persistence.Table tableAnnotation = aClass.getAnnotation(javax.persistence.Table.class);
+        if (tableAnnotation == null) {
             throw new InfoException("实体类未配置表名");
         }
-        String tableName = table.name();
-
-        // 获取主键名
+        String tableName = tableAnnotation.name();
         String idName = "ID";
-        List<Column> columns = getColumns(tableName);
-        if (columns == null) {
-            columns = new ArrayList<>();
-        }
-        for (Column column : columns) {
-            if (column.isPrimaryKey()) {
-                idName = column.getName();
+        for (Field field : new ClassInfo(aClass).getFields()) {
+            Id idAnnotation = field.getAnnotation(Id.class);
+            if (idAnnotation != null) {
+                idName = StringUtil.humpToUnderline(field.getName());
                 break;
             }
         }
-
-        // 设置key处理
         FieldToColumnKeyHandler entityKeyHandler = new FieldToColumnKeyHandler(aClass, idName);
         query.setKeyHandler(entityKeyHandler);
         QueryResult<Map<String, Object>> queryResult = getTable(tableName).query(query);
