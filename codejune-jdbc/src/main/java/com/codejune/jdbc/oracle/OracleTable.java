@@ -73,6 +73,14 @@ public final class OracleTable implements SqlTable {
     }
 
     @Override
+    public void rename(String newTableName) {
+        if (StringUtil.isEmpty(newTableName)) {
+            return;
+        }
+        oracleJdbc.execute("ALTER TABLE " + tableName + " RENAME TO " + newTableName);
+    }
+
+    @Override
     public String getName() {
         return tableName;
     }

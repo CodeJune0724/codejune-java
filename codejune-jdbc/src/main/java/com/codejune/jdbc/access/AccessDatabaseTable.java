@@ -217,6 +217,12 @@ public final class AccessDatabaseTable implements SqlTable {
     }
 
     @Override
+    public void rename(String newTableName) {
+        accessDatabaseJdbc.oracleJdbc.getTable(tableName).rename(newTableName);
+        accessDatabaseJdbc.reload(true);
+    }
+
+    @Override
     public String getName() {
         return tableName;
     }

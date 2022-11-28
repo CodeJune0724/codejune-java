@@ -74,4 +74,9 @@ public final class MysqlTable implements SqlTable {
         return oracleJdbc.getTable(tableName).getRemark();
     }
 
+    @Override
+    public void rename(String newTableName) {
+        oracleJdbc.getTable(tableName).rename(newTableName);
+    }
+
 }
