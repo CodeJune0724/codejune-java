@@ -71,18 +71,18 @@ public class OracleJdbc extends SqlJdbc {
     }
 
     @Override
-    public final List<OracleTable> getTables(String database) {
-        if (StringUtil.isEmpty(database)) {
+    public final List<OracleTable> getTables(String schema) {
+        if (StringUtil.isEmpty(schema)) {
             return null;
         }
         List<OracleTable> result = new ArrayList<>();
         ResultSet resultSet = null;
         try {
             DatabaseMetaData metaData = getConnection().getMetaData();
-            resultSet = metaData.getTables(database, database.toUpperCase(), null, new String[]{"TABLE"});
+            resultSet = metaData.getTables(schema, schema.toUpperCase(), null, new String[]{"TABLE"});
             while (resultSet.next()) {
                 String resTableName = resultSet.getString("TABLE_NAME");
-                result.add(getTable(database + "." + resTableName));
+                result.add(getTable(schema + "." + resTableName));
             }
             return result;
         } catch (Exception e) {

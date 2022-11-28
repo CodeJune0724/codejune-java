@@ -59,7 +59,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
     }
 
     @Override
-    public final List<AccessDatabaseTable> getTables(String database) {
+    public final List<AccessDatabaseTable> getTables(String schema) {
         return getTables();
     }
 

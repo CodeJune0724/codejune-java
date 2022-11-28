@@ -295,6 +295,19 @@ public abstract class SqlJdbc implements Jdbc {
         execute("DROP TABLE " + tableName);
     }
 
+    /**
+     * 获取schema
+     *
+     * @return schema
+     * */
+    public final String getSchema() {
+        try {
+            return connection.getMetaData().getUserName();
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
     @Override
     public void close() {
         if (this.connection == null) {

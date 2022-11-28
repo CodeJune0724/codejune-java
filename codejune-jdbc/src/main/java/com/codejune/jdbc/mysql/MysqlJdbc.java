@@ -84,18 +84,18 @@ public class MysqlJdbc extends SqlJdbc {
     }
 
     @Override
-    public final List<MysqlTable> getTables(String database) {
+    public final List<MysqlTable> getTables(String schema) {
         List<MysqlTable> result = new ArrayList<>();
-        if (StringUtil.isEmpty(database)) {
+        if (StringUtil.isEmpty(schema)) {
             return result;
         }
         ResultSet resultSet = null;
         try {
             DatabaseMetaData metaData = getConnection().getMetaData();
-            resultSet = metaData.getTables(database, database, null, new String[]{"TABLE"});
+            resultSet = metaData.getTables(schema, schema, null, new String[]{"TABLE"});
             while (resultSet.next()) {
                 String resTableName = resultSet.getString("TABLE_NAME");
-                result.add(getTable(database + "." + resTableName));
+                result.add(getTable(schema + "." + resTableName));
             }
             return result;
         } catch (Exception e) {

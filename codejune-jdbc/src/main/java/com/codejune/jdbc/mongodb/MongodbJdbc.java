@@ -50,16 +50,16 @@ public class MongodbJdbc implements Jdbc {
     }
 
     @Override
-    public List<MongodbTable> getTables(String database) {
+    public List<MongodbTable> getTables(String schema) {
         List<MongodbTable> result = new ArrayList<>();
         List<MongoDatabase> mongoDatabaseList = new ArrayList<>();
-        if (StringUtil.isEmpty(database)) {
+        if (StringUtil.isEmpty(schema)) {
             MongoIterable<String> listDatabaseNames = this.mongoClient.listDatabaseNames();
             for (String d : listDatabaseNames) {
                 result.addAll(getTables(d));
             }
         } else {
-            mongoDatabaseList.add(this.mongoClient.getDatabase(database));
+            mongoDatabaseList.add(this.mongoClient.getDatabase(schema));
         }
         for (MongoDatabase mongoDatabase : mongoDatabaseList) {
             MongoIterable<String> collections = mongoDatabase.listCollectionNames();
