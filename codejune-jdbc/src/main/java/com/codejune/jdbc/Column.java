@@ -26,6 +26,8 @@ public class Column {
 
     private int sqlType;
 
+    public Column() {}
+
     public Column(String name, DataType dataType) {
         setName(name);
         setDataType(dataType);
