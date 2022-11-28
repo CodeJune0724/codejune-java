@@ -1,6 +1,5 @@
 package com.codejune.jdbc.access;
 
-import com.codejune.common.DataType;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
@@ -13,8 +12,6 @@ import com.codejune.jdbc.oracle.OracleTable;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.SqlBuilder;
-import com.healthmarketscience.jackcess.ColumnBuilder;
-import com.healthmarketscience.jackcess.TableBuilder;
 import java.io.IOException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -47,13 +44,11 @@ public final class AccessDatabaseTable implements SqlTable {
      * @param columnList 字段
      * */
     public void reloadTable(List<Column> columnList) {
+        if (ObjectUtil.isEmpty(columnList)) {
+            throw new InfoException("字段不能为空");
+        }
         try {
-            if (ObjectUtil.isEmpty(columnList)) {
-                throw new InfoException("字段不能为空");
-            }
-
             com.healthmarketscience.jackcess.Table table = accessDatabaseJdbc.database.getTable(tableName);
-
             if (table != null) {
                 List<Column> columns = getColumns();
                 boolean exist = true;
@@ -74,54 +69,14 @@ public final class AccessDatabaseTable implements SqlTable {
                     return;
                 }
             }
-
-            // 所有字段
-            List<ColumnBuilder> columnBuilderList = new ArrayList<>();
-            int p = 0;
-            int index = 0;
-            for (Column column : columnList) {
-                ColumnBuilder columnBuilder = new ColumnBuilder(column.getName());
-                DataType dataType = column.getDataType();
-                if (column.isPrimaryKey()) {
-                    columnBuilder.setAutoNumber(true).setSQLType(Types.BIGINT);
-                    p = index;
-                } else if (dataType == DataType.INT) {
-                    columnBuilder.setSQLType(Types.INTEGER);
-                } else if (dataType == DataType.STRING) {
-                    columnBuilder.setSQLType(Types.VARCHAR);
-                } else if (dataType == DataType.LONG_STRING) {
-                    columnBuilder.setSQLType(Types.LONGVARCHAR);
-                } else if (dataType == DataType.DATE) {
-                    columnBuilder.setSQLType(Types.DATE);
-                } else if (dataType == DataType.BOOLEAN) {
-                    columnBuilder.setSQLType(Types.BOOLEAN);
-                } else {
-                    throw new ErrorException(dataType + "未配置");
-                }
-                columnBuilderList.add(columnBuilder);
-                index++;
-            }
-            ArrayUtil.move(columnBuilderList, p, 0);
-
-            // 获取表数据
             List<Map<String, Object>> tableData;
             if (table == null) {
                 tableData = new ArrayList<>();
             } else {
                 tableData = query().getData();
-                accessDatabaseJdbc.execute("DROP TABLE " + tableName);
-                accessDatabaseJdbc.reload(true);
+                accessDatabaseJdbc.deleteTable(tableName);
             }
-
-            // 建表
-            TableBuilder tableBuilder = new TableBuilder(tableName);
-            for (ColumnBuilder columnBuilder : columnBuilderList) {
-                tableBuilder.addColumn(columnBuilder);
-            }
-            tableBuilder.toTable(accessDatabaseJdbc.database);
-            accessDatabaseJdbc.reload(true);
-
-            // 保存数据
+            accessDatabaseJdbc.createTable(tableName, null, columnList);
             this.insert(tableData);
         } catch (IOException e) {
             throw new ErrorException(e.getMessage());

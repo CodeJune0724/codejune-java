@@ -99,6 +99,9 @@ public class AccessDatabaseJdbc extends SqlJdbc {
                 } else {
                     throw new ErrorException(dataType + "未配置");
                 }
+                if (column.getLength() > 0) {
+                    columnBuilder.setLength(column.getLength());
+                }
                 columnBuilderList.add(columnBuilder);
             }
             TableBuilder tableBuilder = new TableBuilder(tableName);
