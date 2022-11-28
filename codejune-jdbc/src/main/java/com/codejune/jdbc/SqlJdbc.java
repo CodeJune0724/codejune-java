@@ -258,7 +258,11 @@ public abstract class SqlJdbc implements Jdbc {
                 column.setLength(columnResultSet.getInt("COLUMN_SIZE"));
                 column.setPrimaryKey(primaryKeyList.contains(name));
                 column.setNullable("YES".equals(columnResultSet.getString("IS_NULLABLE")));
-                column.setAutoincrement("YES".equals(columnResultSet.getString("IS_AUTOINCREMENT")));
+                try {
+                    column.setAutoincrement("YES".equals(columnResultSet.getString("IS_AUTOINCREMENT")));
+                } catch (Exception e) {
+                    column.setAutoincrement(false);
+                }
                 result.add(column);
             }
             return result;
