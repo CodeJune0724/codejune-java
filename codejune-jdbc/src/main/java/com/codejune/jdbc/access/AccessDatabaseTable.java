@@ -29,8 +29,6 @@ public final class AccessDatabaseTable implements SqlTable {
 
     private final String tableName;
 
-    private List<Column> columnList = null;
-
     private static final Object OBJECT = new Object();
 
     AccessDatabaseTable(AccessDatabaseJdbc accessDatabaseJdbc, String tableName) {
@@ -134,8 +132,9 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public List<Column> getColumns() {
-        if (columnList == null) {
-            columnList = new ArrayList<>();
+        List<Column> result = accessDatabaseJdbc.oracleJdbc.getColumnCache(tableName);
+        if (result == null) {
+            result = new ArrayList<>();
             List<? extends com.healthmarketscience.jackcess.Column> columns;
             try {
                 columns = this.accessDatabaseJdbc.database.getTable(tableName).getColumns();
@@ -155,15 +154,14 @@ public final class AccessDatabaseTable implements SqlTable {
                 } catch (Exception e) {
                     throw new InfoException(e);
                 }
-                Column column = new Column();
-                column.setName(name);
-                column.setSqlType(sqlType);
+                Column column = new Column(name, sqlType);
                 column.setLength(length);
                 column.setPrimaryKey(isPrimaryKey);
-                columnList.add(column);
+                result.add(column);
             }
+            accessDatabaseJdbc.oracleJdbc.setColumnCache(tableName, result);
         }
-        return ObjectUtil.clone(columnList);
+        return ObjectUtil.clone(result);
     }
 
     @Override
@@ -185,9 +183,6 @@ public final class AccessDatabaseTable implements SqlTable {
     @Override
     public long insert(List<Map<String, Object>> data) {
         OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
-        if (table == null) {
-            return 0;
-        }
         synchronized (OBJECT) {
             return table.insert(data);
         }
@@ -196,18 +191,12 @@ public final class AccessDatabaseTable implements SqlTable {
     @Override
     public long delete(Filter filter) {
         OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
-        if (table == null) {
-            return 0;
-        }
         return table.delete(filter);
     }
 
     @Override
     public long update(Map<String, Object> setData, Filter filter) {
         OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
-        if (table == null) {
-            return 0;
-        }
         return table.update(setData, filter);
     }
 

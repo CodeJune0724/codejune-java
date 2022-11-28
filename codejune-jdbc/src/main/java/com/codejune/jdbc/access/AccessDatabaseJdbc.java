@@ -38,15 +38,12 @@ public class AccessDatabaseJdbc extends SqlJdbc {
     }
 
     @Override
-    public AccessDatabaseTable getTable(String tableName) {
-        if (StringUtil.isEmpty(tableName)) {
-            return null;
-        }
+    public final AccessDatabaseTable getTable(String tableName) {
         return new AccessDatabaseTable(this, tableName);
     }
 
     @Override
-    public List<AccessDatabaseTable> getTables() {
+    public final List<AccessDatabaseTable> getTables() {
         try {
             List<AccessDatabaseTable> result = new ArrayList<>();
             for (String tableName : this.database.getTableNames()) {
@@ -62,12 +59,12 @@ public class AccessDatabaseJdbc extends SqlJdbc {
     }
 
     @Override
-    public List<AccessDatabaseTable> getTables(String database) {
+    public final List<AccessDatabaseTable> getTables(String database) {
         return getTables();
     }
 
     @Override
-    public void createTable(String tableName, String tableRemark, List<Column> columnList) {
+    public final void createTable(String tableName, String tableRemark, List<Column> columnList) {
         try {
             if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
                 throw new InfoException("建表参数缺失");
@@ -118,13 +115,13 @@ public class AccessDatabaseJdbc extends SqlJdbc {
     }
 
     @Override
-    public void deleteTable(String tableName) {
+    public final void deleteTable(String tableName) {
         super.deleteTable(tableName);
         reload(true);
     }
 
     @Override
-    public void close() {
+    public final void close() {
         super.close();
         try {
             if (this.database != null) {
@@ -134,6 +131,27 @@ public class AccessDatabaseJdbc extends SqlJdbc {
         } catch (IOException e) {
             throw new InfoException(e.getMessage());
         }
+    }
+
+    /**
+     * 缓存字段
+     *
+     * @param tableName 表名
+     * @param columnList 字段集合
+     * */
+    public final void setColumnCache(String tableName, List<Column> columnList) {
+        oracleJdbc.setColumnCache(tableName, columnList);
+    }
+
+    /**
+     * 获取缓存字段
+     *
+     * @param tableName 表名
+     *
+     * @return 缓存字段
+     * */
+    public final List<Column> getColumnCache(String tableName) {
+        return oracleJdbc.getColumnCache(tableName);
     }
 
     void reload(boolean isReloadConnection) {

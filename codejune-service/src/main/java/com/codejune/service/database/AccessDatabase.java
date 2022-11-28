@@ -35,9 +35,7 @@ public class AccessDatabase extends Database {
                 Class<? extends BasePO<?>> basePoC = (Class<? extends BasePO<?>>) c;
                 String tableName = BasePO.getTableName(basePoC);
                 List<com.codejune.jdbc.Column> columnList = new ArrayList<>();
-                com.codejune.jdbc.Column column = new com.codejune.jdbc.Column();
-                column.setName(BasePO.getIdName());
-                column.setDataType(DataType.INT);
+                com.codejune.jdbc.Column column = new com.codejune.jdbc.Column(BasePO.getIdName(), DataType.INT);
                 column.setAutoincrement(true);
                 columnList.add(column);
                 List<Field> columnFields = BasePO.getColumnFields(basePoC);
@@ -46,9 +44,7 @@ public class AccessDatabase extends Database {
                     if (dataType == DataType.STRING) {
                         dataType = DataType.LONG_STRING;
                     }
-                    column = new com.codejune.jdbc.Column();
-                    column.setName(field.getAnnotation(Column.class).name());
-                    column.setDataType(dataType);
+                    column = new com.codejune.jdbc.Column(field.getAnnotation(Column.class).name(), dataType);
                     column.setLength(field.getAnnotation(Column.class).length());
                     columnList.add(column);
                 }

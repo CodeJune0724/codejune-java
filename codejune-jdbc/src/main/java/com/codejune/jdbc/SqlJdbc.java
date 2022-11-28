@@ -249,19 +249,20 @@ public abstract class SqlJdbc implements Jdbc {
         ResultSet columnResultSet = null;
         try {
             columnResultSet = databaseMetaData.getColumns(connection.getCatalog(), schema, originTableName, null);
+            ResultSetMetaData resultSetMetaData = columnResultSet.getMetaData();
+            List<String> columnResultSetColumnList = new ArrayList<>();
+            for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                columnResultSetColumnList.add(resultSetMetaData.getColumnName(i));
+            }
             while (columnResultSet.next()) {
                 String name = columnResultSet.getString("COLUMN_NAME");
-                Column column = new Column();
-                column.setName(name);
+                Column column = new Column(name, columnResultSet.getInt("DATA_TYPE"));
                 column.setRemark(columnResultSet.getString("REMARKS"));
-                column.setSqlType(columnResultSet.getInt("DATA_TYPE"));
                 column.setLength(columnResultSet.getInt("COLUMN_SIZE"));
                 column.setPrimaryKey(primaryKeyList.contains(name));
                 column.setNullable("YES".equals(columnResultSet.getString("IS_NULLABLE")));
-                try {
+                if (columnResultSetColumnList.contains("IS_AUTOINCREMENT")) {
                     column.setAutoincrement("YES".equals(columnResultSet.getString("IS_AUTOINCREMENT")));
-                } catch (Exception e) {
-                    column.setAutoincrement(false);
                 }
                 result.add(column);
             }

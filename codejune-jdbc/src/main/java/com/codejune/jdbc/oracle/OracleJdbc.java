@@ -17,6 +17,8 @@ import java.util.*;
  * */
 public class OracleJdbc extends SqlJdbc {
 
+    private final Map<String, List<Column>> columnCache = new HashMap<>();
+
     public OracleJdbc(String host, int port, String sid, String username, String password) {
         super(getConnection(host, port, sid, username, password));
     }
@@ -26,7 +28,7 @@ public class OracleJdbc extends SqlJdbc {
     }
 
     @Override
-    public void createTable(String tableName, String tableRemark, List<Column> columnList) {
+    public final void createTable(String tableName, String tableRemark, List<Column> columnList) {
         if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
             throw new InfoException("建表参数缺失");
         }
@@ -63,37 +65,13 @@ public class OracleJdbc extends SqlJdbc {
         }
     }
 
-    /**
-     * 获取序列的下一个值
-     *
-     * @param sequence sequence
-     *
-     * @return 下一个值
-     * */
-    public Long getNextSequenceValue(String sequence) {
-        if (StringUtil.isEmpty(sequence)) {
-            return null;
-        }
-        List<Map<String, Object>> query = queryBySql("SELECT " + sequence + ".NEXTVAL ID FROM DUAL");
-        if (query.size() == 0) {
-            return null;
-        }
-        if (query.size() != 1) {
-            throw new InfoException("查询序列出错");
-        }
-        return MapUtil.getValue(query.get(0), "ID", Long.class);
-    }
-
     @Override
-    public OracleTable getTable(String tableName) {
-        if (StringUtil.isEmpty(tableName)) {
-            return null;
-        }
+    public final OracleTable getTable(String tableName) {
         return new OracleTable(this, tableName);
     }
 
     @Override
-    public List<OracleTable> getTables(String database) {
+    public final List<OracleTable> getTables(String database) {
         if (StringUtil.isEmpty(database)) {
             return null;
         }
@@ -115,7 +93,7 @@ public class OracleJdbc extends SqlJdbc {
     }
 
     @Override
-    public List<OracleTable> getTables() {
+    public final List<OracleTable> getTables() {
         List<OracleTable> result = new ArrayList<>();
         List<Map<String, Object>> users = queryBySql("SELECT * FROM DBA_USERS");
         for (Map<String, Object> map : users) {
@@ -127,6 +105,54 @@ public class OracleJdbc extends SqlJdbc {
             result.addAll(tables);
         }
         return result;
+    }
+
+    /**
+     * 获取序列的下一个值
+     *
+     * @param sequence sequence
+     *
+     * @return 下一个值
+     * */
+    public final Long getNextSequenceValue(String sequence) {
+        if (StringUtil.isEmpty(sequence)) {
+            return null;
+        }
+        List<Map<String, Object>> query = queryBySql("SELECT " + sequence + ".NEXTVAL ID FROM DUAL");
+        if (query.size() == 0) {
+            return null;
+        }
+        if (query.size() != 1) {
+            throw new InfoException("查询序列出错");
+        }
+        return MapUtil.getValue(query.get(0), "ID", Long.class);
+    }
+
+    /**
+     * 缓存字段
+     *
+     * @param tableName 表名
+     * @param columnList 字段集合
+     * */
+    public final void setColumnCache(String tableName, List<Column> columnList) {
+        if (StringUtil.isEmpty(tableName) || columnList == null) {
+            return;
+        }
+        this.columnCache.put(tableName, columnList);
+    }
+
+    /**
+     * 获取缓存字段
+     *
+     * @param tableName 表名
+     *
+     * @return 缓存字段
+     * */
+    public final List<Column> getColumnCache(String tableName) {
+        if (StringUtil.isEmpty(tableName)) {
+            return null;
+        }
+        return columnCache.get(tableName);
     }
 
     private static Connection getConnection(String host, int port, String sid, String username, String password) {
