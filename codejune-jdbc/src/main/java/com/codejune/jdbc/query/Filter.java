@@ -24,15 +24,13 @@ public final class Filter implements Builder {
     private Config config;
 
     public List<Filter> getOr() {
-        return ObjectUtil.clone(or);
+        handler();
+        return or;
     }
 
     public List<Item> getAnd() {
-        Filter filter = ObjectUtil.clone(this);
-        if (getConfig().cleanNull) {
-            filter.cleanNull();
-        }
-        return filter.and;
+        handler();
+        return and;
     }
 
     public Config getConfig() {
@@ -274,6 +272,12 @@ public final class Filter implements Builder {
                     this.and(Item.equals(key, value));
                 }
             }
+        }
+    }
+
+    private void handler() {
+        if (getConfig().cleanNull) {
+            cleanNull();
         }
     }
 
