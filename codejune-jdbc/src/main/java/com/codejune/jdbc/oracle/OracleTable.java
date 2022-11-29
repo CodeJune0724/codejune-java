@@ -27,8 +27,6 @@ public final class OracleTable implements SqlTable {
 
     private final String tableName;
 
-    private List<Column> columnList = null;
-
     OracleTable(OracleJdbc oracleJdbc, String tableName) {
         this.oracleJdbc = oracleJdbc;
         this.tableName = tableName;
@@ -36,13 +34,12 @@ public final class OracleTable implements SqlTable {
 
     @Override
     public List<Column> getColumns() {
-        if (columnList == null) {
-            columnList = oracleJdbc.getColumns(this.tableName);
+        List<Column> result = oracleJdbc.getColumnCache(tableName);
+        if (result == null) {
+            result = oracleJdbc.getColumns(this.tableName);
+            oracleJdbc.setColumnCache(tableName, result);
         }
-        if (columnList == null) {
-            return null;
-        }
-        return new ArrayList<>(columnList);
+        return ObjectUtil.clone(result);
     }
 
     @Override
@@ -70,6 +67,14 @@ public final class OracleTable implements SqlTable {
         } finally {
             JdbcUtil.close(resultSet);
         }
+    }
+
+    @Override
+    public void rename(String newTableName) {
+        if (StringUtil.isEmpty(newTableName)) {
+            return;
+        }
+        oracleJdbc.execute("ALTER TABLE " + tableName + " RENAME TO " + newTableName);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.codejune.jdbc.access;
 
-import com.codejune.common.DataType;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
@@ -13,8 +12,6 @@ import com.codejune.jdbc.oracle.OracleTable;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.SqlBuilder;
-import com.healthmarketscience.jackcess.ColumnBuilder;
-import com.healthmarketscience.jackcess.TableBuilder;
 import java.io.IOException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -32,8 +29,6 @@ public final class AccessDatabaseTable implements SqlTable {
 
     private final String tableName;
 
-    private List<Column> columnList = null;
-
     private static final Object OBJECT = new Object();
 
     AccessDatabaseTable(AccessDatabaseJdbc accessDatabaseJdbc, String tableName) {
@@ -47,13 +42,11 @@ public final class AccessDatabaseTable implements SqlTable {
      * @param columnList 字段
      * */
     public void reloadTable(List<Column> columnList) {
+        if (ObjectUtil.isEmpty(columnList)) {
+            throw new InfoException("字段不能为空");
+        }
         try {
-            if (ObjectUtil.isEmpty(columnList)) {
-                throw new InfoException("字段不能为空");
-            }
-
             com.healthmarketscience.jackcess.Table table = accessDatabaseJdbc.database.getTable(tableName);
-
             if (table != null) {
                 List<Column> columns = getColumns();
                 boolean exist = true;
@@ -74,54 +67,14 @@ public final class AccessDatabaseTable implements SqlTable {
                     return;
                 }
             }
-
-            // 所有字段
-            List<ColumnBuilder> columnBuilderList = new ArrayList<>();
-            int p = 0;
-            int index = 0;
-            for (Column column : columnList) {
-                ColumnBuilder columnBuilder = new ColumnBuilder(column.getName());
-                DataType dataType = column.getDataType();
-                if (column.isPrimaryKey()) {
-                    columnBuilder.setAutoNumber(true).setSQLType(Types.BIGINT);
-                    p = index;
-                } else if (dataType == DataType.INT) {
-                    columnBuilder.setSQLType(Types.INTEGER);
-                } else if (dataType == DataType.STRING) {
-                    columnBuilder.setSQLType(Types.VARCHAR);
-                } else if (dataType == DataType.LONG_STRING) {
-                    columnBuilder.setSQLType(Types.LONGVARCHAR);
-                } else if (dataType == DataType.DATE) {
-                    columnBuilder.setSQLType(Types.DATE);
-                } else if (dataType == DataType.BOOLEAN) {
-                    columnBuilder.setSQLType(Types.BOOLEAN);
-                } else {
-                    throw new ErrorException(dataType + "未配置");
-                }
-                columnBuilderList.add(columnBuilder);
-                index++;
-            }
-            ArrayUtil.move(columnBuilderList, p, 0);
-
-            // 获取表数据
             List<Map<String, Object>> tableData;
             if (table == null) {
                 tableData = new ArrayList<>();
             } else {
                 tableData = query().getData();
-                accessDatabaseJdbc.execute("DROP TABLE " + tableName);
-                accessDatabaseJdbc.reload(true);
+                accessDatabaseJdbc.deleteTable(tableName);
             }
-
-            // 建表
-            TableBuilder tableBuilder = new TableBuilder(tableName);
-            for (ColumnBuilder columnBuilder : columnBuilderList) {
-                tableBuilder.addColumn(columnBuilder);
-            }
-            tableBuilder.toTable(accessDatabaseJdbc.database);
-            accessDatabaseJdbc.reload(true);
-
-            // 保存数据
+            accessDatabaseJdbc.createTable(tableName, null, columnList);
             this.insert(tableData);
         } catch (IOException e) {
             throw new ErrorException(e.getMessage());
@@ -179,40 +132,47 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public List<Column> getColumns() {
-        if (columnList == null) {
-            columnList = new ArrayList<>();
+        List<Column> result = accessDatabaseJdbc.oracleJdbc.getColumnCache(tableName);
+        if (result == null) {
+            result = new ArrayList<>();
             List<? extends com.healthmarketscience.jackcess.Column> columns;
             try {
                 columns = this.accessDatabaseJdbc.database.getTable(tableName).getColumns();
             } catch (Exception e) {
                 throw new InfoException(e);
             }
-            for (com.healthmarketscience.jackcess.Column column : columns) {
-                String name = column.getName();
+            for (com.healthmarketscience.jackcess.Column jackcessColumn : columns) {
+                String name = jackcessColumn.getName();
                 int sqlType;
-                int length = column.getLength();
-                boolean isPrimaryKey = column.isAutoNumber();
+                int length = jackcessColumn.getLength();
+                boolean isPrimaryKey = jackcessColumn.isAutoNumber();
                 try {
-                    sqlType = column.getSQLType();
-                    if (column.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
+                    sqlType = jackcessColumn.getSQLType();
+                    if (jackcessColumn.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
                         sqlType = Types.BOOLEAN;
                     }
                 } catch (Exception e) {
                     throw new InfoException(e);
                 }
-
-                columnList.add(new Column(name, null, sqlType, length, isPrimaryKey));
+                Column column = new Column(name, sqlType);
+                column.setLength(length);
+                column.setPrimaryKey(isPrimaryKey);
+                result.add(column);
             }
+            accessDatabaseJdbc.oracleJdbc.setColumnCache(tableName, result);
         }
-        if (columnList == null) {
-            return null;
-        }
-        return new ArrayList<>(columnList);
+        return ObjectUtil.clone(result);
     }
 
     @Override
     public String getRemark() {
         return accessDatabaseJdbc.oracleJdbc.getTable(tableName).getRemark();
+    }
+
+    @Override
+    public void rename(String newTableName) {
+        accessDatabaseJdbc.oracleJdbc.getTable(tableName).rename(newTableName);
+        accessDatabaseJdbc.reload(true);
     }
 
     @Override
@@ -223,9 +183,6 @@ public final class AccessDatabaseTable implements SqlTable {
     @Override
     public long insert(List<Map<String, Object>> data) {
         OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
-        if (table == null) {
-            return 0;
-        }
         synchronized (OBJECT) {
             return table.insert(data);
         }
@@ -234,18 +191,12 @@ public final class AccessDatabaseTable implements SqlTable {
     @Override
     public long delete(Filter filter) {
         OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
-        if (table == null) {
-            return 0;
-        }
         return table.delete(filter);
     }
 
     @Override
     public long update(Map<String, Object> setData, Filter filter) {
         OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
-        if (table == null) {
-            return 0;
-        }
         return table.update(setData, filter);
     }
 

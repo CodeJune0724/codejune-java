@@ -41,4 +41,11 @@ public interface SqlTable extends Table {
      * */
     String getRemark();
 
+    /**
+     * 修改表名
+     *
+     * @param newTableName 新表名
+     * */
+    void rename(String newTableName);
+
 }

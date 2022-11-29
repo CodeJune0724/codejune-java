@@ -35,14 +35,18 @@ public class AccessDatabase extends Database {
                 Class<? extends BasePO<?>> basePoC = (Class<? extends BasePO<?>>) c;
                 String tableName = BasePO.getTableName(basePoC);
                 List<com.codejune.jdbc.Column> columnList = new ArrayList<>();
-                columnList.add(new com.codejune.jdbc.Column(BasePO.getIdName(), null, DataType.INT, -1, true));
+                com.codejune.jdbc.Column column = new com.codejune.jdbc.Column(BasePO.getIdName(), DataType.INT);
+                column.setAutoincrement(true);
+                columnList.add(column);
                 List<Field> columnFields = BasePO.getColumnFields(basePoC);
                 for (Field field : columnFields) {
                     DataType dataType = DataType.parse(field.getType());
                     if (dataType == DataType.STRING) {
                         dataType = DataType.LONG_STRING;
                     }
-                    columnList.add(new com.codejune.jdbc.Column(field.getAnnotation(Column.class).name(), null, dataType, -1, false));
+                    column = new com.codejune.jdbc.Column(field.getAnnotation(Column.class).name(), dataType);
+                    column.setLength(field.getAnnotation(Column.class).length());
+                    columnList.add(column);
                 }
                 AccessDatabaseJdbc accessDatabaseJdbc = new AccessDatabaseJdbc(databaseFile);
                 try {

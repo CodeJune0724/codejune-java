@@ -24,11 +24,11 @@ public interface Jdbc extends Closeable {
     /**
      * 获取表集合
      *
-     * @param database 数据库
+     * @param schema schema
      *
      * @return Table
      * */
-    List<? extends Table> getTables(String database);
+    List<? extends Table> getTables(String schema);
 
     /**
      * 获取表集合

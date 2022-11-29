@@ -2,6 +2,7 @@ package com.codejune.jdbc;
 
 import com.codejune.common.ClassInfo;
 import com.codejune.Jdbc;
+import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.Charset;
 import com.codejune.common.util.StringUtil;
@@ -12,6 +13,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
+import javax.persistence.Id;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
@@ -133,34 +135,24 @@ public abstract class SqlJdbc implements Jdbc {
         if (query == null) {
             query = new Query();
         }
-
-        ClassInfo classInfo = new ClassInfo(jpaRepository);
-        ClassInfo superClass = classInfo.getSuperClass(JpaRepository.class);
+        ClassInfo superClass = new ClassInfo(jpaRepository).getSuperClass(JpaRepository.class);
         if (superClass == null || !superClass.existsGenericClass()) {
             throw new InfoException("jpaRepository传入错误");
         }
-        ClassInfo TCLass = superClass.getGenericClass().get(0);
-        Class<?> aClass = TCLass.getOriginClass();
-        javax.persistence.Table table = aClass.getAnnotation(javax.persistence.Table.class);
-        if (table == null) {
+        Class<?> aClass = superClass.getGenericClass().get(0).getOriginClass();
+        javax.persistence.Table tableAnnotation = aClass.getAnnotation(javax.persistence.Table.class);
+        if (tableAnnotation == null) {
             throw new InfoException("实体类未配置表名");
         }
-        String tableName = table.name();
-
-        // 获取主键名
+        String tableName = tableAnnotation.name();
         String idName = "ID";
-        List<Column> columns = getColumns(tableName);
-        if (columns == null) {
-            columns = new ArrayList<>();
-        }
-        for (Column column : columns) {
-            if (column.isPrimaryKey()) {
-                idName = column.getName();
+        for (Field field : new ClassInfo(aClass).getFields()) {
+            Id idAnnotation = field.getAnnotation(Id.class);
+            if (idAnnotation != null) {
+                idName = StringUtil.humpToUnderline(field.getName());
                 break;
             }
         }
-
-        // 设置key处理
         FieldToColumnKeyHandler entityKeyHandler = new FieldToColumnKeyHandler(aClass, idName);
         query.setKeyHandler(entityKeyHandler);
         QueryResult<Map<String, Object>> queryResult = getTable(tableName).query(query);
@@ -249,19 +241,62 @@ public abstract class SqlJdbc implements Jdbc {
         ResultSet columnResultSet = null;
         try {
             columnResultSet = databaseMetaData.getColumns(connection.getCatalog(), schema, originTableName, null);
+            ResultSetMetaData resultSetMetaData = columnResultSet.getMetaData();
+            List<String> columnResultSetColumnList = new ArrayList<>();
+            for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                columnResultSetColumnList.add(resultSetMetaData.getColumnName(i));
+            }
             while (columnResultSet.next()) {
                 String name = columnResultSet.getString("COLUMN_NAME");
-                String remark = columnResultSet.getString("REMARKS");
-                int sqlType = columnResultSet.getInt("DATA_TYPE");
-                int length = columnResultSet.getInt("COLUMN_SIZE");
-                boolean isPrimaryKey = primaryKeyList.contains(name);
-                result.add(new Column(name, remark, sqlType, length, isPrimaryKey));
+                Column column = new Column(name, columnResultSet.getInt("DATA_TYPE"));
+                column.setRemark(columnResultSet.getString("REMARKS"));
+                column.setLength(columnResultSet.getInt("COLUMN_SIZE"));
+                column.setPrimaryKey(primaryKeyList.contains(name));
+                column.setNullable("YES".equals(columnResultSet.getString("IS_NULLABLE")));
+                if (columnResultSetColumnList.contains("IS_AUTOINCREMENT")) {
+                    column.setAutoincrement("YES".equals(columnResultSet.getString("IS_AUTOINCREMENT")));
+                }
+                result.add(column);
             }
             return result;
         } catch (Exception e) {
             throw new InfoException(e);
         } finally {
             JdbcUtil.close(columnResultSet);
+        }
+    }
+
+    /**
+     * 新建表
+     *
+     * @param tableName 表名
+     * @param tableRemark 表备注
+     * @param columnList columnList
+     * */
+    public abstract void createTable(String tableName, String tableRemark, List<Column> columnList);
+
+    /**
+     * 删除表
+     *
+     * @param tableName 表名
+     * */
+    public void deleteTable(String tableName) {
+        if (StringUtil.isEmpty(tableName)) {
+            return;
+        }
+        execute("DROP TABLE " + tableName);
+    }
+
+    /**
+     * 获取schema
+     *
+     * @return schema
+     * */
+    public final String getSchema() {
+        try {
+            return connection.getMetaData().getUserName();
+        } catch (Exception e) {
+            throw new InfoException(e);
         }
     }
 
