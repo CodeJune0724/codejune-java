@@ -156,19 +156,19 @@ public final class SqlBuilder {
      * @return where
      * */
     public String parseWhere(Filter filter) {
-        String result = "WHERE 1 = 1";
+        return parseWhere(filter, true);
+    }
+
+    private String parseWhere(Filter filter, boolean isAddWhere) {
+        String result = isAddWhere ? "WHERE 1 = 1" : "";
         if (filter == null) {
             return result;
         }
         List<Filter> orList = filter.getOr();
         for (Filter or : orList) {
-            String formatFilter = parseWhere(or);
-            if (!StringUtil.isEmpty(formatFilter)) {
-                String s = "(" + formatFilter + ")";
-                if  (!StringUtil.isEmpty(result)) {
-                    s = StringUtil.append(" OR ", s);
-                }
-                result = StringUtil.append(result, s);
+            String formatOr = "(" + parseWhere(or, false) + ")";
+            if  (!StringUtil.isEmpty(result)) {
+                result = StringUtil.append(result, " OR ", formatOr);
             }
         }
         List<Filter.Item> andList = filter.getAnd();
