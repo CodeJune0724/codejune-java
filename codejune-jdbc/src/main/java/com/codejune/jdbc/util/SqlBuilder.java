@@ -165,22 +165,24 @@ public final class SqlBuilder {
             return result;
         }
         List<Filter> orList = filter.getOr();
-        for (Filter or : orList) {
-            String formatOr = "(" + parseWhere(or, false) + ")";
-            if  (!StringUtil.isEmpty(result)) {
-                result = StringUtil.append(result, " OR ", formatOr);
+        if (!ObjectUtil.isEmpty(orList)) {
+            if (!StringUtil.isEmpty(result)) {
+                result = result + " AND ";
             }
+            result = result + ArrayUtil.toString(orList, filter1 -> "(" + parseWhere(filter1, false) + ")", " OR ");
         }
         List<Filter.Item> andList = filter.getAnd();
-        for (Filter.Item and : andList) {
-            String formatItem = filterItemHandler(and);
-            if (!StringUtil.isEmpty(formatItem)) {
-                String s = "(" + formatItem + ")";
-                if  (!StringUtil.isEmpty(result)) {
-                    s = StringUtil.append(" AND ", s);
-                }
-                result = StringUtil.append(result, s);
+        if (!ObjectUtil.isEmpty(andList)) {
+            if (!StringUtil.isEmpty(result)) {
+                result = result + " AND ";
             }
+            result = result + ArrayUtil.toString(andList, item -> {
+                String result1 = filterItemHandler(item);
+                if (!StringUtil.isEmpty(result1)) {
+                    result1 = "(" + result1 + ")";
+                }
+                return result1;
+            }, " AND ");
         }
         return result;
     }
