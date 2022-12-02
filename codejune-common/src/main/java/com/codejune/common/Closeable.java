@@ -5,7 +5,7 @@ package com.codejune.common;
  *
  * @author ZJ
  * */
-public interface Closeable {
+public interface Closeable extends AutoCloseable {
 
     /**
      * 关闭
