@@ -95,11 +95,14 @@ public abstract class Database {
 
         private final ColumnToFieldKeyHandler columnToFieldKeyHandler;
 
+        private final String tableName;
+
         private Table(Database database, Class<T> basePOClass) {
             this.database = database;
             this.basePOClass = basePOClass;
             this.fieldToColumnKeyHandler = new FieldToColumnKeyHandler(basePOClass);
             this.columnToFieldKeyHandler = new ColumnToFieldKeyHandler(basePOClass);
+            this.tableName = BasePO.getTableName(basePOClass);
         }
 
         /**
@@ -116,7 +119,7 @@ public abstract class Database {
             query.setKeyHandler(fieldToColumnKeyHandler);
             Jdbc jdbc = this.database.pool.get();
             try {
-                return jdbc.getTable(getCompleteTableName()).query(query).parse(basePOClass, columnToFieldKeyHandler);
+                return getTable(jdbc).query(query).parse(basePOClass, columnToFieldKeyHandler);
             } finally {
                 this.database.pool.returnObject(jdbc);
             }
@@ -148,7 +151,7 @@ public abstract class Database {
             }
             Jdbc jdbc = this.database.pool.get();
             try {
-                com.codejune.jdbc.Table table = jdbc.getTable(getCompleteTableName());
+                com.codejune.jdbc.Table table = getTable(jdbc);
                 List<String> columnList = new ArrayList<>();
                 List<Field> allFields = BasePO.getAllFields(basePOClass);
                 for (Field field : allFields) {
@@ -207,8 +210,7 @@ public abstract class Database {
             }
             Jdbc jdbc = this.database.pool.get();
             try {
-                com.codejune.jdbc.Table table = jdbc.getTable(getCompleteTableName());
-                table.delete(new Filter().and(Filter.Item.equals(BasePO.getIdName(), id)));
+                getTable(jdbc).delete(new Filter().and(Filter.Item.equals(BasePO.getIdName(), id)));
             } finally {
                 this.database.pool.returnObject(jdbc);
             }
@@ -235,19 +237,20 @@ public abstract class Database {
         public void delete() {
             Jdbc jdbc = this.database.pool.get();
             try {
-                com.codejune.jdbc.Table table = jdbc.getTable(getCompleteTableName());
-                table.delete();
+                getTable(jdbc).delete();
             } finally {
                 this.database.pool.returnObject(jdbc);
             }
         }
 
-        private String getCompleteTableName() {
-            String result = BasePO.getTableName(basePOClass);
-            if (!StringUtil.isEmpty(database.databaseName)) {
-                result = database.databaseName + "." + result;
+        private com.codejune.jdbc.Table getTable(Jdbc jdbc) {
+            com.codejune.jdbc.Database jdbcDatabase;
+            if (StringUtil.isEmpty(database.databaseName)) {
+                jdbcDatabase = jdbc.getDefaultDatabase();
+            } else {
+                jdbcDatabase = jdbc.getDatabase(database.databaseName);
             }
-            return result;
+            return jdbcDatabase.getTable(tableName);
         }
 
     }

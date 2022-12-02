@@ -1,20 +1,13 @@
 package com.codejune.jdbc.access;
 
-import com.codejune.common.DataType;
-import com.codejune.common.exception.ErrorException;
 import com.codejune.common.os.File;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.jdbc.Column;
 import com.codejune.jdbc.oracle.OracleJdbc;
 import com.healthmarketscience.jackcess.*;
 import com.codejune.common.exception.InfoException;
 import com.codejune.jdbc.SqlJdbc;
-import com.codejune.common.util.StringUtil;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Types;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,100 +17,17 @@ import java.util.List;
  * */
 public class AccessDatabaseJdbc extends SqlJdbc {
 
-    protected Database database;
+    Database database;
 
     private final java.io.File file;
 
-    protected OracleJdbc oracleJdbc;
+    OracleJdbc oracleJdbc;
 
     public AccessDatabaseJdbc(java.io.File file) {
         super(getConnection(file));
         this.file = file;
         reload(false);
         this.oracleJdbc = new OracleJdbc(this.getConnection());
-    }
-
-    @Override
-    public final AccessDatabaseTable getTable(String tableName) {
-        return new AccessDatabaseTable(this, tableName);
-    }
-
-    @Override
-    public final List<AccessDatabaseTable> getTables() {
-        try {
-            List<AccessDatabaseTable> result = new ArrayList<>();
-            for (String tableName : this.database.getTableNames()) {
-                if (tableName.startsWith("~")) {
-                    continue;
-                }
-                result.add(getTable(tableName));
-            }
-            return result;
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        }
-    }
-
-    @Override
-    public final List<AccessDatabaseTable> getTables(String schema) {
-        return getTables();
-    }
-
-    @Override
-    public final void createTable(String tableName, String tableRemark, List<Column> columnList) {
-        try {
-            if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
-                throw new InfoException("建表参数缺失");
-            }
-            com.healthmarketscience.jackcess.Table table = database.getTable(tableName);
-            if (table != null) {
-                throw new InfoException(tableName + "表已存在");
-            }
-            List<ColumnBuilder> columnBuilderList = new ArrayList<>();
-            for (Column column : columnList) {
-                ColumnBuilder columnBuilder = new ColumnBuilder(column.getName());
-                DataType dataType = column.getDataType();
-                if (column.isAutoincrement()) {
-                    columnBuilder.setAutoNumber(true);
-                    dataType = DataType.LONG;
-                }
-                if (dataType == com.codejune.common.DataType.INT) {
-                    columnBuilder.setSQLType(Types.INTEGER);
-                } else if (dataType == DataType.LONG) {
-                    columnBuilder.setSQLType(Types.BIGINT);
-                }else if (dataType == com.codejune.common.DataType.STRING) {
-                    columnBuilder.setSQLType(Types.VARCHAR);
-                } else if (dataType == com.codejune.common.DataType.LONG_STRING) {
-                    columnBuilder.setSQLType(Types.LONGVARCHAR);
-                } else if (dataType == com.codejune.common.DataType.DATE) {
-                    columnBuilder.setSQLType(Types.DATE);
-                } else if (dataType == DataType.BOOLEAN) {
-                    columnBuilder.setSQLType(Types.BOOLEAN);
-                } else {
-                    throw new ErrorException(dataType + "未配置");
-                }
-                if (column.getLength() > 0) {
-                    columnBuilder.setLength(column.getLength());
-                }
-                columnBuilderList.add(columnBuilder);
-            }
-            TableBuilder tableBuilder = new TableBuilder(tableName);
-            for (ColumnBuilder columnBuilder : columnBuilderList) {
-                tableBuilder.addColumn(columnBuilder);
-            }
-            tableBuilder.toTable(database);
-            reload(true);
-        } catch (IOException e) {
-            throw new ErrorException(e.getMessage());
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        }
-    }
-
-    @Override
-    public final void deleteTable(String tableName) {
-        super.deleteTable(tableName);
-        reload(true);
     }
 
     @Override
@@ -133,28 +43,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
         }
     }
 
-    /**
-     * 缓存字段
-     *
-     * @param tableName 表名
-     * @param columnList 字段集合
-     * */
-    public final void setColumnCache(String tableName, List<Column> columnList) {
-        oracleJdbc.setColumnCache(tableName, columnList);
-    }
-
-    /**
-     * 获取缓存字段
-     *
-     * @param tableName 表名
-     *
-     * @return 缓存字段
-     * */
-    public final List<Column> getColumnCache(String tableName) {
-        return oracleJdbc.getColumnCache(tableName);
-    }
-
-    void reload(boolean isReloadConnection) {
+    final void reload(boolean isReloadConnection) {
         if (isReloadConnection) {
             this.close();
             setConnection(getConnection(this.file));
@@ -216,6 +105,26 @@ public class AccessDatabaseJdbc extends SqlJdbc {
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
+    }
+
+    @Override
+    public final AccessDatabaseDatabase getDatabase(String databaseName) {
+        throw new InfoException("AccessDatabaseJdbc is not found database");
+    }
+
+    @Override
+    public final List<AccessDatabaseDatabase> getDatabases() {
+        throw new InfoException("AccessDatabaseJdbc is not found database");
+    }
+
+    @Override
+    public final AccessDatabaseDatabase switchDatabase(String databaseName) {
+        throw new InfoException("AccessDatabaseJdbc is not found database");
+    }
+
+    @Override
+    public final AccessDatabaseDatabase getDefaultDatabase() {
+        return new AccessDatabaseDatabase(this);
     }
 
 }

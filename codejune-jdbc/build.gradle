@@ -1,8 +1,8 @@
 dependencies {
     api project(':codejune-common')
-    api group: 'net.sf.ucanaccess', name: 'ucanaccess', version: '5.0.1'
-    api group: 'org.mongodb', name: 'mongo-java-driver', version: '3.12.11'
-    api group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.7.2'
-    api group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.15.0.0.1'
-    api group: 'mysql', name: 'mysql-connector-java', version: '8.0.31'
+    implementation group: 'net.sf.ucanaccess', name: 'ucanaccess', version: '5.0.1'
+    implementation group: 'org.mongodb', name: 'mongo-java-driver', version: '3.12.11'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.7.2'
+    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.15.0.0.1'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.31'
 }

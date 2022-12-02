@@ -3,6 +3,7 @@ package com.codejune.jdbc.mysql;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Query;
+import com.codejune.jdbc.oracle.OracleTable;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.SqlBuilder;
@@ -16,13 +17,16 @@ import java.util.Map;
  * */
 public final class MysqlTable implements SqlTable {
 
-    private final MysqlJdbc mysqlJdbc;
+    private final MysqlDatabase mysqlDatabase;
 
     private final String tableName;
 
-    public MysqlTable(MysqlJdbc mysqlJdbc, String tableName) {
-        this.mysqlJdbc = mysqlJdbc;
+    private final OracleTable oracleTable;
+
+    MysqlTable(MysqlDatabase mysqlDatabase, String tableName) {
+        this.mysqlDatabase = mysqlDatabase;
         this.tableName = tableName;
+        this.oracleTable = mysqlDatabase.oracleDatabase.getTable(tableName);
     }
 
     @Override
@@ -32,29 +36,29 @@ public final class MysqlTable implements SqlTable {
 
     @Override
     public long insert(List<Map<String, Object>> data) {
-        return mysqlJdbc.oracleJdbc.getTable(tableName).insert(data);
+        return oracleTable.insert(data);
     }
 
     @Override
     public long delete(Filter filter) {
-        return mysqlJdbc.oracleJdbc.getTable(tableName).delete(filter);
+        return oracleTable.delete(filter);
     }
 
     @Override
     public long update(Map<String, Object> setData, Filter filter) {
-        return mysqlJdbc.oracleJdbc.getTable(tableName).update(setData, filter);
+        return oracleTable.update(setData, filter);
     }
 
     @Override
     public long count(Filter filter) {
-        return Long.parseLong(mysqlJdbc.oracleJdbc.queryBySql(
+        return Long.parseLong(mysqlDatabase.mysqlJdbc.query(
                 new SqlBuilder(tableName, MysqlJdbc.class).parseCountSql(filter)
         ).get(0).get("C").toString());
     }
 
     @Override
     public List<Map<String, Object>> queryData(Query query) {
-        return mysqlJdbc.oracleJdbc.queryBySql(
+        return mysqlDatabase.mysqlJdbc.query(
                 new SqlBuilder(tableName, MysqlJdbc.class).parseQueryDataSql(query),
                 ArrayUtil.parse("R")
         );
@@ -62,17 +66,17 @@ public final class MysqlTable implements SqlTable {
 
     @Override
     public List<Column> getColumns() {
-        return mysqlJdbc.oracleJdbc.getTable(tableName).getColumns();
+        return oracleTable.getColumns();
     }
 
     @Override
     public String getRemark() {
-        return mysqlJdbc.oracleJdbc.getTable(tableName).getRemark();
+        return oracleTable.getRemark();
     }
 
     @Override
     public void rename(String newTableName) {
-        mysqlJdbc.oracleJdbc.getTable(tableName).rename(newTableName);
+        oracleTable.rename(newTableName);
     }
 
 }

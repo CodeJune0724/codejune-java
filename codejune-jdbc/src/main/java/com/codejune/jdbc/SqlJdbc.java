@@ -76,7 +76,7 @@ public abstract class SqlJdbc implements Jdbc {
      *
      * @return List
      * */
-    public final List<Map<String, Object>> queryBySql(String sql, List<String> filterFields) {
+    public final List<Map<String, Object>> query(String sql, List<String> filterFields) {
         List<Map<String, Object>> result = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -117,8 +117,8 @@ public abstract class SqlJdbc implements Jdbc {
      *
      * @return List
      * */
-    public final List<Map<String, Object>> queryBySql(String sql) {
-        return queryBySql(sql, null);
+    public final List<Map<String, Object>> query(String sql) {
+        return query(sql, null);
     }
 
     /**
@@ -155,7 +155,7 @@ public abstract class SqlJdbc implements Jdbc {
         }
         FieldToColumnKeyHandler entityKeyHandler = new FieldToColumnKeyHandler(aClass, idName);
         query.setKeyHandler(entityKeyHandler);
-        QueryResult<Map<String, Object>> queryResult = getTable(tableName).query(query);
+        QueryResult<Map<String, Object>> queryResult = getDefaultDatabase().getTable(tableName).query(query);
         return (QueryResult<T>) queryResult.parse(aClass, new ColumnToFieldKeyHandler(aClass, idName));
     }
 
@@ -184,120 +184,6 @@ public abstract class SqlJdbc implements Jdbc {
      * */
     public final void executeSqlScript(File scriptFile) {
         this.executeSqlScript(scriptFile, Charset.UTF_8);
-    }
-
-    /**
-     * 获取字段
-     *
-     * @param tableName 表名
-     *
-     * @return 所有字段
-     * */
-    public final List<Column> getColumns(String tableName) {
-        if (StringUtil.isEmpty(tableName)) {
-            return null;
-        }
-        List<Column> result = new ArrayList<>();
-
-        DatabaseMetaData databaseMetaData;
-        try {
-            databaseMetaData = connection.getMetaData();
-        } catch (Exception e) {
-            throw new InfoException(e);
-        }
-
-        String schema;
-        String originTableName;
-        try {
-            if (tableName.contains(".")) {
-                schema = tableName.split("\\.")[0];
-                originTableName = tableName.substring(tableName.indexOf(".") + 1);
-            } else {
-                schema = databaseMetaData.getUserName();
-                originTableName = tableName;
-            }
-            if (StringUtil.isEmpty(schema)) {
-                originTableName = null;
-            }
-        } catch (Exception e) {
-            throw new InfoException(e);
-        }
-
-        // 获取主键
-        ResultSet primaryKeyResultSet = null;
-        List<String> primaryKeyList = new ArrayList<>();
-        try {
-            primaryKeyResultSet = databaseMetaData.getPrimaryKeys(connection.getCatalog(), schema, originTableName);
-            while (primaryKeyResultSet.next()) {
-                primaryKeyList.add(primaryKeyResultSet.getString("COLUMN_NAME"));
-            }
-        } catch (Exception e) {
-            throw new InfoException(e);
-        } finally {
-            JdbcUtil.close(primaryKeyResultSet);
-        }
-
-        // 获取字段
-        ResultSet columnResultSet = null;
-        try {
-            columnResultSet = databaseMetaData.getColumns(connection.getCatalog(), schema, originTableName, null);
-            ResultSetMetaData resultSetMetaData = columnResultSet.getMetaData();
-            List<String> columnResultSetColumnList = new ArrayList<>();
-            for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
-                columnResultSetColumnList.add(resultSetMetaData.getColumnName(i));
-            }
-            while (columnResultSet.next()) {
-                String name = columnResultSet.getString("COLUMN_NAME");
-                Column column = new Column(name, columnResultSet.getInt("DATA_TYPE"));
-                column.setRemark(columnResultSet.getString("REMARKS"));
-                column.setLength(columnResultSet.getInt("COLUMN_SIZE"));
-                column.setPrimaryKey(primaryKeyList.contains(name));
-                column.setNullable("YES".equals(columnResultSet.getString("IS_NULLABLE")));
-                if (columnResultSetColumnList.contains("IS_AUTOINCREMENT")) {
-                    column.setAutoincrement("YES".equals(columnResultSet.getString("IS_AUTOINCREMENT")));
-                }
-                result.add(column);
-            }
-            return result;
-        } catch (Exception e) {
-            throw new InfoException(e);
-        } finally {
-            JdbcUtil.close(columnResultSet);
-        }
-    }
-
-    /**
-     * 新建表
-     *
-     * @param tableName 表名
-     * @param tableRemark 表备注
-     * @param columnList columnList
-     * */
-    public abstract void createTable(String tableName, String tableRemark, List<Column> columnList);
-
-    /**
-     * 删除表
-     *
-     * @param tableName 表名
-     * */
-    public void deleteTable(String tableName) {
-        if (StringUtil.isEmpty(tableName)) {
-            return;
-        }
-        execute("DROP TABLE " + tableName);
-    }
-
-    /**
-     * 获取schema
-     *
-     * @return schema
-     * */
-    public final String getSchema() {
-        try {
-            return connection.getMetaData().getUserName();
-        } catch (Exception e) {
-            throw new InfoException(e);
-        }
     }
 
     @Override
