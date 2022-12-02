@@ -11,7 +11,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -33,9 +32,9 @@ public final class MongodbTable implements Table {
 
     private final MongoCollection<Document> mongoCollection;
 
-    public MongodbTable(MongoDatabase mongoDatabase, String tableName) {
+    MongodbTable(MongodbDatabase mongodbDatabase, String tableName) {
         this.tableName = tableName;
-        mongoCollection = mongoDatabase.getCollection(tableName);
+        mongoCollection = mongodbDatabase.mongoDatabase.getCollection(tableName);
     }
 
     /**

@@ -50,7 +50,7 @@ public class AccessDatabase extends Database {
                 }
                 AccessDatabaseJdbc accessDatabaseJdbc = new AccessDatabaseJdbc(databaseFile);
                 try {
-                    accessDatabaseJdbc.getTable(tableName).reloadTable(columnList);
+                    accessDatabaseJdbc.getDefaultDatabase().getTable(tableName).reloadTable(columnList);
                 } finally {
                     accessDatabaseJdbc.close();
                 }

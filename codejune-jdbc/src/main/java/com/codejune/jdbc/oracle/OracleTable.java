@@ -23,42 +23,79 @@ import java.util.Date;
 
 public final class OracleTable implements SqlTable {
 
-    private final OracleJdbc oracleJdbc;
+    private final OracleDatabase oracleDatabase;
 
     private final String tableName;
 
-    OracleTable(OracleJdbc oracleJdbc, String tableName) {
-        this.oracleJdbc = oracleJdbc;
+    OracleTable(OracleDatabase oracleDatabase, String tableName) {
+        this.oracleDatabase = oracleDatabase;
         this.tableName = tableName;
+    }
+
+    private String getTotalTableName() {
+        String result = tableName;
+        if (!StringUtil.isEmpty(oracleDatabase.getName())) {
+            result = oracleDatabase.getName() + "." + tableName;
+        }
+        return result;
     }
 
     @Override
     public List<Column> getColumns() {
-        List<Column> result = oracleJdbc.getColumnCache(tableName);
-        if (result == null) {
-            result = oracleJdbc.getColumns(this.tableName);
-            oracleJdbc.setColumnCache(tableName, result);
+        List<Column> result = new ArrayList<>();
+        DatabaseMetaData databaseMetaData;
+        try {
+            databaseMetaData = oracleDatabase.oracleJdbc.getConnection().getMetaData();
+        } catch (Exception e) {
+            throw new InfoException(e);
         }
-        return ObjectUtil.clone(result);
+        ResultSet primaryKeyResultSet = null;
+        List<String> primaryKeyList = new ArrayList<>();
+        try {
+            primaryKeyResultSet = databaseMetaData.getPrimaryKeys(oracleDatabase.oracleJdbc.getConnection().getCatalog(), oracleDatabase.getName(), tableName);
+            while (primaryKeyResultSet.next()) {
+                primaryKeyList.add(primaryKeyResultSet.getString("COLUMN_NAME"));
+            }
+        } catch (Exception e) {
+            throw new InfoException(e);
+        } finally {
+            JdbcUtil.close(primaryKeyResultSet);
+        }
+        ResultSet columnResultSet = null;
+        try {
+            columnResultSet = databaseMetaData.getColumns(oracleDatabase.oracleJdbc.getConnection().getCatalog(), oracleDatabase.getName(), tableName, null);
+            ResultSetMetaData resultSetMetaData = columnResultSet.getMetaData();
+            List<String> columnResultSetColumnList = new ArrayList<>();
+            for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                columnResultSetColumnList.add(resultSetMetaData.getColumnName(i));
+            }
+            while (columnResultSet.next()) {
+                String name = columnResultSet.getString("COLUMN_NAME");
+                Column column = new Column(name, columnResultSet.getInt("DATA_TYPE"));
+                column.setRemark(columnResultSet.getString("REMARKS"));
+                column.setLength(columnResultSet.getInt("COLUMN_SIZE"));
+                column.setPrimaryKey(primaryKeyList.contains(name));
+                column.setNullable("YES".equals(columnResultSet.getString("IS_NULLABLE")));
+                if (columnResultSetColumnList.contains("IS_AUTOINCREMENT")) {
+                    column.setAutoincrement("YES".equals(columnResultSet.getString("IS_AUTOINCREMENT")));
+                }
+                result.add(column);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new InfoException(e);
+        } finally {
+            JdbcUtil.close(columnResultSet);
+        }
     }
 
     @Override
     public String getRemark() {
         ResultSet resultSet = null;
         try {
-            DatabaseMetaData metaData = this.oracleJdbc.getConnection().getMetaData();
-            String schema;
-            String originTableName;
-            if (this.tableName.contains(".")) {
-                String[] split = this.tableName.split("\\.");
-                schema = split[0];
-                originTableName = split[1];
-            } else {
-                schema = null;
-                originTableName = this.tableName;
-            }
-            resultSet = metaData.getTables(null, schema == null ? null : schema.toUpperCase(), originTableName, new String[]{"TABLE", "REMARKS"});
-            while (resultSet.next()) {
+            DatabaseMetaData metaData = oracleDatabase.oracleJdbc.getConnection().getMetaData();
+            resultSet = metaData.getTables(oracleDatabase.oracleJdbc.getConnection().getCatalog(), oracleDatabase.getName().toUpperCase(), tableName, new String[]{"TABLE", "REMARKS"});
+            if (resultSet.next()) {
                 return resultSet.getString("REMARKS");
             }
             return null;
@@ -74,7 +111,7 @@ public final class OracleTable implements SqlTable {
         if (StringUtil.isEmpty(newTableName)) {
             return;
         }
-        oracleJdbc.execute("ALTER TABLE " + tableName + " RENAME TO " + newTableName);
+        oracleDatabase.oracleJdbc.execute("ALTER TABLE " + tableName + " RENAME TO " + newTableName);
     }
 
     @Override
@@ -87,32 +124,26 @@ public final class OracleTable implements SqlTable {
         if (data.size() == 0) {
             return 0;
         }
-
         List<Column> allColumn = getColumns();
         if (ObjectUtil.isEmpty(allColumn)) {
             return 0;
         }
-
-        Connection connection = oracleJdbc.getConnection();
-
-        String sql = "INSERT INTO " + tableName + " (";
+        Connection connection = oracleDatabase.oracleJdbc.getConnection();
+        String sql = "INSERT INTO " + getTotalTableName() + " (";
         String value = " VALUES (";
         int index = 0;
         for (Column column : allColumn) {
             index++;
             String end;
-
             if (index == allColumn.size()) {
                 end = ")";
             } else {
                 end = ", ";
             }
-
             sql = StringUtil.append(sql, column.getName(), end);
             value = StringUtil.append(value, "?", end);
         }
         sql = StringUtil.append(sql, value);
-
         PreparedStatement preparedStatement = null;
         try {
             connection.setAutoCommit(false);
@@ -161,7 +192,7 @@ public final class OracleTable implements SqlTable {
 
     @Override
     public long delete(Filter filter) {
-        return oracleJdbc.execute(new SqlBuilder(tableName, OracleJdbc.class).parseDeleteSql(filter));
+        return oracleDatabase.oracleJdbc.execute(new SqlBuilder(getTotalTableName(), OracleJdbc.class).parseDeleteSql(filter));
     }
 
     @Override
@@ -169,44 +200,20 @@ public final class OracleTable implements SqlTable {
         if (ObjectUtil.isEmpty(setData)) {
             return 0;
         }
-
-        // 根据字段类型转换数据
-        Set<String> keySet = setData.keySet();
-        List<Column> columnList = getColumns();
-        if (columnList == null) {
-            columnList = new ArrayList<>();
-        }
-        for (String key : keySet) {
-            Object value = setData.get(key);
-            Column column = null;
-            for (Column item : columnList) {
-                if (item.getName().equals(key)) {
-                    column = item;
-                    break;
-                }
-            }
-            DataType dataType = null;
-            if (column != null) {
-                dataType = column.getDataType();
-            }
-            value = DataType.transform(value, dataType);
-            setData.put(key, value);
-        }
-
-        return oracleJdbc.execute(new SqlBuilder(tableName, OracleJdbc.class).parseUpdateSql(setData, filter));
+        return oracleDatabase.oracleJdbc.execute(new SqlBuilder(getTotalTableName(), OracleJdbc.class).parseUpdateSql(setData, filter));
     }
 
     @Override
     public long count(Filter filter) {
-        return Long.parseLong(oracleJdbc.queryBySql(
-                new SqlBuilder(tableName, OracleJdbc.class).parseCountSql(filter)
+        return Long.parseLong(oracleDatabase.oracleJdbc.query(
+                new SqlBuilder(getTotalTableName(), OracleJdbc.class).parseCountSql(filter)
         ).get(0).get("C").toString());
     }
 
     @Override
     public List<Map<String, Object>> queryData(Query query) {
-        return oracleJdbc.queryBySql(
-                new SqlBuilder(tableName, OracleJdbc.class).parseQueryDataSql(query),
+        return oracleDatabase.oracleJdbc.query(
+                new SqlBuilder(getTotalTableName(), OracleJdbc.class).parseQueryDataSql(query),
                 ArrayUtil.parse("R")
         );
     }

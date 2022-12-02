@@ -1,10 +1,11 @@
 package com.codejune.jdbc.mongodb;
 
+import com.codejune.common.exception.InfoException;
+import com.codejune.common.util.StringUtil;
+import com.codejune.jdbc.Database;
 import com.mongodb.*;
 import com.mongodb.MongoClient;
-import com.mongodb.client.*;
 import com.codejune.Jdbc;
-import com.codejune.common.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * */
 public class MongodbJdbc implements Jdbc {
 
-    private final MongoClient mongoClient;
+    final MongoClient mongoClient;
 
     public MongodbJdbc(String host, int port, String database, String username, String password) {
         MongoClientOptions mongoClientOptions = MongoClientOptions.builder().build();
@@ -28,58 +29,42 @@ public class MongodbJdbc implements Jdbc {
         this.mongoClient = new MongoClient(new ServerAddress(host, port), mongoClientOptions);
     }
 
-    /**
-     * 获取表
-     *
-     * @param database 数据库名
-     * @param tableName 表名
-     *
-     * @return Table
-     * */
-    public MongodbTable getTable(String database, String tableName) {
-        return new MongodbTable(this.mongoClient.getDatabase(database), tableName);
+    @Override
+    public final void close() {
+        if (this.mongoClient != null) {
+            this.mongoClient.close();
+        }
     }
 
     @Override
-    public MongodbTable getTable(String tableName) {
-        if (tableName.contains(".")) {
-            String[] split = tableName.split("\\.");
-            return getTable(split[0], split[1]);
+    public final MongodbDatabase getDatabase(String databaseName) {
+        if (StringUtil.isEmpty(databaseName)) {
+            throw new InfoException("databaseName is null");
         }
-        return null;
+        return new MongodbDatabase(this, databaseName);
     }
 
     @Override
-    public List<MongodbTable> getTables(String schema) {
-        List<MongodbTable> result = new ArrayList<>();
-        List<MongoDatabase> mongoDatabaseList = new ArrayList<>();
-        if (StringUtil.isEmpty(schema)) {
-            MongoIterable<String> listDatabaseNames = this.mongoClient.listDatabaseNames();
-            for (String d : listDatabaseNames) {
-                result.addAll(getTables(d));
-            }
-        } else {
-            mongoDatabaseList.add(this.mongoClient.getDatabase(schema));
-        }
-        for (MongoDatabase mongoDatabase : mongoDatabaseList) {
-            MongoIterable<String> collections = mongoDatabase.listCollectionNames();
-            for (String collection: collections) {
-                result.add(getTable(collection));
-            }
+    public final List<MongodbDatabase> getDatabases() {
+        List<MongodbDatabase> result = new ArrayList<>();
+        for (String item : mongoClient.listDatabaseNames()) {
+            result.add(getDatabase(item));
         }
         return result;
     }
 
     @Override
-    public List<MongodbTable> getTables() {
-        return getTables(null);
+    public final Database switchDatabase(String databaseName) {
+        return getDatabase(databaseName);
     }
 
     @Override
-    public void close() {
-        if (this.mongoClient != null) {
-            this.mongoClient.close();
+    public final Database getDefaultDatabase() {
+        MongoCredential mongoCredential = mongoClient.getCredential();
+        if (mongoCredential == null) {
+            throw new InfoException("mongoCredential is null");
         }
+        return getDatabase(mongoCredential.getUserName());
     }
 
 }

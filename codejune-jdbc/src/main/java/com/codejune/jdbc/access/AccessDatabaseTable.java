@@ -25,15 +25,18 @@ import java.util.Map;
  * */
 public final class AccessDatabaseTable implements SqlTable {
 
-    private final AccessDatabaseJdbc accessDatabaseJdbc;
+    private final AccessDatabaseDatabase accessDatabaseDatabase;
 
     private final String tableName;
 
+    private final OracleTable oracleTable;
+
     private static final Object OBJECT = new Object();
 
-    AccessDatabaseTable(AccessDatabaseJdbc accessDatabaseJdbc, String tableName) {
-        this.accessDatabaseJdbc = accessDatabaseJdbc;
+    AccessDatabaseTable(AccessDatabaseDatabase accessDatabaseDatabase, String tableName) {
+        this.accessDatabaseDatabase = accessDatabaseDatabase;
         this.tableName = tableName;
+        this.oracleTable = accessDatabaseDatabase.oracleDatabase.getTable(tableName);
     }
 
     /**
@@ -46,7 +49,7 @@ public final class AccessDatabaseTable implements SqlTable {
             throw new InfoException("字段不能为空");
         }
         try {
-            com.healthmarketscience.jackcess.Table table = accessDatabaseJdbc.database.getTable(tableName);
+            com.healthmarketscience.jackcess.Table table = accessDatabaseDatabase.accessDatabaseJdbc.database.getTable(tableName);
             if (table != null) {
                 List<Column> columns = getColumns();
                 boolean exist = true;
@@ -72,9 +75,9 @@ public final class AccessDatabaseTable implements SqlTable {
                 tableData = new ArrayList<>();
             } else {
                 tableData = query().getData();
-                accessDatabaseJdbc.deleteTable(tableName);
+                accessDatabaseDatabase.deleteTable(tableName);
             }
-            accessDatabaseJdbc.createTable(tableName, null, columnList);
+            accessDatabaseDatabase.createTable(tableName, null, columnList);
             this.insert(tableData);
         } catch (IOException e) {
             throw new ErrorException(e.getMessage());
@@ -110,7 +113,7 @@ public final class AccessDatabaseTable implements SqlTable {
      * @return 数量
      * */
     public long count(Filter filter, boolean isCase) {
-        return Long.parseLong(accessDatabaseJdbc.queryBySql(
+        return Long.parseLong(accessDatabaseDatabase.accessDatabaseJdbc.query(
                 new SqlBuilder(tableName, isCase ? AccessDatabaseJdbc.class : OracleJdbc.class).parseCountSql(filter)
         ).get(0).get("C").toString());
     }
@@ -124,7 +127,7 @@ public final class AccessDatabaseTable implements SqlTable {
      * @return 数量
      * */
     public List<Map<String, Object>> queryData(Query query, boolean isCase) {
-        return accessDatabaseJdbc.queryBySql(
+        return accessDatabaseDatabase.accessDatabaseJdbc.query(
                 new SqlBuilder(tableName, isCase ? AccessDatabaseJdbc.class : OracleJdbc.class).parseQueryDataSql(query),
                 ArrayUtil.parse("R")
         );
@@ -132,47 +135,43 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public List<Column> getColumns() {
-        List<Column> result = accessDatabaseJdbc.oracleJdbc.getColumnCache(tableName);
-        if (result == null) {
-            result = new ArrayList<>();
-            List<? extends com.healthmarketscience.jackcess.Column> columns;
+        List<Column> result = new ArrayList<>();
+        List<? extends com.healthmarketscience.jackcess.Column> columns;
+        try {
+            columns = accessDatabaseDatabase.accessDatabaseJdbc.database.getTable(tableName).getColumns();
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+        for (com.healthmarketscience.jackcess.Column jackcessColumn : columns) {
+            String name = jackcessColumn.getName();
+            int sqlType;
+            int length = jackcessColumn.getLength();
+            boolean isPrimaryKey = jackcessColumn.isAutoNumber();
             try {
-                columns = this.accessDatabaseJdbc.database.getTable(tableName).getColumns();
+                sqlType = jackcessColumn.getSQLType();
+                if (jackcessColumn.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
+                    sqlType = Types.BOOLEAN;
+                }
             } catch (Exception e) {
                 throw new InfoException(e);
             }
-            for (com.healthmarketscience.jackcess.Column jackcessColumn : columns) {
-                String name = jackcessColumn.getName();
-                int sqlType;
-                int length = jackcessColumn.getLength();
-                boolean isPrimaryKey = jackcessColumn.isAutoNumber();
-                try {
-                    sqlType = jackcessColumn.getSQLType();
-                    if (jackcessColumn.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
-                        sqlType = Types.BOOLEAN;
-                    }
-                } catch (Exception e) {
-                    throw new InfoException(e);
-                }
-                Column column = new Column(name, sqlType);
-                column.setLength(length);
-                column.setPrimaryKey(isPrimaryKey);
-                result.add(column);
-            }
-            accessDatabaseJdbc.oracleJdbc.setColumnCache(tableName, result);
+            Column column = new Column(name, sqlType);
+            column.setLength(length);
+            column.setPrimaryKey(isPrimaryKey);
+            result.add(column);
         }
-        return ObjectUtil.clone(result);
+        return result;
     }
 
     @Override
     public String getRemark() {
-        return accessDatabaseJdbc.oracleJdbc.getTable(tableName).getRemark();
+        return oracleTable.getRemark();
     }
 
     @Override
     public void rename(String newTableName) {
-        accessDatabaseJdbc.oracleJdbc.getTable(tableName).rename(newTableName);
-        accessDatabaseJdbc.reload(true);
+        oracleTable.rename(newTableName);
+        accessDatabaseDatabase.accessDatabaseJdbc.reload(true);
     }
 
     @Override
@@ -182,22 +181,19 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public long insert(List<Map<String, Object>> data) {
-        OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
         synchronized (OBJECT) {
-            return table.insert(data);
+            return oracleTable.insert(data);
         }
     }
 
     @Override
     public long delete(Filter filter) {
-        OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
-        return table.delete(filter);
+        return oracleTable.delete(filter);
     }
 
     @Override
     public long update(Map<String, Object> setData, Filter filter) {
-        OracleTable table = accessDatabaseJdbc.oracleJdbc.getTable(tableName);
-        return table.update(setData, filter);
+        return oracleTable.update(setData, filter);
     }
 
     @Override

@@ -1,8 +1,7 @@
 package com.codejune;
 
 import com.codejune.common.Closeable;
-import com.codejune.jdbc.Table;
-import com.codejune.common.util.StringUtil;
+import com.codejune.jdbc.Database;
 import java.util.List;
 
 /**
@@ -13,48 +12,33 @@ import java.util.List;
 public interface Jdbc extends Closeable {
 
     /**
-     * 获取表
+     * 获取数据库
      *
-     * @param tableName 表名
+     * @param databaseName 数据库名
      *
-     * @return Table
+     * @return Database
      * */
-    Table getTable(String tableName);
+    Database getDatabase(String databaseName);
 
     /**
-     * 获取表集合
+     * 获取数据库集合
      *
-     * @param schema schema
-     *
-     * @return Table
+     * @return List<Database>
      * */
-    List<? extends Table> getTables(String schema);
+    List<? extends Database> getDatabases();
 
     /**
-     * 获取表集合
+     * 切换数据库
      *
-     * @return Table
+     * @param databaseName 数据库名
      * */
-    List<? extends Table> getTables();
+    Database switchDatabase(String databaseName);
 
     /**
-     * 表是否存在
+     * 获取默认数据库
      *
-     * @param tableName 表名
-     *
-     * @return 表是否存在
+     * @return 默认数据库
      * */
-    default boolean isExistTable(String tableName) {
-        if (StringUtil.isEmpty(tableName)) {
-            return false;
-        }
-        List<? extends Table> tables = getTables();
-        for (Table table : tables) {
-            if (tableName.equals(table.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
+    Database getDefaultDatabase();
 
 }
