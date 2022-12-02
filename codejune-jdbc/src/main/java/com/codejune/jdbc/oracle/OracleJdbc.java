@@ -74,7 +74,7 @@ public class OracleJdbc extends SqlJdbc {
     @Override
     public final List<OracleDatabase> getDatabases() {
         List<OracleDatabase> result = new ArrayList<>();
-        List<Map<String, Object>> users = query("SELECT * FROM DBA_USERS");
+        List<Map<String, Object>> users = query("SELECT * FROM ALL_USERS");
         for (Map<String, Object> map : users) {
             result.add(getDatabase(MapUtil.getValue(map, "USERNAME", String.class)));
         }

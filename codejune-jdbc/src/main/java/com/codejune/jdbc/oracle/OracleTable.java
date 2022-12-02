@@ -52,7 +52,7 @@ public final class OracleTable implements SqlTable {
         ResultSet primaryKeyResultSet = null;
         List<String> primaryKeyList = new ArrayList<>();
         try {
-            primaryKeyResultSet = databaseMetaData.getPrimaryKeys(oracleDatabase.oracleJdbc.getConnection().getCatalog(), oracleDatabase.getName(), tableName);
+            primaryKeyResultSet = databaseMetaData.getPrimaryKeys(oracleDatabase.getName(), oracleDatabase.getName(), tableName);
             while (primaryKeyResultSet.next()) {
                 primaryKeyList.add(primaryKeyResultSet.getString("COLUMN_NAME"));
             }
@@ -63,7 +63,7 @@ public final class OracleTable implements SqlTable {
         }
         ResultSet columnResultSet = null;
         try {
-            columnResultSet = databaseMetaData.getColumns(oracleDatabase.oracleJdbc.getConnection().getCatalog(), oracleDatabase.getName(), tableName, null);
+            columnResultSet = databaseMetaData.getColumns(oracleDatabase.getName(), oracleDatabase.getName(), tableName, null);
             ResultSetMetaData resultSetMetaData = columnResultSet.getMetaData();
             List<String> columnResultSetColumnList = new ArrayList<>();
             for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
@@ -94,7 +94,7 @@ public final class OracleTable implements SqlTable {
         ResultSet resultSet = null;
         try {
             DatabaseMetaData metaData = oracleDatabase.oracleJdbc.getConnection().getMetaData();
-            resultSet = metaData.getTables(oracleDatabase.oracleJdbc.getConnection().getCatalog(), oracleDatabase.getName().toUpperCase(), tableName, new String[]{"TABLE", "REMARKS"});
+            resultSet = metaData.getTables(oracleDatabase.getName(), oracleDatabase.getName(), tableName, new String[]{"TABLE", "REMARKS"});
             if (resultSet.next()) {
                 return resultSet.getString("REMARKS");
             }
