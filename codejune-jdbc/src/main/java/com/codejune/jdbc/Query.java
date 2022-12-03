@@ -158,6 +158,27 @@ public class Query implements Builder {
             list.add(MapUtil.parse(sort));
             map.put("sort", list);
         }
+        List<?> field = MapUtil.getValue(map, "field", List.class);
+        if (!ObjectUtil.isEmpty(field)) {
+            List<Field> fieldList = new ArrayList<>();
+            for (Object item : field) {
+                if (item == null) {
+                    continue;
+                }
+                String name = null;
+                String alias = null;
+                if (item instanceof String) {
+                    name = ObjectUtil.toString(item);
+                }
+                if (DataType.parse(item.getClass()) == DataType.MAP) {
+                    Map<?, ?> itemMap = MapUtil.parse(item);
+                    name = MapUtil.getValue(itemMap, "name", String.class);
+                    alias = MapUtil.getValue(itemMap, "alias", String.class);
+                }
+                fieldList.add(new Field().setName(name).setAlias(alias));
+            }
+            map.put("field", fieldList);
+        }
         ObjectUtil.assignment(this, map);
     }
 

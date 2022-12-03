@@ -88,7 +88,7 @@ public abstract class SqlJdbc implements Jdbc {
             int columnCount = resultSetMetaData.getColumnCount();
             List<String> columns = new ArrayList<>();
             for (int i = 1; i <= columnCount; i++) {
-                columns.add(resultSetMetaData.getColumnName(i));
+                columns.add(resultSetMetaData.getColumnLabel(i));
             }
             while (resultSet.next()) {
                 Map<String, Object> map = new LinkedHashMap<>();
