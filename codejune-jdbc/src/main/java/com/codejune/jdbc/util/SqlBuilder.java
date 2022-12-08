@@ -127,7 +127,7 @@ public final class SqlBuilder {
                 result = field.getName();
             }
             if (!StringUtil.isEmpty(field.getAlias())) {
-                result = result + " " + field.getAlias();
+                result = result + " AS '" + field.getAlias() + "'";
             }
             return result;
         }, ", ")) + " FROM " + tableName;

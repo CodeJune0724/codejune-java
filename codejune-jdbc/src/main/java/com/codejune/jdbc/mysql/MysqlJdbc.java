@@ -29,7 +29,7 @@ public class MysqlJdbc extends SqlJdbc {
 
     private static Connection getConnection(String host, int port, String database, String username, String password) {
         try {
-            String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+            String url = "jdbc:mysql://" + host + ":" + port + "/" + (StringUtil.isEmpty(database) ? "" : database);
             Properties properties = new Properties();
             properties.put("user", username);
             properties.put("password", password);
@@ -48,7 +48,7 @@ public class MysqlJdbc extends SqlJdbc {
     }
 
     @Override
-    public final List<? extends MysqlDatabase> getDatabases() {
+    public final List<MysqlDatabase> getDatabases() {
         List<MysqlDatabase> result = new ArrayList<>();
         for (Map<String, Object> item : query("SHOW DATABASES")) {
             result.add(getDatabase(MapUtil.getValue(item, "Database", String.class)));
