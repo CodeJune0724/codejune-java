@@ -3,11 +3,11 @@ import com.codejune.common.os.Folder;
 
 public final class Package {
 
-    private static final String DIR = "E:\\ZJ\\project\\ksd\\src\\main\\java\\com\\kesida\\zjcommon";
+    private static final String DIR = "E:\\ZJ\\project\\swgd-mongodb-util\\src\\main\\java\\com\\easipass\\swgd\\param\\common";
 
-    private static final String PACKAGE = "com.kesida.zjcommon";
+    private static final String PACKAGE = "com.easipass.swgd.param.common";
 
-    private static final String[] MODULE_LIST = new String[] {"common", "http", "jdbc"};
+    private static final String[] MODULE_LIST = new String[] {"common", "http", "jdbc", "excel"};
 
     public static void main(String[] args) {
         new Folder(DIR).delete();
