@@ -228,7 +228,7 @@ public enum DataType {
                 List<Field> allFields = classInfo.getFields();
                 for (Field field : allFields) {
                     Object value = field.getData(object);
-                    Method method = classInfo.getMethod(BeanUtil.getGetterMethodName(field.getName(), parse(field.getType())));
+                    Method method = classInfo.getGetMethod(field.getName());
                     if (method != null) {
                         try {
                             value = method.execute(object);
@@ -275,7 +275,7 @@ public enum DataType {
                 for (Field field : allFields) {
                     if (key.equals(field.getName())) {
                         value = transform(value, field.getType());
-                        Method method = classInfo.getMethod(BeanUtil.getSetterMethodName(field.getName()));
+                        Method method = classInfo.getSetMethod(field.getName());
                         boolean isExecuteMethod = false;
                         if (method != null) {
                             isExecuteMethod = true;

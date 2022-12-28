@@ -3,8 +3,12 @@ package com.codejune.common;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.classInfo.Method;
 import com.codejune.common.exception.ErrorException;
+import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -211,6 +215,56 @@ public final class ClassInfo {
             }
         }
         return null;
+    }
+
+    /**
+     * 获取get方法
+     *
+     * @param fieldName 字段名
+     *
+     * @return Method
+     * */
+    public Method getGetMethod(String fieldName) {
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(aClass);
+            for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
+                if (propertyDescriptor.getName().equals(fieldName)) {
+                    java.lang.reflect.Method readMethod = propertyDescriptor.getReadMethod();
+                    if (readMethod != null) {
+                        return getMethod(readMethod.getName());
+                    }
+                    break;
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
+    /**
+     * 获取set方法
+     *
+     * @param fieldName 字段名
+     *
+     * @return Method
+     * */
+    public Method getSetMethod(String fieldName) {
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(aClass);
+            for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
+                if (propertyDescriptor.getName().equals(fieldName)) {
+                    java.lang.reflect.Method writeMethod = propertyDescriptor.getWriteMethod();
+                    if (writeMethod != null) {
+                        return getMethod(writeMethod.getName());
+                    }
+                    break;
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
     }
 
     /**
