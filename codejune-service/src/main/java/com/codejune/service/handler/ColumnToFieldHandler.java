@@ -1,13 +1,13 @@
-package com.codejune.jdbc.handler;
+package com.codejune.service.handler;
 
 import com.codejune.common.ClassInfo;
 import com.codejune.common.DataType;
 import com.codejune.common.classInfo.Field;
-import com.codejune.common.handler.ObjectHandler;
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.StringUtil;
-import javax.persistence.Column;
-import javax.persistence.Id;
+import com.codejune.service.BasePO;
+import com.codejune.service.Column;
+import com.codejune.service.Id;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,11 +17,11 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public final class ColumnToFieldKeyHandler implements ObjectHandler {
+public final class ColumnToFieldHandler implements DataHandler<String, String> {
 
     private final Map<String, String> newKeyMap = new HashMap<>();
 
-    public ColumnToFieldKeyHandler(Class<?> c, String idName) {
+    public ColumnToFieldHandler(Class<?> c) {
         if (DataType.parse(c) != DataType.OBJECT) {
             return;
         }
@@ -30,7 +30,7 @@ public final class ColumnToFieldKeyHandler implements ObjectHandler {
             String key = field.getName();
             String newKey;
             if (field.isAnnotation(Id.class)) {
-                newKey = idName;
+                newKey = BasePO.getIdName();
             } else if (field.isAnnotation(Column.class)) {
                 newKey = field.getAnnotation(Column.class).name();
             } else {
@@ -41,8 +41,8 @@ public final class ColumnToFieldKeyHandler implements ObjectHandler {
     }
 
     @Override
-    public Object getNewObject(Object key) {
-        String result = this.newKeyMap.get(ObjectUtil.toString(key));
+    public String handler(String key) {
+        String result = this.newKeyMap.get(key);
         if (StringUtil.isEmpty(result)) {
             return key;
         }

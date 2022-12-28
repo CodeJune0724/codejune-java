@@ -3,8 +3,7 @@ package com.codejune.service.handler;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.DataType;
 import com.codejune.common.classInfo.Field;
-import com.codejune.common.handler.ObjectHandler;
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.StringUtil;
 import com.codejune.service.BasePO;
 import com.codejune.service.Column;
@@ -14,15 +13,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ColumnToFieldKeyHandler
+ * FieldToColumnKeyHandler
  *
  * @author ZJ
  * */
-public final class ColumnToFieldKeyHandler implements ObjectHandler {
+public final class FieldToColumnHandler implements DataHandler<String, String> {
 
     private final Map<String, String> newKeyMap = new HashMap<>();
 
-    public ColumnToFieldKeyHandler(Class<?> c) {
+    public FieldToColumnHandler(Class<?> c) {
         if (DataType.parse(c) != DataType.OBJECT) {
             return;
         }
@@ -37,13 +36,13 @@ public final class ColumnToFieldKeyHandler implements ObjectHandler {
             } else {
                 newKey = key;
             }
-            newKeyMap.put(newKey, key);
+            newKeyMap.put(key, newKey);
         }
     }
 
     @Override
-    public Object getNewObject(Object key) {
-        String result = this.newKeyMap.get(ObjectUtil.toString(key));
+    public String handler(String key) {
+        String result = this.newKeyMap.get(key);
         if (StringUtil.isEmpty(result)) {
             return key;
         }

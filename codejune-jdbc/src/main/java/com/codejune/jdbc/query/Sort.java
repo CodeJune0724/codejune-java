@@ -1,6 +1,6 @@
 package com.codejune.jdbc.query;
 
-import com.codejune.common.handler.ObjectHandler;
+import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.ObjectUtil;
 
 /**
@@ -37,13 +37,13 @@ public final class Sort {
     /**
      * 设置key
      *
-     * @param objectHandler objectHandler
+     * @param dataHandler dataHandler
      * */
-    public void setKey(ObjectHandler objectHandler) {
-        if (objectHandler == null) {
+    public void keyHandler(DataHandler<String, String> dataHandler) {
+        if (dataHandler == null) {
             return;
         }
-        this.column = ObjectUtil.toString(objectHandler.getNewObject(this.column));
+        this.column = dataHandler.handler(this.column);
     }
 
     /**

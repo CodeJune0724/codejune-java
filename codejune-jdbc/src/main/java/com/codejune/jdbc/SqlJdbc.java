@@ -5,9 +5,10 @@ import com.codejune.Jdbc;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.Charset;
+import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
-import com.codejune.jdbc.handler.ColumnToFieldKeyHandler;
-import com.codejune.jdbc.handler.FieldToColumnKeyHandler;
+import com.codejune.jdbc.handler.ColumnToFieldHandler;
+import com.codejune.jdbc.handler.FieldToColumnHandler;
 import com.codejune.jdbc.util.JdbcUtil;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.EncodedResource;
@@ -153,10 +154,11 @@ public abstract class SqlJdbc implements Jdbc {
                 break;
             }
         }
-        FieldToColumnKeyHandler entityKeyHandler = new FieldToColumnKeyHandler(aClass, idName);
-        query.setKeyHandler(entityKeyHandler);
+        FieldToColumnHandler entityKeyHandler = new FieldToColumnHandler(aClass, idName);
+        query.keyHandler(entityKeyHandler);
         QueryResult<Map<String, Object>> queryResult = getDefaultDatabase().getTable(tableName).query(query);
-        return (QueryResult<T>) queryResult.parse(aClass, new ColumnToFieldKeyHandler(aClass, idName));
+        ColumnToFieldHandler columnToFieldHandler = new ColumnToFieldHandler(aClass, idName);
+        return (QueryResult<T>) queryResult.parse(aClass, key -> columnToFieldHandler.handler(ObjectUtil.toString(key)));
     }
 
     /**

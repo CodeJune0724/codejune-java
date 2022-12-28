@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.handler.ObjectHandler;
+import com.codejune.common.handler.DataHandler;
 import java.util.*;
 
 /**
@@ -71,22 +71,22 @@ public final class MapUtil {
      * 转换key
      *
      * @param map map
-     * @param objectHandler keyHandler
+     * @param dataHandler dataHandler
      * @param <T> T
      *
      * @return Map
      * */
-    public static <T> Map<?, T> transformKey(Map<?, T> map, ObjectHandler objectHandler) {
+    public static <T> Map<?, T> transformKey(Map<?, T> map, DataHandler<Object, Object> dataHandler) {
         if (map == null) {
             return null;
         }
-        if (objectHandler == null) {
-            objectHandler = new ObjectHandler() {};
+        if (dataHandler == null) {
+            dataHandler = o -> null;
         }
         Map<Object, T> result = new HashMap<>();
         Set<?> keySet = new HashSet<>(map.keySet());
         for (Object key : keySet) {
-            Object newKey = objectHandler.getNewObject(key);
+            Object newKey = dataHandler.handler(key);
             if (newKey == null) {
                 continue;
             }
@@ -130,12 +130,7 @@ public final class MapUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> Map<String, T> transformKeyToHump(Map<String, T> map) {
-        ObjectHandler keyHandler = new ObjectHandler() {
-            @Override
-            public Object getNewObject(Object key) {
-                return StringUtil.underlineToHump(ObjectUtil.toString(key));
-            }
-        };
+        DataHandler<Object, Object> keyHandler = key -> StringUtil.underlineToHump(ObjectUtil.toString(key));
         return (Map<String, T>) transformKey(map, keyHandler);
     }
 
@@ -149,12 +144,7 @@ public final class MapUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> Map<String, T> transformKeyToUnderline(Map<String, T> map) {
-        ObjectHandler keyHandler = new ObjectHandler() {
-            @Override
-            public Object getNewObject(Object key) {
-                return StringUtil.humpToUnderline(ObjectUtil.toString(key));
-            }
-        };
+        DataHandler<Object, Object> keyHandler = key -> StringUtil.humpToUnderline(ObjectUtil.toString(key));
         return (Map<String, T>) transformKey(map, keyHandler);
     }
 
