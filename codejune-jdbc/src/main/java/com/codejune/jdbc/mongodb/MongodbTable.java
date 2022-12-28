@@ -1,7 +1,6 @@
 package com.codejune.jdbc.mongodb;
 
 import com.codejune.common.exception.ErrorException;
-import com.codejune.common.handler.ObjectHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.jdbc.*;
 import com.codejune.jdbc.query.Field;
@@ -167,15 +166,12 @@ public final class MongodbTable implements Table {
         for (Document document : queryData) {
             Map<String, Object> map = new LinkedHashMap<>(document);
             if (!ObjectUtil.isEmpty(fieldMap)) {
-                map = MapUtil.transformGeneric(MapUtil.transformKey(map, new ObjectHandler() {
-                    @Override
-                    public Object getNewObject(Object key) {
-                        String result = fieldMap.get(ObjectUtil.toString(key));
-                        if (ObjectUtil.isEmpty(result)) {
-                            return key;
-                        } else {
-                            return result;
-                        }
+                map = MapUtil.transformGeneric(MapUtil.transformKey(map, key -> {
+                    String result1 = fieldMap.get(ObjectUtil.toString(key));
+                    if (ObjectUtil.isEmpty(result1)) {
+                        return key;
+                    } else {
+                        return result1;
                     }
                 }), String.class, Object.class);
             }

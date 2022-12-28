@@ -2,7 +2,7 @@ package com.codejune.jdbc;
 
 import com.codejune.common.Builder;
 import com.codejune.common.DataType;
-import com.codejune.common.handler.ObjectHandler;
+import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.query.Field;
@@ -116,20 +116,25 @@ public class Query implements Builder {
     }
 
     /**
-     * 设置key处理
+     * key处理
+     *
+     * @param dataHandler dataHandler
      *
      * @return this
      * */
-    public Query setKeyHandler(ObjectHandler keyHandler) {
-        if (keyHandler == null) {
+    public Query keyHandler(DataHandler<String, String> dataHandler) {
+        if (dataHandler == null) {
             return this;
         }
         if (this.filter != null) {
-            this.filter.setKey(keyHandler);
+            this.filter.itemHandler(item -> {
+                item.setKey(dataHandler.handler(item.getKey()));
+                return item;
+            });
         }
         if (this.sort != null) {
             for (Sort item : sort) {
-                item.setKey(keyHandler);
+                item.keyHandler(dataHandler);
             }
         }
         return this;

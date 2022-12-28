@@ -10,8 +10,8 @@ import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.query.Filter;
-import com.codejune.service.handler.ColumnToFieldKeyHandler;
-import com.codejune.service.handler.FieldToColumnKeyHandler;
+import com.codejune.service.handler.ColumnToFieldHandler;
+import com.codejune.service.handler.FieldToColumnHandler;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,17 +110,17 @@ public abstract class Database {
 
         private final Class<T> basePOClass;
 
-        private final FieldToColumnKeyHandler fieldToColumnKeyHandler;
+        private final FieldToColumnHandler fieldToColumnHandler;
 
-        private final ColumnToFieldKeyHandler columnToFieldKeyHandler;
+        private final ColumnToFieldHandler columnToFieldHandler;
 
         private final String tableName;
 
         private Table(Database database, Class<T> basePOClass) {
             this.database = database;
             this.basePOClass = basePOClass;
-            this.fieldToColumnKeyHandler = new FieldToColumnKeyHandler(basePOClass);
-            this.columnToFieldKeyHandler = new ColumnToFieldKeyHandler(basePOClass);
+            this.fieldToColumnHandler = new FieldToColumnHandler(basePOClass);
+            this.columnToFieldHandler = new ColumnToFieldHandler(basePOClass);
             this.tableName = BasePO.getTableName(basePOClass);
         }
 
@@ -135,10 +135,10 @@ public abstract class Database {
             if (query == null) {
                 query = new Query();
             }
-            query.setKeyHandler(fieldToColumnKeyHandler);
+            query.keyHandler(fieldToColumnHandler);
             Jdbc jdbc = this.database.getJdbc();
             try {
-                return getTable(jdbc).query(query).parse(basePOClass, columnToFieldKeyHandler);
+                return getTable(jdbc).query(query).parse(basePOClass, o -> columnToFieldHandler.handler(ObjectUtil.toString(o)));
             } finally {
                 this.database.pool.returnObject(jdbc);
             }
@@ -181,7 +181,7 @@ public abstract class Database {
                     t.setId(database.actualGetNextId(this));
                 }
                 Map<String, Object> map = MapUtil.filterKey(MapUtil.parse(t, String.class, Object.class), columnList);
-                map = MapUtil.transformGeneric(MapUtil.transformKey(map, fieldToColumnKeyHandler), String.class, Object.class);
+                map = MapUtil.transformGeneric(MapUtil.transformKey(map, o -> fieldToColumnHandler.handler(ObjectUtil.toString(o))), String.class, Object.class);
                 if (isId) {
                     table.update(map, new Filter().and(Filter.Item.equals(BasePO.getIdName(), t.getId())));
                 } else {

@@ -3,7 +3,7 @@ package com.codejune.jdbc.query;
 import com.codejune.common.Builder;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.ObjectHandler;
+import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -79,17 +79,19 @@ public final class Filter implements Builder {
     /**
      * 设置新的key
      *
-     * @param objectHandler objectHandler
+     * @param dataHandler dataHandler
+     *
+     * @return this
      * */
-    public Filter setKey(ObjectHandler objectHandler) {
-        if (objectHandler == null) {
+    public Filter itemHandler(DataHandler<Item, Item> dataHandler) {
+        if (dataHandler == null) {
             return this;
         }
         for (Filter filter : or) {
-            filter.setKey(objectHandler);
+            filter.itemHandler(dataHandler);
         }
         for (Item item : and) {
-            item.key = ObjectUtil.toString(objectHandler.getNewObject(item.key));
+            ObjectUtil.assignment(item, dataHandler.handler(item));
         }
         return this;
     }
@@ -152,29 +154,6 @@ public final class Filter implements Builder {
         this.and.clear();
         this.and.addAll(list);
         return this;
-    }
-
-    /**
-     * 通过key获取
-     *
-     * @param key key
-     *
-     * @return List
-     * */
-    public List<Item> getItem(String key) {
-        List<Item> result = new ArrayList<>();
-        if (StringUtil.isEmpty(key)) {
-            return result;
-        }
-        for (Filter filter : getOr()) {
-            result.addAll(filter.getItem(key));
-        }
-        for (Item item : getAnd()) {
-            if (key.equals(item.getKey())) {
-                result.add(item);
-            }
-        }
-        return result;
     }
 
     /**
@@ -311,11 +290,12 @@ public final class Filter implements Builder {
             this(null, null, null);
         }
 
+        @SuppressWarnings("unchecked")
         public Item(Type type, Object key, Object value) {
             this.type = type;
             this.key = ObjectUtil.toString(key);
-            if (value instanceof ObjectHandler) {
-                value = ((ObjectHandler) value).getNewObject(null);
+            if (value instanceof DataHandler) {
+                value = ((DataHandler<Object, Object>) value).handler(key);
             }
             this.value = value;
         }
