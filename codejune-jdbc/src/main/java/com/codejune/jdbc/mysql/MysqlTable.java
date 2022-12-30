@@ -3,6 +3,7 @@ package com.codejune.jdbc.mysql;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Query;
+import com.codejune.jdbc.oracle.OracleJdbc;
 import com.codejune.jdbc.oracle.OracleTable;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
@@ -41,12 +42,12 @@ public final class MysqlTable implements SqlTable {
 
     @Override
     public long delete(Filter filter) {
-        return oracleTable.delete(filter);
+        return mysqlDatabase.mysqlJdbc.execute(new SqlBuilder(tableName, OracleJdbc.class).parseDeleteSql(filter));
     }
 
     @Override
     public long update(Map<String, Object> setData, Filter filter) {
-        return oracleTable.update(setData, filter);
+        return oracleTable.update(setData, filter, MysqlJdbc.class);
     }
 
     @Override
