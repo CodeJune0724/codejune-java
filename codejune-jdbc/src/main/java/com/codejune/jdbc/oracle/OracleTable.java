@@ -1,5 +1,6 @@
 package com.codejune.jdbc.oracle;
 
+import com.codejune.Jdbc;
 import com.codejune.common.DataType;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
@@ -30,14 +31,6 @@ public final class OracleTable implements SqlTable {
     OracleTable(OracleDatabase oracleDatabase, String tableName) {
         this.oracleDatabase = oracleDatabase;
         this.tableName = tableName;
-    }
-
-    private String getTotalTableName() {
-        String result = tableName;
-        if (!StringUtil.isEmpty(oracleDatabase.getName())) {
-            result = oracleDatabase.getName() + "." + tableName;
-        }
-        return result;
     }
 
     @Override
@@ -129,7 +122,7 @@ public final class OracleTable implements SqlTable {
             return 0;
         }
         Connection connection = oracleDatabase.oracleJdbc.getConnection();
-        String sql = "INSERT INTO " + getTotalTableName() + " (";
+        String sql = "INSERT INTO " + tableName + " (";
         String value = " VALUES (";
         int index = 0;
         for (Column column : allColumn) {
@@ -189,30 +182,68 @@ public final class OracleTable implements SqlTable {
 
     @Override
     public long delete(Filter filter) {
-        return oracleDatabase.oracleJdbc.execute(new SqlBuilder(getTotalTableName(), OracleJdbc.class).parseDeleteSql(filter));
+        return oracleDatabase.oracleJdbc.execute(new SqlBuilder(tableName, OracleJdbc.class).parseDeleteSql(filter));
     }
 
     @Override
     public long update(Map<String, Object> setData, Filter filter) {
-        if (ObjectUtil.isEmpty(setData)) {
-            return 0;
-        }
-        return oracleDatabase.oracleJdbc.execute(new SqlBuilder(getTotalTableName(), OracleJdbc.class).parseUpdateSql(setData, filter));
+        return update(setData, filter, OracleJdbc.class);
     }
 
     @Override
     public long count(Filter filter) {
         return Long.parseLong(oracleDatabase.oracleJdbc.query(
-                new SqlBuilder(getTotalTableName(), OracleJdbc.class).parseCountSql(filter)
+                new SqlBuilder(tableName, OracleJdbc.class).parseCountSql(filter)
         ).get(0).get("C").toString());
     }
 
     @Override
     public List<Map<String, Object>> queryData(Query query) {
         return oracleDatabase.oracleJdbc.query(
-                new SqlBuilder(getTotalTableName(), OracleJdbc.class).parseQueryDataSql(query),
+                new SqlBuilder(tableName, OracleJdbc.class).parseQueryDataSql(query),
                 ArrayUtil.parse("R")
         );
+    }
+
+    public long update(Map<String, Object> setData, Filter filter, Class<? extends Jdbc> jdbcType) {
+        if (ObjectUtil.isEmpty(setData)) {
+            return 0;
+        }
+        List<Column> allColumn = getColumns();
+        if (ObjectUtil.isEmpty(allColumn)) {
+            return 0;
+        }
+        String sql = "UPDATE " + tableName + " SET " + ArrayUtil.toString(setData.keySet(), key -> key + " = ?", ", ") + " " + new SqlBuilder(tableName, jdbcType).parseWhere(filter);
+        Connection connection = oracleDatabase.oracleJdbc.getConnection();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            int index = 0;
+            for (String key : setData.keySet()) {
+                index++;
+                Object data = setData.get(key);
+                Column column = null;
+                for (Column item : allColumn) {
+                    if (item.getName().equals(key)) {
+                        column = item;
+                        break;
+                    }
+                }
+                if (column == null) {
+                    throw new InfoException(key + "字段不存在");
+                }
+                if (data == null) {
+                    preparedStatement.setNull(index, column.getSqlType());
+                } else if (column.getDataType() == DataType.DATE) {
+                    preparedStatement.setTimestamp(index, new Timestamp(((Date) DataType.transform(data, column.getDataType())).getTime()));
+                } else if (column.getDataType() == DataType.OBJECT) {
+                    preparedStatement.setObject(index, data);
+                } else {
+                    preparedStatement.setObject(index, DataType.transform(data, column.getDataType()));
+                }
+            }
+            return preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
     }
 
 }
