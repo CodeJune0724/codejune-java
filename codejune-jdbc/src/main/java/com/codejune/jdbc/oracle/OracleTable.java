@@ -121,7 +121,7 @@ public final class OracleTable implements SqlTable {
         if (ObjectUtil.isEmpty(allColumn)) {
             return 0;
         }
-        String sql = "INSERT INTO " + tableName + " (" + ArrayUtil.toString(allColumn, Column::getName, ", ") + ")  VALUES (" + ArrayUtil.toString(ArrayUtil.createSequence(allColumn.size()), integer -> "?", ", ") + ")";
+        String sql = "INSERT INTO " + tableName + " (" + ArrayUtil.toString(allColumn, Column::getName, ", ") + ") VALUES (" + ArrayUtil.toString(ArrayUtil.createSequence(allColumn.size()), integer -> "?", ", ") + ")";
         Connection connection = oracleDatabase.oracleJdbc.getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
