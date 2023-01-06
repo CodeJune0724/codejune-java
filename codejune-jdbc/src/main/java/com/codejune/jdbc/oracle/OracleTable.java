@@ -126,7 +126,7 @@ public final class OracleTable implements SqlTable {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
             int dataSize = data.size();
-            for (int i = 0; i < dataSize; i++) {
+            for (int i = 1; i <= dataSize; i++) {
                 Map<String, Object> map = data.get(i);
                 int index = 0;
                 for (Column column : allColumn) {
@@ -143,7 +143,7 @@ public final class OracleTable implements SqlTable {
                     }
                 }
                 preparedStatement.addBatch();
-                if (i != 0 && i % 50000 == 0) {
+                if (i % 50000 == 0) {
                     preparedStatement.executeBatch();
                     connection.commit();
                     preparedStatement.clearBatch();
