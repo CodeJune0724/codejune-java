@@ -13,23 +13,29 @@ public abstract class DataPageExecutor<T> {
 
     private final int size;
 
-    private final QueryData<T> queryData;
-
     private final long count;
 
-    public DataPageExecutor(int size, QueryData<T> queryData, long count) {
+    public DataPageExecutor(int size, long count) {
         if (size <= 0) {
             throw new InfoException("size <= 0");
         }
         this.size = size;
-        this.queryData = queryData;
         this.count = count;
     }
 
-    public DataPageExecutor(int size, QueryData<T> queryData) {
-        this(size, queryData, -1);
+    public DataPageExecutor(int size) {
+        this(size, -1);
     }
 
+    /**
+     * 数据查询
+     *
+     * @param page 页数
+     * @param size 大小
+     *
+     * @return 查询到的数据
+     * */
+    public abstract List<T> queryData(int page, int size);
     /**
      * 数据处理
      *
@@ -41,9 +47,6 @@ public abstract class DataPageExecutor<T> {
      * 执行
      * */
     public final void run() {
-        if (queryData == null) {
-            return;
-        }
         for (int i = 1; ; i++) {
             int size;
             if (count > 0) {
@@ -57,31 +60,12 @@ public abstract class DataPageExecutor<T> {
             } else {
                 size = this.size;
             }
-            List<T> data = queryData.query(i, size);
+            List<T> data = queryData(i, size);
             if (count <= 0 && ObjectUtil.isEmpty(data)) {
                 break;
             }
             handler(data);
         }
-    }
-
-    /**
-     * 自定义查询
-     *
-     * @author ZJ
-     * */
-    public interface QueryData<T> {
-
-        /**
-         * 查询数据
-         *
-         * @param page 页数
-         * @param size 大小
-         *
-         * @return 查询到的数据
-         * */
-        List<T> query(int page, int size);
-
     }
 
 }

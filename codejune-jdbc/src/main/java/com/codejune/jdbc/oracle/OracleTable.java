@@ -121,30 +121,14 @@ public final class OracleTable implements SqlTable {
         if (ObjectUtil.isEmpty(allColumn)) {
             return 0;
         }
+        String sql = "INSERT INTO " + tableName + " (" + ArrayUtil.toString(allColumn, Column::getName, ", ") + ") VALUES (" + ArrayUtil.toString(ArrayUtil.createSequence(allColumn.size()), integer -> "?", ", ") + ")";
         Connection connection = oracleDatabase.oracleJdbc.getConnection();
-        String sql = "INSERT INTO " + tableName + " (";
-        String value = " VALUES (";
-        int index = 0;
-        for (Column column : allColumn) {
-            index++;
-            String end;
-            if (index == allColumn.size()) {
-                end = ")";
-            } else {
-                end = ", ";
-            }
-            sql = StringUtil.append(sql, column.getName(), end);
-            value = StringUtil.append(value, "?", end);
-        }
-        sql = StringUtil.append(sql, value);
-        PreparedStatement preparedStatement = null;
-        try {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
-            preparedStatement = connection.prepareStatement(sql);
             int dataSize = data.size();
-            for (int i = 0; i < dataSize; i++) {
+            for (int i = 1; i <= dataSize; i++) {
                 Map<String, Object> map = data.get(i);
-                index = 0;
+                int index = 0;
                 for (Column column : allColumn) {
                     index++;
                     Object filedData = map.get(column.getName());
@@ -159,7 +143,7 @@ public final class OracleTable implements SqlTable {
                     }
                 }
                 preparedStatement.addBatch();
-                if (i != 0 && i % 50000 == 0) {
+                if (i % 50000 == 0) {
                     preparedStatement.executeBatch();
                     connection.commit();
                     preparedStatement.clearBatch();
@@ -176,7 +160,6 @@ public final class OracleTable implements SqlTable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            JdbcUtil.close(preparedStatement);
         }
     }
 
