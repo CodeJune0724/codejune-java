@@ -152,7 +152,7 @@ public final class OracleTable implements SqlTable {
             preparedStatement.executeBatch();
             connection.commit();
             return dataSize;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new InfoException(e.getMessage() + ": " + sql);
         } finally {
             try {
