@@ -260,12 +260,32 @@ public final class MongodbTable implements Table {
                 result.put("$nin", value);
                 break;
             case CONTAINS:
-                result.put("$regex", Pattern.compile(RegexUtil.escape(value.toString())));
+                result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
                 break;
             case NOT_CONTAINS:
-                Map<String, Object> map = new HashMap<>();
-                map.put("$regex", Pattern.compile(RegexUtil.escape(value.toString())));
-                result.put("$not", map);
+                Map<String, Object> notContainsMap = new HashMap<>();
+                notContainsMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
+                result.put("$not", notContainsMap);
+                break;
+            case START_WITH:
+                String startWithValue = ObjectUtil.toString(value);
+                result.put("$regex", Pattern.compile(RegexUtil.escape(startWithValue == null ? null : "^" + startWithValue)));
+                break;
+            case NOT_START_WITH:
+                Map<String, Object> notStartWithMap = new HashMap<>();
+                String notStartWithValue = ObjectUtil.toString(value);
+                notStartWithMap.put("$regex", Pattern.compile(RegexUtil.escape(notStartWithValue == null ? null : "^" + notStartWithValue)));
+                result.put("$not", notStartWithMap);
+                break;
+            case END_WITH:
+                String endWithValue = ObjectUtil.toString(value);
+                result.put("$regex", Pattern.compile(RegexUtil.escape(endWithValue == null ? null : endWithValue + "$")));
+                break;
+            case NOT_END_WITH:
+                Map<String, Object> notEndWithMap = new HashMap<>();
+                String notEndWithValue = ObjectUtil.toString(value);
+                notEndWithMap.put("$regex", Pattern.compile(RegexUtil.escape(notEndWithValue == null ? null : notEndWithValue + "$")));
+                result.put("$not", notEndWithMap);
                 break;
         }
         return result;
