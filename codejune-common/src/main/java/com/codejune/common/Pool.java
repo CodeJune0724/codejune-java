@@ -83,7 +83,7 @@ public abstract class Pool<T> implements Closeable {
         for (int i = 0; i < size; i++) {
             T t = this.get();
             if (t instanceof Closeable) {
-                Closeable.close((Closeable) t);
+                ((Closeable) t).close();
             }
         }
         this.genericObjectPool.clear();

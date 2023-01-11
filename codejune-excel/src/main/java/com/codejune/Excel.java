@@ -1,11 +1,10 @@
 package com.codejune;
 
+import com.codejune.common.util.*;
 import com.codejune.common.util.DateUtil;
 import com.monitorjbl.xlsx.StreamingReader;
 import com.codejune.common.Closeable;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.util.IOUtil;
-import com.codejune.common.util.ObjectUtil;
 import com.codejune.excel.Sheet;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -32,10 +31,13 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     }
 
     public Excel(String path) {
-        FileInputStream fileInputStream = null;
+        if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
+            throw new InfoException("excel文件不存在");
+        }
         Workbook tmpWorkbook = null;
-        try {
-            fileInputStream = new FileInputStream(path);
+        try (
+                FileInputStream fileInputStream = new FileInputStream(path)
+        ) {
             if (path.endsWith(".xls")) {
                 tmpWorkbook = WorkbookFactory.create(fileInputStream);
             } else if (path.endsWith(".xlsx")) {
@@ -76,22 +78,15 @@ public final class Excel implements Closeable, Iterable<Sheet> {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            this.close();
             throw new InfoException(e.getMessage());
         } finally {
-            IOUtil.close(fileInputStream);
-            if (tmpWorkbook != null) {
-                try {
-                    tmpWorkbook.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            closeWorkbook(tmpWorkbook);
         }
     }
 
     public Excel(File excelFile) {
-        this(excelFile.getAbsolutePath());
+        this(excelFile == null ? null : excelFile.getAbsolutePath());
     }
 
     /**
@@ -187,11 +182,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
 
     @Override
     public void close() {
-        try {
-            workbook.close();
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        }
+        closeWorkbook(this.workbook);
     }
 
     @Override
@@ -209,6 +200,17 @@ public final class Excel implements Closeable, Iterable<Sheet> {
                 return sheets.get(i[0]++);
             }
         };
+    }
+
+    private void closeWorkbook(Workbook workbook) {
+        if (workbook == null) {
+            return;
+        }
+        try {
+            workbook.close();
+        } catch (Exception e) {
+            throw new InfoException(e.getMessage());
+        }
     }
 
 }
