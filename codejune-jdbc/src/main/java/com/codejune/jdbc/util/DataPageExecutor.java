@@ -1,4 +1,4 @@
-package com.codejune.jdbc.handler;
+package com.codejune.jdbc.util;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.jdbc.Query;
@@ -12,13 +12,13 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public abstract class DataPageHandler extends com.codejune.common.DataPageExecutor<Map<String, Object>> {
+public abstract class DataPageExecutor extends com.codejune.common.DataPageExecutor<Map<String, Object>> {
 
     private final Table table;
 
     private final Filter filter;
 
-    public DataPageHandler(int size, Table table, Filter filter) {
+    public DataPageExecutor(int size, Table table, Filter filter) {
         super(size);
         if (table == null) {
             throw new InfoException("table is null");
@@ -27,7 +27,7 @@ public abstract class DataPageHandler extends com.codejune.common.DataPageExecut
         this.filter = filter;
     }
 
-    public DataPageHandler(int size, Table table) {
+    public DataPageExecutor(int size, Table table) {
         this(size, table, null);
     }
 

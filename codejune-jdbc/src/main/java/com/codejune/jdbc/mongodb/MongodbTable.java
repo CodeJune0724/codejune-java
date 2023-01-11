@@ -260,12 +260,28 @@ public final class MongodbTable implements Table {
                 result.put("$nin", value);
                 break;
             case CONTAINS:
-                result.put("$regex", Pattern.compile(RegexUtil.escape(value.toString())));
+                result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
                 break;
             case NOT_CONTAINS:
-                Map<String, Object> map = new HashMap<>();
-                map.put("$regex", Pattern.compile(RegexUtil.escape(value.toString())));
-                result.put("$not", map);
+                Map<String, Object> notContainsMap = new HashMap<>();
+                notContainsMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
+                result.put("$not", notContainsMap);
+                break;
+            case START_WITH:
+                result.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
+                break;
+            case NOT_START_WITH:
+                Map<String, Object> notStartWithMap = new HashMap<>();
+                notStartWithMap.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
+                result.put("$not", notStartWithMap);
+                break;
+            case END_WITH:
+                result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
+                break;
+            case NOT_END_WITH:
+                Map<String, Object> notEndWithMap = new HashMap<>();
+                notEndWithMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
+                result.put("$not", notEndWithMap);
                 break;
         }
         return result;

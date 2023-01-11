@@ -244,6 +244,18 @@ public final class SqlBuilder {
                     result = notIn;
                 }
                 break;
+            case START_WITH:
+                result = key + " LIKE '" + ObjectUtil.toString(value) + "%'";
+                break;
+            case NOT_START_WITH:
+                result = key + " NOT LIKE '" + ObjectUtil.toString(value) + "%'";
+                break;
+            case END_WITH:
+                result = key + " LIKE '%" + ObjectUtil.toString(value) + "'";
+                break;
+            case NOT_END_WITH:
+                result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "'";
+                break;
         }
         return result;
     }

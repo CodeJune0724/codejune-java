@@ -445,6 +445,54 @@ public final class Filter implements Builder {
         }
 
         /**
+         * 以...开头
+         *
+         * @param key key
+         * @param value value
+         *
+         * @return Item
+         * */
+        public static Item startWith(Object key, Object value) {
+            return new Item(Type.START_WITH, key, value);
+        }
+
+        /**
+         * 不以...开头
+         *
+         * @param key key
+         * @param value value
+         *
+         * @return Item
+         * */
+        public static Item notStartWith(Object key, Object value) {
+            return new Item(Type.NOT_START_WITH, key, value);
+        }
+
+        /**
+         * 以...结尾
+         *
+         * @param key key
+         * @param value value
+         *
+         * @return Item
+         * */
+        public static Item endWith(Object key, Object value) {
+            return new Item(Type.END_WITH, key, value);
+        }
+
+        /**
+         * 不以...结尾
+         *
+         * @param key key
+         * @param value value
+         *
+         * @return Item
+         * */
+        public static Item notEndWith(Object key, Object value) {
+            return new Item(Type.NOT_END_WITH, key, value);
+        }
+
+        /**
          * 类型
          *
          * @author ZJ
@@ -469,7 +517,15 @@ public final class Filter implements Builder {
 
             CONTAINS("$contains"),
 
-            NOT_CONTAINS("$!contains");
+            NOT_CONTAINS("$!contains"),
+
+            START_WITH("$startWith"),
+
+            NOT_START_WITH("$!startWith"),
+
+            END_WITH("$endWith"),
+
+            NOT_END_WITH("$!endWith");
 
             private final String value;
 

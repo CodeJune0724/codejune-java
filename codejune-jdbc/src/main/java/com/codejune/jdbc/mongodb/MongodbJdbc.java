@@ -2,7 +2,6 @@ package com.codejune.jdbc.mongodb;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.StringUtil;
-import com.codejune.jdbc.Database;
 import com.mongodb.*;
 import com.mongodb.MongoClient;
 import com.codejune.Jdbc;
@@ -54,12 +53,12 @@ public class MongodbJdbc implements Jdbc {
     }
 
     @Override
-    public final Database switchDatabase(String databaseName) {
+    public final MongodbDatabase switchDatabase(String databaseName) {
         return getDatabase(databaseName);
     }
 
     @Override
-    public final Database getDefaultDatabase() {
+    public final MongodbDatabase getDefaultDatabase() {
         MongoCredential mongoCredential = mongoClient.getCredential();
         if (mongoCredential == null) {
             throw new InfoException("mongoCredential is null");
