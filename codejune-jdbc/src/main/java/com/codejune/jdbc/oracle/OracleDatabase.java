@@ -6,7 +6,6 @@ import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.database.SqlDatabase;
-import com.codejune.jdbc.util.JdbcUtil;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -44,18 +43,19 @@ public final class OracleDatabase implements SqlDatabase {
     @Override
     public List<OracleTable> getTables() {
         List<OracleTable> result = new ArrayList<>();
-        ResultSet resultSet = null;
+        DatabaseMetaData metaData;
         try {
-            DatabaseMetaData metaData = oracleJdbc.getConnection().getMetaData();
-            resultSet = metaData.getTables(databaseName, databaseName.toUpperCase(), null, new String[]{"TABLE"});
+            metaData = oracleJdbc.getConnection().getMetaData();
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+        try (ResultSet resultSet = metaData.getTables(databaseName, databaseName.toUpperCase(), null, new String[]{"TABLE"})) {
             while (resultSet.next()) {
                 result.add(getTable(resultSet.getString("TABLE_NAME")));
             }
             return result;
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
-        } finally {
-            JdbcUtil.close(resultSet);
         }
     }
 

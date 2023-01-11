@@ -10,7 +10,6 @@ import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
-import com.codejune.jdbc.util.JdbcUtil;
 import com.codejune.jdbc.util.SqlBuilder;
 import java.sql.*;
 import java.util.*;
@@ -42,60 +41,53 @@ public final class OracleTable implements SqlTable {
         } catch (Exception e) {
             throw new InfoException(e);
         }
-        ResultSet primaryKeyResultSet = null;
         List<String> primaryKeyList = new ArrayList<>();
-        try {
-            primaryKeyResultSet = databaseMetaData.getPrimaryKeys(oracleDatabase.getName(), oracleDatabase.getName(), tableName);
-            while (primaryKeyResultSet.next()) {
-                primaryKeyList.add(primaryKeyResultSet.getString("COLUMN_NAME"));
+        try (ResultSet resultSet = databaseMetaData.getPrimaryKeys(oracleDatabase.getName(), oracleDatabase.getName(), tableName)) {
+            while (resultSet.next()) {
+                primaryKeyList.add(resultSet.getString("COLUMN_NAME"));
             }
         } catch (Exception e) {
             throw new InfoException(e);
-        } finally {
-            JdbcUtil.close(primaryKeyResultSet);
         }
-        ResultSet columnResultSet = null;
-        try {
-            columnResultSet = databaseMetaData.getColumns(oracleDatabase.getName(), oracleDatabase.getName(), tableName, null);
-            ResultSetMetaData resultSetMetaData = columnResultSet.getMetaData();
+        try (ResultSet resultSet = databaseMetaData.getColumns(oracleDatabase.getName(), oracleDatabase.getName(), tableName, null)) {
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             List<String> columnResultSetColumnList = new ArrayList<>();
             for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
                 columnResultSetColumnList.add(resultSetMetaData.getColumnName(i));
             }
-            while (columnResultSet.next()) {
-                String name = columnResultSet.getString("COLUMN_NAME");
-                Column column = new Column(name, columnResultSet.getInt("DATA_TYPE"));
-                column.setRemark(columnResultSet.getString("REMARKS"));
-                column.setLength(columnResultSet.getInt("COLUMN_SIZE"));
+            while (resultSet.next()) {
+                String name = resultSet.getString("COLUMN_NAME");
+                Column column = new Column(name, resultSet.getInt("DATA_TYPE"));
+                column.setRemark(resultSet.getString("REMARKS"));
+                column.setLength(resultSet.getInt("COLUMN_SIZE"));
                 column.setPrimaryKey(primaryKeyList.contains(name));
-                column.setNullable("YES".equals(columnResultSet.getString("IS_NULLABLE")));
+                column.setNullable("YES".equals(resultSet.getString("IS_NULLABLE")));
                 if (columnResultSetColumnList.contains("IS_AUTOINCREMENT")) {
-                    column.setAutoincrement("YES".equals(columnResultSet.getString("IS_AUTOINCREMENT")));
+                    column.setAutoincrement("YES".equals(resultSet.getString("IS_AUTOINCREMENT")));
                 }
                 result.add(column);
             }
             return result;
         } catch (Exception e) {
             throw new InfoException(e);
-        } finally {
-            JdbcUtil.close(columnResultSet);
         }
     }
 
     @Override
     public String getRemark() {
-        ResultSet resultSet = null;
+        DatabaseMetaData metaData;
         try {
-            DatabaseMetaData metaData = oracleDatabase.oracleJdbc.getConnection().getMetaData();
-            resultSet = metaData.getTables(oracleDatabase.getName(), oracleDatabase.getName(), tableName, new String[]{"TABLE", "REMARKS"});
+            metaData = oracleDatabase.oracleJdbc.getConnection().getMetaData();
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+        try (ResultSet resultSet = metaData.getTables(oracleDatabase.getName(), oracleDatabase.getName(), tableName, new String[]{"TABLE", "REMARKS"})) {
             if (resultSet.next()) {
                 return resultSet.getString("REMARKS");
             }
             return null;
         } catch (Exception e) {
             throw new InfoException(e);
-        } finally {
-            JdbcUtil.close(resultSet);
         }
     }
 
