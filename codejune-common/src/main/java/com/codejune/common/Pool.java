@@ -48,16 +48,32 @@ public abstract class Pool<T> implements Closeable {
     public abstract T create();
 
     /**
+     * 对象校验方法
+     *
+     * @param t 获取到的对象
+     *
+     * @return 对象是否有效
+     * */
+    public boolean check(T t) {
+        return true;
+    }
+
+    /**
      * 获取
      *
      * @return T
      * */
     public final T get() {
+        T result;
         try {
-            return genericObjectPool.borrowObject();
+            result = genericObjectPool.borrowObject();
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
+        if (!check(result)) {
+            return create();
+        }
+        return result;
     }
 
     /**

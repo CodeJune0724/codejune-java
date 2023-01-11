@@ -39,17 +39,6 @@ public abstract class Database {
     }
 
     /**
-     * 校验jdbc
-     *
-     * @param jdbc jdbc
-     *
-     * @return 是否有效
-     * */
-    public boolean jdbcCheck(Jdbc jdbc) {
-        return true;
-    }
-
-    /**
      * 切换表
      *
      * @param <T> 泛型
@@ -91,14 +80,6 @@ public abstract class Database {
         return (ID) getNextId();
     }
 
-    private Jdbc getJdbc() {
-        Jdbc result = pool.get();
-        if (!jdbcCheck(result)) {
-            result = pool.create();
-        }
-        return result;
-    }
-
     /**
      * 表
      *
@@ -136,7 +117,7 @@ public abstract class Database {
                 query = new Query();
             }
             query.keyHandler(fieldToColumnHandler);
-            Jdbc jdbc = this.database.getJdbc();
+            Jdbc jdbc = this.database.pool.get();
             try {
                 return getTable(jdbc).query(query).parse(basePOClass, o -> columnToFieldHandler.handler(ObjectUtil.toString(o)));
             } finally {
@@ -168,7 +149,7 @@ public abstract class Database {
                     throw new InfoException(e.getMessage());
                 }
             }
-            Jdbc jdbc = this.database.getJdbc();
+            Jdbc jdbc = this.database.pool.get();
             try {
                 com.codejune.jdbc.Table table = getTable(jdbc);
                 List<String> columnList = new ArrayList<>();
@@ -227,7 +208,7 @@ public abstract class Database {
             if (id == null) {
                 return;
             }
-            Jdbc jdbc = this.database.getJdbc();
+            Jdbc jdbc = this.database.pool.get();
             try {
                 getTable(jdbc).delete(new Filter().and(Filter.Item.equals(BasePO.getIdName(), id)));
             } finally {
@@ -254,7 +235,7 @@ public abstract class Database {
          * 删除
          * */
         public void delete() {
-            Jdbc jdbc = this.database.getJdbc();
+            Jdbc jdbc = this.database.pool.get();
             try {
                 getTable(jdbc).delete();
             } finally {
