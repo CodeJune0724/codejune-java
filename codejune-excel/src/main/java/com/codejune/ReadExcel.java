@@ -2,7 +2,8 @@ package com.codejune;
 
 import com.codejune.common.Closeable;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.util.IOUtil;
+import com.codejune.common.util.FileUtil;
+import com.codejune.common.util.StringUtil;
 import com.codejune.readexcel.Sheet;
 import com.monitorjbl.xlsx.StreamingReader;
 import org.apache.poi.ss.usermodel.*;
@@ -19,13 +20,12 @@ public final class ReadExcel implements Closeable, Iterable<Sheet> {
 
     private final Workbook workbook;
 
-    private final FileInputStream fileInputStream;
-
     public ReadExcel(String path) {
-        FileInputStream fileInputStream;
-        Workbook workbook;
-        try {
-            fileInputStream = new FileInputStream(path);
+        if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
+            throw new InfoException("excel文件不存在");
+        }
+        try (FileInputStream fileInputStream = new FileInputStream(path)) {
+            Workbook workbook;
             if (path.endsWith(".xls")) {
                 workbook = WorkbookFactory.create(fileInputStream);
             } else if (path.endsWith(".xlsx")) {
@@ -33,10 +33,8 @@ public final class ReadExcel implements Closeable, Iterable<Sheet> {
             } else {
                 throw new InfoException("文件错误");
             }
-            this.fileInputStream = fileInputStream;
             this.workbook = workbook;
         } catch (Exception e) {
-            e.printStackTrace();
             this.close();
             throw new InfoException(e.getMessage());
         }
@@ -63,12 +61,7 @@ public final class ReadExcel implements Closeable, Iterable<Sheet> {
 
     @Override
     public void close() {
-        try {
-            workbook.close();
-            IOUtil.close(fileInputStream);
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        }
+        closeWorkbook(this.workbook);
     }
 
     @Override
@@ -85,6 +78,17 @@ public final class ReadExcel implements Closeable, Iterable<Sheet> {
                 return new Sheet(iterator.next());
             }
         };
+    }
+
+    private void closeWorkbook(Workbook workbook) {
+        if (workbook == null) {
+            return;
+        }
+        try {
+            workbook.close();
+        } catch (Exception e) {
+            throw new InfoException(e.getMessage());
+        }
     }
 
 }
