@@ -85,7 +85,7 @@ public final class JdbcUtil {
             throw new InfoException("charset is null");
         }
         FileSystemResource fileSystemResource = new FileSystemResource(scriptFile);
-        EncodedResource encodedResource = new EncodedResource(fileSystemResource, charset.name());
+        EncodedResource encodedResource = new EncodedResource(fileSystemResource, charset.getName());
         ScriptUtils.executeSqlScript(connection, encodedResource);
     }
 
