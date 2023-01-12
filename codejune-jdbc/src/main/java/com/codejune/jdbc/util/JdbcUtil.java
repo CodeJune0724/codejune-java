@@ -1,5 +1,6 @@
 package com.codejune.jdbc.util;
 
+import com.codejune.Jdbc;
 import com.codejune.common.Charset;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.classInfo.Field;
@@ -8,7 +9,6 @@ import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
-import com.codejune.jdbc.Table;
 import com.codejune.jdbc.handler.ColumnToFieldHandler;
 import com.codejune.jdbc.handler.FieldToColumnHandler;
 import org.springframework.core.io.FileSystemResource;
@@ -31,14 +31,17 @@ public final class JdbcUtil {
      * 通过jpa查询
      *
      * @param <T> T
+     * @param jdbc jdbc
      * @param jpaRepository jpaRepository
-     * @param table 表
      * @param query query
      *
      * @return List
      * */
     @SuppressWarnings("unchecked")
-    public static <T> QueryResult<T> queryByJpa(Class<? extends JpaRepository<T, ?>> jpaRepository, Table table, Query query) {
+    public static <T> QueryResult<T> queryByJpa(Jdbc jdbc, Class<? extends JpaRepository<T, ?>> jpaRepository, Query query) {
+        if (jdbc == null || jpaRepository == null) {
+            return null;
+        }
         if (query == null) {
             query = new Query();
         }
@@ -62,7 +65,7 @@ public final class JdbcUtil {
         }
         FieldToColumnHandler entityKeyHandler = new FieldToColumnHandler(aClass, idName);
         query.keyHandler(entityKeyHandler);
-        QueryResult<Map<String, Object>> queryResult = table.query(query);
+        QueryResult<Map<String, Object>> queryResult = jdbc.getDefaultDatabase().getTable(tableName).query(query);
         ColumnToFieldHandler columnToFieldHandler = new ColumnToFieldHandler(aClass, idName);
         return (QueryResult<T>) queryResult.parse(aClass, key -> columnToFieldHandler.handler(ObjectUtil.toString(key)));
     }
