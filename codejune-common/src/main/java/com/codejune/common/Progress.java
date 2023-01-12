@@ -48,17 +48,19 @@ public abstract class Progress implements ProgressListener {
     }
 
     /**
-     * 添加进度
+     * 推进进度
      *
      * @param size 大小
      * */
-    public final void add(long size) {
-        if (size < 0) {
-            return;
-        }
-        this.currentSize = this.currentSize + size;
-        if (this.currentSize > this.totalSize) {
-            this.currentSize = this.totalSize;
+    public final void countDown(long size) {
+        synchronized (this) {
+            if (size < 0) {
+                return;
+            }
+            this.currentSize = this.currentSize + size;
+            if (this.currentSize > this.totalSize) {
+                this.currentSize = this.totalSize;
+            }
         }
     }
 
