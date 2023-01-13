@@ -104,7 +104,7 @@ public final class Http {
                 }
             };
             httpEntityEnclosingRequestBase.setURI(URI.create(url));
-            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().setConnectTimeout(10000).build());
+            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().build());
 
             // 请求头
             Set<String> keySet = header.keySet();
