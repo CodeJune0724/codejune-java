@@ -11,12 +11,15 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import java.io.File;
 import java.io.InputStream;
@@ -96,7 +99,7 @@ public final class Http {
         HttpEntity httpEntity = null;
         HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
         try {
-            closeableHttpClient = HttpClients.createDefault();
+            closeableHttpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(new SSLContextBuilder().loadTrustMaterial(null, (chain, authType) -> true).build(), NoopHostnameVerifier.INSTANCE)).build();
             HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = new HttpEntityEnclosingRequestBase() {
                 @Override
                 public String getMethod() {
@@ -105,14 +108,10 @@ public final class Http {
             };
             httpEntityEnclosingRequestBase.setURI(URI.create(url));
             httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().build());
-
-            // 请求头
             Set<String> keySet = header.keySet();
             for (String key : keySet) {
                 httpEntityEnclosingRequestBase.setHeader(key, header.get(key));
             }
-
-            // 请求体
             if (body != null) {
                 switch (contentType) {
                     case APPLICATION_JSON:
@@ -141,17 +140,13 @@ public final class Http {
                 }
             }
             httpEntityEnclosingRequestBase.setEntity(httpEntity);
-
-            // 执行
             closeableHttpResponse = closeableHttpClient.execute(httpEntityEnclosingRequestBase);
-
             httpResponseResult.setCode(closeableHttpResponse.getStatusLine().getStatusCode());
             Header[] allHeaders = closeableHttpResponse.getAllHeaders();
             for (Header header : allHeaders) {
                 httpResponseResult.addHeader(header.getName(), header.getValue());
             }
             httpResponseResult.setBody(closeableHttpResponse.getEntity().getContent());
-
             if (httpResponseResultHandler == null) {
                 httpResponseResultHandler = httpResponseResult1 -> {};
             }
