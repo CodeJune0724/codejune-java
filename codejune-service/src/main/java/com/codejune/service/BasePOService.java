@@ -14,25 +14,16 @@ public final class BasePOService<T extends BasePO<ID>, ID> implements POService<
 
     private final Database database;
 
-    private final Class<T> POClass;
-
-    @SuppressWarnings("unchecked")
     public BasePOService(Database database) {
         if (database == null) {
             throw new InfoException("database is null");
         }
         this.database = database;
-        ClassInfo classInfo = new ClassInfo(this.getClass());
-        ClassInfo superClass = classInfo.getSuperClass(BasePOService.class);
-        if (superClass == null) {
-            throw new InfoException("类错误");
-        }
-        POClass = (Class<T>) superClass.getGenericClass().get(0).getOriginClass();
     }
 
     @Override
     public QueryResult<T> query(Query query) {
-        return database.getTable(POClass).query(query);
+        return database.getTable(getPOClass()).query(query);
     }
 
     @Override
@@ -40,7 +31,7 @@ public final class BasePOService<T extends BasePO<ID>, ID> implements POService<
         if (t == null) {
             throw new InfoException("参数缺失");
         }
-        List<Field> columnFields = BasePO.getColumnFields(POClass);
+        List<Field> columnFields = BasePO.getColumnFields(getPOClass());
         for (Field field : columnFields) {
             Column column = field.getAnnotation(Column.class);
             String fieldName = field.getName();
@@ -84,7 +75,7 @@ public final class BasePOService<T extends BasePO<ID>, ID> implements POService<
                 }
             }
         }
-        T saveEntity = database.getTable(POClass).save(t);
+        T saveEntity = database.getTable(getPOClass()).save(t);
         if (saveEntity == null) {
             return null;
         }
@@ -93,12 +84,22 @@ public final class BasePOService<T extends BasePO<ID>, ID> implements POService<
 
     @Override
     public void delete(ID id) {
-        database.getTable(POClass).delete(id);
+        database.getTable(getPOClass()).delete(id);
     }
 
     @Override
     public void delete() {
-        database.getTable(POClass).delete();
+        database.getTable(getPOClass()).delete();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class<T> getPOClass() {
+        ClassInfo classInfo = new ClassInfo(this.getClass());
+        ClassInfo superClass = classInfo.getSuperClass(BasePOService.class);
+        if (superClass == null) {
+            throw new InfoException("类错误");
+        }
+        return (Class<T>) superClass.getGenericClass().get(0).getOriginClass();
     }
 
 }
