@@ -71,7 +71,10 @@ public abstract class Pool<T> implements Closeable {
             throw new InfoException(e.getMessage());
         }
         if (!check(result)) {
-            return create();
+            if (result instanceof Closeable) {
+                ((Closeable) result).close();
+            }
+            result = create();
         }
         return result;
     }

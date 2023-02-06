@@ -48,11 +48,8 @@ public class AccessDatabase extends Database {
                     column.setLength(field.getAnnotation(Column.class).length());
                     columnList.add(column);
                 }
-                AccessDatabaseJdbc accessDatabaseJdbc = new AccessDatabaseJdbc(databaseFile);
-                try {
+                try (AccessDatabaseJdbc accessDatabaseJdbc = new AccessDatabaseJdbc(databaseFile)) {
                     accessDatabaseJdbc.getDefaultDatabase().getTable(tableName).reloadTable(columnList);
-                } finally {
-                    accessDatabaseJdbc.close();
                 }
             }
         }

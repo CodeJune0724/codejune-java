@@ -10,7 +10,7 @@ import com.codejune.jdbc.query.Filter;
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class BasePOService<T extends BasePO<ID>, ID> implements POService<T, ID> {
+public final class BasePOService<T extends BasePO<ID>, ID> implements POService<T, ID> {
 
     private final Database database;
 
@@ -23,7 +23,7 @@ public class BasePOService<T extends BasePO<ID>, ID> implements POService<T, ID>
 
     @Override
     public QueryResult<T> query(Query query) {
-        return database.switchTable(getGenericClass()).query(query);
+        return database.getTable(getGenericClass()).query(query);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class BasePOService<T extends BasePO<ID>, ID> implements POService<T, ID>
                 }
             }
         }
-        T saveEntity = database.switchTable(getGenericClass()).save(t);
+        T saveEntity = database.getTable(getGenericClass()).save(t);
         if (saveEntity == null) {
             return null;
         }
@@ -84,12 +84,12 @@ public class BasePOService<T extends BasePO<ID>, ID> implements POService<T, ID>
 
     @Override
     public void delete(ID id) {
-        database.switchTable(getGenericClass()).delete(id);
+        database.getTable(getGenericClass()).delete(id);
     }
 
     @Override
     public void delete() {
-        database.switchTable(getGenericClass()).delete();
+        database.getTable(getGenericClass()).delete();
     }
 
     @Override

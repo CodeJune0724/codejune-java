@@ -72,6 +72,9 @@ public abstract class Progress implements ProgressListener {
     public final Double getPercentage() {
         Double currentSizeDouble = ObjectUtil.transform(currentSize, Double.class);
         Double totalSizeDouble = ObjectUtil.transform(totalSize, Double.class);
+        if (totalSizeDouble == 0) {
+            return totalSizeDouble;
+        }
         return ObjectUtil.transform(String.format("%.2f", (currentSizeDouble / totalSizeDouble) * 100), Double.class);
     }
 

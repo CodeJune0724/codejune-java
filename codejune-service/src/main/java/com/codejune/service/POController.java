@@ -8,15 +8,15 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-public class POController<T extends BasePO<ID>, ID> {
+public final class POController<T extends BasePO<ID>, ID> {
 
-    protected final POService<T, ID> poService;
+    private final POService<T, ID> POService;
 
     public POController(POService<T, ID> poService) {
         if (poService == null) {
             throw new InfoException("poService is null");
         }
-        this.poService = poService;
+        this.POService = poService;
     }
 
     @PostMapping()
@@ -25,7 +25,7 @@ public class POController<T extends BasePO<ID>, ID> {
         if (requestBody != null) {
             requestBody.setId(null);
         }
-        return ResponseResult.returnTrue(poService.save(requestBody));
+        return ResponseResult.returnTrue(POService.save(requestBody));
     }
 
     @PostMapping("saveList")
@@ -36,13 +36,13 @@ public class POController<T extends BasePO<ID>, ID> {
                 t.setId(null);
             }
         }
-        return ResponseResult.returnTrue(poService.save(requestBody));
+        return ResponseResult.returnTrue(POService.save(requestBody));
     }
 
     @DeleteMapping("{id}")
     public ResponseResult delete(@PathVariable(required = false) ID id, HttpServletRequest httpServletRequest) {
         beforeHandler(httpServletRequest);
-        poService.delete(id);
+        POService.delete(id);
         return ResponseResult.returnTrue();
     }
 
@@ -51,7 +51,7 @@ public class POController<T extends BasePO<ID>, ID> {
         beforeHandler(httpServletRequest);
         if (requestBody != null) {
             for (ID id : requestBody) {
-                poService.delete(id);
+                POService.delete(id);
             }
         }
         return ResponseResult.returnTrue();
@@ -66,19 +66,19 @@ public class POController<T extends BasePO<ID>, ID> {
         if (requestBody != null) {
             requestBody.setId(id);
         }
-        return ResponseResult.returnTrue(poService.save(requestBody));
+        return ResponseResult.returnTrue(POService.save(requestBody));
     }
 
     @PostMapping("query")
     public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody, HttpServletRequest httpServletRequest) {
         beforeHandler(httpServletRequest);
-        return ResponseResult.returnTrue(poService.query(Query.parse(requestBody)));
+        return ResponseResult.returnTrue(POService.query(Query.parse(requestBody)));
     }
 
     @GetMapping("{id}")
     public ResponseResult getDetails(@PathVariable(required = false) ID id, HttpServletRequest httpServletRequest) {
         beforeHandler(httpServletRequest);
-        return ResponseResult.returnTrue(poService.getDetails(id));
+        return ResponseResult.returnTrue(POService.getDetails(id));
     }
 
     /**
