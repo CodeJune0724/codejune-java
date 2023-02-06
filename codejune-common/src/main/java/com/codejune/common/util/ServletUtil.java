@@ -3,8 +3,9 @@ package com.codejune.common.util;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.io.writer.OutputStreamWriter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,6 +74,29 @@ public final class ServletUtil {
             throw new InfoException(e.getMessage());
         } finally {
             IOUtil.close(inputStream);
+        }
+    }
+
+    /**
+     * 转换文件
+     *
+     * @param multipartFile multipartFile
+     * @param file file
+     * */
+    public static void parseFile(MultipartFile multipartFile, File file) {
+        if (multipartFile == null) {
+            throw new InfoException("multipartFile is null");
+        }
+        if (file == null) {
+            throw new InfoException("file is null");
+        }
+        if (StringUtil.isEmpty(multipartFile.getOriginalFilename())) {
+            throw new InfoException("multipartFile.getOriginalFilename() is null");
+        }
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            new com.codejune.common.os.File(file).write(inputStream);
+        } catch (Exception e) {
+            throw new InfoException(e);
         }
     }
 
