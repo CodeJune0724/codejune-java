@@ -7,21 +7,21 @@ import com.codejune.jdbc.QueryResult;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.query.Filter;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Service;
 import java.lang.reflect.Field;
 import java.util.List;
 
-@Service
 public final class BasePOService<T extends BasePO<ID>, ID> implements POService<T, ID> {
 
-    @Resource
-    private Database database;
+    private final Database database;
 
     private final Class<T> POClass;
 
     @SuppressWarnings("unchecked")
-    public BasePOService() {
+    public BasePOService(Database database) {
+        if (database == null) {
+            throw new InfoException("database is null");
+        }
+        this.database = database;
         ClassInfo classInfo = new ClassInfo(this.getClass());
         ClassInfo superClass = classInfo.getSuperClass(BasePOService.class);
         if (superClass == null) {
