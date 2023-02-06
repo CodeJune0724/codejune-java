@@ -126,11 +126,4 @@ public interface POService<T extends BasePO<ID>, ID> {
         return queryById(id);
     }
 
-    /**
-     * 获取泛型类
-     *
-     * @return 泛型类
-     * */
-    Class<T> getGenericClass();
-
 }
