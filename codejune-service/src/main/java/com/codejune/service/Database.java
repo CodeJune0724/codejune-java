@@ -46,7 +46,7 @@ public abstract class Database {
      *
      * @return Table
      * */
-    public final <T extends BasePO<ID>, ID> Table<T, ID> switchTable(Class<T> basePOClass) {
+    public final <T extends BasePO<ID>, ID> Table<T, ID> getTable(Class<T> basePOClass) {
         return new Table<>(this, basePOClass);
     }
 
