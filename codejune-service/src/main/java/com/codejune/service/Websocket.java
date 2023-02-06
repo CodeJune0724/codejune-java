@@ -3,7 +3,7 @@ package com.codejune.service;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.JsonUtil;
-import javax.websocket.*;
+import jakarta.websocket.*;
 import java.nio.ByteBuffer;
 
 public class Websocket {

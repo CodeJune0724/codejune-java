@@ -4,11 +4,11 @@ subprojects {
     apply plugin: 'maven-publish'
 
     group 'com.codejune'
-    version '1.4.7'
+    version '1.4.8'
 
     [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 
     java {
         withSourcesJar()
