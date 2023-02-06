@@ -9,17 +9,8 @@ import java.util.Map;
 
 public final class POController<T extends BasePO<ID>, ID> {
 
-    private final POService<T, ID> POService;
-
-    public POController(POService<T, ID> poService) {
-        if (poService == null) {
-            throw new InfoException("poService is null");
-        }
-        this.POService = poService;
-    }
-
     @PostMapping()
-    public ResponseResult save(@RequestBody(required = false) T requestBody) {
+    public ResponseResult save(@RequestBody(required = false) T requestBody, POService<T, ID> POService) {
         if (requestBody != null) {
             requestBody.setId(null);
         }
@@ -27,7 +18,7 @@ public final class POController<T extends BasePO<ID>, ID> {
     }
 
     @PostMapping("saveList")
-    public ResponseResult saveList(@RequestBody(required = false) List<T> requestBody) {
+    public ResponseResult saveList(@RequestBody(required = false) List<T> requestBody, POService<T, ID> POService) {
         if (requestBody != null) {
             for (T t : requestBody) {
                 t.setId(null);
@@ -37,13 +28,13 @@ public final class POController<T extends BasePO<ID>, ID> {
     }
 
     @DeleteMapping("{id}")
-    public ResponseResult delete(@PathVariable(required = false) ID id) {
+    public ResponseResult delete(@PathVariable(required = false) ID id, POService<T, ID> POService) {
         POService.delete(id);
         return ResponseResult.returnTrue();
     }
 
     @DeleteMapping("deleteList")
-    public ResponseResult deleteList(@RequestBody(required = false) List<ID> requestBody) {
+    public ResponseResult deleteList(@RequestBody(required = false) List<ID> requestBody, POService<T, ID> POService) {
         if (requestBody != null) {
             for (ID id : requestBody) {
                 POService.delete(id);
@@ -53,7 +44,7 @@ public final class POController<T extends BasePO<ID>, ID> {
     }
 
     @PutMapping("{id}")
-    public ResponseResult update(@PathVariable(required = false) ID id, @RequestBody(required = false) T requestBody) {
+    public ResponseResult update(@PathVariable(required = false) ID id, @RequestBody(required = false) T requestBody, POService<T, ID> POService) {
         if (id == null) {
             throw new InfoException("参数缺失");
         }
@@ -64,12 +55,12 @@ public final class POController<T extends BasePO<ID>, ID> {
     }
 
     @PostMapping("query")
-    public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody) {
+    public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody, POService<T, ID> POService) {
         return ResponseResult.returnTrue(POService.query(Query.parse(requestBody)));
     }
 
     @GetMapping("{id}")
-    public ResponseResult getDetails(@PathVariable(required = false) ID id) {
+    public ResponseResult getDetails(@PathVariable(required = false) ID id, POService<T, ID> POService) {
         return ResponseResult.returnTrue(POService.getDetails(id));
     }
 

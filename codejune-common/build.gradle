@@ -1,6 +1,5 @@
 dependencies {
     api group: 'org.apache.commons', name: 'commons-pool2', version: '2.11.1'
     api group: 'com.alibaba', name: 'fastjson', version: '2.0.10'
-    compileOnly group: 'org.springframework', name: 'spring-web', version: '5.3.25'
-    compileOnly group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
+    compileOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.0.2'
 }
