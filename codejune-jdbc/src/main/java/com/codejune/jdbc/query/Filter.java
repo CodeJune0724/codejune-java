@@ -1,9 +1,9 @@
 package com.codejune.jdbc.query;
 
+import com.codejune.common.Action;
 import com.codejune.common.Builder;
 import com.codejune.common.classInfo.Field;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -79,19 +79,19 @@ public final class Filter implements Builder {
     /**
      * 设置新的key
      *
-     * @param dataHandler dataHandler
+     * @param action action
      *
      * @return this
      * */
-    public Filter itemHandler(DataHandler<Item, Item> dataHandler) {
-        if (dataHandler == null) {
+    public Filter itemHandler(Action<Item, Item> action) {
+        if (action == null) {
             return this;
         }
         for (Filter filter : or) {
-            filter.itemHandler(dataHandler);
+            filter.itemHandler(action);
         }
         for (Item item : and) {
-            ObjectUtil.assignment(item, dataHandler.handler(item));
+            ObjectUtil.assignment(item, action.then(item));
         }
         return this;
     }
@@ -294,8 +294,8 @@ public final class Filter implements Builder {
         public Item(Type type, Object key, Object value) {
             this.type = type;
             this.key = ObjectUtil.toString(key);
-            if (value instanceof DataHandler) {
-                value = ((DataHandler<Object, Object>) value).handler(key);
+            if (value instanceof Action) {
+                value = ((Action<Object, Object>) value).then(key);
             }
             this.value = value;
         }

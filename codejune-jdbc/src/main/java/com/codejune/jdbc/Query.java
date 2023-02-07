@@ -1,8 +1,8 @@
 package com.codejune.jdbc;
 
+import com.codejune.common.Action;
 import com.codejune.common.Builder;
 import com.codejune.common.DataType;
-import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.query.Field;
@@ -118,23 +118,23 @@ public class Query implements Builder {
     /**
      * key处理
      *
-     * @param dataHandler dataHandler
+     * @param action action
      *
      * @return this
      * */
-    public Query keyHandler(DataHandler<String, String> dataHandler) {
-        if (dataHandler == null) {
+    public Query keyHandler(Action<String, String> action) {
+        if (action == null) {
             return this;
         }
         if (this.filter != null) {
             this.filter.itemHandler(item -> {
-                item.setKey(dataHandler.handler(item.getKey()));
+                item.setKey(action.then(item.getKey()));
                 return item;
             });
         }
         if (this.sort != null) {
             for (Sort item : sort) {
-                item.keyHandler(dataHandler);
+                item.keyHandler(action);
             }
         }
         return this;
