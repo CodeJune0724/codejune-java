@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.handler.DataHandler;
+import com.codejune.common.Action;
 import java.util.*;
 
 /**
@@ -71,22 +71,22 @@ public final class MapUtil {
      * 转换key
      *
      * @param map map
-     * @param dataHandler dataHandler
+     * @param action action
      * @param <T> T
      *
      * @return Map
      * */
-    public static <T> Map<?, T> transformKey(Map<?, T> map, DataHandler<Object, Object> dataHandler) {
+    public static <T> Map<?, T> transformKey(Map<?, T> map, Action<Object, Object> action) {
         if (map == null) {
             return null;
         }
-        if (dataHandler == null) {
-            dataHandler = o -> null;
+        if (action == null) {
+            action = o -> null;
         }
         Map<Object, T> result = new HashMap<>();
         Set<?> keySet = new HashSet<>(map.keySet());
         for (Object key : keySet) {
-            Object newKey = dataHandler.handler(key);
+            Object newKey = action.then(key);
             if (newKey == null) {
                 continue;
             }
@@ -130,8 +130,8 @@ public final class MapUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> Map<String, T> transformKeyToHump(Map<String, T> map) {
-        DataHandler<Object, Object> keyHandler = key -> StringUtil.underlineToHump(ObjectUtil.toString(key));
-        return (Map<String, T>) transformKey(map, keyHandler);
+        Action<Object, Object> action = key -> StringUtil.underlineToHump(ObjectUtil.toString(key));
+        return (Map<String, T>) transformKey(map, action);
     }
 
     /**
@@ -144,8 +144,8 @@ public final class MapUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> Map<String, T> transformKeyToUnderline(Map<String, T> map) {
-        DataHandler<Object, Object> keyHandler = key -> StringUtil.humpToUnderline(ObjectUtil.toString(key));
-        return (Map<String, T>) transformKey(map, keyHandler);
+        Action<Object, Object> action = key -> StringUtil.humpToUnderline(ObjectUtil.toString(key));
+        return (Map<String, T>) transformKey(map, action);
     }
 
     /**

@@ -1,8 +1,8 @@
 package com.codejune.jdbc.util;
 
 import com.codejune.Jdbc;
+import com.codejune.common.Action;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -274,8 +274,8 @@ public final class SqlBuilder {
         if (value instanceof Number) {
             return ObjectUtil.toString(value);
         }
-        if (value instanceof DataHandler) {
-            return ObjectUtil.toString(((DataHandler<Object, Object>) value).handler(value));
+        if (value instanceof Action) {
+            return ObjectUtil.toString(((Action<Object, Object>) value).then(value));
         }
         String result = ObjectUtil.toString(value);
         if (result == null) {

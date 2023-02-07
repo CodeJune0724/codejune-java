@@ -116,7 +116,7 @@ public abstract class Database {
             if (query == null) {
                 query = new Query();
             }
-            query.keyHandler(fieldToColumnHandler);
+            query.keyHandler(fieldToColumnHandler::handler);
             Jdbc jdbc = this.database.pool.get();
             try {
                 return getTable(jdbc).query(query).parse(basePOClass, o -> columnToFieldHandler.handler(ObjectUtil.toString(o)));

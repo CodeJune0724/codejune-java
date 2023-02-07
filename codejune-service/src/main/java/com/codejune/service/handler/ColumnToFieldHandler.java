@@ -3,7 +3,6 @@ package com.codejune.service.handler;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.DataType;
 import com.codejune.common.classInfo.Field;
-import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.StringUtil;
 import com.codejune.service.BasePO;
 import com.codejune.service.Column;
@@ -17,7 +16,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public final class ColumnToFieldHandler implements DataHandler<String, String> {
+public final class ColumnToFieldHandler {
 
     private final Map<String, String> newKeyMap = new HashMap<>();
 
@@ -40,7 +39,6 @@ public final class ColumnToFieldHandler implements DataHandler<String, String> {
         }
     }
 
-    @Override
     public String handler(String key) {
         String result = this.newKeyMap.get(key);
         if (StringUtil.isEmpty(result)) {

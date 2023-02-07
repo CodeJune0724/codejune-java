@@ -64,7 +64,7 @@ public final class JdbcUtil {
             }
         }
         FieldToColumnHandler entityKeyHandler = new FieldToColumnHandler(aClass, idName);
-        query.keyHandler(entityKeyHandler);
+        query.keyHandler(entityKeyHandler::handler);
         QueryResult<Map<String, Object>> queryResult = jdbc.getDefaultDatabase().getTable(tableName).query(query);
         ColumnToFieldHandler columnToFieldHandler = new ColumnToFieldHandler(aClass, idName);
         return (QueryResult<T>) queryResult.parse(aClass, key -> columnToFieldHandler.handler(ObjectUtil.toString(key)));

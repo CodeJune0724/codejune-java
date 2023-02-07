@@ -3,7 +3,6 @@ package com.codejune.jdbc.handler;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.DataType;
 import com.codejune.common.classInfo.Field;
-import com.codejune.common.handler.DataHandler;
 import com.codejune.common.util.StringUtil;
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -16,7 +15,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public final class ColumnToFieldHandler implements DataHandler<String, String> {
+public final class ColumnToFieldHandler {
 
     private final Map<String, String> newKeyMap = new HashMap<>();
 
@@ -38,7 +37,7 @@ public final class ColumnToFieldHandler implements DataHandler<String, String> {
             newKeyMap.put(newKey, key);
         }
     }
-    @Override
+
     public String handler(String key) {
         String result = this.newKeyMap.get(key);
         if (StringUtil.isEmpty(result)) {
