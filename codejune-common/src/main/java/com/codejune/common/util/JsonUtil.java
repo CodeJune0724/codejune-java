@@ -29,7 +29,7 @@ public class JsonUtil {
             return ObjectUtil.toString(Object);
         }
         try {
-            return JSON.toJSONString(Object, SerializerFeature.WriteMapNullValue);
+            return JSON.toJSONString(Object, SerializerFeature.WriteMapNullValue, SerializerFeature.DisableCircularReferenceDetect);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
