@@ -42,6 +42,9 @@ public final class Filter implements Builder {
 
     public void setConfig(Config config) {
         this.config = config;
+        for (Filter filter : or) {
+            filter.setConfig(config);
+        }
     }
 
     /**
