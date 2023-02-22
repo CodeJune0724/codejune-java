@@ -33,7 +33,7 @@ public final class WindowsShell implements Shell {
             String success = successTextInputStreamReader.getData();
 
             errorStream = process.getErrorStream();
-            TextInputStreamReader errorTextInputStreamReader = new TextInputStreamReader(inputStream);
+            TextInputStreamReader errorTextInputStreamReader = new TextInputStreamReader(errorStream);
             errorTextInputStreamReader.setReadListener(readListener);
             String error = errorTextInputStreamReader.getData();
 
