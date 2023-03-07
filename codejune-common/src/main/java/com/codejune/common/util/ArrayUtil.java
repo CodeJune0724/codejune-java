@@ -185,7 +185,37 @@ public final class ArrayUtil {
         return result;
     }
 
+    /**
+     * 截取
+     *
+     * @param tList tList
+     * @param startIndex 开始位置
+     * @param length 截取长度
+     *
+     * @return List<T>
+     * */
+    public static <T> List<T> split(List<T> tList, int startIndex, int length) {
+        if (tList == null) {
+            return null;
+        }
+        int size = tList.size();
+        if (startIndex > size) {
+            return new ArrayList<>();
+        }
+        int endIndex = startIndex + length;
+        if (endIndex > size) {
+            endIndex = size;
+        }
+        if (startIndex > endIndex) {
+            int temp = startIndex;
+            startIndex = endIndex;
+            endIndex = temp;
+        }
+        return tList.subList(startIndex, endIndex);
+    }
+
     public interface StringHandler<T> {
+
         String toString(T t);
 
     }

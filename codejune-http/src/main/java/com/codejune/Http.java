@@ -114,10 +114,8 @@ public final class Http {
             }
             if (body != null) {
                 switch (contentType) {
-                    case APPLICATION_JSON:
-                        httpEntity = new StringEntity(JsonUtil.toJsonString(body), "UTF-8");
-                        break;
-                    case FORM_DATA:
+                    case APPLICATION_JSON -> httpEntity = new StringEntity(JsonUtil.toJsonString(body), "UTF-8");
+                    case FORM_DATA -> {
                         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
                         Map<String, Object> mapBody = MapUtil.transformGeneric(MapUtil.parse(body), String.class, Object.class);
                         for (String key : mapBody.keySet()) {
@@ -133,10 +131,8 @@ public final class Http {
                             }
                         }
                         httpEntity = multipartEntityBuilder.build();
-                        break;
-                    default:
-                        httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
-                        break;
+                    }
+                    default -> httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
                 }
             }
             httpEntityEnclosingRequestBase.setEntity(httpEntity);
