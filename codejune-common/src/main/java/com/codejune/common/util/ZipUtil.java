@@ -1,12 +1,15 @@
 package com.codejune.common.util;
 
 import com.codejune.common.exception.InfoException;
+import com.codejune.common.os.Folder;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -43,6 +46,34 @@ public final class ZipUtil {
             zip(dirs, outFile.getAbsolutePath());
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
+        }
+    }
+
+    /**
+     * 解压
+     *
+     * @param zipFile 压缩包
+     * @param outPath 解压目录
+     * */
+    public static void unzip(File zipFile, String outPath) {
+        if (zipFile == null || !zipFile.exists() || outPath == null) {
+            return;
+        }
+        new Folder(outPath);
+        try (ZipFile zf = new ZipFile(zipFile)) {
+            Enumeration<?> enumeration = zf.entries();
+            while (enumeration.hasMoreElements()) {
+                ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();
+                if (zipEntry.isDirectory()) {
+                    new Folder(new File(outPath, zipEntry.getName()).getAbsolutePath());
+                } else {
+                    try (InputStream inputStream = zf.getInputStream(zipEntry)) {
+                        new com.codejune.common.os.File(new File(outPath, zipEntry.getName())).write(inputStream);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new InfoException(e);
         }
     }
 
