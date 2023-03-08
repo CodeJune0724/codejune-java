@@ -18,7 +18,7 @@ public final class Sheet implements Iterable<Row> {
     @Override
     public Iterator<Row> iterator() {
         Iterator<org.apache.poi.ss.usermodel.Row> iterator = sheet.iterator();
-        return new Iterator<Row>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return iterator.hasNext();

@@ -67,7 +67,7 @@ public final class ReadExcel implements Closeable, Iterable<Sheet> {
     @Override
     public Iterator<Sheet> iterator() {
         Iterator<org.apache.poi.ss.usermodel.Sheet> iterator = workbook.iterator();
-        return new Iterator<Sheet>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return iterator.hasNext();

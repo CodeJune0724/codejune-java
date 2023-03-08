@@ -21,7 +21,7 @@ public abstract class Pool<T> implements Closeable {
 
     public Pool(int size) {
         Pool<T> pool = this;
-        BasePooledObjectFactory<T> basePooledObjectFactory = new BasePooledObjectFactory<T>() {
+        BasePooledObjectFactory<T> basePooledObjectFactory = new BasePooledObjectFactory<>() {
             @Override
             public T create() {
                 return pool.create();

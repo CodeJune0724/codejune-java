@@ -54,7 +54,7 @@ public final class FileWriter extends Writer implements Closeable {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             inputStreamReader.setReadListener(data -> {
                 try {
-                    finalRandomAccessFile.write(data.getBytes(), 0, data.getLength());
+                    finalRandomAccessFile.write(data.bytes(), 0, data.length());
                 } catch (Exception e) {
                     throw new InfoException(e);
                 }

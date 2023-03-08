@@ -60,7 +60,7 @@ public final class Row implements Iterable<Cell> {
             cells.add(getCell(i));
         }
         int[] i = new int[] {0};
-        return new Iterator<Cell>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return i[0] < cells.size();

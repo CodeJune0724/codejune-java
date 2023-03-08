@@ -50,7 +50,7 @@ public class Writer {
             return;
         }
         try {
-            this.outputStream.write(byteBuffer.getBytes(), 0, byteBuffer.getLength());
+            this.outputStream.write(byteBuffer.bytes(), 0, byteBuffer.length());
         } catch (Exception e) {
             throw new InfoException(e);
         }

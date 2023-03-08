@@ -68,7 +68,7 @@ public final class ObjectUtil {
             return true;
         }
         if (object instanceof Optional) {
-            return !((Optional<?>) object).isPresent();
+            return ((Optional<?>) object).isEmpty();
         }
         if (object instanceof CharSequence) {
             return ((CharSequence) object).length() == 0;
@@ -116,27 +116,34 @@ public final class ObjectUtil {
             return t;
         }
         switch (dataType) {
-            case INT:
+            case INT -> {
                 return (T) Integer.valueOf(tString);
-            case LONG:
+            }
+            case LONG -> {
                 return (T) Long.valueOf(tString);
-            case DOUBLE:
+            }
+            case DOUBLE -> {
                 return (T) Double.valueOf(tString);
-            case STRING:
+            }
+            case STRING -> {
                 return (T) tString;
-            case BOOLEAN:
+            }
+            case BOOLEAN -> {
                 return (T) Boolean.valueOf(tString);
-            case DATE:
+            }
+            case DATE -> {
                 Date date = (Date) t;
                 return (T) new Date(date.getTime());
-            case LIST:
+            }
+            case LIST -> {
                 List<?> list = (List<?>) t;
                 List<Object> result = new ArrayList<>();
                 for (Object item : list) {
                     result.add(clone(item, isForceInstance));
                 }
                 return (T) result;
-            case OBJECT:
+            }
+            case OBJECT -> {
                 Object re;
                 try {
                     re = t.getClass().getConstructor().newInstance();
@@ -153,7 +160,8 @@ public final class ObjectUtil {
                     field.setData(re, clone(field.getData(t), isForceInstance));
                 }
                 return (T) re;
-            case MAP:
+            }
+            case MAP -> {
                 Map<?, ?> tMap = (Map<?, ?>) t;
                 Map<Object, Object> map = new HashMap<>();
                 Set<?> keySet = tMap.keySet();
@@ -161,6 +169,7 @@ public final class ObjectUtil {
                     map.put(key, clone(tMap.get(key), isForceInstance));
                 }
                 return (T) map;
+            }
         }
         return t;
     }

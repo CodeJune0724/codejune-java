@@ -142,7 +142,7 @@ public final class Element implements Iterable<Element> {
     public Iterator<Element> iterator() {
         List<Element> elements = getElements();
         final int[] i = {0};
-        return new Iterator<Element>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return i[0] < elements.size();

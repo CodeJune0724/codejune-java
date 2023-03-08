@@ -2,7 +2,6 @@ package com.codejune.common.util;
 
 import com.codejune.common.exception.InfoException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +23,7 @@ public final class Base64Util {
      */
     public static String encode(String s) {
         Base64.Encoder encoder = Base64.getEncoder();
-        String result = "";
+        String result;
         result = encoder.encodeToString(s.getBytes(StandardCharsets.UTF_8));
         return result;
     }
@@ -38,7 +37,7 @@ public final class Base64Util {
      */
     public static String decode(String s) {
         Base64.Decoder decoder = Base64.getDecoder();
-        String result = "";
+        String result;
         result = new String(decoder.decode(s), StandardCharsets.UTF_8);
         return result;
     }

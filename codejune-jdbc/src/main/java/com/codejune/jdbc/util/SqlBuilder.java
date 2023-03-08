@@ -196,19 +196,11 @@ public final class SqlBuilder {
         String key = item.getKey();
         Object value = item.getValue();
         switch (type) {
-            case GT:
-                result = key + " > " + valueHandler(value);
-                break;
-            case GTE:
-                result = key + " >= " + valueHandler(value);
-                break;
-            case LT:
-                result = key + " < " + valueHandler(value);
-                break;
-            case LTE:
-                result = key + " <= " + valueHandler(value);
-                break;
-            case EQUALS:
+            case GT -> result = key + " > " + valueHandler(value);
+            case GTE -> result = key + " >= " + valueHandler(value);
+            case LT -> result = key + " < " + valueHandler(value);
+            case LTE -> result = key + " <= " + valueHandler(value);
+            case EQUALS -> {
                 if (value == null) {
                     result = key + " IS " + valueHandler(null);
                 } else {
@@ -218,44 +210,32 @@ public final class SqlBuilder {
                         result = key + " = " + valueHandler(value);
                     }
                 }
-                break;
-            case NOT_EQUALS:
+            }
+            case NOT_EQUALS -> {
                 if (value == null) {
                     result = key + " IS NOT " + valueHandler(null);
                 } else {
                     result = key + " != " + valueHandler(value);
                 }
-                break;
-            case CONTAINS:
-                result = key + " LIKE '%" + ObjectUtil.toString(value) + "%'";
-                break;
-            case NOT_CONTAINS:
-                result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "%'";
-                break;
-            case IN:
+            }
+            case CONTAINS -> result = key + " LIKE '%" + ObjectUtil.toString(value) + "%'";
+            case NOT_CONTAINS -> result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "%'";
+            case IN -> {
                 String in = inHandler(key, value, false);
                 if (in != null) {
                     result = in;
                 }
-                break;
-            case NOT_IN:
+            }
+            case NOT_IN -> {
                 String notIn = inHandler(key, value, true);
                 if (notIn != null) {
                     result = notIn;
                 }
-                break;
-            case START_WITH:
-                result = key + " LIKE '" + ObjectUtil.toString(value) + "%'";
-                break;
-            case NOT_START_WITH:
-                result = key + " NOT LIKE '" + ObjectUtil.toString(value) + "%'";
-                break;
-            case END_WITH:
-                result = key + " LIKE '%" + ObjectUtil.toString(value) + "'";
-                break;
-            case NOT_END_WITH:
-                result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "'";
-                break;
+            }
+            case START_WITH -> result = key + " LIKE '" + ObjectUtil.toString(value) + "%'";
+            case NOT_START_WITH -> result = key + " NOT LIKE '" + ObjectUtil.toString(value) + "%'";
+            case END_WITH -> result = key + " LIKE '%" + ObjectUtil.toString(value) + "'";
+            case NOT_END_WITH -> result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "'";
         }
         return result;
     }
