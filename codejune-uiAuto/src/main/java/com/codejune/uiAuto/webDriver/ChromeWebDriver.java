@@ -1,8 +1,8 @@
 package com.codejune.uiAuto.webDriver;
 
-import com.codejune.common.SystemOS;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.MapUtil;
+import com.codejune.uiAuto.DriverType;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -37,15 +37,7 @@ public final class ChromeWebDriver extends BaseWebDriver {
             throw new InfoException("文件不能为空");
         }
         System.setProperty("webdriver.chrome.driver", webDriverFile.getAbsolutePath());
-
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("start-maximized");
-        if (!isShow) {
-            chromeOptions.addArguments("--headless=new");
-        }
-        if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
-            chromeOptions.addArguments("no-sandbox");
-        }
+        ChromeOptions chromeOptions = (ChromeOptions) DriverType.CHROME.getMutableCapabilities(isShow);
         chromeOptions.setExperimentalOption("excludeSwitches", Arrays.asList("enable-automation", "enable-logging"));
         chromeOptions.setExperimentalOption("useAutomationExtension", false);
         ChromeDriver chromeDriver;

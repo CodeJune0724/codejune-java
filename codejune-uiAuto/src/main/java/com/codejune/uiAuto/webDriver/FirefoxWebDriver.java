@@ -1,13 +1,11 @@
 package com.codejune.uiAuto.webDriver;
 
-import com.codejune.common.SystemOS;
 import com.codejune.common.exception.InfoException;
+import com.codejune.uiAuto.DriverType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 火狐驱动
@@ -37,16 +35,7 @@ public final class FirefoxWebDriver extends BaseWebDriver {
             throw new InfoException("文件不能为空");
         }
         System.setProperty("webdriver.gecko.driver", webDriverFile.getAbsolutePath());
-
-        FirefoxOptions firefoxOptions = new FirefoxOptions();
-        List<String> options = new ArrayList<>();
-        if (!isShow) {
-            firefoxOptions.addArguments("--headless=new");
-        }
-        if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
-            options.add("--no-sandbox");
-        }
-        firefoxOptions.addArguments(options);
+        FirefoxOptions firefoxOptions = (FirefoxOptions) DriverType.FIREBOX.getMutableCapabilities(isShow);
         WebDriver result;
         try {
             result = new FirefoxDriver(firefoxOptions);
