@@ -1,4 +1,4 @@
 dependencies {
     api project(':codejune-common')
-    api group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.3.0'
+    api group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '+'
 }

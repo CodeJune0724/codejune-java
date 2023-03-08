@@ -15,7 +15,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import javax.persistence.Id;
+import jakarta.persistence.Id;
 import java.io.File;
 import java.sql.Connection;
 import java.util.Map;
@@ -50,7 +50,7 @@ public final class JdbcUtil {
             throw new InfoException("jpaRepository传入错误");
         }
         Class<?> aClass = superClass.getGenericClass().get(0).getOriginClass();
-        javax.persistence.Table tableAnnotation = aClass.getAnnotation(javax.persistence.Table.class);
+        jakarta.persistence.Table tableAnnotation = aClass.getAnnotation(jakarta.persistence.Table.class);
         if (tableAnnotation == null) {
             throw new InfoException("实体类未配置表名");
         }

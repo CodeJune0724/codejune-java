@@ -72,10 +72,7 @@ public abstract class Selector {
                     List<WebElement> result = new ArrayList<>();
                     List<org.openqa.selenium.WebElement> elements = webDriver.getSeleniumWebDriver().findElements(By.xpath(this.getSelect()));
                     for (int i = 0; i < elements.size(); i++) {
-                        StringBuilder s = new StringBuilder();
-                        for (int j = 0; j < (i + 1); j++) {
-                            s.append("result = elements.iterateNext();");
-                        }
+                        String s = "result = elements.iterateNext();".repeat((i + 1));
                         result.add(new BaseWebElement(webDriver, elements.get(i), "(function() {let elements = document.evaluate('" + this.getSelect() + "', document);let result = null;" + s + "return result;})()"));
                     }
                     return result;
@@ -106,10 +103,7 @@ public abstract class Selector {
                         if ("script".equals(webElement.getTagName())) {
                             continue;
                         }
-                        StringBuilder s = new StringBuilder();
-                        for (int j = 0; j < (i + 1); j++) {
-                            s.append("result = elements.iterateNext();");
-                        }
+                        String s = "result = elements.iterateNext();".repeat((i + 1));
                         result.add(new BaseWebElement(webDriver, elements.get(i), "(function() {let elements = document.evaluate('//*[contains(text(), \"" + this.getSelect() + "\")]', document);let result = null;" + s + "return result;})()"));
                     }
                     return result;

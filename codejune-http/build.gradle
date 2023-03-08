@@ -1,5 +1,5 @@
 dependencies {
     api project(':codejune-common')
-    api group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-    api group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
+    api group: 'org.apache.httpcomponents', name: 'httpclient', version: '+'
+    api group: 'org.apache.httpcomponents', name: 'httpmime', version: '+'
 }

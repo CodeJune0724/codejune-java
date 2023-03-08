@@ -33,31 +33,26 @@ public final class FirefoxWebDriver extends BaseWebDriver {
     }
 
     private static WebDriver getWebDriver(File webDriverFile, boolean isShow) {
-        // 返回的驱动
-        WebDriver result;
-        // 火狐设置
-        FirefoxOptions firefoxOptions = new FirefoxOptions();
-        // 火狐设置List
-        List<String> options = new ArrayList<>();
-
+        if (webDriverFile == null) {
+            throw new InfoException("文件不能为空");
+        }
         System.setProperty("webdriver.gecko.driver", webDriverFile.getAbsolutePath());
 
-        firefoxOptions.setHeadless(!isShow);
-
-        // linux开启沙盒
+        FirefoxOptions firefoxOptions = new FirefoxOptions();
+        List<String> options = new ArrayList<>();
+        if (!isShow) {
+            firefoxOptions.addArguments("--headless=new");
+        }
         if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
             options.add("--no-sandbox");
         }
-
         firefoxOptions.addArguments(options);
-
-        // 实例化驱动
+        WebDriver result;
         try {
             result = new FirefoxDriver(firefoxOptions);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
-
         return result;
     }
 

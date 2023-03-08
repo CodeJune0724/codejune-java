@@ -2,5 +2,5 @@ dependencies {
     api project(':codejune-common')
     api group: 'org.apache.poi', name: 'poi', version: '4.1.2'
     api group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
-    api group: 'com.monitorjbl', name: 'xlsx-streamer', version: '2.2.0'
+    api group: 'com.monitorjbl', name: 'xlsx-streamer', version: '+'
 }
