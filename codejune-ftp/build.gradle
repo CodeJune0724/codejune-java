@@ -1,5 +1,5 @@
 dependencies {
     api project(':codejune-common')
-    api group: 'com.jcraft', name: 'jsch', version: '+'
-    api group: 'commons-net', name: 'commons-net', version: '+'
+    api group: 'com.jcraft', name: 'jsch', version: '0.1.55'
+    api group: 'commons-net', name: 'commons-net', version: '3.9.0'
 }
