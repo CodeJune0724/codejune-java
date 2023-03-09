@@ -1,8 +1,7 @@
 package com.codejune.common.util;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.codejune.common.exception.InfoException;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,7 @@ public class JsonUtil {
             return ObjectUtil.toString(Object);
         }
         try {
-            return JSON.toJSONString(Object, SerializerFeature.WriteMapNullValue, SerializerFeature.DisableCircularReferenceDetect);
+            return JSON.toJSONString(Object, JSONWriter.Feature.WriteMapNullValue);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
@@ -49,7 +48,7 @@ public class JsonUtil {
             return  null;
         }
         try {
-            return JSON.parseObject(ObjectUtil.toString(data), tClass, Feature.OrderedField);
+            return JSON.parseObject(ObjectUtil.toString(data), tClass);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
