@@ -34,8 +34,7 @@ public final class ClassInfo {
             this.aClass = (Class<?>) type;
         } else if (type instanceof ParameterizedType) {
             this.aClass = (Class<?>) ((ParameterizedType) type).getRawType();
-        } else if (type instanceof WildcardType) {
-            WildcardType wildcardType = (WildcardType) type;
+        } else if (type instanceof WildcardType wildcardType) {
             Type[] lowerBounds = wildcardType.getLowerBounds();
             if (lowerBounds.length != 0) {
                 aClass = (Class<?>) lowerBounds[0];
@@ -90,8 +89,7 @@ public final class ClassInfo {
      * */
     public List<ClassInfo> getGenericClass() {
         List<ClassInfo> result = new ArrayList<>();
-        if (this.type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) this.type;
+        if (this.type instanceof ParameterizedType parameterizedType) {
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
             for (Type type : actualTypeArguments) {
                 result.add(new ClassInfo(type));

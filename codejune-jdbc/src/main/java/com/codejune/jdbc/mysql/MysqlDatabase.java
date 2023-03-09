@@ -66,22 +66,13 @@ public final class MysqlDatabase implements SqlDatabase {
         String sql = "CREATE TABLE " + tableName + "(\n";
         sql = StringUtil.append(sql, ArrayUtil.toString(columnList, column -> {
             String result = "\t" + column.getName() + " ";
-            switch (column.getDataType()) {
-                case INT:
-                    result = result + "INT";
-                    break;
-                case STRING:
-                    result = result + "VARCHAR(" + column.getLength() + ")";
-                    break;
-                case DATE:
-                    result = result + "DATETIME";
-                    break;
-                case DOUBLE:
-                    result = result + "DOUBLE";
-                    break;
-                default:
-                    throw new ErrorException("column.getDataType()未配置");
-            }
+            result = switch (column.getDataType()) {
+                case INT -> result + "INT";
+                case STRING -> result + "VARCHAR(" + column.getLength() + ")";
+                case DATE -> result + "DATETIME";
+                case DOUBLE -> result + "DOUBLE";
+                default -> throw new ErrorException("column.getDataType()未配置");
+            };
             if (!column.isNullable()) {
                 result = result + " NOT NULL";
             }

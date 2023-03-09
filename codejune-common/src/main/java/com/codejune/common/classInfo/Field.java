@@ -132,8 +132,7 @@ public final class Field {
     public List<ClassInfo> getGenericClass() {
         List<ClassInfo> result = new ArrayList<>();
         Type genericType = this.field.getGenericType();
-        if (genericType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) genericType;
+        if (genericType instanceof ParameterizedType parameterizedType) {
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
             for (Type type : actualTypeArguments) {
                 result.add(new ClassInfo(type));

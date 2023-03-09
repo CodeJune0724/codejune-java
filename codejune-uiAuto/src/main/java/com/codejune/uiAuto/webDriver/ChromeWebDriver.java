@@ -1,8 +1,8 @@
 package com.codejune.uiAuto.webDriver;
 
-import com.codejune.common.SystemOS;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.MapUtil;
+import com.codejune.uiAuto.DriverType;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -36,36 +36,17 @@ public final class ChromeWebDriver extends BaseWebDriver {
         if (webDriverFile == null) {
             throw new InfoException("文件不能为空");
         }
-
-        // 返回的驱动程序
-        ChromeDriver chromeDriver;
-        // 谷歌设置
-        ChromeOptions chromeOptions = new ChromeOptions();
-
         System.setProperty("webdriver.chrome.driver", webDriverFile.getAbsolutePath());
-
-        // 设置浏览器最大化
-        chromeOptions.addArguments("start-maximized");
-
-        chromeOptions.setHeadless(!isShow);
-
-        // linux系统设置沙盒模式
-        if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
-            chromeOptions.addArguments("no-sandbox");
-        }
-
-        // 防检测
+        ChromeOptions chromeOptions = (ChromeOptions) DriverType.CHROME.getMutableCapabilities(isShow);
         chromeOptions.setExperimentalOption("excludeSwitches", Arrays.asList("enable-automation", "enable-logging"));
         chromeOptions.setExperimentalOption("useAutomationExtension", false);
-
-        // 实例化驱动
+        ChromeDriver chromeDriver;
         try {
             chromeDriver = new ChromeDriver(chromeOptions);
             chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", MapUtil.parse("{\"source\":\"Object.defineProperty(navigator, 'webdriver', {       get: () => undefined     })\"}", String.class, Object.class));
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }
-
         return chromeDriver;
     }
 

@@ -115,58 +115,29 @@ public class Column {
     }
 
     private static int getSqlType(DataType dataType) {
-        switch (dataType) {
-            case INT:
-                return Types.INTEGER;
-            case LONG:
-                return Types.BIGINT;
-            case DOUBLE:
-                return Types.DOUBLE;
-            case STRING:
-                return Types.VARCHAR;
-            case LONG_STRING:
-                return Types.LONGVARCHAR;
-            case BOOLEAN:
-                return Types.BIT;
-            case DATE:
-                return Types.DATE;
-        }
-        return Types.OTHER;
+        return switch (dataType) {
+            case INT -> Types.INTEGER;
+            case LONG -> Types.BIGINT;
+            case DOUBLE -> Types.DOUBLE;
+            case STRING -> Types.VARCHAR;
+            case LONG_STRING -> Types.LONGVARCHAR;
+            case BOOLEAN -> Types.BIT;
+            case DATE -> Types.DATE;
+            default -> Types.OTHER;
+        };
     }
 
     private static DataType getDataType(int sqlType) {
-        switch (sqlType) {
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.NVARCHAR:
-                return DataType.STRING;
-            case Types.LONGVARCHAR:
-                return DataType.LONG_STRING;
-            case Types.NUMERIC:
-            case Types.DECIMAL:
-            case Types.SMALLINT:
-            case Types.REAL:
-            case Types.FLOAT:
-            case Types.DOUBLE:
-                return DataType.DOUBLE;
-            case Types.BIT:
-            case Types.BOOLEAN:
-                return DataType.BOOLEAN;
-            case Types.TINYINT:
-            case Types.INTEGER:
-                return DataType.INT;
-            case Types.BIGINT:
-                return DataType.LONG;
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
-                return DataType.OBJECT;
-            case Types.DATE:
-            case Types.TIME:
-            case Types.TIMESTAMP:
-                return DataType.DATE;
-        }
-        return DataType.OBJECT;
+        return switch (sqlType) {
+            case Types.CHAR, Types.VARCHAR, Types.NVARCHAR -> DataType.STRING;
+            case Types.LONGVARCHAR -> DataType.LONG_STRING;
+            case Types.NUMERIC, Types.DECIMAL, Types.SMALLINT, Types.REAL, Types.FLOAT, Types.DOUBLE -> DataType.DOUBLE;
+            case Types.BIT, Types.BOOLEAN -> DataType.BOOLEAN;
+            case Types.TINYINT, Types.INTEGER -> DataType.INT;
+            case Types.BIGINT -> DataType.LONG;
+            case Types.DATE, Types.TIME, Types.TIMESTAMP -> DataType.DATE;
+            default -> DataType.OBJECT;
+        };
     }
 
 }

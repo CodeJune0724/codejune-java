@@ -1,6 +1,5 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.DateType;
 import java.text.SimpleDateFormat;
@@ -97,26 +96,16 @@ public final class DateUtil {
         if (date == 0 || dateType == null) {
             return 0L;
         }
-        switch (dateType) {
-            case YEAR:
-                return transformMillisecond(date * 365, DateType.DAY);
-            case MONTH:
-                return transformMillisecond(date * 30, DateType.DAY);
-            case week:
-                return transformMillisecond(date * 7, DateType.DAY);
-            case DAY:
-                return transformMillisecond(date * 24, DateType.HOUR);
-            case HOUR:
-                return transformMillisecond(date * 60, DateType.MINUTE);
-            case MINUTE:
-                return transformMillisecond(date * 60, DateType.SECOND);
-            case SECOND:
-                return transformMillisecond(date * 1000, DateType.MILLISECOND);
-            case MILLISECOND:
-                return date;
-            default:
-                throw new ErrorException("dateType未配置");
-        }
+        return switch (dateType) {
+            case YEAR -> transformMillisecond(date * 365, DateType.DAY);
+            case MONTH -> transformMillisecond(date * 30, DateType.DAY);
+            case week -> transformMillisecond(date * 7, DateType.DAY);
+            case DAY -> transformMillisecond(date * 24, DateType.HOUR);
+            case HOUR -> transformMillisecond(date * 60, DateType.MINUTE);
+            case MINUTE -> transformMillisecond(date * 60, DateType.SECOND);
+            case SECOND -> transformMillisecond(date * 1000, DateType.MILLISECOND);
+            case MILLISECOND -> date;
+        };
     }
 
 }

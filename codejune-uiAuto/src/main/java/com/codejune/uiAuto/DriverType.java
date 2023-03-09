@@ -1,9 +1,11 @@
 package com.codejune.uiAuto;
 
+import com.codejune.common.Action;
 import com.codejune.common.SystemOS;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import java.util.Arrays;
 
 /**
  * 驱动类型
@@ -15,45 +17,43 @@ public enum DriverType {
     /**
      * CHROME
      * */
-    CHROME((boolean isShow) -> {
+    CHROME(isShow -> {
         ChromeOptions chromeOptions = new ChromeOptions();
-        if (isShow) {
-            chromeOptions.setHeadless(true);
+        chromeOptions.addArguments("start-maximized");
+        if (!isShow) {
+            chromeOptions.addArguments("--headless");
         }
         if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
-            chromeOptions.addArguments("--no-sandbox");
+            chromeOptions.addArguments("no-sandbox");
         }
+        chromeOptions.setExperimentalOption("excludeSwitches", Arrays.asList("enable-automation", "enable-logging"));
+        chromeOptions.setExperimentalOption("useAutomationExtension", false);
         return chromeOptions;
     }),
 
     /**
      * FIREBOX
      * */
-    FIREBOX((boolean isShow) -> {
+    FIREBOX(isShow -> {
         FirefoxOptions firefoxOptions = new FirefoxOptions();
-        if (isShow) {
-            firefoxOptions.setHeadless(true);
+        firefoxOptions.addArguments("start-maximized");
+        if (!isShow) {
+            firefoxOptions.addArguments("--headless");
         }
         if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
-            firefoxOptions.addArguments("--no-sandbox");
+            firefoxOptions.addArguments("no-sandbox");
         }
         return firefoxOptions;
     });
 
-    private final Option option;
+    private final Action<Boolean, MutableCapabilities> action;
 
-    DriverType(Option option) {
-        this.option = option;
+    DriverType(Action<Boolean, MutableCapabilities> action) {
+        this.action = action;
     }
 
     public MutableCapabilities getMutableCapabilities(boolean isShow) {
-        return this.option.getMutableCapabilities(isShow);
-    }
-
-    private interface Option {
-
-        MutableCapabilities getMutableCapabilities(boolean isShow);
-
+        return this.action.then(isShow);
     }
 
 }

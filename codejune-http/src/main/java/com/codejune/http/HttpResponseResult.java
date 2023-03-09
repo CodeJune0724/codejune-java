@@ -6,6 +6,7 @@ import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.RegexUtil;
 import com.codejune.common.util.StringUtil;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,7 +76,7 @@ public final class HttpResponseResult<T> implements Builder {
             result = RegexUtil.find("filename=(.*?)$", contentDisposition, 1);
             if (!StringUtil.isEmpty(result)) {
                 try {
-                    result = URLDecoder.decode(result, "UTF-8");
+                    result = URLDecoder.decode(result, StandardCharsets.UTF_8);
                 } catch (Exception e) {
                     throw new InfoException(e);
                 }

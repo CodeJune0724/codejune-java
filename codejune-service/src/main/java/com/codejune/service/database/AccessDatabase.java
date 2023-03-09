@@ -23,7 +23,7 @@ public class AccessDatabase extends Database {
 
     @SuppressWarnings("unchecked")
     public AccessDatabase(File databaseFile, String packageName, Class<?> tCLass) {
-        super(new Pool<Jdbc>(10) {
+        super(new Pool<>(10) {
             @Override
             public Jdbc create() {
                 return new AccessDatabaseJdbc(databaseFile);

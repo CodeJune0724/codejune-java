@@ -87,7 +87,7 @@ public final class Sheet implements Iterable<Row> {
             rows.add(getRow(i));
         }
         int[] i = new int[] {0};
-        return new Iterator<Row>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return i[0] < rows.size();

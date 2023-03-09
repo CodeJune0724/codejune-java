@@ -202,14 +202,13 @@ public final class MongodbTable implements Table {
         for (Filter.Item item : and) {
             String key = item.getKey();
             Object formatItem = formatItem(item);
-            if (formatItem instanceof Map) {
+            if (formatItem instanceof Map<?, ?> formatItemMap) {
                 Document document;
                 if (formatItem instanceof Document) {
                     document = (Document) formatItem;
                 } else {
                     document = new Document();
                 }
-                Map<?, ?> formatItemMap = (Map<?, ?>) formatItem;
                 Set<?> objects = formatItemMap.keySet();
                 for (Object k : objects) {
                     document.put(k.toString(), formatItemMap.get(k));
@@ -235,54 +234,33 @@ public final class MongodbTable implements Table {
         Filter.Item.Type type = item.getType();
         Object value = item.getValue();
         switch (type) {
-            case GT:
-                result.put("$gt", value);
-                break;
-            case GTE:
-                result.put("$gte", value);
-                break;
-            case LT:
-                result.put("$lt", value);
-                break;
-            case LTE:
-                result.put("$lte", value);
-                break;
-            case EQUALS:
-                result.put("$eq", value);
-                break;
-            case NOT_EQUALS:
-                result.put("$ne", value);
-                break;
-            case IN:
-                result.put("$in", value);
-                break;
-            case NOT_IN:
-                result.put("$nin", value);
-                break;
-            case CONTAINS:
-                result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
-                break;
-            case NOT_CONTAINS:
+            case GT -> result.put("$gt", value);
+            case GTE -> result.put("$gte", value);
+            case LT -> result.put("$lt", value);
+            case LTE -> result.put("$lte", value);
+            case EQUALS -> result.put("$eq", value);
+            case NOT_EQUALS -> result.put("$ne", value);
+            case IN -> result.put("$in", value);
+            case NOT_IN -> result.put("$nin", value);
+            case CONTAINS -> result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
+            case NOT_CONTAINS -> {
                 Map<String, Object> notContainsMap = new HashMap<>();
                 notContainsMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
                 result.put("$not", notContainsMap);
-                break;
-            case START_WITH:
-                result.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
-                break;
-            case NOT_START_WITH:
+            }
+            case START_WITH ->
+                    result.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
+            case NOT_START_WITH -> {
                 Map<String, Object> notStartWithMap = new HashMap<>();
                 notStartWithMap.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
                 result.put("$not", notStartWithMap);
-                break;
-            case END_WITH:
-                result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
-                break;
-            case NOT_END_WITH:
+            }
+            case END_WITH -> result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
+            case NOT_END_WITH -> {
                 Map<String, Object> notEndWithMap = new HashMap<>();
                 notEndWithMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
                 result.put("$not", notEndWithMap);
-                break;
+            }
         }
         return result;
     }

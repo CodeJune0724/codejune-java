@@ -115,46 +115,22 @@ public enum DataType {
             String objectS = ObjectUtil.toString(object);
             String tClassName = tClass.getName();
             if (StringUtil.isEmpty(objectS)) {
-                switch (tClassName) {
-                    case "byte":
-                    case "int":
-                    case "long":
-                    case "short":
-                    case "char":
-                        return 0;
-                    case "float":
-                    case "double":
-                        return 0.0;
-                    case "boolean":
-                        return false;
-                }
-                return null;
+                return switch (tClassName) {
+                    case "byte", "int", "long", "short", "char" -> 0;
+                    case "float", "double" -> 0.0;
+                    case "boolean" -> false;
+                    default -> null;
+                };
             } else {
                 switch (tClassName) {
-                    case "byte":
-                        tClass = Byte.class;
-                        break;
-                    case "int":
-                        tClass = Integer.class;
-                        break;
-                    case "long":
-                        tClass = Long.class;
-                        break;
-                    case "short":
-                        tClass = Short.class;
-                        break;
-                    case "char":
-                        tClass = Character.class;
-                        break;
-                    case "float":
-                        tClass = Float.class;
-                        break;
-                    case "double":
-                        tClass = Double.class;
-                        break;
-                    case "boolean":
-                        tClass = Boolean.class;
-                        break;
+                    case "byte" -> tClass = Byte.class;
+                    case "int" -> tClass = Integer.class;
+                    case "long" -> tClass = Long.class;
+                    case "short" -> tClass = Short.class;
+                    case "char" -> tClass = Character.class;
+                    case "float" -> tClass = Float.class;
+                    case "double" -> tClass = Double.class;
+                    case "boolean" -> tClass = Boolean.class;
                 }
             }
             if (tClass == Byte.class) {

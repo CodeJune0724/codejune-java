@@ -75,17 +75,12 @@ public final class OracleDatabase implements SqlDatabase {
         String sql = "CREATE TABLE " + tableName + "(\n";
         sql = StringUtil.append(sql, ArrayUtil.toString(columnList, column -> {
             String result = "\t" + column.getName() + " ";
-            switch (column.getDataType()) {
-                case INT:
-                    result = result + "NUMBER(" + column.getLength() + ")";
-                    break;
-                case STRING:
-                    result = result + "VARCHAR2(" + column.getLength() + ")";
-                    break;
-                case DATE:
-                    result = result + "DATETIME";
-                    break;
-            }
+            result = switch (column.getDataType()) {
+                case INT -> result + "NUMBER(" + column.getLength() + ")";
+                case STRING -> result + "VARCHAR2(" + column.getLength() + ")";
+                case DATE -> result + "DATETIME";
+                default -> "\t" + column.getName() + " ";
+            };
             if (!column.isNullable()) {
                 result = result + " NOT NULL";
             }

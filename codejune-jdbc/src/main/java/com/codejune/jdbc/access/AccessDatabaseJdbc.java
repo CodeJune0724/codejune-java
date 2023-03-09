@@ -73,16 +73,11 @@ public class AccessDatabaseJdbc extends SqlJdbc {
                 String[] split = name.split("\\.");
                 String suffix = split[split.length - 1];
                 suffix = suffix.toUpperCase();
-                switch (suffix) {
-                    case "MDB":
-                        fileFormat = Database.FileFormat.V2003;
-                        break;
-                    case "ACCDB":
-                        fileFormat = Database.FileFormat.V2016;
-                        break;
-                    default:
-                        throw new InfoException("类型错误");
-                }
+                fileFormat = switch (suffix) {
+                    case "MDB" -> Database.FileFormat.V2003;
+                    case "ACCDB" -> Database.FileFormat.V2016;
+                    default -> throw new InfoException("类型错误");
+                };
             } else {
                 throw new InfoException("文件名错误");
             }

@@ -189,7 +189,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     public Iterator<Sheet> iterator() {
         List<Sheet> sheets = getSheets();
         final int[] i = new int[]{0};
-        return new Iterator<Sheet>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return i[0] < sheets.size();

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * ServletUtil
@@ -35,7 +36,7 @@ public final class ServletUtil {
 
         try {
             httpServletResponse.setContentType("application/x-download");
-            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), "UTF-8"));
+            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8));
             httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
