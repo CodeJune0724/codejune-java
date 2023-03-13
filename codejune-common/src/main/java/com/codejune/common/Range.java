@@ -9,13 +9,13 @@ import com.codejune.common.exception.InfoException;
  * */
 public class Range {
 
-    private final Integer start;
+    private final Long start;
 
-    private final Integer end;
+    private final Long end;
 
-    public Range(Integer start, Integer end) {
+    public Range(Long start, Long end) {
         if (start == null) {
-            start = 0;
+            start = 0L;
         }
         if (end != null && end < start) {
             throw new InfoException("end < start");
@@ -24,11 +24,11 @@ public class Range {
         this.end = end;
     }
 
-    public Integer getStart() {
+    public Long getStart() {
         return start;
     }
 
-    public Integer getEnd() {
+    public Long getEnd() {
         return end;
     }
 

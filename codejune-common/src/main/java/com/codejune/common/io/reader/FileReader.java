@@ -5,6 +5,7 @@ import com.codejune.common.Range;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.ByteBuffer;
 import com.codejune.common.util.IOUtil;
+import com.codejune.common.util.ObjectUtil;
 import java.io.RandomAccessFile;
 
 /**
@@ -33,11 +34,14 @@ public final class FileReader extends InputStreamReader implements Closeable {
      * */
     public void read(Range range) {
         if (range == null) {
-            range = new Range(0, null);
+            range = new Range(0L, null);
         }
-        Integer difference = range.getEnd() == null ? null : range.getEnd() - range.getStart();
-        if (difference != null && difference == 0) {
+        Long length = range.getEnd() == null ? null : range.getEnd() - range.getStart();
+        if (length != null && length == 0) {
             return;
+        }
+        if (length != null) {
+            this.setReadSize(ObjectUtil.transform(length, int.class));
         }
         RandomAccessFile randomAccessFile = null;
         try {
