@@ -85,6 +85,12 @@ public final class Http {
      * @param value 值
      * */
     public void addHeader(String key, String value) {
+        if (StringUtil.isEmpty(key)) {
+            return;
+        }
+        if (key.equalsIgnoreCase("content-length")) {
+            return;
+        }
         header.put(key, value);
     }
 
@@ -148,6 +154,7 @@ public final class Http {
             }
             httpResponseResultHandler.handler(httpResponseResult);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new InfoException(e.getMessage());
         } finally {
             IOUtil.close(httpResponseResult.getBody());
