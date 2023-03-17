@@ -113,26 +113,26 @@ public final class Http {
                 httpEntityEnclosingRequestBase.setHeader(key, header.get(key));
             }
             if (body != null) {
-                switch (contentType) {
-                    case APPLICATION_JSON -> httpEntity = new StringEntity(JsonUtil.toJsonString(body), "UTF-8");
-                    case FORM_DATA -> {
-                        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
-                        Map<String, Object> mapBody = MapUtil.transformGeneric(MapUtil.parse(body), String.class, Object.class);
-                        for (String key : mapBody.keySet()) {
-                            Object value = mapBody.get(key);
-                            if (value == null) {
-                                continue;
-                            }
-                            if (value instanceof File) {
-                                FileBody fileBody = new FileBody((File) value);
-                                multipartEntityBuilder = multipartEntityBuilder.addPart(key, fileBody);
-                            } else {
-                                multipartEntityBuilder.addTextBody(key, ObjectUtil.toString(value), org.apache.http.entity.ContentType.create("text/plain", StandardCharsets.UTF_8));
-                            }
+                if (contentType == ContentType.APPLICATION_JSON) {
+                    httpEntity = new StringEntity(JsonUtil.toJsonString(body), "UTF-8");
+                } else if (contentType == ContentType.FORM_DATA) {
+                    MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
+                    Map<String, Object> mapBody = MapUtil.transformGeneric(MapUtil.parse(body), String.class, Object.class);
+                    for (String key : mapBody.keySet()) {
+                        Object value = mapBody.get(key);
+                        if (value == null) {
+                            continue;
                         }
-                        httpEntity = multipartEntityBuilder.build();
+                        if (value instanceof File) {
+                            FileBody fileBody = new FileBody((File) value);
+                            multipartEntityBuilder = multipartEntityBuilder.addPart(key, fileBody);
+                        } else {
+                            multipartEntityBuilder.addTextBody(key, ObjectUtil.toString(value), org.apache.http.entity.ContentType.create("text/plain", StandardCharsets.UTF_8));
+                        }
                     }
-                    default -> httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
+                    httpEntity = multipartEntityBuilder.build();
+                } else {
+                    httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
                 }
             }
             httpEntityEnclosingRequestBase.setEntity(httpEntity);
