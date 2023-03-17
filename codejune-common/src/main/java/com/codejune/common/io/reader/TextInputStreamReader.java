@@ -41,10 +41,10 @@ public final class TextInputStreamReader extends Reader<String> {
      * */
     public void read(Range range) {
         if (range == null) {
-            range = new Range(0, null);
+            range = new Range(0L, null);
         }
-        Integer difference = range.getEnd() == null ? null : range.getEnd() - range.getStart();
-        if (difference != null && difference == 0) {
+        Long length = range.getEnd() == null ? null : range.getEnd() - range.getStart();
+        if (length != null && length == 0) {
             return;
         }
         InputStreamReader inputStreamReader = null;
