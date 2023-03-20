@@ -28,6 +28,7 @@ public enum DriverType {
         }
         chromeOptions.setExperimentalOption("excludeSwitches", Arrays.asList("enable-automation", "enable-logging"));
         chromeOptions.setExperimentalOption("useAutomationExtension", false);
+        chromeOptions.addArguments("--remote-allow-origins=*");
         return chromeOptions;
     }),
 
@@ -43,6 +44,7 @@ public enum DriverType {
         if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
             firefoxOptions.addArguments("no-sandbox");
         }
+        firefoxOptions.addArguments("--remote-allow-origins=*");
         return firefoxOptions;
     });
 
