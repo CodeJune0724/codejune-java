@@ -1,11 +1,13 @@
 package com.codejune.jdbc.mongodb;
 
-import com.codejune.common.exception.ErrorException;
+import com.codejune.common.Action;
 import com.codejune.common.util.MapUtil;
 import com.codejune.jdbc.*;
 import com.codejune.jdbc.query.Field;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.Sort;
+import com.codejune.jdbc.query.filter.Compare;
+import com.codejune.jdbc.query.filter.Expression;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.ListIndexesIterable;
@@ -102,7 +104,7 @@ public final class MongodbTable implements Table {
     @Override
     public long delete(Filter filter) {
         try {
-            DeleteResult deleteResult = mongoCollection.deleteMany(formatFilter(filter));
+            DeleteResult deleteResult = mongoCollection.deleteMany(filterHandler(filter));
             return deleteResult.getDeletedCount();
         } catch (Exception e) {
             throw new InfoException(e);
@@ -115,7 +117,7 @@ public final class MongodbTable implements Table {
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.upsert(true);
             BasicDBObject updateSetValue = new BasicDBObject("$set", setData);
-            UpdateResult updateResult = mongoCollection.updateMany(formatFilter(filter), updateSetValue, updateOptions);
+            UpdateResult updateResult = mongoCollection.updateMany(filterHandler(filter), updateSetValue, updateOptions);
             return updateResult.getModifiedCount();
         } catch (Exception e) {
             throw new InfoException(e);
@@ -124,7 +126,7 @@ public final class MongodbTable implements Table {
 
     @Override
     public long count(Filter filter) {
-        return mongoCollection.countDocuments(formatFilter(filter));
+        return mongoCollection.countDocuments(filterHandler(filter));
     }
 
     @Override
@@ -132,8 +134,7 @@ public final class MongodbTable implements Table {
         if (query == null) {
             query = new Query();
         }
-        FindIterable<Document> queryData = mongoCollection.find(formatFilter(query.getFilter()));
-
+        FindIterable<Document> queryData = mongoCollection.find(filterHandler(query.getFilter()));
         Map<String, String> fieldMap = new HashMap<>();
         if (!ObjectUtil.isEmpty(query.getField())) {
             Document document = new Document();
@@ -144,11 +145,9 @@ public final class MongodbTable implements Table {
             }
             queryData = queryData.projection(document);
         }
-
-        if (query.isPage()) {
+        if (query.isPaging()) {
             queryData = queryData.limit(query.getSize()).skip(query.getSize() * (query.getPage() - 1));
         }
-
         if (query.isSort()) {
             List<Sort> sortList = query.getSort();
             for (Sort sort : sortList) {
@@ -158,20 +157,19 @@ public final class MongodbTable implements Table {
                 } else {
                     sortInt = -1;
                 }
-                queryData = queryData.sort(new Document().append(sort.getColumn(), sortInt));
+                queryData = queryData.sort(new Document().append(sort.getField(), sortInt));
             }
         }
-
         List<Map<String, Object>> result = new ArrayList<>();
         for (Document document : queryData) {
             Map<String, Object> map = new LinkedHashMap<>(document);
             if (!ObjectUtil.isEmpty(fieldMap)) {
-                map = MapUtil.transformGeneric(MapUtil.transformKey(map, key -> {
-                    String result1 = fieldMap.get(ObjectUtil.toString(key));
-                    if (ObjectUtil.isEmpty(result1)) {
+                map = MapUtil.parse(MapUtil.keyHandler(map, key -> {
+                    String alias = fieldMap.get(key);
+                    if (ObjectUtil.isEmpty(alias)) {
                         return key;
                     } else {
-                        return result1;
+                        return alias;
                     }
                 }), String.class, Object.class);
             }
@@ -180,89 +178,100 @@ public final class MongodbTable implements Table {
         return result;
     }
 
-    private static Document formatFilter(Filter filter) {
-        Document result = new Document();
+    private static Document filterHandler(Filter filter) {
         if (filter == null) {
-            filter = new Filter();
+            return new Document();
         }
-
-        List<Filter> or = filter.getOr();
-        List<Document> documentList = new ArrayList<>();
-        for (Filter orFilter : or) {
-            Document document = formatFilter(orFilter);
-            if (document.size() != 0) {
-                documentList.add(document);
+        Action<Compare, Map<String, Object>> compareAction = compare -> {
+            if (compare == null) {
+                return null;
             }
-        }
-        if (!ObjectUtil.isEmpty(documentList)) {
-            result.put("$or", documentList);
-        }
-
-        List<Filter.Item> and = filter.getAnd();
-        for (Filter.Item item : and) {
-            String key = item.getKey();
-            Object formatItem = formatItem(item);
-            if (formatItem instanceof Map<?, ?> formatItemMap) {
-                Document document;
-                if (formatItem instanceof Document) {
-                    document = (Document) formatItem;
-                } else {
-                    document = new Document();
+            Map<String, Object> result = new HashMap<>();
+            Compare.Type type = compare.getType();
+            Object value = compare.getValue();
+            switch (type) {
+                case GT -> result.put("$gt", value);
+                case GTE -> result.put("$gte", value);
+                case LT -> result.put("$lt", value);
+                case LTE -> result.put("$lte", value);
+                case EQUALS -> result.put("$eq", value);
+                case NOT_EQUALS -> result.put("$ne", value);
+                case IN -> result.put("$in", value);
+                case NOT_IN -> result.put("$nin", value);
+                case CONTAINS -> result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
+                case NOT_CONTAINS -> {
+                    Map<String, Object> notContainsMap = new HashMap<>();
+                    notContainsMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
+                    result.put("$not", notContainsMap);
                 }
-                Set<?> objects = formatItemMap.keySet();
-                for (Object k : objects) {
-                    document.put(k.toString(), formatItemMap.get(k));
+                case START_WITH ->
+                        result.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
+                case NOT_START_WITH -> {
+                    Map<String, Object> notStartWithMap = new HashMap<>();
+                    notStartWithMap.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
+                    result.put("$not", notStartWithMap);
                 }
-
-                if (result.get(key) != null) {
-                    document.putAll(MapUtil.transformGeneric((Map<?, ?>) result.get(key), String.class, Object.class));
+                case END_WITH -> result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
+                case NOT_END_WITH -> {
+                    Map<String, Object> notEndWithMap = new HashMap<>();
+                    notEndWithMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
+                    result.put("$not", notEndWithMap);
                 }
-                result.put(key, document);
-            } else {
-                throw new ErrorException("formatItem is error");
             }
-        }
-
-        return result;
-    }
-
-    private static Object formatItem(Filter.Item item) {
-        if (item == null) {
-            return null;
-        }
-        Map<String, Object> result = new HashMap<>();
-        Filter.Item.Type type = item.getType();
-        Object value = item.getValue();
-        switch (type) {
-            case GT -> result.put("$gt", value);
-            case GTE -> result.put("$gte", value);
-            case LT -> result.put("$lt", value);
-            case LTE -> result.put("$lte", value);
-            case EQUALS -> result.put("$eq", value);
-            case NOT_EQUALS -> result.put("$ne", value);
-            case IN -> result.put("$in", value);
-            case NOT_IN -> result.put("$nin", value);
-            case CONTAINS -> result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
-            case NOT_CONTAINS -> {
-                Map<String, Object> notContainsMap = new HashMap<>();
-                notContainsMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
-                result.put("$not", notContainsMap);
+            return result;
+        };
+        Action<List<Expression>, Document> expressionListAction = new Action<>() {
+            @Override
+            public Document then(List<Expression> expressionList) {
+                if (ObjectUtil.isEmpty(expressionList)) {
+                    return new Document();
+                }
+                Document result = new Document();
+                List<Object> and = new ArrayList<>();
+                List<Object> or = new ArrayList<>();
+                for (Expression expression : expressionList) {
+                    Expression.Connector connector = expression.getConnector();
+                    if (connector == null) {
+                        connector = Expression.Connector.AND;
+                    }
+                    if (expression.isCompare()) {
+                        Compare compare = expression.getCompare();
+                        Map<String, Object> compareActionResult = compareAction.then(compare);
+                        if (ObjectUtil.isEmpty(compareActionResult)) {
+                            continue;
+                        }
+                        Map<String, Object> finalCompareActionResult = compareActionResult;
+                        compareActionResult = new HashMap<>() {
+                            {
+                                put(compare.getKey(), finalCompareActionResult);
+                            }
+                        };
+                        if (connector == Expression.Connector.AND) {
+                            and.add(compareActionResult);
+                        }
+                        if (connector == Expression.Connector.OR) {
+                            or.add(compareActionResult);
+                        }
+                    }
+                    if (expression.isGroup()) {
+                        if (connector == Expression.Connector.AND) {
+                            and.add(this.then(expression.getGroup().getExpressionList()));
+                        }
+                        if (connector == Expression.Connector.OR) {
+                            or.add(this.then(expression.getGroup().getExpressionList()));
+                        }
+                    }
+                }
+                if (!ObjectUtil.isEmpty(or)) {
+                    result.put("$or", or);
+                }
+                if (!ObjectUtil.isEmpty(and)) {
+                    result.put("$and", and);
+                }
+                return result;
             }
-            case START_WITH ->
-                    result.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
-            case NOT_START_WITH -> {
-                Map<String, Object> notStartWithMap = new HashMap<>();
-                notStartWithMap.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
-                result.put("$not", notStartWithMap);
-            }
-            case END_WITH -> result.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
-            case NOT_END_WITH -> {
-                Map<String, Object> notEndWithMap = new HashMap<>();
-                notEndWithMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
-                result.put("$not", notEndWithMap);
-            }
-        }
-        return result;
+        };
+        return expressionListAction.then(filter.getExpressionList());
     }
 
 }

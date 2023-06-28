@@ -1,4 +1,4 @@
-package com.codejune.common.classInfo;
+package com.codejune.common.classinfo;
 
 import com.codejune.common.exception.InfoException;
 import java.lang.annotation.Annotation;

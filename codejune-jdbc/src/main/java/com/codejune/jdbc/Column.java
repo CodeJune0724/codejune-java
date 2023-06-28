@@ -1,7 +1,6 @@
 package com.codejune.jdbc;
 
-import com.codejune.common.DataType;
-import java.sql.Types;
+import java.sql.JDBCType;
 
 /**
  * 数据库字段
@@ -14,7 +13,7 @@ public class Column {
 
     private String remark;
 
-    private DataType dataType;
+    private JDBCType type;
 
     private int length;
 
@@ -24,18 +23,11 @@ public class Column {
 
     private boolean autoincrement;
 
-    private int sqlType;
-
     public Column() {}
 
-    public Column(String name, DataType dataType) {
+    public Column(String name, JDBCType type) {
         setName(name);
-        setDataType(dataType);
-    }
-
-    public Column(String name, int sqlType) {
-        setName(name);
-        setSqlType(sqlType);
+        setType(type);
     }
 
     public String getName() {
@@ -54,8 +46,12 @@ public class Column {
         this.remark = remark;
     }
 
-    public DataType getDataType() {
-        return dataType;
+    public JDBCType getType() {
+        return type;
+    }
+
+    public void setType(JDBCType type) {
+        this.type = type;
     }
 
     public int getLength() {
@@ -88,56 +84,6 @@ public class Column {
 
     public void setAutoincrement(boolean autoincrement) {
         this.autoincrement = autoincrement;
-    }
-
-    public int getSqlType() {
-        return sqlType;
-    }
-
-    /**
-     * setDataType
-     *
-     * @param dataType dataType
-     * */
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
-        this.sqlType = getSqlType(dataType);
-    }
-
-    /**
-     * setSqlType
-     *
-     * @param sqlType sqlType
-     * */
-    public void setSqlType(int sqlType) {
-        this.sqlType = sqlType;
-        this.dataType = getDataType(sqlType);
-    }
-
-    private static int getSqlType(DataType dataType) {
-        return switch (dataType) {
-            case INT -> Types.INTEGER;
-            case LONG -> Types.BIGINT;
-            case DOUBLE -> Types.DOUBLE;
-            case STRING -> Types.VARCHAR;
-            case LONG_STRING -> Types.LONGVARCHAR;
-            case BOOLEAN -> Types.BIT;
-            case DATE -> Types.DATE;
-            default -> Types.OTHER;
-        };
-    }
-
-    private static DataType getDataType(int sqlType) {
-        return switch (sqlType) {
-            case Types.CHAR, Types.VARCHAR, Types.NVARCHAR -> DataType.STRING;
-            case Types.LONGVARCHAR -> DataType.LONG_STRING;
-            case Types.NUMERIC, Types.DECIMAL, Types.SMALLINT, Types.REAL, Types.FLOAT, Types.DOUBLE -> DataType.DOUBLE;
-            case Types.BIT, Types.BOOLEAN -> DataType.BOOLEAN;
-            case Types.TINYINT, Types.INTEGER -> DataType.INT;
-            case Types.BIGINT -> DataType.LONG;
-            case Types.DATE, Types.TIME, Types.TIMESTAMP -> DataType.DATE;
-            default -> DataType.OBJECT;
-        };
     }
 
 }

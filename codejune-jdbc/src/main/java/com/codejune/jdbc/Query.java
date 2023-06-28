@@ -2,15 +2,14 @@ package com.codejune.jdbc;
 
 import com.codejune.common.Action;
 import com.codejune.common.Builder;
-import com.codejune.common.DataType;
+import com.codejune.common.Data;
+import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.query.Field;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.Sort;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 查询
@@ -88,7 +87,7 @@ public class Query implements Builder {
      *
      * @return 分页返回true
      * */
-    public boolean isPage() {
+    public boolean isPaging() {
         return page != null && size != null && page > 0 && size > 0;
     }
 
@@ -126,16 +125,13 @@ public class Query implements Builder {
         if (action == null) {
             return this;
         }
-        if (this.filter != null) {
-            this.filter.itemHandler(item -> {
-                item.setKey(action.then(item.getKey()));
-                return item;
-            });
-        }
-        if (this.sort != null) {
-            for (Sort item : sort) {
-                item.keyHandler(action);
-            }
+        getFilter().getConfig().setCleanNullExclude(ArrayUtil.parse(getFilter().getConfig().getCleanNullExclude(), action));
+        getFilter().compareHandler(item -> {
+            item.setKey(action.then(item.getKey()));
+            return item;
+        });
+        for (Sort item : getSort()) {
+            item.keyHandler(action);
         }
         return this;
     }
@@ -158,46 +154,51 @@ public class Query implements Builder {
     public void build(Object object) {
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
         Object sort = MapUtil.getValue(map, "sort", Object.class);
-        if (sort != null && DataType.parse(sort.getClass()) == DataType.MAP) {
-            List<Map<?, ?>> list = new ArrayList<>();
-            list.add(MapUtil.parse(sort));
+        if (sort instanceof Map<?,?> sortMap) {
+            List<Sort> list = new ArrayList<>();
+            for (Object key : sortMap.keySet()) {
+                Sort sortItem = new Sort();
+                sortItem.setField(key);
+                sortItem.setOrderBy(MapUtil.getValue(sortMap, Data.toString(key), Sort.OderBy.class));
+                list.add(sortItem);
+            }
             map.put("sort", list);
         }
-        List<?> field = MapUtil.getValue(map, "field", List.class);
-        if (!ObjectUtil.isEmpty(field)) {
-            List<Field> fieldList = new ArrayList<>();
-            for (Object item : field) {
+        if (map != null) {
+            map.put("sort", ArrayUtil.parse(MapUtil.getValue(map, "sort", List.class), Sort.class));
+        }
+        Object field = MapUtil.getValue(map, "field", Object.class);
+        if (field instanceof Map<?,?> fieldMap) {
+            List<Field> list = new ArrayList<>();
+            for (Object key : fieldMap.keySet()) {
+                Field fieldItem = new Field();
+                fieldItem.setName(ObjectUtil.toString(key));
+                fieldItem.setAlias(MapUtil.getValue(fieldMap, Data.toString(key), String.class));
+                list.add(fieldItem);
+            }
+            map.put("field", list);
+        }
+        List<?> fieldList = MapUtil.getValue(map, "field", List.class);
+        if (!ObjectUtil.isEmpty(fieldList)) {
+            List<Field> newFieldList = new ArrayList<>();
+            for (Object item : fieldList) {
                 if (item == null) {
                     continue;
                 }
-                String name = null;
+                String name;
                 String alias = null;
-                if (item instanceof String) {
-                    name = ObjectUtil.toString(item);
-                }
-                if (DataType.parse(item.getClass()) == DataType.MAP) {
+                if (item instanceof String itemString) {
+                    name = itemString;
+                } else {
                     Map<?, ?> itemMap = MapUtil.parse(item);
                     name = MapUtil.getValue(itemMap, "name", String.class);
                     alias = MapUtil.getValue(itemMap, "alias", String.class);
                 }
-                fieldList.add(new Field().setName(name).setAlias(alias));
+                newFieldList.add(new Field().setName(name).setAlias(alias));
             }
-            map.put("field", fieldList);
+            map.put("field", newFieldList);
         }
         ObjectUtil.assignment(this, map);
-    }
-
-    /**
-     * 转换
-     *
-     * @param object object
-     *
-     * @return Query
-     * */
-    public static Query parse(Object object) {
-        Query result = new Query();
-        result.build(object);
-        return result;
     }
 
 }

@@ -1,11 +1,10 @@
 package com.codejune.common.util;
 
 import com.codejune.common.exception.InfoException;
+import com.codejune.common.io.writer.OutputStreamWriter;
 import com.codejune.common.os.Folder;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -22,30 +21,73 @@ public final class ZipUtil {
     /**
      * 压缩
      *
-     * @param dirs 源文件或者文件夹
-     * @param outFile 输出文件
+     * @param fileList 源文件或者文件夹
+     * @param result 输出文件
+     *
+     * @return outFile
      * */
-    public static void zip(List<String> dirs, File outFile) {
-        if (ObjectUtil.isEmpty(dirs)) {
-            return;
-        }
-        if (outFile == null) {
+    public static File zip(List<String> fileList, File result) {
+        if (result == null) {
             throw new InfoException("outFile is null");
         }
-        if (outFile.exists()) {
-            FileUtil.delete(outFile);
+        if (ObjectUtil.isEmpty(fileList)) {
+            return result;
         }
-        File parent = outFile.getParentFile();
-        if (!parent.exists()) {
-            boolean mkdirs = parent.mkdirs();
-            if (!mkdirs) {
-                throw new InfoException("创建文件夹失败");
+        if (result.exists()) {
+            FileUtil.delete(result);
+        }
+        new Folder(result.getParent());
+        try (
+                FileOutputStream fileOutputStream = new FileOutputStream(result);
+                ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)
+        ) {
+            for (String file : fileList) {
+                zip(zipOutputStream, new File(file), "");
             }
-        }
-        try {
-            zip(dirs, outFile.getAbsolutePath());
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new InfoException(e);
+        }
+        return result;
+    }
+
+    private static void zip(ZipOutputStream zipOutputStream, File file, String path) {
+        if (zipOutputStream == null) {
+            return;
+        }
+        if (!FileUtil.exist(file)) {
+            return;
+        }
+        if (StringUtil.isEmpty(path)) {
+            path = "";
+        }
+        if (!StringUtil.isEmpty(path)) {
+            path = path + "/";
+        }
+        if (FileUtil.isFile(file)) {
+            try {
+                zipOutputStream.putNextEntry(new ZipEntry(path + file.getName()));
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(zipOutputStream);
+                try (InputStream inputStream = IOUtil.getInputStream(file)) {
+                    outputStreamWriter.write(inputStream);
+                }
+                zipOutputStream.closeEntry();
+            } catch (Exception e) {
+                throw new InfoException(e);
+            }
+        } else {
+            File[] fileList = file.listFiles();
+            if (fileList == null) {
+               return;
+            }
+            try {
+                zipOutputStream.putNextEntry(new ZipEntry(path + file.getName() + "/"));
+                zipOutputStream.closeEntry();
+                for (File fileListItem : fileList) {
+                    zip(zipOutputStream, fileListItem, path + file.getName());
+                }
+            } catch (Exception e) {
+                throw new InfoException(e);
+            }
         }
     }
 
@@ -60,7 +102,7 @@ public final class ZipUtil {
             return;
         }
         new Folder(outPath);
-        try (ZipFile zf = new ZipFile(zipFile)) {
+        try (ZipFile zf = new ZipFile(zipFile, Charset.forName(System.getProperty("sun.jnu.encoding")))) {
             Enumeration<?> enumeration = zf.entries();
             while (enumeration.hasMoreElements()) {
                 ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();
@@ -74,113 +116,6 @@ public final class ZipUtil {
             }
         } catch (Exception e) {
             throw new InfoException(e);
-        }
-    }
-
-    private static void zip(List<String> dirs, String outDir) {
-        OutputStream out = null;
-        ZipOutputStream zos = null;
-        try {
-            out = Files.newOutputStream(Paths.get(outDir));
-            zos = new ZipOutputStream(out);
-            List<File> sourceFileList = new ArrayList<>();
-            for (String dir : dirs) {
-                File sourceFile = new File(dir);
-                sourceFileList.add(sourceFile);
-            }
-            compress(sourceFileList, zos);
-        } catch (Exception e) {
-            throw new InfoException(e);
-        } finally {
-            if (zos != null) {
-                try {
-                    zos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            IOUtil.close(out);
-        }
-
-    }
-
-    private static void compress(File sourceFile, ZipOutputStream zos, String name, boolean KeepDirStructure) {
-        FileInputStream in = null;
-
-        try {
-            byte[] buf = new byte[2 * 1024];
-            if (sourceFile.isFile()) {
-                zos.putNextEntry(new ZipEntry(name));
-                int len;
-                in = new FileInputStream(sourceFile);
-                while ((len = in.read(buf)) != -1) {
-                    zos.write(buf, 0, len);
-                }
-                // Complete the entry
-                zos.closeEntry();
-                in.close();
-            } else {
-                File[] listFiles = sourceFile.listFiles();
-                if (listFiles == null || listFiles.length == 0) {
-                    if (KeepDirStructure) {
-                        zos.putNextEntry(new ZipEntry(name + "/"));
-                        zos.closeEntry();
-                    }
-
-                } else {
-                    for (File file : listFiles) {
-                        if (KeepDirStructure) {
-                            compress(file, zos, name + "/" + file.getName(),
-                                    KeepDirStructure);
-                        } else {
-                            compress(file, zos, file.getName(), KeepDirStructure);
-                        }
-
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(in);
-        }
-    }
-
-    private static void compress(List<File> sourceFileList, ZipOutputStream zos) {
-        FileInputStream in = null;
-
-        try {
-            byte[] buf = new byte[2 * 1024];
-            for (File sourceFile : sourceFileList) {
-                String name = sourceFile.getName();
-                if (sourceFile.isFile()) {
-                    zos.putNextEntry(new ZipEntry(name));
-                    int len;
-                    in = new FileInputStream(sourceFile);
-                    while ((len = in.read(buf)) != -1) {
-                        zos.write(buf, 0, len);
-                    }
-                    zos.closeEntry();
-                    in.close();
-                } else {
-                    File[] listFiles = sourceFile.listFiles();
-                    if (listFiles == null || listFiles.length == 0) {
-                        zos.putNextEntry(new ZipEntry(name + "/"));
-                        zos.closeEntry();
-
-                    } else {
-                        for (File file : listFiles) {
-                            compress(file, zos, name + "/" + file.getName(),
-                                    true);
-
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(in);
         }
     }
 

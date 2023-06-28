@@ -1,7 +1,7 @@
 package com.codejune.common;
 
-import com.codejune.common.classInfo.Field;
-import com.codejune.common.classInfo.Method;
+import com.codejune.common.classinfo.Field;
+import com.codejune.common.classinfo.Method;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ObjectUtil;
@@ -223,6 +223,18 @@ public final class ClassInfo {
      * @return Method
      * */
     public Method getGetMethod(String fieldName) {
+        if (StringUtil.isEmpty(fieldName)) {
+            return null;
+        }
+        Method result;
+        try {
+            result = new Method(aClass.getMethod("get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1)));
+        } catch (Exception e) {
+            result = null;
+        }
+        if (result != null) {
+            return result;
+        }
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(aClass);
             for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
@@ -248,6 +260,22 @@ public final class ClassInfo {
      * @return Method
      * */
     public Method getSetMethod(String fieldName) {
+        if (StringUtil.isEmpty(fieldName)) {
+            return null;
+        }
+        Field field = getField(fieldName);
+        if (field == null) {
+            return null;
+        }
+        Method result;
+        try {
+            result = new Method(aClass.getMethod("set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1), field.getType()));
+        } catch (Exception e) {
+            result = null;
+        }
+        if (result != null) {
+            return result;
+        }
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(aClass);
             for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {

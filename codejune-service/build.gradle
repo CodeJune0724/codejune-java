@@ -1,6 +1,0 @@
-dependencies {
-    api project(':codejune-common')
-    api project(':codejune-jdbc')
-    compileOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.0.4'
-    compileOnly group: 'org.springframework.boot', name: 'spring-boot-starter-websocket', version: '3.0.4'
-}

@@ -13,7 +13,9 @@ public enum ContentType {
 
     FORM_DATA("multipart/form-data"),
 
-    ROW("text/plain");
+    TEXT_PLAIN("text/plain"),
+
+    TEXT_HTML("text/html");
 
     private final String contentType;
 

@@ -2,13 +2,17 @@ package com.codejune.jdbc.query;
 
 import com.codejune.common.Action;
 import com.codejune.common.Builder;
-import com.codejune.common.classInfo.Field;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
-import com.codejune.jdbc.Column;
-import java.util.*;
+import com.codejune.jdbc.query.filter.Compare;
+import com.codejune.jdbc.query.filter.Config;
+import com.codejune.jdbc.query.filter.Expression;
+import com.codejune.jdbc.query.filter.Group;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 过滤
@@ -17,546 +21,223 @@ import java.util.*;
  * */
 public final class Filter implements Builder {
 
-    private final List<Filter> or = new ArrayList<>();
+    private final List<Expression> expressionList = new ArrayList<>();
 
-    private final List<Item> and = new ArrayList<>();
+    private Config config = new Config();
 
-    private Config config;
-
-    public List<Filter> getOr() {
-        handler();
-        return or;
-    }
-
-    public List<Item> getAnd() {
-        handler();
-        return and;
+    public List<Expression> getExpressionList() {
+        Filter clone = ObjectUtil.clone(this);
+        Config config = getConfig();
+        if (config.getCleanNull() != null && config.getCleanNull()) {
+            return clone.compareHandler(compare -> {
+                if (compare == null) {
+                    return null;
+                }
+                List<String> cleanNullExclude = config.getCleanNullExclude();
+                if (cleanNullExclude == null) {
+                    cleanNullExclude = new ArrayList<>();
+                }
+                if (ObjectUtil.isEmpty(compare.getValue()) && !cleanNullExclude.contains(compare.getKey())) {
+                    return null;
+                }
+                return compare;
+            }).expressionList;
+        }
+        return clone.expressionList;
     }
 
     public Config getConfig() {
-        if (config == null) {
-            config = new Config();
-        }
         return config;
     }
 
     public void setConfig(Config config) {
+        if (config == null) {
+            return;
+        }
         this.config = config;
-        for (Filter filter : or) {
-            filter.setConfig(config);
-        }
     }
 
     /**
-     * 或者
+     * and
      *
-     * @param filter filter
+     * @param group 一组表达式
      *
-     * @return Filter
+     * @return this
      * */
-    public Filter or(Filter filter) {
-        if (filter == null) {
-            return this;
-        }
-        if (!ObjectUtil.isEmpty(filter.or)) {
-            throw new InfoException("or禁止包含or");
-        }
-        or.add(filter);
+    public Filter and(Group group) {
+        this.expressionList.add(new Expression(Expression.Connector.AND, group));
         return this;
     }
 
     /**
-     * 并且
+     * and
      *
-     * @param item item
+     * @param compare 比较
      *
-     * @return Filter
+     * @return this
      * */
-    public Filter and(Item item) {
-        if (item != null) {
-            and.add(item);
-        }
+    public Filter and(Compare compare) {
+        this.expressionList.add(new Expression(Expression.Connector.AND, compare));
         return this;
     }
 
     /**
-     * 设置新的key
+     * or
+     *
+     * @param group 一组表达式
+     *
+     * @return this
+     * */
+    public Filter or(Group group) {
+        this.expressionList.add(new Expression(Expression.Connector.OR, group));
+        return this;
+    }
+
+    /**
+     * or
+     *
+     * @param compare 比较
+     *
+     * @return this
+     * */
+    public Filter or(Compare compare) {
+        this.expressionList.add(new Expression(Expression.Connector.OR, compare));
+        return this;
+    }
+
+    /**
+     * Compare处理
      *
      * @param action action
      *
      * @return this
      * */
-    public Filter itemHandler(Action<Item, Item> action) {
-        if (action == null) {
-            return this;
-        }
-        for (Filter filter : or) {
-            filter.itemHandler(action);
-        }
-        for (Item item : and) {
-            ObjectUtil.assignment(item, action.then(item));
-        }
-        return this;
-    }
-
-    /**
-     * 清空null
-     *
-     * @return Filter
-     * */
-    public Filter cleanNull() {
-        for (Filter filter : this.or) {
-            filter.cleanNull();
-        }
-        List<Item> isNotNull = new ArrayList<>();
-        for (Item item : this.and) {
-            if (!ObjectUtil.isEmpty(item.getValue())) {
-                isNotNull.add(item);
+    public Filter compareHandler(Action<Compare, Compare> action) {
+        Action<List<Expression>, List<Expression>> compareHandlerAction = new Action<>() {
+            @Override
+            public List<Expression> then(List<Expression> expressionsList) {
+                List<Expression> result = new ArrayList<>();
+                for (Expression expression : expressionsList) {
+                    if (expression.isCompare()) {
+                        Compare compare = action.then(expression.getCompare());
+                        if (compare != null) {
+                            result.add(expression);
+                        }
+                    }
+                    if (expression.isGroup()) {
+                        Group group = expression.getGroup();
+                        List<Expression> newGroupExpressionList = this.then(group.getExpressionList());
+                        if (!ObjectUtil.isEmpty(newGroupExpressionList)) {
+                            group.getExpressionList().clear();
+                            group.getExpressionList().addAll(newGroupExpressionList);
+                            result.add(expression);
+                        }
+                    }
+                }
+                return result;
             }
-        }
-        this.and.clear();
-        this.and.addAll(isNotNull);
-        return this;
-    }
-
-    /**
-     * 过滤key
-     *
-     * @param keyList 需要存在的key
-     *
-     * @return Filter
-     * */
-    public Filter filter(Collection<?> keyList) {
-        if (ObjectUtil.isEmpty(keyList)) {
-            return this;
-        }
-        List<String> strings = new ArrayList<>();
-        for (Object o : keyList) {
-            if (o instanceof Column) {
-                strings.add(((Column) o).getName());
-            } else if (o instanceof java.lang.reflect.Field) {
-                strings.add(((java.lang.reflect.Field) o).getName());
-            } else if (o instanceof String) {
-                strings.add(ObjectUtil.toString(o));
-            } else if (o instanceof Field) {
-                strings.add(((Field) o).getName());
-            }
-        }
-        if (ObjectUtil.isEmpty(strings)) {
-            return this;
-        }
-        for (Filter filter : this.or) {
-            filter.filter(keyList);
-        }
-        List<Item> list = new ArrayList<>();
-        for (Item item : this.and) {
-            if (strings.contains(item.getKey())) {
-                list.add(item);
-            }
-        }
-        this.and.clear();
-        this.and.addAll(list);
-        return this;
-    }
-
-    /**
-     * 通过key删除
-     *
-     * @param key key
-     *
-     * @return this
-     * */
-    public Filter deleteItem(String key) {
-        if (StringUtil.isEmpty(key)) {
-            return this;
-        }
-        for (Filter filter : getOr()) {
-            filter.deleteItem(key);
-        }
-        List<Item> newItem = new ArrayList<>();
-        for (Item item : getAnd()) {
-            if (!key.equals(item.getKey())) {
-                newItem.add(item);
-            }
-        }
-        this.and.clear();
-        this.and.addAll(newItem);
-        return this;
-    }
-
-    /**
-     * 通过ItemList删除
-     *
-     * @param itemList itemList
-     *
-     * @return this
-     * */
-    public Filter deleteItem(List<Item> itemList) {
-        if (ObjectUtil.isEmpty(itemList)) {
-            return this;
-        }
-        for (Item item : itemList) {
-            deleteItem(item);
-        }
-        return this;
-    }
-
-    /**
-     * 通过Item删除
-     *
-     * @param item item
-     *
-     * @return this
-     * */
-    public Filter deleteItem(Item item) {
-        if (item == null) {
-            return this;
-        }
-        deleteItem(item.getKey());
+        };
+        List<Expression> newExpressionList = compareHandlerAction.then(this.expressionList);
+        this.expressionList.clear();
+        this.expressionList.addAll(newExpressionList);
         return this;
     }
 
     @Override
     public void build(Object object) {
-        if (object == null) {
+        Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
+        if (map == null) {
             return;
         }
-        Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
-        Set<String> keySet = map.keySet();
-        for (String key : keySet) {
-            Object value = map.get(key);
-            if ("$config".equals(key)) {
-                this.setConfig(ObjectUtil.transform(value, Config.class));
-            } else if ("$or".equals(key)) {
-                for (Object map1 : (List<?>) value) {
-                    this.or(Filter.parse(MapUtil.parse(map1, String.class, Object.class)));
+        this.expressionList.clear();
+        ObjectUtil.assignment(this.getConfig(), map.remove("$config"));
+        Action<Map<?, ?>, List<Expression>> expressionAction = new Action<>() {
+            @Override
+            public List<Expression> then(Map<?, ?> map) {
+                if (map == null) {
+                    return new ArrayList<>();
                 }
-            } else {
-                if (value instanceof Map) {
-                    Map<String, Object> map1 = MapUtil.parse(value, String.class, Object.class);
-                    Set<String> keySet1 = map1.keySet();
-                    for (String key1 : keySet1) {
-                        Item.Type type = null;
-                        Item.Type[] values = Item.Type.values();
-                        for (Item.Type type1 : values) {
-                            if (type1.value.equals(key1)) {
-                                type = type1;
-                                break;
-                            }
+                List<Object> or = ArrayUtil.parse(MapUtil.getValue(map, "$or", List.class), Object.class);
+                if (or == null) {
+                    or = new ArrayList<>();
+                }
+                List<Object> and = ArrayUtil.parse(MapUtil.getValue(map, "$and", List.class), Object.class);
+                if (and == null) {
+                    and = new ArrayList<>();
+                }
+                for (Object key : map.keySet()) {
+                    if ("$or".equals(key) || "$and".equals(key)) {
+                        continue;
+                    }
+                    Object value = map.get(key);
+                    if (value instanceof Map<?, ?> valueMap) {
+                        for (Object valueMapKey : valueMap.keySet()) {
+                            and.add(new HashMap<>() {
+                                {
+                                    put(key, new HashMap<>() {
+                                        {
+                                            put(valueMapKey, valueMap.get(valueMapKey));
+                                        }
+                                    });
+                                }
+                            });
                         }
-                        if (type == null) {
+                    } else {
+                        and.add(new HashMap<>() {
+                            {
+                                put(ObjectUtil.toString(key), value);
+                            }
+                        });
+                    }
+                }
+                int count = or.size() + and.size();
+                if (count == 0) {
+                    return new ArrayList<>();
+                }
+                List<Expression> result = new ArrayList<>();
+                if (count == 1) {
+                    Expression.Connector connector;
+                    Object compare;
+                    if (or.size() == 1) {
+                        connector = Expression.Connector.OR;
+                        compare = or.get(0);
+                    } else {
+                        connector = Expression.Connector.AND;
+                        compare = and.get(0);
+                    }
+                    result.add(new Expression(connector, ObjectUtil.transform(compare, Compare.class)));
+                } else {
+                    for (Object item : or) {
+                        List<Expression> orExpressionList = this.then(MapUtil.parse(item));
+                        if (orExpressionList.size() == 0) {
                             continue;
                         }
-                        Object value1 = map1.get(key1);
-                        this.and(new Item(type, key, value1));
+                        if (orExpressionList.size() == 1) {
+                            result.add(new Expression(Expression.Connector.OR, orExpressionList.get(0).getCompare()));
+                        } else {
+                            Group group = new Group();
+                            group.setExpressionList(orExpressionList);
+                            result.add(new Expression(Expression.Connector.OR, group));
+                        }
                     }
-                } else {
-                    this.and(Item.equals(key, value));
+                    for (Object item : and) {
+                        List<Expression> andExpressionList = this.then(MapUtil.parse(item));
+                        if (andExpressionList.size() == 0) {
+                            continue;
+                        }
+                        if (andExpressionList.size() == 1) {
+                            result.add(new Expression(Expression.Connector.AND, andExpressionList.get(0).getCompare()));
+                        } else {
+                            Group group = new Group();
+                            group.setExpressionList(andExpressionList);
+                            result.add(new Expression(Expression.Connector.AND, group));
+                        }
+                    }
                 }
+                return result;
             }
-        }
-    }
-
-    private void handler() {
-        if (getConfig().cleanNull) {
-            cleanNull();
-        }
-    }
-
-    /**
-     * 转换
-     *
-     * @param object object
-     *
-     * @return Filter
-     * */
-    public static Filter parse(Object object) {
-        Filter result = new Filter();
-        result.build(object);
-        return result;
-    }
-
-    /**
-     * 校验单独项
-     *
-     * @author ZJ
-     * */
-    public static final class Item {
-
-        private Type type;
-
-        private String key;
-
-        private Object value;
-
-        public Item() {
-            this(null, null, null);
-        }
-
-        @SuppressWarnings("unchecked")
-        public Item(Type type, Object key, Object value) {
-            this.type = type;
-            this.key = ObjectUtil.toString(key);
-            if (value instanceof Action) {
-                value = ((Action<Object, Object>) value).then(key);
-            }
-            this.value = value;
-        }
-
-        public Type getType() {
-            return type;
-        }
-
-        public void setType(Type type) {
-            this.type = type;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public void setValue(Object value) {
-            this.value = value;
-        }
-
-        /**
-         * 大于
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item gt(Object key, Object value) {
-            return new Item(Type.GT, key, value);
-        }
-
-        /**
-         * 大于等于
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item gte(Object key, Object value) {
-            return new Item(Type.GTE, key, value);
-        }
-
-        /**
-         * 小于
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item lt(Object key, Object value) {
-            return new Item(Type.LT, key, value);
-        }
-
-        /**
-         * 小于等于
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item lte(Object key, Object value) {
-            return new Item(Type.LTE, key, value);
-        }
-
-        /**
-         * 等于
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item equals(Object key, Object value) {
-            return new Item(Type.EQUALS, key, value);
-        }
-
-        /**
-         * 不等于
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item notEquals(Object key, Object value) {
-            return new Item(Type.NOT_EQUALS, key, value);
-        }
-
-        /**
-         * in
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item in(Object key, Object value) {
-            return new Item(Type.IN, key, value);
-        }
-
-        /**
-         * notIn
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item notIn(Object key, Object value) {
-            return new Item(Type.NOT_IN, key, value);
-        }
-
-        /**
-         * 包含
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item contains(Object key, Object value) {
-            return new Item(Type.CONTAINS, key, value);
-        }
-
-        /**
-         * 不包含
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item notContains(Object key, Object value) {
-            return new Item(Type.NOT_CONTAINS, key, value);
-        }
-
-        /**
-         * 以...开头
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item startWith(Object key, Object value) {
-            return new Item(Type.START_WITH, key, value);
-        }
-
-        /**
-         * 不以...开头
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item notStartWith(Object key, Object value) {
-            return new Item(Type.NOT_START_WITH, key, value);
-        }
-
-        /**
-         * 以...结尾
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item endWith(Object key, Object value) {
-            return new Item(Type.END_WITH, key, value);
-        }
-
-        /**
-         * 不以...结尾
-         *
-         * @param key key
-         * @param value value
-         *
-         * @return Item
-         * */
-        public static Item notEndWith(Object key, Object value) {
-            return new Item(Type.NOT_END_WITH, key, value);
-        }
-
-        /**
-         * 类型
-         *
-         * @author ZJ
-         * */
-        public enum Type {
-
-            GT("$gt"),
-
-            GTE("$gte"),
-
-            LT("$lt"),
-
-            LTE("$lte"),
-
-            EQUALS("$equals"),
-
-            NOT_EQUALS("$!equals"),
-
-            IN("$in"),
-
-            NOT_IN("$!in"),
-
-            CONTAINS("$contains"),
-
-            NOT_CONTAINS("$!contains"),
-
-            START_WITH("$startWith"),
-
-            NOT_START_WITH("$!startWith"),
-
-            END_WITH("$endWith"),
-
-            NOT_END_WITH("$!endWith");
-
-            private final String value;
-
-            Type(String value) {
-                this.value = value;
-            }
-
-        }
-
-    }
-
-    /**
-     * 配置
-     *
-     * @author ZJ
-     * */
-    public static final class Config {
-
-        private boolean cleanNull;
-
-        public boolean isCleanNull() {
-            return cleanNull;
-        }
-
-        public void setCleanNull(boolean cleanNull) {
-            this.cleanNull = cleanNull;
-        }
-
+        };
+        this.expressionList.addAll(expressionAction.then(map));
     }
 
 }

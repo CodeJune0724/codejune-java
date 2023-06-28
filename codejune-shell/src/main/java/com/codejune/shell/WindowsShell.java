@@ -1,10 +1,10 @@
 package com.codejune.shell;
 
 import com.codejune.Shell;
+import com.codejune.common.Listener;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.listener.ReadListener;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ import java.io.InputStream;
 public final class WindowsShell implements Shell {
 
     @Override
-    public ResponseResult command(String command, ReadListener<String> readListener) {
+    public ResponseResult command(String command, Listener<String> listener) {
         if (StringUtil.isEmpty(command)) {
             return null;
         }
@@ -29,12 +29,12 @@ public final class WindowsShell implements Shell {
 
             inputStream = process.getInputStream();
             TextInputStreamReader successTextInputStreamReader = new TextInputStreamReader(inputStream);
-            successTextInputStreamReader.setReadListener(readListener);
+            successTextInputStreamReader.setListener(listener);
             String success = successTextInputStreamReader.getData();
 
             errorStream = process.getErrorStream();
             TextInputStreamReader errorTextInputStreamReader = new TextInputStreamReader(errorStream);
-            errorTextInputStreamReader.setReadListener(readListener);
+            errorTextInputStreamReader.setListener(listener);
             String error = errorTextInputStreamReader.getData();
 
             int i = process.exitValue();

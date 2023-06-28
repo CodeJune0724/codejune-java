@@ -1,18 +1,22 @@
 package com.codejune.service.database;
 
 import com.codejune.Jdbc;
+import com.codejune.common.Action;
 import com.codejune.common.ClassInfo;
-import com.codejune.common.DataType;
 import com.codejune.common.Pool;
+import com.codejune.common.exception.ErrorException;
 import com.codejune.common.util.PackageUtil;
 import com.codejune.jdbc.access.AccessDatabaseJdbc;
 import com.codejune.service.BasePO;
-import com.codejune.service.Column;
 import com.codejune.service.Database;
+import jakarta.persistence.Column;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.sql.JDBCType;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * AccessDatabase
@@ -22,11 +26,18 @@ import java.util.List;
 public class AccessDatabase extends Database {
 
     @SuppressWarnings("unchecked")
-    public AccessDatabase(File databaseFile, String packageName, Class<?> tCLass) {
+    public AccessDatabase(File databaseFile, String packageName, Class<?> tCLass, Action<AccessDatabaseJdbc, Boolean> check) {
         super(new Pool<>(10) {
             @Override
             public Jdbc create() {
                 return new AccessDatabaseJdbc(databaseFile);
+            }
+            @Override
+            public boolean check(Jdbc jdbc) {
+                if (check == null) {
+                    return true;
+                }
+                return check.then((AccessDatabaseJdbc) jdbc);
             }
         });
         List<Class<?>> scan = PackageUtil.scan(packageName, tCLass);
@@ -35,16 +46,29 @@ public class AccessDatabase extends Database {
                 Class<? extends BasePO<?>> basePoC = (Class<? extends BasePO<?>>) c;
                 String tableName = BasePO.getTableName(basePoC);
                 List<com.codejune.jdbc.Column> columnList = new ArrayList<>();
-                com.codejune.jdbc.Column column = new com.codejune.jdbc.Column(BasePO.getIdName(), DataType.INT);
-                column.setAutoincrement(true);
+                com.codejune.jdbc.Column column = new com.codejune.jdbc.Column("ID", JDBCType.VARCHAR);
+                column.setPrimaryKey(true);
                 columnList.add(column);
                 List<Field> columnFields = BasePO.getColumnFields(basePoC);
                 for (Field field : columnFields) {
-                    DataType dataType = DataType.parse(field.getType());
-                    if (dataType == DataType.STRING) {
-                        dataType = DataType.LONG_STRING;
+                    JDBCType jdbcType;
+                    ClassInfo classInfo = new ClassInfo(field.getType());
+                    if (classInfo.isInstanceof(Integer.class)) {
+                        jdbcType = JDBCType.INTEGER;
+                    } else if (classInfo.isInstanceof(Long.class)) {
+                        jdbcType = JDBCType.BIGINT;
+                    } else if (classInfo.isInstanceof(Double.class)) {
+                        jdbcType = JDBCType.DOUBLE;
+                    } else if (classInfo.isInstanceof(Boolean.class)) {
+                        jdbcType = JDBCType.BOOLEAN;
+                    } else if (classInfo.isInstanceof(String.class)) {
+                        jdbcType = JDBCType.LONGVARCHAR;
+                    } else if (classInfo.isInstanceof(Date.class)) {
+                        jdbcType = JDBCType.DATE;
+                    } else {
+                        throw new ErrorException("sqlType未配置");
                     }
-                    column = new com.codejune.jdbc.Column(field.getAnnotation(Column.class).name(), dataType);
+                    column = new com.codejune.jdbc.Column(field.getAnnotation(Column.class).name(), jdbcType);
                     column.setLength(field.getAnnotation(Column.class).length());
                     columnList.add(column);
                 }
@@ -53,6 +77,16 @@ public class AccessDatabase extends Database {
                 }
             }
         }
+    }
+
+    public AccessDatabase(File databaseFile, String packageName, Class<?> tCLass) {
+        this(databaseFile, packageName, tCLass, null);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public final <T extends BasePO<ID>, ID> ID getNextId(Jdbc jdbc, Table<T, ID> table) {
+        return (ID) UUID.randomUUID().toString();
     }
 
 }

@@ -10,17 +10,17 @@ import com.codejune.common.util.ObjectUtil;
  * */
 public final class Sort {
 
-    private String column;
+    private String field;
 
     private OderBy orderBy = OderBy.ASC;
 
-    public String getColumn() {
-        return column;
+    public String getField() {
+        return field;
     }
 
-    public Sort setColumn(Object column) {
-        if (column != null) {
-            this.column = ObjectUtil.toString(column);
+    public Sort setField(Object field) {
+        if (field != null) {
+            this.field = ObjectUtil.toString(field);
         }
         return this;
     }
@@ -43,7 +43,7 @@ public final class Sort {
         if (action == null) {
             return;
         }
-        this.column = action.then(this.column);
+        this.setField(action.then(this.field));
     }
 
     /**

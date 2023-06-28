@@ -2,10 +2,9 @@ package com.codejune.jdbc;
 
 import com.codejune.common.Action;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.util.MapUtil;
+import com.codejune.common.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 查询结果
@@ -35,35 +34,7 @@ public final class QueryResult<T> {
     }
 
     /**
-     * 转换成实体结果
-     *
-     * @param eClass eClass
-     * @param <E> E
-     * @param action action
-     *
-     * @return QueryResult
-     * */
-    public <E> QueryResult<E> parse(Class<E> eClass, Action<Object, Object> action) {
-        if (eClass == null) {
-            throw new InfoException("eClass不能为空");
-        }
-        if (action == null) {
-            action = key -> key;
-        }
-        QueryResult<E> result = new QueryResult<>();
-        result.setCount(this.count);
-        List<E> data = new ArrayList<>();
-        for (T t : this.data) {
-            Map<String, Object> parse = MapUtil.parse(t, String.class, Object.class);
-            Map<?, ?> map = MapUtil.transformKey(parse, action);
-            data.add(MapUtil.transform(map, eClass));
-        }
-        result.setData(data);
-        return result;
-    }
-
-    /**
-     * 转换成实体结果
+     * 转换
      *
      * @param eClass eClass
      * @param <E> E
@@ -71,7 +42,42 @@ public final class QueryResult<T> {
      * @return QueryResult
      * */
     public <E> QueryResult<E> parse(Class<E> eClass) {
-        return parse(eClass, null);
+        if (eClass == null) {
+            throw new InfoException("eClass不能为空");
+        }
+        QueryResult<E> result = new QueryResult<>();
+        result.setCount(this.count);
+        List<E> newData = new ArrayList<>();
+        for (T t : this.data) {
+            newData.add(ObjectUtil.transform(t, eClass));
+        }
+        result.setData(newData);
+        return result;
+    }
+
+    /**
+     * 转换
+     *
+     * @param action action
+     *
+     * @return QueryResult
+     * */
+    public QueryResult<T> parse(Action<T, T> action) {
+        if (action == null) {
+            return this;
+        }
+        QueryResult<T> result = new QueryResult<>();
+        result.setCount(this.count);
+        List<T> newData = new ArrayList<>();
+        for (T t : this.data) {
+            T newT = action.then(t);
+            if (newT == null) {
+                continue;
+            }
+            newData.add(newT);
+        }
+        result.setData(newData);
+        return result;
     }
 
 }

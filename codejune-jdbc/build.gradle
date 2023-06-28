@@ -1,8 +1,0 @@
-dependencies {
-    api project(':codejune-common')
-    compileOnly group: 'net.sf.ucanaccess', name: 'ucanaccess', version: '5.0.1'
-    compileOnly group: 'org.mongodb', name: 'mongo-java-driver', version: '3.12.12'
-    compileOnly group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '3.0.4'
-    compileOnly group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.18.0.0'
-    compileOnly group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.32'
-}

@@ -1,7 +1,7 @@
 package com.codejune.common.io;
 
+import com.codejune.common.Listener;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.listener.ReadListener;
 import java.io.InputStream;
 
 /**
@@ -13,9 +13,9 @@ public abstract class Reader<T> {
 
     protected final InputStream inputStream;
 
-    protected int readSize = 1024;
+    protected int size = 1024;
 
-    protected ReadListener<T> readListener = data -> {};
+    protected Listener<T> listener = data -> {};
 
     protected Reader(InputStream inputStream) {
         if (inputStream == null) {
@@ -24,18 +24,18 @@ public abstract class Reader<T> {
         this.inputStream = inputStream;
     }
 
-    public final void setReadSize(int readSize) {
-        if (readSize <= 0) {
+    public final void setSize(int size) {
+        if (size <= 0) {
             return;
         }
-        this.readSize = readSize;
+        this.size = size;
     }
 
-    public final void setReadListener(ReadListener<T> readListener) {
-        if (readListener == null) {
+    public final void setListener(Listener<T> listener) {
+        if (listener == null) {
             return;
         }
-        this.readListener = readListener;
+        this.listener = listener;
     }
 
     /**

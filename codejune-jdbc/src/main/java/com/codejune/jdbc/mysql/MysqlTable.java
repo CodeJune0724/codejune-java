@@ -61,7 +61,7 @@ public final class MysqlTable implements SqlTable {
     public List<Map<String, Object>> queryData(Query query) {
         return mysqlDatabase.mysqlJdbc.query(
                 new SqlBuilder(tableName, MysqlJdbc.class).parseQueryDataSql(query),
-                ArrayUtil.parse("R")
+                ArrayUtil.asList("R")
         );
     }
 

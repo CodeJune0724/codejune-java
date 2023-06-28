@@ -1,10 +1,11 @@
-package com.codejune.common.classInfo;
+package com.codejune.common.classinfo;
 
 import com.codejune.common.ClassInfo;
-import com.codejune.common.DataType;
+import com.codejune.common.Data;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
+import com.codejune.common.util.ObjectUtil;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -77,11 +78,11 @@ public final class Field {
             List<ClassInfo> genericClass = getGenericClass();
             Object setData;
             if (classInfo.equals(List.class) && genericClass.size() >= 1) {
-                setData = ArrayUtil.parse(data, genericClass.get(0).getOriginClass());
+                setData = ArrayUtil.parse(ObjectUtil.transform(data, List.class), genericClass.get(0).getOriginClass());
             } else if (classInfo.equals(Map.class) && genericClass.size() >= 2) {
                 setData = MapUtil.parse(data, genericClass.get(0).getOriginClass(), genericClass.get(1).getOriginClass());
             } else {
-                setData = DataType.transform(data, classInfo.getOriginClass());
+                setData = Data.transform(data, classInfo.getOriginClass());
             }
             this.field.set(object, setData);
         } catch (Exception e) {

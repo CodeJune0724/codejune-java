@@ -3,11 +3,7 @@ package com.codejune;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.*;
-import com.codejune.http.ContentType;
-import com.codejune.http.HttpResponseResult;
-import com.codejune.http.HttpResponseResultHandler;
-import com.codejune.http.Type;
-import org.apache.http.Header;
+import com.codejune.http.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
@@ -25,9 +21,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * http组件
@@ -40,15 +34,15 @@ public final class Http {
 
     private final Type type;
 
-    private final Map<String, String> header = new HashMap<>();
+    private final List<Header> headerList = new ArrayList<>();
 
     private ContentType contentType;
 
     private Object body;
 
     {
-        header.put("accept", "*/*");
-        header.put("connection", "Keep-Alive");
+        addHeader("accept", "*/*");
+        addHeader("connection", "Keep-Alive");
     }
 
     public Http(String url, Type type) {
@@ -62,20 +56,16 @@ public final class Http {
         this.type = type;
     }
 
-    public void setContentType(ContentType contentType) {
-        this.contentType = contentType;
-        String key = "Content-type";
-        if (this.contentType == null) {
-            this.header.remove(key);
-        } else {
-            if (contentType != ContentType.FORM_DATA) {
-                this.header.put(key, contentType.getContentType());
-            }
-        }
+    public String getUrl() {
+        return url;
     }
 
-    public void setBody(Object body) {
-        this.body = body;
+    public Type getType() {
+        return type;
+    }
+
+    public List<Header> getHeaderList() {
+        return headerList;
     }
 
     /**
@@ -91,7 +81,43 @@ public final class Http {
         if (key.equalsIgnoreCase("content-length")) {
             return;
         }
-        header.put(key, value);
+        this.headerList.add(new Header(key, value));
+    }
+
+    /**
+     * 删除请求头
+     *
+     * @param key key
+     * */
+    public void deleteHeader(String key) {
+        if (StringUtil.isEmpty(key)) {
+            return;
+        }
+        getHeaderList().removeIf(header -> key.equals(header.getKey()));
+    }
+
+    public ContentType getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.contentType = contentType;
+        String key = "Content-type";
+        if (this.contentType == null) {
+            headerList.removeIf(header -> key.equals(header.getKey()));
+        } else {
+            if (contentType != ContentType.FORM_DATA) {
+                addHeader(key, contentType.getContentType());
+            }
+        }
+    }
+
+    public Object getBody() {
+        return body;
+    }
+
+    public void setBody(Object body) {
+        this.body = body;
     }
 
     /**
@@ -114,26 +140,27 @@ public final class Http {
             };
             httpEntityEnclosingRequestBase.setURI(URI.create(url));
             httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().build());
-            Set<String> keySet = header.keySet();
-            for (String key : keySet) {
-                httpEntityEnclosingRequestBase.setHeader(key, header.get(key));
+            for (Header header : headerList) {
+                httpEntityEnclosingRequestBase.setHeader(header.getKey(), header.getValue());
             }
             if (body != null) {
                 if (contentType == ContentType.APPLICATION_JSON) {
                     httpEntity = new StringEntity(JsonUtil.toJsonString(body), "UTF-8");
                 } else if (contentType == ContentType.FORM_DATA) {
                     MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
-                    Map<String, Object> mapBody = MapUtil.transformGeneric(MapUtil.parse(body), String.class, Object.class);
-                    for (String key : mapBody.keySet()) {
-                        Object value = mapBody.get(key);
-                        if (value == null) {
-                            continue;
-                        }
-                        if (value instanceof File) {
-                            FileBody fileBody = new FileBody((File) value);
-                            multipartEntityBuilder = multipartEntityBuilder.addPart(key, fileBody);
-                        } else {
-                            multipartEntityBuilder.addTextBody(key, ObjectUtil.toString(value), org.apache.http.entity.ContentType.create("text/plain", StandardCharsets.UTF_8));
+                    Map<String, Object> mapBody = MapUtil.parse(body, String.class, Object.class);
+                    if (mapBody != null) {
+                        for (String key : mapBody.keySet()) {
+                            Object value = mapBody.get(key);
+                            if (value == null) {
+                                continue;
+                            }
+                            if (value instanceof File) {
+                                FileBody fileBody = new FileBody((File) value);
+                                multipartEntityBuilder = multipartEntityBuilder.addPart(key, fileBody);
+                            } else {
+                                multipartEntityBuilder.addTextBody(key, ObjectUtil.toString(value), org.apache.http.entity.ContentType.create("text/plain", StandardCharsets.UTF_8));
+                            }
                         }
                     }
                     httpEntity = multipartEntityBuilder.build();
@@ -144,8 +171,7 @@ public final class Http {
             httpEntityEnclosingRequestBase.setEntity(httpEntity);
             closeableHttpResponse = closeableHttpClient.execute(httpEntityEnclosingRequestBase);
             httpResponseResult.setCode(closeableHttpResponse.getStatusLine().getStatusCode());
-            Header[] allHeaders = closeableHttpResponse.getAllHeaders();
-            for (Header header : allHeaders) {
+            for (org.apache.http.Header header : closeableHttpResponse.getAllHeaders()) {
                 httpResponseResult.addHeader(header.getName(), header.getValue());
             }
             httpResponseResult.setBody(closeableHttpResponse.getEntity().getContent());

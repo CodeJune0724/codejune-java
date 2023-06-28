@@ -1,10 +1,11 @@
 package com.codejune.common.io;
 
+import com.codejune.common.Listener;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.reader.InputStreamReader;
-import com.codejune.common.listener.WriteListener;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
  * 写入
@@ -15,9 +16,9 @@ public class Writer {
 
     protected final OutputStream outputStream;
 
-    protected int writeSize = 1024;
+    protected int size = 1024;
 
-    protected WriteListener writeListener = data -> {};
+    protected Listener<ByteBuffer> listen = data -> {};
 
     protected Writer(OutputStream outputStream) {
         if (outputStream == null) {
@@ -26,18 +27,18 @@ public class Writer {
         this.outputStream = outputStream;
     }
 
-    public final void setWriteSize(int writeSize) {
-        if (writeSize <= 0) {
+    public final void setSize(int size) {
+        if (size <= 0) {
             return;
         }
-        this.writeSize = writeSize;
+        this.size = size;
     }
 
-    public final void setWriteListener(WriteListener writeListener) {
-        if (writeListener == null) {
+    public final void setListen(Listener<ByteBuffer> listen) {
+        if (listen == null) {
             return;
         }
-        this.writeListener = writeListener;
+        this.listen = listen;
     }
 
     /**
@@ -50,11 +51,11 @@ public class Writer {
             return;
         }
         try {
-            this.outputStream.write(byteBuffer.bytes(), 0, byteBuffer.length());
+            this.outputStream.write(byteBuffer.array(), 0, byteBuffer.limit());
         } catch (Exception e) {
             throw new InfoException(e);
         }
-        writeListener.listen(byteBuffer);
+        listen.listen(byteBuffer);
     }
 
     /**
@@ -67,8 +68,8 @@ public class Writer {
             return;
         }
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        inputStreamReader.setReadSize(writeSize);
-        inputStreamReader.setReadListener(Writer.this::write);
+        inputStreamReader.setSize(size);
+        inputStreamReader.setListener(Writer.this::write);
         inputStreamReader.read();
     }
 
@@ -81,7 +82,7 @@ public class Writer {
         if (bytes == null) {
             return;
         }
-        write(new ByteBuffer(bytes, bytes.length));
+        write(ByteBuffer.wrap(bytes, 0, bytes.length));
     }
 
 }

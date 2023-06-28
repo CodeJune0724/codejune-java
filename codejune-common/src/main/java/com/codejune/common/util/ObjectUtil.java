@@ -1,10 +1,12 @@
 package com.codejune.common.util;
 
 import com.codejune.common.ClassInfo;
-import com.codejune.common.DataType;
-import com.codejune.common.classInfo.Field;
+import com.codejune.common.Data;
+import com.codejune.common.classinfo.Field;
+import com.codejune.common.classinfo.Method;
 import com.codejune.common.exception.InfoException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 /**
@@ -25,7 +27,7 @@ public final class ObjectUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> T transform(Object object, Class<T> tClass) {
-        return (T) DataType.transform(object, tClass);
+        return (T) Data.transform(object, tClass);
     }
 
     /**
@@ -93,97 +95,27 @@ public final class ObjectUtil {
      * @return String
      * */
     public static String toString(Object object) {
-        return DataType.toString(object);
+        return Data.toString(object);
     }
 
     /**
      * 克隆
      *
      * @param t t
-     * @param isForceInstance 是否强制实例化
      * @param <T> T
      *
      * @return 克隆的新对象
      * */
     @SuppressWarnings("unchecked")
-    public static <T> T clone(T t, boolean isForceInstance) {
+    public static <T> T clone(T t) {
         if (t == null) {
             return null;
         }
-        DataType dataType = DataType.parse(t.getClass());
-        String tString = ObjectUtil.toString(t);
-        if (StringUtil.isEmpty(tString)) {
-            return t;
+        try {
+            return (T) Data.transform(t, t.getClass(), true);
+        } catch (Exception e) {
+            throw new InfoException(e);
         }
-        switch (dataType) {
-            case INT -> {
-                return (T) Integer.valueOf(tString);
-            }
-            case LONG -> {
-                return (T) Long.valueOf(tString);
-            }
-            case DOUBLE -> {
-                return (T) Double.valueOf(tString);
-            }
-            case STRING -> {
-                return (T) tString;
-            }
-            case BOOLEAN -> {
-                return (T) Boolean.valueOf(tString);
-            }
-            case DATE -> {
-                Date date = (Date) t;
-                return (T) new Date(date.getTime());
-            }
-            case LIST -> {
-                List<?> list = (List<?>) t;
-                List<Object> result = new ArrayList<>();
-                for (Object item : list) {
-                    result.add(clone(item, isForceInstance));
-                }
-                return (T) result;
-            }
-            case OBJECT -> {
-                Object re;
-                try {
-                    re = t.getClass().getConstructor().newInstance();
-                } catch (Exception e) {
-                    if (isForceInstance) {
-                        throw new InfoException("实例化失败: " + e.getMessage());
-                    } else {
-                        return t;
-                    }
-                }
-                ClassInfo classInfo = new ClassInfo(re.getClass());
-                List<Field> allFields = classInfo.getFields();
-                for (Field field : allFields) {
-                    field.setData(re, clone(field.getData(t), isForceInstance));
-                }
-                return (T) re;
-            }
-            case MAP -> {
-                Map<?, ?> tMap = (Map<?, ?>) t;
-                Map<Object, Object> map = new HashMap<>();
-                Set<?> keySet = tMap.keySet();
-                for (Object key : keySet) {
-                    map.put(key, clone(tMap.get(key), isForceInstance));
-                }
-                return (T) map;
-            }
-        }
-        return t;
-    }
-
-    /**
-     * 克隆
-     *
-     * @param t t
-     * @param <T> T
-     *
-     * @return 克隆的新对象
-     * */
-    public static <T> T clone(T t) {
-        return clone(t, true);
     }
 
     /**
@@ -197,26 +129,90 @@ public final class ObjectUtil {
         if (o1 == null || o2 == null) {
             return;
         }
-        DataType o1DataType = DataType.parse(o1.getClass());
-        DataType o2DataType = DataType.parse(o2.getClass());
-        if (o2DataType != DataType.MAP && o2DataType != DataType.OBJECT) {
+        if (!(o2 instanceof Map<?,?>) && !Data.isObject(o2.getClass())) {
             return;
         }
         Map<?, ?> o2Map = transform(o2, Map.class);
-        switch (o1DataType) {
-            case MAP:
-                Map<Object, Object> o1Map = (Map<Object, Object>) o1;
-                Set<?> keySet = o1Map.keySet();
-                for (Object key : keySet) {
-                    o1Map.put(key, o2Map.get(key));
+        if (o1 instanceof Map) {
+            Map<Object, Object> o1Map = (Map<Object, Object>) o1;
+            o1Map.replaceAll((k, v) -> o2Map.get(k));
+        } else if (Data.isObject(o1.getClass())) {
+            ClassInfo classInfo = new ClassInfo(o1.getClass());
+            for (Field field : classInfo.getFields()) {
+                Object setData = o2Map.get(field.getName());
+                setData = transform(setData, field.getType());
+                Method setMethod = classInfo.getSetMethod(field.getName());
+                if (setMethod != null) {
+                    setMethod.execute(o1, setData);
+                } else {
+                    field.setData(o1, setData);
                 }
-            case OBJECT:
-                ClassInfo classInfo = new ClassInfo(o1.getClass());
-                List<Field> fields = classInfo.getFields();
-                for (Field field : fields) {
-                    field.setData(o1, o2Map.get(field.getName()));
-                }
+            }
         }
+    }
+
+    /**
+     * 实例化对象
+     *
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return T
+     * */
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstance(Class<T> tClass) {
+        if (tClass == null) {
+            return null;
+        }
+        if (tClass.isEnum()) {
+            T[] enumConstants = tClass.getEnumConstants();
+            if (enumConstants.length != 0) {
+                return enumConstants[0];
+            } else {
+                return null;
+            }
+        }
+        Exception error;
+        try {
+            return tClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            error = e;
+            Constructor<?>[] declaredConstructorList = tClass.getDeclaredConstructors();
+            for (Constructor<?> constructor : declaredConstructorList) {
+                if (constructor.toGenericString().startsWith("public")) {
+                    Object[] paramList = new Object[constructor.getParameterCount()];
+                    Class<?>[] parameterTypes = constructor.getParameterTypes();
+                    for (int i = 0; i < parameterTypes.length; i++) {
+                        Class<?> parameterType = parameterTypes[i];
+                        Object value;
+                        if (parameterType == Object.class) {
+                            value = null;
+                        } else {
+                            value = newInstance(parameterType);
+                        }
+                        paramList[i] = value;
+                    }
+                    try {
+                        return (T) constructor.newInstance(paramList);
+                    } catch (Exception exception) {
+                        error = exception;
+                    }
+                }
+            }
+        }
+        throw new InfoException(error.getMessage());
+    }
+
+    /**
+     * 比较
+     *
+     * @param o1 o1
+     * @param o2 o2
+     *
+     * @return 是否相等
+     * */
+    public static boolean equals(Object o1, Object o2) {
+        return Objects.equals(o1, o2);
     }
 
 }

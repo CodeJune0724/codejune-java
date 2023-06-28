@@ -1,7 +1,7 @@
 package com.codejune.jdbc.oracle;
 
 import com.codejune.Jdbc;
-import com.codejune.common.DataType;
+import com.codejune.common.Data;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -57,7 +57,7 @@ public final class OracleTable implements SqlTable {
             }
             while (resultSet.next()) {
                 String name = resultSet.getString("COLUMN_NAME");
-                Column column = new Column(name, resultSet.getInt("DATA_TYPE"));
+                Column column = new Column(name, JDBCType.valueOf(resultSet.getInt("DATA_TYPE")));
                 column.setRemark(resultSet.getString("REMARKS"));
                 column.setLength(resultSet.getInt("COLUMN_SIZE"));
                 column.setPrimaryKey(primaryKeyList.contains(name));
@@ -115,7 +115,9 @@ public final class OracleTable implements SqlTable {
         }
         String sql = "INSERT INTO " + tableName + " (" + ArrayUtil.toString(allColumn, Column::getName, ", ") + ") VALUES (" + ArrayUtil.toString(ArrayUtil.createSequence(allColumn.size()), integer -> "?", ", ") + ")";
         Connection connection = oracleDatabase.oracleJdbc.getConnection();
+        boolean AutoCommit = true;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            AutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             int dataSize = data.size();
             for (int i = 0; i < dataSize; i++) {
@@ -125,13 +127,11 @@ public final class OracleTable implements SqlTable {
                     index++;
                     Object filedData = map.get(column.getName());
                     if (filedData == null) {
-                        preparedStatement.setNull(index, column.getSqlType());
-                    } else if (column.getDataType() == DataType.DATE) {
-                        preparedStatement.setTimestamp(index, new Timestamp(((Date) DataType.transform(filedData, column.getDataType())).getTime()));
-                    } else if (column.getDataType() == DataType.OBJECT) {
-                        preparedStatement.setObject(index, filedData);
+                        preparedStatement.setNull(index, column.getType().getVendorTypeNumber());
+                    } else if (column.getType() == JDBCType.TIMESTAMP) {
+                        preparedStatement.setTimestamp(index, new Timestamp(((Date) Data.transform(filedData, Date.class)).getTime()));
                     } else {
-                        preparedStatement.setObject(index, DataType.transform(filedData, column.getDataType()));
+                        preparedStatement.setObject(index, filedData);
                     }
                 }
                 preparedStatement.addBatch();
@@ -148,10 +148,9 @@ public final class OracleTable implements SqlTable {
             throw new InfoException(e.getMessage() + ": " + sql);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
-        }
-        finally {
+        } finally {
             try {
-                connection.setAutoCommit(true);
+                connection.setAutoCommit(AutoCommit);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -179,7 +178,7 @@ public final class OracleTable implements SqlTable {
     public List<Map<String, Object>> queryData(Query query) {
         return oracleDatabase.oracleJdbc.query(
                 new SqlBuilder(tableName, OracleJdbc.class).parseQueryDataSql(query),
-                ArrayUtil.parse("R")
+                ArrayUtil.asList("R")
         );
     }
 
@@ -209,13 +208,11 @@ public final class OracleTable implements SqlTable {
                     throw new InfoException(key + "字段不存在");
                 }
                 if (data == null) {
-                    preparedStatement.setNull(index, column.getSqlType());
-                } else if (column.getDataType() == DataType.DATE) {
-                    preparedStatement.setTimestamp(index, new Timestamp(((Date) DataType.transform(data, column.getDataType())).getTime()));
-                } else if (column.getDataType() == DataType.OBJECT) {
-                    preparedStatement.setObject(index, data);
+                    preparedStatement.setNull(index, column.getType().getVendorTypeNumber());
+                } else if (column.getType() == JDBCType.TIMESTAMP) {
+                    preparedStatement.setTimestamp(index, new Timestamp(((Date) Data.transform(data, Date.class)).getTime()));
                 } else {
-                    preparedStatement.setObject(index, DataType.transform(data, column.getDataType()));
+                    preparedStatement.setObject(index, data);
                 }
             }
             return preparedStatement.executeUpdate();

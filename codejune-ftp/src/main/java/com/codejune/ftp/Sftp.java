@@ -1,18 +1,16 @@
 package com.codejune.ftp;
 
+import com.codejune.common.Listener;
 import com.codejune.common.os.FileInfo;
 import com.codejune.ftp.os.File;
 import com.codejune.ftp.os.Folder;
 import com.jcraft.jsch.*;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.DownloadHandler;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -22,18 +20,139 @@ import java.util.*;
  * */
 public final class Sftp extends com.codejune.Ftp {
 
-    /**
-     * sftp连接
-     * */
     private ChannelSftp channelSftp;
 
-    /**
-     * session通道
-     * */
     private Session session;
 
     public Sftp(String host, int port, String username, String password) {
         super(host, port, username, password);
+    }
+
+    @Override
+    public boolean isConnected() {
+        try {
+            this.channelSftp.ls("/");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean exist(String path) {
+        if (StringUtil.isEmpty(path)) {
+            return false;
+        }
+        try {
+            this.channelSftp.stat(path);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isFile(String path) {
+        if (!exist(path)) {
+            return false;
+        }
+        try {
+            this.channelSftp.cd(path);
+            return false;
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    @Override
+    public boolean isFolder(String path) {
+        if (StringUtil.isEmpty(path)) {
+            return false;
+        }
+        return !this.isFile(path);
+    }
+
+    @Override
+    public void upload(String path, String updateFileName, InputStream inputStream) {
+        boolean isCloseInputStream = false;
+        try {
+            if (inputStream == null) {
+                inputStream = new ByteArrayInputStream("".getBytes());
+                isCloseInputStream = true;
+            }
+            this.channelSftp.cd(path);
+            channelSftp.put(inputStream, updateFileName);
+        } catch (Exception e) {
+            throw new InfoException(e);
+        } finally {
+            if (isCloseInputStream) {
+                IOUtil.close(inputStream);
+            }
+        }
+    }
+
+    @Override
+    public void download(String filePath, Listener<InputStream> listener) {
+        if (!isFile(filePath)) {
+            throw new InfoException(filePath + " is not file");
+        }
+        if (listener == null) {
+            listener = data -> {};
+        }
+        try (InputStream inputStream = this.channelSftp.get(filePath)) {
+            listener.listen(inputStream);
+        } catch (Exception e) {
+            throw new InfoException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void delete(String path) {
+        if (!exist(path)) {
+            return;
+        }
+        try {
+            if (isFile(path)) {
+                this.channelSftp.rm(path);
+            } else {
+                for (FileInfo fileInfo : this.ls(path)) {
+                    delete(fileInfo.getPath());
+                }
+                this.channelSftp.rmdir(path);
+            }
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
+    @Override
+    public void createFolder(String path) {
+        if (StringUtil.isEmpty(path)) {
+            return;
+        }
+        if (isFolder(path)) {
+            return;
+        }
+        if (isFile(path)) {
+            throw new InfoException(path + " is file");
+        }
+
+        try {
+            this.channelSftp.mkdir(path);
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
+    @Override
+    public void close() {
+        if (this.session != null) {
+            this.session.disconnect();
+        }
+
+        if (this.channelSftp != null) {
+            this.channelSftp.disconnect();
+        }
     }
 
     @Override
@@ -50,57 +169,6 @@ public final class Sftp extends com.codejune.Ftp {
             this.channelSftp.connect();
         }catch (Exception e) {
             throw new InfoException("sftp: " + this.getHost() + ", 连接失败");
-        }
-    }
-
-    @Override
-    public void close() {
-        if (this.session != null) {
-            this.session.disconnect();
-        }
-
-        if (this.channelSftp != null) {
-            this.channelSftp.disconnect();
-        }
-    }
-
-    @Override
-    public void upload(String path, String name, String data) {
-        InputStream inputStream = null;
-        try {
-            inputStream = new ByteArrayInputStream(data.getBytes());
-            this.channelSftp.cd(path);
-            channelSftp.put(inputStream, name);
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void upload(String path, String name, java.io.File file) {
-        InputStream inputStream = null;
-        try {
-            inputStream = Files.newInputStream(file.toPath());
-            this.channelSftp.cd(path);
-            channelSftp.put(inputStream, name);
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -184,36 +252,6 @@ public final class Sftp extends com.codejune.Ftp {
             return result;
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
-        }
-    }
-
-    @Override
-    public void download(String path, String fileName, DownloadHandler downloadHandler) {
-        if (StringUtil.isEmpty(path) || StringUtil.isEmpty(fileName)) {
-            throw new InfoException("参数缺失，下载失败");
-        }
-        if (downloadHandler == null) {
-            downloadHandler = inputStream -> {};
-        }
-        InputStream inputStream = null;
-        try {
-            this.channelSftp.cd(path);
-            inputStream = this.channelSftp.get(fileName);
-            downloadHandler.download(inputStream);
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(inputStream);
-        }
-    }
-
-    @Override
-    public boolean isConnected() {
-        try {
-            this.channelSftp.ls("/");
-            return true;
-        } catch (Exception e) {
-            return false;
         }
     }
 

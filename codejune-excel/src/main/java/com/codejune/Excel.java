@@ -1,8 +1,6 @@
 package com.codejune;
 
 import com.codejune.common.util.*;
-import com.codejune.common.util.DateUtil;
-import com.monitorjbl.xlsx.StreamingReader;
 import com.codejune.common.Closeable;
 import com.codejune.common.exception.InfoException;
 import com.codejune.excel.Sheet;
@@ -11,7 +9,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,54 +31,12 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
             throw new InfoException("excel文件不存在");
         }
-        Workbook tmpWorkbook = null;
         try (
                 FileInputStream fileInputStream = new FileInputStream(path)
         ) {
-            if (path.endsWith(".xls")) {
-                tmpWorkbook = WorkbookFactory.create(fileInputStream);
-            } else if (path.endsWith(".xlsx")) {
-                tmpWorkbook = StreamingReader.builder().rowCacheSize(100).bufferSize(4096).open(fileInputStream);
-            } else {
-                throw new InfoException("文件错误");
-            }
-            this.workbook = new SXSSFWorkbook(-1);
-            Iterator<org.apache.poi.ss.usermodel.Sheet> sheetIterator = tmpWorkbook.sheetIterator();
-            while (sheetIterator.hasNext()) {
-                org.apache.poi.ss.usermodel.Sheet tmpSheet = sheetIterator.next();
-                org.apache.poi.ss.usermodel.Sheet sheet = this.workbook.createSheet(tmpSheet.getSheetName());
-                int index = 0;
-                for (Row tmpRow : tmpSheet) {
-                    Row row = sheet.createRow(index);
-                    short lastCellNum = tmpRow.getLastCellNum();
-                    for (int i = 0; i < lastCellNum; i++) {
-                        Cell cell = tmpRow.getCell(i);
-                        String cellData = "";
-                        if (cell != null) {
-                            String c;
-                            if (cell.getCellType() == CellType.NUMERIC) {
-                                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
-                                    c = DateUtil.format(cell.getDateCellValue(), DateUtil.DEFAULT_DATE_FORMAT);
-                                } else {
-                                    c = ObjectUtil.toString(cell.getNumericCellValue());
-                                }
-                            } else {
-                                c = cell.getStringCellValue();
-                            }
-                            if (c != null) {
-                                cellData = c;
-                            }
-                        }
-                        row.createCell(i).setCellValue(cellData);
-                    }
-                    index++;
-                }
-            }
+            this.workbook = WorkbookFactory.create(fileInputStream);
         } catch (Exception e) {
-            this.close();
-            throw new InfoException(e.getMessage());
-        } finally {
-            closeWorkbook(tmpWorkbook);
+            throw new InfoException(e);
         }
     }
 
@@ -162,22 +117,24 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     /**
      * 保存
      *
-     * @param file file
+     * @param result file
+     *
+     * @return file
      * */
-    public void save(File file) {
-        if (file == null) {
-            return;
+    public File save(File result) {
+        if (result == null) {
+            return null;
         }
-        if (!file.getName().endsWith(".xlsx")) {
+        if (!result.getName().endsWith(".xlsx")) {
             throw new InfoException("文件错误");
         }
-        OutputStream outputStream = null;
-        try {
-            outputStream = Files.newOutputStream(file.toPath());
+        new com.codejune.common.os.File(result.getAbsolutePath());
+        try (OutputStream outputStream = IOUtil.getOutputStream(result)) {
             this.workbook.write(outputStream);
         } catch (Exception e) {
-            IOUtil.close(outputStream);
+            throw new InfoException(e);
         }
+        return result;
     }
 
     @Override

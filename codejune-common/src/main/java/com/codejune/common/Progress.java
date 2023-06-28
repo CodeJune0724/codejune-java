@@ -1,7 +1,6 @@
 package com.codejune.common;
 
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.listener.ProgressListener;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.ThreadUtil;
 
@@ -10,22 +9,22 @@ import com.codejune.common.util.ThreadUtil;
  *
  * @author ZJ
  * */
-public abstract class Progress implements ProgressListener {
+public abstract class Progress implements Listener<Progress> {
 
-    private long currentSize = 0;
+    private long current = 0;
 
-    private final long totalSize;
+    private final long total;
 
-    public Progress(long totalSize, int listenInterval) {
-        if (totalSize < 0) {
+    public Progress(long total, int listenInterval) {
+        if (total < 0) {
             throw new InfoException("size is < 0");
         }
-        this.totalSize = totalSize;
+        this.total = total;
         Thread thread = new Thread(() -> {
             while (true) {
                 listen(Progress.this);
                 ThreadUtil.sleep(listenInterval);
-                if (currentSize >= totalSize) {
+                if (current >= total) {
                     listen(Progress.this);
                     break;
                 }
@@ -39,12 +38,12 @@ public abstract class Progress implements ProgressListener {
         this(size, 1000);
     }
 
-    public long getTotalSize() {
-        return totalSize;
+    public long getTotal() {
+        return total;
     }
 
-    public long getCurrentSize() {
-        return currentSize;
+    public long getCurrent() {
+        return current;
     }
 
     /**
@@ -57,11 +56,18 @@ public abstract class Progress implements ProgressListener {
             if (size < 0) {
                 return;
             }
-            this.currentSize = this.currentSize + size;
-            if (this.currentSize > this.totalSize) {
-                this.currentSize = this.totalSize;
+            this.current = this.current + size;
+            if (this.current > this.total) {
+                this.current = this.total;
             }
         }
+    }
+
+    /**
+     * 推进进度
+     * */
+    public final void countDown() {
+        countDown(1);
     }
 
     /**
@@ -70,8 +76,8 @@ public abstract class Progress implements ProgressListener {
      * @return 百分比
      * */
     public final Double getPercentage() {
-        Double currentSizeDouble = ObjectUtil.transform(currentSize, Double.class);
-        Double totalSizeDouble = ObjectUtil.transform(totalSize, Double.class);
+        Double currentSizeDouble = ObjectUtil.transform(current, Double.class);
+        Double totalSizeDouble = ObjectUtil.transform(total, Double.class);
         if (totalSizeDouble == 0) {
             return totalSizeDouble;
         }

@@ -43,6 +43,10 @@ public final class File implements FileInfo {
         this(new java.io.File(path));
     }
 
+    public File(String parent, String name) {
+        this(new java.io.File(parent, name));
+    }
+
     @Override
     public String getName() {
         return this.file.getName();
@@ -210,7 +214,7 @@ public final class File implements FileInfo {
      * @return File
      * */
     public File copy(String copyPath) {
-        return  copy(copyPath, null);
+        return copy(copyPath, null);
     }
 
     /**

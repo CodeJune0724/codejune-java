@@ -1,9 +1,12 @@
 package com.codejune.service;
 
 import com.codejune.common.ClassInfo;
-import com.codejune.common.classInfo.Field;
+import com.codejune.common.classinfo.Field;
 import com.codejune.common.exception.ErrorException;
 import com.codejune.common.exception.InfoException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +17,7 @@ import java.util.List;
  * */
 public abstract class BasePO<ID> {
 
-    @Id(name = "ID")
+    @Id
     private ID id;
 
     public ID getId() {
@@ -38,15 +41,6 @@ public abstract class BasePO<ID> {
             }
         }
         throw new ErrorException("ID未配置");
-    }
-
-    /**
-     * 获取id名称
-     *
-     * @return id名称
-     * */
-    public static String getIdName() {
-        return getIdField().getAnnotation(Id.class).name();
     }
 
     /**

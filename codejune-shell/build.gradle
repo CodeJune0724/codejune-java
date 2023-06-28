@@ -1,4 +1,0 @@
-dependencies {
-    api project(':codejune-common')
-    api group: 'ch.ethz.ganymed', name: 'ganymed-ssh2', version: '262'
-}

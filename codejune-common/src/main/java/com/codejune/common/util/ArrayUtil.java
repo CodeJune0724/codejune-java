@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.Action;
 import java.util.*;
 
 /**
@@ -91,6 +91,34 @@ public final class ArrayUtil {
     }
 
     /**
+     * 数据转换
+     *
+     * @param list list
+     * @param action action
+     * @param <PARAM> 参数类型
+     * @param <RETURN> 返回类型
+     *
+     * @return list
+     * */
+    public static <PARAM, RETURN> List<RETURN> parse(List<PARAM> list, Action<PARAM, RETURN> action) {
+        if (list == null) {
+            return null;
+        }
+        if (action == null) {
+            action = param -> null;
+        }
+        List<RETURN> result = new ArrayList<>();
+        for (PARAM item : list) {
+            RETURN then = action.then(item);
+            if (then == null) {
+                continue;
+            }
+            result.add(then);
+        }
+        return result;
+    }
+
+    /**
      * 转换泛型
      *
      * @param list list
@@ -100,30 +128,7 @@ public final class ArrayUtil {
      * @return List
      * */
     public static <T> List<T> parse(List<?> list, Class<T> tClass) {
-        if (list == null) {
-            return null;
-        }
-        if (tClass == null) {
-            throw new InfoException("tClass is null");
-        }
-        List<T> result = new ArrayList<>();
-        for (Object item : list) {
-            result.add(ObjectUtil.transform(item, tClass));
-        }
-        return result;
-    }
-
-    /**
-     * 转换泛型
-     *
-     * @param object object
-     * @param tClass tClass
-     * @param <T> T
-     *
-     * @return List
-     * */
-    public static <T> List<T> parse(Object object, Class<T> tClass) {
-        return parse(ObjectUtil.transform(object, List.class), tClass);
+        return parse(list, o -> ObjectUtil.transform(o, tClass));
     }
 
     /**
@@ -135,7 +140,7 @@ public final class ArrayUtil {
      * @return List
      * */
     @SafeVarargs
-    public static <T> List<T> parse(T... ts) {
+    public static <T> List<T> asList(T... ts) {
         if (ts == null) {
             return null;
         }
@@ -146,25 +151,48 @@ public final class ArrayUtil {
      * list转成string
      *
      * @param collection collection
-     * @param stringHandler 转换方法
+     * @param action action
      * @param split 分隔符
      * @param <T> 航行
      * */
-    public static <T> String toString(Collection<T> collection, StringHandler<T> stringHandler, String split) {
+    public static <T> String toString(Collection<T> collection, Action<T, String> action, String split) {
         if (ObjectUtil.isEmpty(collection)) {
             return null;
         }
-        if (stringHandler == null) {
-            stringHandler = ObjectUtil::toString;
+        if (action == null) {
+            action = t -> null;
         }
         if (split == null) {
             split = "";
         }
         String result = "";
         for (T t : collection) {
-            result = StringUtil.append(result, stringHandler.toString(t), split);
+            String string = action.then(t);
+            if (string == null) {
+                continue;
+            }
+            result = StringUtil.append(result, string, split);
         }
-        return result.substring(0, result.length() - split.length());
+        return ObjectUtil.toString(ObjectUtil.subString(result, result.length() - split.length()));
+    }
+
+    /**
+     * 生成序列
+     *
+     * @param size 大小
+     * @param startIndex 开始索引
+     *
+     * @return 序列
+     * */
+    public static List<Integer> createSequence(int size, int startIndex) {
+        List<Integer> result = new ArrayList<>();
+        if (size <= 0) {
+            return result;
+        }
+        for (int i = startIndex; i < size; i++) {
+            result.add(i);
+        }
+        return result;
     }
 
     /**
@@ -175,14 +203,7 @@ public final class ArrayUtil {
      * @return 序列
      * */
     public static List<Integer> createSequence(int size) {
-        List<Integer> result = new ArrayList<>();
-        if (size <= 0) {
-            return result;
-        }
-        for (int i = 0; i < size; i++) {
-            result.add(i);
-        }
-        return result;
+        return createSequence(size, 0);
     }
 
     /**
@@ -212,12 +233,6 @@ public final class ArrayUtil {
             endIndex = temp;
         }
         return tList.subList(startIndex, endIndex);
-    }
-
-    public interface StringHandler<T> {
-
-        String toString(T t);
-
     }
 
 }

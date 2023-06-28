@@ -3,7 +3,7 @@ import com.codejune.common.os.Folder;
 
 public final class Package {
 
-    private static final String DIR = "E:\\ZJ\\project\\swgd-mongodb-util\\src\\main\\java\\com\\easipass\\swgd\\param\\common";
+    private static final String DIR = "C:\\application\\project\\swgd-mongodb-util\\src\\main\\java\\com\\easipass\\swgd\\param\\common";
 
     private static final String PACKAGE = "com.easipass.swgd.param.common";
 

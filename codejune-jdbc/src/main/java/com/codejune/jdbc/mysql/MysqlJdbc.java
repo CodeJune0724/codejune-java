@@ -2,6 +2,7 @@ package com.codejune.jdbc.mysql;
 
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.MapUtil;
+import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.SqlJdbc;
 import com.codejune.jdbc.oracle.OracleJdbc;
@@ -67,7 +68,11 @@ public class MysqlJdbc extends SqlJdbc {
 
     @Override
     public final MysqlDatabase getDefaultDatabase() {
-        return getDatabase(oracleJdbc.getDefaultDatabase().getName());
+        List<Map<String, Object>> query = oracleJdbc.query("SELECT database()");
+        if (ObjectUtil.isEmpty(query)) {
+            throw new InfoException("not query database");
+        }
+        return getDatabase(MapUtil.getValue(query.get(0), "database()", String.class));
     }
 
 }

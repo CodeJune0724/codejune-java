@@ -1,7 +1,7 @@
 package com.codejune.ftp;
 
+import com.codejune.common.Listener;
 import com.codejune.common.exception.InfoException;
-import com.codejune.common.handler.DownloadHandler;
 import com.codejune.common.os.FileInfo;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
@@ -10,7 +10,6 @@ import com.codejune.ftp.os.Folder;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import java.io.*;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,14 +31,108 @@ public final class Ftp extends com.codejune.Ftp {
     }
 
     @Override
-    protected void connect() {
+    public boolean isConnected() {
         try {
-            this.ftpClient = new FTPClient();
-            this.ftpClient.connect(this.getHost(), this.getPort());
-            this.ftpClient.login(this.getUsername(), this.getPassword());
+            this.ftpClient.listFiles();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean exist(String path) {
+        if (StringUtil.isEmpty(path)) {
+            return false;
+        }
+        try {
+            return this.ftpClient.getStatus(path) != null;
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
+    @Override
+    public boolean isFile(String path) {
+        try {
+            boolean result = this.ftpClient.changeWorkingDirectory(path);
+            this.ftpClient.changeWorkingDirectory("/");
+            return !result;
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
+    @Override
+    public boolean isFolder(String path) {
+        if (StringUtil.isEmpty(path)) {
+            return false;
+        }
+        return !this.isFile(path);
+    }
+
+    @Override
+    public void upload(String path, String updateFileName, InputStream inputStream) {
+        boolean isCloseInputStream = false;
+        try {
+            if (inputStream == null) {
+                inputStream = new ByteArrayInputStream("".getBytes());
+                isCloseInputStream = true;
+            }
             this.ftpClient.enterLocalPassiveMode();
+            this.ftpClient.storeFile(path + "/" + updateFileName, inputStream);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
+        } finally {
+            if (isCloseInputStream) {
+                IOUtil.close(inputStream);
+            }
+        }
+    }
+
+    @Override
+    public void download(String filePath, Listener<InputStream> listener) {
+        if (!isFile(filePath)) {
+            throw new InfoException(filePath + " is not file");
+        }
+        if (listener == null) {
+            listener = data -> {};
+        }
+        try (InputStream inputStream = this.ftpClient.retrieveFileStream(filePath)) {
+            listener.listen(inputStream);
+        } catch (Exception e) {
+            throw new InfoException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void delete(String path) {
+        if (!exist(path)) {
+            return;
+        }
+        try {
+            if (isFile(path)) {
+                this.ftpClient.deleteFile(path);
+            } else {
+                for (FileInfo fileInfo : this.ls(path)) {
+                    delete(fileInfo.getPath());
+                }
+                this.ftpClient.removeDirectory(path);
+            }
+        } catch (Exception e) {
+            throw new InfoException(e);
+        }
+    }
+
+    @Override
+    public void createFolder(String path) {
+        if (isFile(path)) {
+            throw new InfoException(path + " is file");
+        }
+        try {
+            this.ftpClient.mkd(path);
+        } catch (Exception e) {
+            throw new InfoException(e);
         }
     }
 
@@ -54,30 +147,14 @@ public final class Ftp extends com.codejune.Ftp {
     }
 
     @Override
-    public void upload(String path, String name, String data) {
-        InputStream inputStream = null;
+    protected void connect() {
         try {
-            inputStream = new ByteArrayInputStream(data.getBytes());
+            this.ftpClient = new FTPClient();
+            this.ftpClient.connect(this.getHost(), this.getPort());
+            this.ftpClient.login(this.getUsername(), this.getPassword());
             this.ftpClient.enterLocalPassiveMode();
-            this.ftpClient.storeFile(path + "/" + name, inputStream);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(inputStream);
-        }
-    }
-
-    @Override
-    public void upload(String path, String name, java.io.File file) {
-        InputStream inputStream = null;
-        try {
-            inputStream = Files.newInputStream(file.toPath());
-            this.ftpClient.enterLocalPassiveMode();
-            this.ftpClient.storeFile(path + "/" + name, inputStream);
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(inputStream);
         }
     }
 
@@ -159,35 +236,6 @@ public final class Ftp extends com.codejune.Ftp {
             return result;
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
-        }
-    }
-
-    @Override
-    public void download(String path, String fileName, DownloadHandler downloadHandler) {
-        if (StringUtil.isEmpty(path) || StringUtil.isEmpty(fileName)) {
-            throw new InfoException("参数缺失，下载失败");
-        }
-        if (downloadHandler == null) {
-            downloadHandler = inputStream -> {};
-        }
-        InputStream inputStream = null;
-        try {
-            inputStream = this.ftpClient.retrieveFileStream(new java.io.File(path, fileName).getAbsolutePath());
-            downloadHandler.download(inputStream);
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(inputStream);
-        }
-    }
-
-    @Override
-    public boolean isConnected() {
-        try {
-            this.ftpClient.listFiles();
-            return true;
-        } catch (Exception e) {
-            return false;
         }
     }
 

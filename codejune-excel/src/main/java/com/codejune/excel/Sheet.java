@@ -21,6 +21,7 @@ public final class Sheet implements Iterable<Row> {
     public Sheet(org.apache.poi.ss.usermodel.Sheet sheet, Workbook workbook) {
         this.sheet = sheet;
         this.workbook = workbook;
+        this.sheet.setForceFormulaRecalculation(true);
     }
 
     /**
@@ -45,30 +46,27 @@ public final class Sheet implements Iterable<Row> {
     }
 
     /**
-     * 获取row
+     * 获取index
      *
-     * @param rowNum 序号
-     *
-     * @return Row
+     * @return index
      * */
-    public Row getRow(int rowNum) {
-        org.apache.poi.ss.usermodel.Row row = this.sheet.getRow(rowNum);
-        if (row == null) {
-            row = this.sheet.createRow(rowNum);
-        }
-        return new Row(row);
+    public int getIndex() {
+        return this.workbook.getSheetIndex(this.getName());
     }
 
     /**
-     * 删除row
+     * 获取row
      *
-     * @param rowNum 序号
+     * @param rowIndex rowIndex
+     *
+     * @return Row
      * */
-    public void deleteRow(int rowNum) {
-        org.apache.poi.ss.usermodel.Row row = this.sheet.getRow(rowNum);
-        if (row != null) {
-            this.sheet.removeRow(row);
+    public Row getRow(int rowIndex) {
+        org.apache.poi.ss.usermodel.Row row = this.sheet.getRow(rowIndex);
+        if (row == null) {
+            row = this.sheet.createRow(rowIndex);
         }
+        return new Row(this, row);
     }
 
     /**
@@ -78,6 +76,41 @@ public final class Sheet implements Iterable<Row> {
      * */
     public int getRowSize() {
         return this.sheet.getLastRowNum() + 1;
+    }
+
+    /**
+     * 插入一行
+     *
+     * @param rowIndex 插入的位置
+     *
+     * @return Row
+     * */
+    public Row insertRow(int rowIndex) {
+        this.sheet.shiftRows(rowIndex, this.sheet.getLastRowNum(), 1);
+        return new Row(this, this.sheet.createRow(rowIndex));
+    }
+
+    /**
+     * 删除row
+     *
+     * @param rowIndex rowIndex
+     * */
+    public void deleteRow(int rowIndex) {
+        org.apache.poi.ss.usermodel.Row row = this.sheet.getRow(rowIndex);
+        if (row != null) {
+            this.sheet.removeRow(row);
+        }
+    }
+
+    /**
+     * 删除cell
+     *
+     * @param cellIndex cellIndex
+     * */
+    public void deleteCell(int cellIndex) {
+        for (Row row : this) {
+            row.deleteCell(cellIndex);
+        }
     }
 
     @Override

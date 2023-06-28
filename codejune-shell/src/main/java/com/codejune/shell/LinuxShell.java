@@ -4,10 +4,10 @@ import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import com.codejune.Shell;
 import com.codejune.common.Closeable;
+import com.codejune.common.Listener;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.listener.ReadListener;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.InputStream;
@@ -34,7 +34,7 @@ public final class LinuxShell implements Shell, Closeable {
     }
 
     @Override
-    public ResponseResult command(String command, ReadListener<String> readListener) {
+    public ResponseResult command(String command, Listener<String> listener) {
         if (StringUtil.isEmpty(command)) {
             return new ResponseResult();
         }
@@ -47,13 +47,13 @@ public final class LinuxShell implements Shell, Closeable {
             String out = null;
             if (inputStream != null) {
                 TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-                textInputStreamReader.setReadListener(readListener);
+                textInputStreamReader.setListener(listener);
                 out = textInputStreamReader.getData();
             }
             if (StringUtil.isEmpty(out)) {
                 inputStream = session.getStderr();
                 TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-                textInputStreamReader.setReadListener(readListener);
+                textInputStreamReader.setListener(listener);
                 out = textInputStreamReader.getData();
             }
             return ResponseResult.returnFalse(session.getExitStatus(), null, out);

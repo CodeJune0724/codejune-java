@@ -3,8 +3,9 @@ package com.codejune.jdbc.mongodb;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.StringUtil;
 import com.mongodb.*;
-import com.mongodb.MongoClient;
 import com.codejune.Jdbc;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +19,14 @@ public class MongodbJdbc implements Jdbc {
     final MongoClient mongoClient;
 
     public MongodbJdbc(String host, int port, String database, String username, String password) {
-        MongoClientOptions mongoClientOptions = MongoClientOptions.builder().build();
-        MongoCredential credential = MongoCredential.createCredential(username, database, password.toCharArray());
-        this.mongoClient = new MongoClient(new ServerAddress(host, port), credential, mongoClientOptions);
+        MongoCredential mongoCredential = MongoCredential.createScramSha256Credential(username, database, password.toCharArray());
+        MongoClientSettings mongoClientSettings = MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(List.of(new ServerAddress(host, port)))).credential(mongoCredential).build();
+        this.mongoClient = MongoClients.create(mongoClientSettings);
     }
 
     public MongodbJdbc(String host, int port) {
-        MongoClientOptions mongoClientOptions = MongoClientOptions.builder().build();
-        this.mongoClient = new MongoClient(new ServerAddress(host, port), mongoClientOptions);
+        MongoClientSettings mongoClientSettings = MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(List.of(new ServerAddress(host, port)))).build();
+        this.mongoClient = MongoClients.create(mongoClientSettings);
     }
 
     @Override
@@ -59,11 +60,12 @@ public class MongodbJdbc implements Jdbc {
 
     @Override
     public final MongodbDatabase getDefaultDatabase() {
-        MongoCredential mongoCredential = mongoClient.getCredential();
-        if (mongoCredential == null) {
+        List<MongodbDatabase> databases = getDatabases();
+        if (databases.isEmpty()) {
             throw new InfoException("mongoCredential is null");
+        } else {
+            return getDatabase(databases.get(0).getName());
         }
-        return getDatabase(mongoCredential.getUserName());
     }
 
 }

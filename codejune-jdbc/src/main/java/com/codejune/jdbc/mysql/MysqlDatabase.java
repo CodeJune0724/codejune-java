@@ -63,12 +63,12 @@ public final class MysqlDatabase implements SqlDatabase {
         if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
             throw new InfoException("建表参数缺失");
         }
-        String sql = "CREATE TABLE " + tableName + "(\n";
+        String sql = "CREATE TABLE " + tableName + " (\n";
         sql = StringUtil.append(sql, ArrayUtil.toString(columnList, column -> {
             String result = "\t" + column.getName() + " ";
-            result = switch (column.getDataType()) {
-                case INT -> result + "INT";
-                case STRING -> result + "VARCHAR(" + column.getLength() + ")";
+            result = switch (column.getType()) {
+                case INTEGER -> result + "INT";
+                case VARCHAR -> result + "VARCHAR(" + column.getLength() + ")";
                 case DATE -> result + "DATETIME";
                 case DOUBLE -> result + "DOUBLE";
                 default -> throw new ErrorException("column.getDataType()未配置");
@@ -88,7 +88,7 @@ public final class MysqlDatabase implements SqlDatabase {
             return result;
         }, ",\n"), "\n)");
         if (!StringUtil.isEmpty(tableRemark)) {
-            sql = StringUtil.append(sql, " COMMENT='" + tableRemark + "'");
+            sql = StringUtil.append(sql, " COMMENT = '" + tableRemark + "'");
         }
         mysqlJdbc.execute(sql);
     }

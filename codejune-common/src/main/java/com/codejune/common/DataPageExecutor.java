@@ -1,6 +1,5 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ObjectUtil;
 import java.util.List;
 
@@ -16,15 +15,16 @@ public abstract class DataPageExecutor<T> {
     private final long count;
 
     public DataPageExecutor(int size, long count) {
-        if (size <= 0) {
-            throw new InfoException("size <= 0");
-        }
         this.size = size;
         this.count = count;
     }
 
     public DataPageExecutor(int size) {
         this(size, -1);
+    }
+
+    public DataPageExecutor() {
+        this(-1);
     }
 
     /**
@@ -36,6 +36,7 @@ public abstract class DataPageExecutor<T> {
      * @return 查询到的数据
      * */
     public abstract List<T> queryData(int page, int size);
+
     /**
      * 数据处理
      *
@@ -47,10 +48,10 @@ public abstract class DataPageExecutor<T> {
      * 执行
      * */
     public final void run() {
-        for (int i = 1; ; i++) {
+        for (int page = 1; ; page++) {
             int size;
             if (count > 0) {
-                size = (int) count - ((i - 1) * this.size);
+                size = (int) count - ((page - 1) * this.size);
                 if (size <= 0) {
                     break;
                 }
@@ -60,7 +61,7 @@ public abstract class DataPageExecutor<T> {
             } else {
                 size = this.size;
             }
-            List<T> data = queryData(i, size);
+            List<T> data = queryData(page, size);
             if (count <= 0 && ObjectUtil.isEmpty(data)) {
                 break;
             }

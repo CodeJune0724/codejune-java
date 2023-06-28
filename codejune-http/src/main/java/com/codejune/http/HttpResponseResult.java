@@ -7,8 +7,8 @@ import com.codejune.common.util.RegexUtil;
 import com.codejune.common.util.StringUtil;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * HttpResponseResult
@@ -21,7 +21,7 @@ public final class HttpResponseResult<T> implements Builder {
 
     private int code;
 
-    private Map<String, String> header = new HashMap<>();
+    private final List<Header> headerList = new ArrayList<>();
 
     private T body;
 
@@ -38,12 +38,49 @@ public final class HttpResponseResult<T> implements Builder {
         this.flag = code == 200;
     }
 
-    public Map<String, String> getHeader() {
-        return header;
+    public List<Header> getHeaderList() {
+        return headerList;
     }
 
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
+    /**
+     * 添加header
+     *
+     * @param key key
+     * @param value value
+     * */
+    public void addHeader(String key, String value) {
+        if (StringUtil.isEmpty(key)) {
+            return;
+        }
+        this.headerList.add(new Header(key, value));
+    }
+
+    /**
+     * 获取header
+     *
+     * @return List<Header>
+     * */
+    public List<Header> getHeaderList(String key) {
+        List<Header> result = new ArrayList<>();
+        for (Header item : getHeaderList()) {
+            if (item.getKey().equals(key)) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取header
+     *
+     * @return Header
+     * */
+    public Header getHeader(String key) {
+        List<Header> headerList = getHeaderList(key);
+        if (headerList.size() >= 1) {
+            return headerList.get(0);
+        }
+        return null;
     }
 
     public T getBody() {
@@ -55,22 +92,16 @@ public final class HttpResponseResult<T> implements Builder {
     }
 
     /**
-     * 添加header
-     *
-     * @param key key
-     * @param value value
-     * */
-    public void addHeader(String key, String value) {
-        this.header.put(key, value);
-    }
-
-    /**
      * 获取下载文件名
      *
      * @return 下载的文件名
      * */
     public String getDownloadFileName() {
-        String contentDisposition = this.header.get("Content-Disposition");
+        Header header = getHeader("Content-Disposition");
+        String contentDisposition = null;
+        if (header != null) {
+            contentDisposition = header.getValue();
+        }
         String result = null;
         if (!StringUtil.isEmpty(contentDisposition)) {
             result = RegexUtil.find("filename=(.*?)$", contentDisposition, 1);
@@ -89,7 +120,6 @@ public final class HttpResponseResult<T> implements Builder {
     public void build(Object object) {
         HttpResponseResult<?> parse = ObjectUtil.transform(object, HttpResponseResult.class);
         this.setCode(parse.getCode());
-        this.setHeader(parse.getHeader());
     }
 
 }

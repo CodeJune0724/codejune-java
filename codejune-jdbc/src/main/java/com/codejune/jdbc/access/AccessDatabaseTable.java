@@ -13,7 +13,7 @@ import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.SqlBuilder;
 import java.io.IOException;
-import java.sql.Types;
+import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +56,7 @@ public final class AccessDatabaseTable implements SqlTable {
                 for (Column column : columnList) {
                     boolean columnExist = false;
                     for (Column originColumn : columns) {
-                        if (originColumn.getName().equals(column.getName()) && originColumn.getDataType() == column.getDataType()) {
+                        if (originColumn.getName().equals(column.getName()) && originColumn.getType() == column.getType()) {
                             columnExist = true;
                             break;
                         }
@@ -129,7 +129,7 @@ public final class AccessDatabaseTable implements SqlTable {
     public List<Map<String, Object>> queryData(Query query, boolean isCase) {
         return accessDatabaseDatabase.accessDatabaseJdbc.query(
                 new SqlBuilder(tableName, isCase ? AccessDatabaseJdbc.class : OracleJdbc.class).parseQueryDataSql(query),
-                ArrayUtil.parse("R")
+                ArrayUtil.asList("R")
         );
     }
 
@@ -144,18 +144,18 @@ public final class AccessDatabaseTable implements SqlTable {
         }
         for (com.healthmarketscience.jackcess.Column jackcessColumn : columns) {
             String name = jackcessColumn.getName();
-            int sqlType;
+            JDBCType jdbcType;
             int length = jackcessColumn.getLength();
             boolean isPrimaryKey = jackcessColumn.isAutoNumber();
             try {
-                sqlType = jackcessColumn.getSQLType();
+                jdbcType = JDBCType.valueOf(jackcessColumn.getSQLType());
                 if (jackcessColumn.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
-                    sqlType = Types.BOOLEAN;
+                    jdbcType = JDBCType.BOOLEAN;
                 }
             } catch (Exception e) {
                 throw new InfoException(e);
             }
-            Column column = new Column(name, sqlType);
+            Column column = new Column(name, jdbcType);
             column.setLength(length);
             column.setPrimaryKey(isPrimaryKey);
             result.add(column);

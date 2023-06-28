@@ -59,10 +59,12 @@ public class Websocket {
         if (session == null) {
             return;
         }
-        try {
-            session.getBasicRemote().sendText(JsonUtil.toJsonString(message));
-        } catch (Exception e) {
-            throw new InfoException(e);
+        synchronized (this) {
+            try {
+                session.getBasicRemote().sendText(JsonUtil.toJsonString(message));
+            } catch (Exception e) {
+                throw new InfoException(e);
+            }
         }
     }
 
@@ -75,10 +77,12 @@ public class Websocket {
         if (session == null) {
             return;
         }
-        try {
-            session.getBasicRemote().sendBinary(byteBuffer);
-        } catch (Exception e) {
-            throw new InfoException(e);
+        synchronized (this) {
+            try {
+                session.getBasicRemote().sendBinary(byteBuffer);
+            } catch (Exception e) {
+                throw new InfoException(e);
+            }
         }
     }
 

@@ -11,6 +11,9 @@ import com.codejune.jdbc.Query;
 import com.codejune.jdbc.access.AccessDatabaseJdbc;
 import com.codejune.jdbc.mysql.MysqlJdbc;
 import com.codejune.jdbc.query.Filter;
+import com.codejune.jdbc.query.filter.Compare;
+import com.codejune.jdbc.query.filter.Expression;
+import com.codejune.jdbc.query.filter.Group;
 import java.util.*;
 
 /**
@@ -121,7 +124,7 @@ public final class SqlBuilder {
         if (query == null) {
             query = new Query();
         }
-        String sql = "SELECT " + (query.getField().size() == 0 ? "*" : ArrayUtil.toString(query.getField(), field -> {
+        String sql = "SELECT " + (query.getField().isEmpty() ? "*" : ArrayUtil.toString(query.getField(), field -> {
             String result = "";
             if (!StringUtil.isEmpty(field.getName())) {
                 result = field.getName();
@@ -133,16 +136,16 @@ public final class SqlBuilder {
         }, ", ")) + " FROM " + tableName;
         sql = sql + " " + parseWhere(query.getFilter());
         if (query.isSort()) {
-            sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getColumn() + " " + sort.getOrderBy().name(), ", "));
+            sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getField() + " " + sort.getOrderBy().name(), ", "));
         }
-        if (query.isPage()) {
+        if (query.isPaging()) {
             Integer page = query.getPage();
             Integer size = query.getSize();
             if (jdbcType == MysqlJdbc.class) {
-                sql = StringUtil.append("SELECT * FROM (", sql, ") T LIMIT ", ((page - 1) * size) + "", ", ", size + "");
+                sql = StringUtil.append("SELECT * FROM (", sql, ") T LIMIT ", String.valueOf((page - 1) * size), ", ", String.valueOf(size));
             } else {
                 sql = StringUtil.append("SELECT ROWNUM R, T.* FROM (", sql, ") T");
-                sql = StringUtil.append("SELECT * FROM (SELECT * FROM (", sql, ") WHERE R <= ", (page * size) + "", ") WHERE R >= ", (size * (page - 1) + 1) + "");
+                sql = StringUtil.append("SELECT * FROM (SELECT * FROM (", sql, ") WHERE R <= ", String.valueOf(page * size), ") WHERE R >= ", String.valueOf(size * (page - 1) + 1));
             }
         }
         return sql;
@@ -156,88 +159,109 @@ public final class SqlBuilder {
      * @return where
      * */
     public String parseWhere(Filter filter) {
-        return parseWhere(filter, true);
-    }
-
-    private String parseWhere(Filter filter, boolean isAddWhere) {
-        String result = isAddWhere ? "WHERE 1 = 1" : "";
         if (filter == null) {
-            return result;
+            return "WHERE 1 = 1";
         }
-        List<Filter> orList = filter.getOr();
-        if (!ObjectUtil.isEmpty(orList)) {
-            if (!StringUtil.isEmpty(result)) {
-                result = result + " AND ";
+        Action<Compare, String> compareAction = compare -> {
+            String result = "";
+            if (compare == null) {
+                return result;
             }
-            result = result + ArrayUtil.toString(orList, filter1 -> "(" + parseWhere(filter1, false) + ")", " OR ");
-        }
-        List<Filter.Item> andList = filter.getAnd();
-        if (!ObjectUtil.isEmpty(andList)) {
-            if (!StringUtil.isEmpty(result)) {
-                result = result + " AND ";
-            }
-            result = result + ArrayUtil.toString(andList, item -> {
-                String result1 = filterItemHandler(item);
-                if (!StringUtil.isEmpty(result1)) {
-                    result1 = "(" + result1 + ")";
-                }
-                return result1;
-            }, " AND ");
-        }
-        return result;
-    }
-
-    private String filterItemHandler(Filter.Item item) {
-        String result = "";
-        if (item == null) {
-            return result;
-        }
-        Filter.Item.Type type = item.getType();
-        String key = item.getKey();
-        Object value = item.getValue();
-        switch (type) {
-            case GT -> result = key + " > " + valueHandler(value);
-            case GTE -> result = key + " >= " + valueHandler(value);
-            case LT -> result = key + " < " + valueHandler(value);
-            case LTE -> result = key + " <= " + valueHandler(value);
-            case EQUALS -> {
-                if (value == null) {
-                    result = key + " IS " + valueHandler(null);
-                } else {
-                    if (jdbcType == AccessDatabaseJdbc.class && value instanceof String) {
-                        result = "StrComp(" + key + ", " + valueHandler(value) + ", 0) = 0";
+            Compare.Type type = compare.getType();
+            String key = compare.getKey();
+            Object value = compare.getValue();
+            switch (type) {
+                case GT -> result = key + " > " + (value);
+                case GTE -> result = key + " >= " + valueHandler(value);
+                case LT -> result = key + " < " + valueHandler(value);
+                case LTE -> result = key + " <= " + valueHandler(value);
+                case EQUALS -> {
+                    if (value == null) {
+                        result = key + " IS " + valueHandler(null);
                     } else {
-                        result = key + " = " + valueHandler(value);
+                        if (jdbcType == AccessDatabaseJdbc.class && value instanceof String) {
+                            result = "(" + key + " IS NOT NULL) AND StrComp(" + key + ", " + valueHandler(value) + ", 0) = 0";
+                        } else {
+                            result = key + " = " + valueHandler(value);
+                        }
                     }
                 }
-            }
-            case NOT_EQUALS -> {
-                if (value == null) {
-                    result = key + " IS NOT " + valueHandler(null);
-                } else {
-                    result = key + " != " + valueHandler(value);
+                case NOT_EQUALS -> {
+                    if (value == null) {
+                        result = key + " IS NOT " + valueHandler(null);
+                    } else {
+                        result = key + " != " + valueHandler(value);
+                    }
                 }
-            }
-            case CONTAINS -> result = key + " LIKE '%" + ObjectUtil.toString(value) + "%'";
-            case NOT_CONTAINS -> result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "%'";
-            case IN -> {
-                String in = inHandler(key, value, false);
-                if (in != null) {
-                    result = in;
+                case CONTAINS -> result = key + " LIKE '%" + ObjectUtil.toString(value) + "%'";
+                case NOT_CONTAINS -> result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "%'";
+                case IN -> {
+                    String in = inHandler(key, value, false);
+                    if (in != null) {
+                        result = in;
+                    }
                 }
-            }
-            case NOT_IN -> {
-                String notIn = inHandler(key, value, true);
-                if (notIn != null) {
-                    result = notIn;
+                case NOT_IN -> {
+                    String notIn = inHandler(key, value, true);
+                    if (notIn != null) {
+                        result = notIn;
+                    }
                 }
+                case START_WITH -> result = key + " LIKE '" + ObjectUtil.toString(value) + "%'";
+                case NOT_START_WITH -> result = key + " NOT LIKE '" + ObjectUtil.toString(value) + "%'";
+                case END_WITH -> result = key + " LIKE '%" + ObjectUtil.toString(value) + "'";
+                case NOT_END_WITH -> result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "'";
             }
-            case START_WITH -> result = key + " LIKE '" + ObjectUtil.toString(value) + "%'";
-            case NOT_START_WITH -> result = key + " NOT LIKE '" + ObjectUtil.toString(value) + "%'";
-            case END_WITH -> result = key + " LIKE '%" + ObjectUtil.toString(value) + "'";
-            case NOT_END_WITH -> result = key + " NOT LIKE '%" + ObjectUtil.toString(value) + "'";
+            return result;
+        };
+        Action<List<Expression>, String> expressionListActon = new Action<>() {
+            @Override
+            public String then(List<Expression> expressionList) {
+                if (ObjectUtil.isEmpty(expressionList)) {
+                    return null;
+                }
+                String result = "";
+                for (int i = 0; i < expressionList.size(); i++) {
+                    Expression expression = expressionList.get(i);
+                    if (expression == null) {
+                        continue;
+                    }
+                    Expression.Connector connector = expression.getConnector();
+                    if (connector == null) {
+                        connector = Expression.Connector.AND;
+                    }
+                    String endString = "";
+                    if (expression.isCompare()) {
+                        String compareActionResult = compareAction.then(expression.getCompare());
+                        if (!StringUtil.isEmpty(compareActionResult)) {
+                            endString = "(" + compareActionResult + ")";
+                        }
+                    }
+                    if (expression.isGroup()) {
+                        Group group = expression.getGroup();
+                        if (group != null) {
+                            String expressionListResult = this.then(group.getExpressionList());
+                            if (!StringUtil.isEmpty(expressionListResult)) {
+                                endString = "(" + expressionListResult + ")";
+                            }
+                        }
+                    }
+                    if (!StringUtil.isEmpty(endString)) {
+                        if (!StringUtil.isEmpty(result)) {
+                            result = StringUtil.append(result, " ");
+                        }
+                        result = StringUtil.append(result, (i == 0 ? endString : connector + " " + endString));
+                    }
+                }
+                return result;
+            }
+        };
+        String expressionListResult = expressionListActon.then(filter.getExpressionList());
+        if (StringUtil.isEmpty(expressionListResult)) {
+            return "WHERE 1 = 1";
+        } else {
+            return "WHERE 1 = 1 AND " + expressionListResult;
         }
-        return result;
     }
 
     @SuppressWarnings("unchecked")

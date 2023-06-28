@@ -52,13 +52,13 @@ public final class FileWriter extends Writer implements Closeable {
             randomAccessFile.seek(position);
             final RandomAccessFile finalRandomAccessFile = randomAccessFile;
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            inputStreamReader.setReadListener(data -> {
+            inputStreamReader.setListener(data -> {
                 try {
-                    finalRandomAccessFile.write(data.bytes(), 0, data.length());
+                    finalRandomAccessFile.write(data.array(), 0, data.limit());
                 } catch (Exception e) {
                     throw new InfoException(e);
                 }
-                writeListener.listen(data);
+                listen.listen(data);
             });
             inputStreamReader.read();
         } catch (Exception e) {

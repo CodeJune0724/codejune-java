@@ -82,23 +82,27 @@ public final class ServletUtil {
      * 转换文件
      *
      * @param multipartFile multipartFile
-     * @param file file
+     * @param path 输出路径
+     *
+     * @return file
      * */
-    public static void parseFile(MultipartFile multipartFile, File file) {
+    public static File parseFile(MultipartFile multipartFile, String path) {
         if (multipartFile == null) {
             throw new InfoException("multipartFile is null");
         }
-        if (file == null) {
-            throw new InfoException("file is null");
+        if (path == null) {
+            throw new InfoException("path is null");
         }
         if (StringUtil.isEmpty(multipartFile.getOriginalFilename())) {
             throw new InfoException("multipartFile.getOriginalFilename() is null");
         }
+        File result = new File(path, multipartFile.getOriginalFilename());
         try (InputStream inputStream = multipartFile.getInputStream()) {
-            new com.codejune.common.os.File(file).write(inputStream);
+            new com.codejune.common.os.File(result).write(inputStream);
         } catch (Exception e) {
             throw new InfoException(e);
         }
+        return result;
     }
 
 }
