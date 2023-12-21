@@ -9,6 +9,7 @@ import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.query.Field;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.Sort;
+import com.codejune.jdbc.query.filter.Compare;
 import java.util.*;
 
 /**
@@ -199,6 +200,21 @@ public class Query implements Builder {
             map.put("field", newFieldList);
         }
         ObjectUtil.assignment(this, map);
+    }
+
+    /**
+     * and
+     *
+     * @param compare compare
+     *
+     * @return Query
+     * */
+    public static Query and(Compare ...compare) {
+        Filter filter = new Filter();
+        for (Compare item : compare) {
+            filter.and(item);
+        }
+        return new Query().setFilter(filter);
     }
 
 }
