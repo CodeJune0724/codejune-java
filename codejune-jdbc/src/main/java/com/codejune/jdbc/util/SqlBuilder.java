@@ -250,7 +250,7 @@ public final class SqlBuilder {
                         if (!StringUtil.isEmpty(result)) {
                             result = StringUtil.append(result, " ");
                         }
-                        result = StringUtil.append(result, (i == 0 ? endString : connector + " " + endString));
+                        result = StringUtil.append(result, (i == 0 || StringUtil.isEmpty(result) ? endString : connector + " " + endString));
                     }
                 }
                 return result;
