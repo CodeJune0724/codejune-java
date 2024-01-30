@@ -1,5 +1,6 @@
 package com.codejune;
 
+import com.codejune.common.Action;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.*;
@@ -123,15 +124,12 @@ public final class Http {
     /**
      * 发送
      *
-     * @param httpResponseResultHandler httpResponseResultHandler
+     * @param action action
      * */
-    public void send(HttpResponseResultHandler httpResponseResultHandler) {
-        CloseableHttpClient closeableHttpClient = null;
-        CloseableHttpResponse closeableHttpResponse = null;
-        HttpEntity httpEntity = null;
+    public void send(Action<HttpResponseResult<InputStream>, ?> action) {
         HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
-        try {
-            closeableHttpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(new SSLContextBuilder().loadTrustMaterial(null, (chain, authType) -> true).build(), NoopHostnameVerifier.INSTANCE)).build();
+        HttpEntity httpEntity = null;
+        try (CloseableHttpClient closeableHttpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(new SSLContextBuilder().loadTrustMaterial(null, (chain, authType) -> true).build(), NoopHostnameVerifier.INSTANCE)).build()) {
             HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = new HttpEntityEnclosingRequestBase() {
                 @Override
                 public String getMethod() {
@@ -164,39 +162,46 @@ public final class Http {
                         }
                     }
                     httpEntity = multipartEntityBuilder.build();
+                } else if (contentType == ContentType.FORM_URLENCODED) {
+                    if (body instanceof Map<?,?> map) {
+                        Map<String, Object> stringObjectMap = MapUtil.parse(map, String.class, Object.class);
+                        if (stringObjectMap == null) {
+                            stringObjectMap = new HashMap<>();
+                        }
+                        String body = ArrayUtil.toString(stringObjectMap.keySet(), key -> {
+                            Object value = map.get(key);
+                            if (value == null) {
+                                return null;
+                            }
+                            return key + "=" + ObjectUtil.toString(value);
+                        }, "&");
+                        httpEntity = new StringEntity(body == null ? "" : body, "UTF-8");
+                    } else {
+                        httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
+                    }
                 } else {
                     httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
                 }
             }
             httpEntityEnclosingRequestBase.setEntity(httpEntity);
-            closeableHttpResponse = closeableHttpClient.execute(httpEntityEnclosingRequestBase);
-            httpResponseResult.setCode(closeableHttpResponse.getStatusLine().getStatusCode());
-            for (org.apache.http.Header header : closeableHttpResponse.getAllHeaders()) {
-                httpResponseResult.addHeader(header.getName(), header.getValue());
+            try (CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpEntityEnclosingRequestBase)) {
+                httpResponseResult.setCode(closeableHttpResponse.getStatusLine().getStatusCode());
+                for (org.apache.http.Header header : closeableHttpResponse.getAllHeaders()) {
+                    httpResponseResult.addHeader(header.getName(), header.getValue());
+                }
+                httpResponseResult.setBody(closeableHttpResponse.getEntity().getContent());
+                if (action == null) {
+                    action = (Action<HttpResponseResult<InputStream>, Object>) inputStreamHttpResponseResult -> null;
+                }
+                action.then(httpResponseResult);
             }
-            httpResponseResult.setBody(closeableHttpResponse.getEntity().getContent());
-            if (httpResponseResultHandler == null) {
-                httpResponseResultHandler = httpResponseResult1 -> {};
-            }
-            httpResponseResultHandler.handler(httpResponseResult);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new InfoException(e.getMessage());
         } finally {
             IOUtil.close(httpResponseResult.getBody());
             try {
-                if (httpEntity != null) {
-                    EntityUtils.consume(httpEntity);
-                }
-                if (closeableHttpResponse != null) {
-                    closeableHttpResponse.close();
-                }
-                if (closeableHttpClient != null) {
-                    closeableHttpClient.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+                EntityUtils.consume(httpEntity);
+            } catch (Exception ignored) {}
         }
     }
 
@@ -210,6 +215,7 @@ public final class Http {
         send(httpResponseResult -> {
             result.build(httpResponseResult);
             result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
+            return null;
         });
         return result;
     }

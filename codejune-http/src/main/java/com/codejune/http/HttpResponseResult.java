@@ -2,6 +2,7 @@ package com.codejune.http;
 
 import com.codejune.common.Builder;
 import com.codejune.common.exception.InfoException;
+import com.codejune.common.util.JsonUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.RegexUtil;
 import com.codejune.common.util.StringUtil;
@@ -77,7 +78,7 @@ public final class HttpResponseResult<T> implements Builder {
      * */
     public Header getHeader(String key) {
         List<Header> headerList = getHeaderList(key);
-        if (headerList.size() >= 1) {
+        if (ObjectUtil.isEmpty(headerList)) {
             return headerList.get(0);
         }
         return null;
@@ -116,10 +117,23 @@ public final class HttpResponseResult<T> implements Builder {
         return result;
     }
 
+    /**
+     * 转换
+     *
+     * @param tClass tClass
+     * @param <E> T
+     * */
+    public <E> HttpResponseResult<E> parse(Class<E> tClass) {
+        HttpResponseResult<E> result = new HttpResponseResult<>();
+        result.build(this);
+        result.setBody(JsonUtil.parse(this.getBody(), tClass));
+        return result;
+    }
+
     @Override
     public void build(Object object) {
-        HttpResponseResult<?> parse = ObjectUtil.transform(object, HttpResponseResult.class);
-        this.setCode(parse.getCode());
+        HttpResponseResult<?> httpResponseResult = ObjectUtil.transform(object, HttpResponseResult.class);
+        this.setCode(httpResponseResult.getCode());
     }
 
 }

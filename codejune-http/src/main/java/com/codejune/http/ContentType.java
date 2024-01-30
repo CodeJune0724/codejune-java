@@ -15,7 +15,9 @@ public enum ContentType {
 
     TEXT_PLAIN("text/plain"),
 
-    TEXT_HTML("text/html");
+    TEXT_HTML("text/html"),
+
+    FORM_URLENCODED("application/x-www-form-urlencoded");
 
     private final String contentType;
 
