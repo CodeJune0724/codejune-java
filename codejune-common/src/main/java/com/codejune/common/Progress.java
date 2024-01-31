@@ -22,10 +22,10 @@ public abstract class Progress implements Listener<Progress> {
         this.total = total;
         Thread thread = new Thread(() -> {
             while (true) {
-                listen(Progress.this);
+                then(Progress.this);
                 ThreadUtil.sleep(listenInterval);
                 if (current >= total) {
-                    listen(Progress.this);
+                    then(Progress.this);
                     break;
                 }
             }

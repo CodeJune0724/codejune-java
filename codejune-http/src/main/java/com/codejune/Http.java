@@ -1,6 +1,6 @@
 package com.codejune;
 
-import com.codejune.common.Action;
+import com.codejune.common.Listener;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.*;
@@ -124,9 +124,9 @@ public final class Http {
     /**
      * 发送
      *
-     * @param action action
+     * @param listener listener
      * */
-    public void send(Action<HttpResponseResult<InputStream>, ?> action) {
+    public void send(Listener<HttpResponseResult<InputStream>> listener) {
         HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
         HttpEntity httpEntity = null;
         try (CloseableHttpClient closeableHttpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(new SSLContextBuilder().loadTrustMaterial(null, (chain, authType) -> true).build(), NoopHostnameVerifier.INSTANCE)).build()) {
@@ -190,10 +190,10 @@ public final class Http {
                     httpResponseResult.addHeader(header.getName(), header.getValue());
                 }
                 httpResponseResult.setBody(closeableHttpResponse.getEntity().getContent());
-                if (action == null) {
-                    action = (Action<HttpResponseResult<InputStream>, Object>) inputStreamHttpResponseResult -> null;
+                if (listener == null) {
+                    listener = data -> {};
                 }
-                action.then(httpResponseResult);
+                listener.then(httpResponseResult);
             }
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
@@ -215,7 +215,6 @@ public final class Http {
         send(httpResponseResult -> {
             result.build(httpResponseResult);
             result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
-            return null;
         });
         return result;
     }

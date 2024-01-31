@@ -99,7 +99,7 @@ public final class Ftp extends com.codejune.Ftp {
             listener = data -> {};
         }
         try (InputStream inputStream = this.ftpClient.retrieveFileStream(filePath)) {
-            listener.listen(inputStream);
+            listener.then(inputStream);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }

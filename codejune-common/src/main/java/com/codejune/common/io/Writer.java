@@ -55,7 +55,7 @@ public class Writer {
         } catch (Exception e) {
             throw new InfoException(e);
         }
-        listen.listen(byteBuffer);
+        listen.then(byteBuffer);
     }
 
     /**

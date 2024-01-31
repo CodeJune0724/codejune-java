@@ -12,6 +12,6 @@ public interface Listener<T> {
      *
      * @param data 实时监听的数据
      * */
-    void listen(T data);
+    void then(T data);
 
 }

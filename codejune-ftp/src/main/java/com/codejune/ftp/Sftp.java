@@ -100,7 +100,7 @@ public final class Sftp extends com.codejune.Ftp {
             listener = data -> {};
         }
         try (InputStream inputStream = this.channelSftp.get(filePath)) {
-            listener.listen(inputStream);
+            listener.then(inputStream);
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
         }

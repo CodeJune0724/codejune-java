@@ -50,7 +50,7 @@ public final class FileReader extends InputStreamReader implements Closeable {
             byte[] bytes = new byte[this.size];
             int size = randomAccessFile.read(bytes);
             while (size != -1) {
-                listener.listen(ByteBuffer.wrap(bytes, 0, size));
+                listener.then(ByteBuffer.wrap(bytes, 0, size));
                 if (range.getEnd() != null && randomAccessFile.getFilePointer() >= range.getEnd()) {
                     break;
                 }

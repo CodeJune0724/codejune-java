@@ -59,7 +59,7 @@ public final class TextInputStreamReader extends Reader<String> {
                     break;
                 }
                 if (lineNum >= range.getStart()) {
-                    listener.listen(line);
+                    listener.then(line);
                 }
                 line = bufferedReader.readLine();
                 lineNum = lineNum + 1;
@@ -82,7 +82,7 @@ public final class TextInputStreamReader extends Reader<String> {
         TextInputStreamReader textInputStreamReader = new TextInputStreamReader(this.inputStream);
         textInputStreamReader.setListener(data -> {
             result.append(data).append("\n");
-            TextInputStreamReader.this.listener.listen(data);
+            TextInputStreamReader.this.listener.then(data);
         });
         textInputStreamReader.read();
         return ObjectUtil.toString(ObjectUtil.subString(result.toString(), result.length() - 1));

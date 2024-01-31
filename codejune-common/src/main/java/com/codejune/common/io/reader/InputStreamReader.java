@@ -22,7 +22,7 @@ public class InputStreamReader extends Reader<ByteBuffer> {
             byte[] bytes = new byte[this.size];
             int size = this.inputStream.read(bytes);
             while (size != -1) {
-                listener.listen(ByteBuffer.wrap(bytes, 0, size));
+                listener.then(ByteBuffer.wrap(bytes, 0, size));
                 size = this.inputStream.read(bytes);
             }
         } catch (Exception e) {

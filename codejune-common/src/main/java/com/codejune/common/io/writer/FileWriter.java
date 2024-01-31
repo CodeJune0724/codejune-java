@@ -58,7 +58,7 @@ public final class FileWriter extends Writer implements Closeable {
                 } catch (Exception e) {
                     throw new InfoException(e);
                 }
-                listen.listen(data);
+                listen.then(data);
             });
             inputStreamReader.read();
         } catch (Exception e) {
