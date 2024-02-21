@@ -22,12 +22,26 @@ public final class ObjectUtil {
      * @param <T> T
      * @param object object
      * @param tClass tClass
+     * @param builder builder
      *
      * @return T
      * */
     @SuppressWarnings("unchecked")
+    public static <T> T transform(Object object, Class<T> tClass, boolean builder) {
+        return (T) Data.transform(object, tClass, builder);
+    }
+
+    /**
+     * 转成指定的类
+     *
+     * @param <T> T
+     * @param object object
+     * @param tClass tClass
+     *
+     * @return T
+     * */
     public static <T> T transform(Object object, Class<T> tClass) {
-        return (T) Data.transform(object, tClass);
+        return transform(object, tClass, true);
     }
 
     /**
@@ -141,9 +155,9 @@ public final class ObjectUtil {
             for (Field field : classInfo.getFields()) {
                 Object setData;
                 if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                    setData = Data.transformList(o2Map.get(field.getName()), field.getType(), field.getGenericClass().get(0).getOriginClass());
+                    setData = Data.transformList(o2Map.get(field.getName()), field.getType(), field.getGenericClass().get(0).getOriginClass(), false);
                 } else {
-                    setData = transform(o2Map.get(field.getName()), field.getType());
+                    setData = transform(o2Map.get(field.getName()), field.getType(), false);
                 }
                 Method setMethod = classInfo.getSetMethod(field.getName());
                 if (setMethod != null) {

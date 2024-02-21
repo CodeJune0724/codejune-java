@@ -25,11 +25,12 @@ public final class Data {
      * @param object object
      * @param tClass class
      * @param clone 是否是克隆
+     * @param builder 是否自动builder
      *
      * @return Object
      * */
     @SuppressWarnings("unchecked")
-    public static Object transform(Object object, Class<?> tClass, boolean clone) {
+    public static Object transform(Object object, Class<?> tClass, boolean clone, boolean builder) {
         if (tClass == null || object == null) {
             return null;
         }
@@ -170,9 +171,9 @@ public final class Data {
             return result;
         }
         Object result = ObjectUtil.newInstance(tClass);
-        if (!clone && (result instanceof Builder builder)) {
-            builder.build(object);
-            return builder;
+        if (!clone && builder && (result instanceof Builder builderExe)) {
+            builderExe.build(object);
+            return builderExe;
         }
         List<Field> fields = tClassClassInfo.getFields();
         for (Map.Entry<?, ?> entry : ((Map<?, ?>) transform(object, Map.class, clone)).entrySet()) {
@@ -212,6 +213,19 @@ public final class Data {
      *
      * @param object object
      * @param tClass class
+     * @param clone 是否是克隆
+     *
+     * @return Object
+     * */
+    public static Object transform(Object object, Class<?> tClass, boolean clone) {
+        return transform(object, tClass, clone, true);
+    }
+
+    /**
+     * 数据转换
+     *
+     * @param object object
+     * @param tClass class
      *
      * @return Object
      * */
@@ -219,8 +233,24 @@ public final class Data {
         return transform(object, tClass, false);
     }
 
+    /**
+     * 转换list
+     *
+     * @param object object
+     * @param tClass tClass
+     * @param genericClass genericClass
+     * @param builder builder
+     *
+     * @return Collection<?>
+     * */
     @SuppressWarnings("unchecked")
-    public static Collection<?> transformList(Object object, Class<?> tClass, Class<?> genericClass) {
+    public static Collection<?> transformList(Object object, Class<?> tClass, Class<?> genericClass, boolean builder) {
+        if (object == null) {
+            return null;
+        }
+        if (genericClass == null) {
+            genericClass = Object.class;
+        }
         if (!new ClassInfo(tClass).isInstanceof(Collection.class)) {
             throw new InfoException(tClass + " is not Collection");
         }
@@ -244,9 +274,22 @@ public final class Data {
             genericClass = collection.toArray()[0].getClass();
         }
         for (Object item : objectCollection) {
-            result.add(transform(item, genericClass, false));
+            result.add(transform(item, genericClass, true, builder));
         }
         return result;
+    }
+
+    /**
+     * 转换list
+     *
+     * @param object object
+     * @param tClass tClass
+     * @param genericClass genericClass
+     *
+     * @return Collection<?>
+     * */
+    public static Collection<?> transformList(Object object, Class<?> tClass, Class<?> genericClass) {
+        return transformList(object, tClass, genericClass, true);
     }
 
     /**
