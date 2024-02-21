@@ -123,14 +123,17 @@ public final class ObjectUtil {
      *
      * @param o1 赋值对象
      * @param o2 取值对象
+     * @param <T> 泛型
+     *
+     * @return o1
      * */
     @SuppressWarnings("unchecked")
-    public static void assignment(Object o1, Object o2) {
+    public static <T> T assignment(T o1, Object o2) {
         if (o1 == null || o2 == null) {
-            return;
+            return o1;
         }
         if (!(o2 instanceof Map<?,?>) && !Data.isObject(o2.getClass())) {
-            return;
+            return o1;
         }
         Map<?, ?> o2Map = transform(o2, Map.class);
         if (o1 instanceof Map) {
@@ -149,6 +152,7 @@ public final class ObjectUtil {
                 }
             }
         }
+        return o1;
     }
 
     /**
