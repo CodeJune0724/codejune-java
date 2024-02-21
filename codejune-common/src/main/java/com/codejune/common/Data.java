@@ -94,28 +94,7 @@ public final class Data {
             return Boolean.valueOf(objectS);
         }
         if (tClassClassInfo.isInstanceof(Collection.class)) {
-            Collection<?> objectCollection;
-            Class<?> collectionClass = Object.class;
-            if (object instanceof Collection<?> collection) {
-                if (!collection.isEmpty()) {
-                    collectionClass = collection.toArray()[0].getClass();
-                }
-                objectCollection = collection;
-            } else if (object instanceof String) {
-                objectCollection = JsonUtil.parse(object, Collection.class);
-            } else {
-                throw new InfoException(object + " to Collection error");
-            }
-            Collection<Object> result;
-            if (tClass.isInterface()) {
-                result = new ArrayList<>();
-            } else {
-                result = (Collection<Object>) ObjectUtil.newInstance(tClass);
-            }
-            for (Object item : objectCollection) {
-                result.add(transform(item, collectionClass, clone));
-            }
-            return result;
+            return transformList(object, tClass, Object.class);
         }
         if (tClassClassInfo.isInstanceof(Date.class)) {
             Date objectOfDate = null;
@@ -203,7 +182,12 @@ public final class Data {
             }
             for (Field field : fields) {
                 if (key.equals(field.getName())) {
-                    Object value = transform(entry.getValue(), field.getType(), clone);
+                    Object value;
+                    if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
+                        value = transformList(entry.getValue(), field.getType(), field.getGenericClass().get(0).getOriginClass());
+                    } else {
+                        value = transform(entry.getValue(), field.getType(), clone);
+                    }
                     boolean isExecuteMethod = false;
                     if (!clone) {
                         Method method = tClassClassInfo.getSetMethod(field.getName());
@@ -233,6 +217,36 @@ public final class Data {
      * */
     public static Object transform(Object object, Class<?> tClass) {
         return transform(object, tClass, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Collection<?> transformList(Object object, Class<?> tClass, Class<?> genericClass) {
+        if (!new ClassInfo(tClass).isInstanceof(Collection.class)) {
+            throw new InfoException(tClass + " is not Collection");
+        }
+        Collection<Object> result;
+        if (tClass == List.class) {
+            result = new ArrayList<>();
+        } else if (tClass == Set.class) {
+            result = new HashSet<>();
+        } else {
+            result = (Collection<Object>) ObjectUtil.newInstance(tClass);
+        }
+        Collection<?> objectCollection;
+        if (object instanceof Collection<?> collection) {
+            objectCollection = collection;
+        } else if (object instanceof String) {
+            objectCollection = JsonUtil.parse(object, Collection.class);
+        } else {
+            throw new InfoException(object + " to Collection error");
+        }
+        if (genericClass == Object.class && object instanceof Collection<?> collection && !collection.isEmpty()) {
+            genericClass = collection.toArray()[0].getClass();
+        }
+        for (Object item : objectCollection) {
+            result.add(transform(item, genericClass, false));
+        }
+        return result;
     }
 
     /**

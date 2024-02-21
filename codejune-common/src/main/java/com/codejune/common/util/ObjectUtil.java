@@ -43,9 +43,6 @@ public final class ObjectUtil {
             return null;
         }
         Class<?> aClass = object.getClass();
-        if (aClass == null) {
-            return object;
-        }
         if (length <= 0) {
             return object;
         }
@@ -73,7 +70,7 @@ public final class ObjectUtil {
             return ((Optional<?>) object).isEmpty();
         }
         if (object instanceof CharSequence) {
-            return ((CharSequence) object).length() == 0;
+            return ((CharSequence) object).isEmpty();
         }
         if (object.getClass().isArray()) {
             return Array.getLength(object) == 0;
@@ -142,8 +139,12 @@ public final class ObjectUtil {
         } else if (Data.isObject(o1.getClass())) {
             ClassInfo classInfo = new ClassInfo(o1.getClass());
             for (Field field : classInfo.getFields()) {
-                Object setData = o2Map.get(field.getName());
-                setData = transform(setData, field.getType());
+                Object setData;
+                if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
+                    setData = Data.transformList(o2Map.get(field.getName()), field.getType(), field.getGenericClass().get(0).getOriginClass());
+                } else {
+                    setData = transform(o2Map.get(field.getName()), field.getType());
+                }
                 Method setMethod = classInfo.getSetMethod(field.getName());
                 if (setMethod != null) {
                     setMethod.execute(o1, setData);
