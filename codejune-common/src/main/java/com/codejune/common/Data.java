@@ -95,14 +95,14 @@ public final class Data {
             return Boolean.valueOf(objectS);
         }
         if (tClassClassInfo.isInstanceof(Collection.class)) {
-            return transformList(object, tClass, Object.class);
+            return transformList(object, tClass, Object.class, builder);
         }
         if (tClassClassInfo.isInstanceof(Date.class)) {
             Date objectOfDate = null;
             if (object instanceof Date) {
                 objectOfDate = (Date) object;
             } else if (object instanceof Number) {
-                objectOfDate = new Date((Long) transform(object, Long.class, clone));
+                objectOfDate = new Date((Long) transform(object, Long.class, clone, builder));
             } else if (object instanceof LocalDateTime localDateTime) {
                 return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
             } else {
@@ -162,7 +162,7 @@ public final class Data {
                             }
                         }
                     }
-                    objectOfMap.put(field.getName(), transform(value, field.getType(), clone));
+                    objectOfMap.put(field.getName(), transform(value, field.getType(), clone, builder));
                 }
             }
             for (String key : objectOfMap.keySet()) {
@@ -176,7 +176,7 @@ public final class Data {
             return builderExe;
         }
         List<Field> fields = tClassClassInfo.getFields();
-        for (Map.Entry<?, ?> entry : ((Map<?, ?>) transform(object, Map.class, clone)).entrySet()) {
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) transform(object, Map.class, clone, builder)).entrySet()) {
             Object key = entry.getKey();
             if (StringUtil.isEmpty(key)) {
                 continue;
@@ -185,9 +185,9 @@ public final class Data {
                 if (key.equals(field.getName())) {
                     Object value;
                     if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                        value = transformList(entry.getValue(), field.getType(), field.getGenericClass().get(0).getOriginClass());
+                        value = transformList(entry.getValue(), field.getType(), field.getGenericClass().get(0).getOriginClass(), builder);
                     } else {
-                        value = transform(entry.getValue(), field.getType(), clone);
+                        value = transform(entry.getValue(), field.getType(), clone, builder);
                     }
                     boolean isExecuteMethod = false;
                     if (!clone) {

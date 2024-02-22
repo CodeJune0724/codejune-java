@@ -199,7 +199,11 @@ public class Query implements Builder {
             }
             map.put("field", newFieldList);
         }
-        ObjectUtil.assignment(this, map);
+        this.setPage(MapUtil.getValue(map, "page", Integer.class));
+        this.setSize(MapUtil.getValue(map, "size", Integer.class));
+        this.setFilter(MapUtil.getValue(map, "filter", Filter.class));
+        this.setSort(ArrayUtil.parse(MapUtil.getValue(map, "sort", List.class), Sort.class));
+        this.setField(ArrayUtil.parse(MapUtil.getValue(map, "field", List.class), Field.class));
     }
 
     /**

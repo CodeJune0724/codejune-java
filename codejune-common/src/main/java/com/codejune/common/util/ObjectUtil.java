@@ -28,7 +28,7 @@ public final class ObjectUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> T transform(Object object, Class<T> tClass, boolean builder) {
-        return (T) Data.transform(object, tClass, builder);
+        return (T) Data.transform(object, tClass, false, builder);
     }
 
     /**
