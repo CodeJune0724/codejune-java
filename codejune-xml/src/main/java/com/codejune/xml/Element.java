@@ -26,7 +26,11 @@ public final class Element implements Iterable<Element> {
      * @return Element
      * */
     public Element getElement(String name) {
-        return new Element(this.element.element(name));
+        org.dom4j.Element originElement = this.element.element(name);
+        if (originElement == null) {
+            return null;
+        }
+        return new Element(originElement);
     }
 
     /**
@@ -34,12 +38,10 @@ public final class Element implements Iterable<Element> {
      *
      * @return List
      * */
-    public List<Element> getElements() {
+    public List<Element> getElement() {
         List<Element> elements = new ArrayList<>();
         for (org.dom4j.Element element : this.element.elements()) {
-            if (element != null) {
-                elements.add(new Element(element));
-            }
+            elements.add(new Element(element));
         }
         return elements;
     }
@@ -140,17 +142,17 @@ public final class Element implements Iterable<Element> {
 
     @Override
     public Iterator<Element> iterator() {
-        List<Element> elements = getElements();
+        List<Element> elementList = getElement();
         final int[] i = {0};
         return new Iterator<>() {
             @Override
             public boolean hasNext() {
-                return i[0] < elements.size();
+                return i[0] < elementList.size();
             }
 
             @Override
             public Element next() {
-                return elements.get(i[0]++);
+                return elementList.get(i[0]++);
             }
         };
     }
