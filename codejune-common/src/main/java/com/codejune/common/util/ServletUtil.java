@@ -24,37 +24,42 @@ public final class ServletUtil {
      * 下载文件
      *
      * @param httpServletResponse httpServletResponse
+     * @param inputStream inputStream
+     * @param fileName fileName
+     * */
+    public static void download(HttpServletResponse httpServletResponse, InputStream inputStream, String fileName) {
+        if (httpServletResponse == null || inputStream == null) {
+            return;
+        }
+        if (StringUtil.isEmpty(fileName)) {
+            fileName = "";
+        }
+        try (OutputStream outputStream = httpServletResponse.getOutputStream()) {
+            httpServletResponse.setContentType("application/x-download");
+            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+            httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            httpServletResponse.setHeader("Content-Length", String.valueOf(inputStream.available()));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+            outputStreamWriter.write(inputStream);
+        } catch (IOException e) {
+            throw new InfoException(e.getMessage());
+        }
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param httpServletResponse httpServletResponse
      * @param file file
      * */
     public static void download(HttpServletResponse httpServletResponse, File file) {
         if (file == null) {
             return;
         }
-        if (!file.isFile()) {
-            throw new InfoException("非文件");
-        }
-
-        try {
-            httpServletResponse.setContentType("application/x-download");
-            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8));
-            httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        try (InputStream inputStream = IOUtil.getInputStream(file)) {
+            download(httpServletResponse, inputStream, file.getName());
         } catch (Exception e) {
             throw new InfoException(e.getMessage());
-        }
-
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
-        try {
-            inputStream = IOUtil.getInputStream(file);
-            outputStream = httpServletResponse.getOutputStream();
-            httpServletResponse.setHeader("Content-Length", String.valueOf(inputStream.available()));
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-            outputStreamWriter.write(inputStream);
-        } catch (IOException e) {
-            throw new InfoException(e.getMessage());
-        } finally {
-            IOUtil.close(inputStream);
-            IOUtil.close(outputStream);
         }
     }
 
