@@ -1,5 +1,6 @@
 package com.codejune.common.util;
 
+import com.codejune.common.Listener;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.writer.OutputStreamWriter;
 import com.codejune.common.os.Folder;
@@ -22,32 +23,30 @@ public final class ZipUtil {
      * 压缩
      *
      * @param fileList 源文件或者文件夹
-     * @param result 输出文件
-     *
-     * @return outFile
+     * @param listener listener
      * */
-    public static File zip(List<String> fileList, File result) {
-        if (result == null) {
-            throw new InfoException("outFile is null");
-        }
+    public static void zip(List<String> fileList, Listener<InputStream> listener) {
         if (ObjectUtil.isEmpty(fileList)) {
-            return result;
+            return;
         }
-        if (result.exists()) {
-            FileUtil.delete(result);
+        if (listener == null) {
+            return;
         }
-        new Folder(result.getParent());
         try (
-                FileOutputStream fileOutputStream = new FileOutputStream(result);
-                ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)
         ) {
             for (String file : fileList) {
                 zip(zipOutputStream, new File(file), "");
             }
+            zipOutputStream.flush();
+            zipOutputStream.finish();
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())) {
+                listener.then(byteArrayInputStream);
+            }
         } catch (Exception e) {
             throw new InfoException(e);
         }
-        return result;
     }
 
     private static void zip(ZipOutputStream zipOutputStream, File file, String path) {
