@@ -132,8 +132,7 @@ public final class HttpResponseResult<T> implements Builder {
 
     @Override
     public void build(Object object) {
-        HttpResponseResult<?> httpResponseResult = ObjectUtil.transform(object, HttpResponseResult.class);
-        this.setCode(httpResponseResult.getCode());
+        ObjectUtil.assignment(this, ObjectUtil.transform(object, HttpResponseResult.class));
     }
 
 }
