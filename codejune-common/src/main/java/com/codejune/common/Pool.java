@@ -68,8 +68,10 @@ public abstract class Pool<T> implements Closeable {
             source = genericObjectPool.borrowObject();
             T result = source.getSource();
             if (!check(result)) {
-                if (result instanceof Closeable) {
-                    ((Closeable) result).close();
+                if (result instanceof Closeable closeable) {
+                    try {
+                        closeable.close();
+                    } catch (Throwable ignored) {}
                 }
                 result = create();
             }
