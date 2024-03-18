@@ -6,12 +6,11 @@ import com.codejune.common.exception.InfoException;
 import com.codejune.excel.Sheet;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * excel
@@ -22,40 +21,53 @@ public final class Excel implements Closeable, Iterable<Sheet> {
 
     private final Workbook workbook;
 
-    public Excel() {
-        workbook = new SXSSFWorkbook(-1);
-        this.addSheet("Sheet1");
-    }
+    private XSSFWorkbook xssfWorkbook = null;
 
-    public Excel(String path) {
-        if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
-            throw new InfoException("excel文件不存在");
-        }
-        try (
-                FileInputStream fileInputStream = new FileInputStream(path)
-        ) {
-            this.workbook = WorkbookFactory.create(fileInputStream);
+    public Excel(boolean write) {
+        try {
+            if (write) {
+                this.workbook = new SXSSFWorkbook(100);
+            } else {
+                this.workbook = new SXSSFWorkbook(-1);
+            }
+            this.workbook.createSheet("Sheet1");
         } catch (Exception e) {
+            this.close();
             throw new InfoException(e);
         }
     }
 
-    public Excel(File excelFile) {
-        this(excelFile == null ? null : excelFile.getAbsolutePath());
+    public Excel() {
+        this(false);
     }
 
-    /**
-     * 添加sheet
-     *
-     * @param sheetName sheet名
-     *
-     * @return Sheet
-     * */
-    public Sheet addSheet(String sheetName) {
-        if (this.workbook.getSheet(sheetName) != null) {
-            throw new InfoException(sheetName + "已存在");
+    public Excel(String path, boolean write) {
+        if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
+            throw new InfoException("excel文件不存在");
         }
-        return new Sheet(this.workbook.createSheet(sheetName), this.workbook);
+        try (FileInputStream fileInputStream = new FileInputStream(path)) {
+            if (write) {
+                this.xssfWorkbook = new XSSFWorkbook(path);
+                this.workbook = new SXSSFWorkbook(this.xssfWorkbook, 100);
+            } else {
+                this.workbook = WorkbookFactory.create(fileInputStream);
+            }
+        } catch (Exception e) {
+            this.close();
+            throw new InfoException(e);
+        }
+    }
+
+    public Excel(String path) {
+        this(path, false);
+    }
+
+    public Excel(File excelFile, boolean write) {
+        this(excelFile == null ? null : excelFile.getAbsolutePath(), write);
+    }
+
+    public Excel(File excelFile) {
+        this(excelFile == null ? null : excelFile.getAbsolutePath(), false);
     }
 
     /**
@@ -80,7 +92,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     public Sheet getSheet(String sheetName) {
         org.apache.poi.ss.usermodel.Sheet sheet = this.workbook.getSheet(sheetName);
         if (sheet == null) {
-            return null;
+            sheet = this.workbook.createSheet(sheetName);
         }
         return new Sheet(sheet, this.workbook);
     }
@@ -101,20 +113,6 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     }
 
     /**
-     * 获取所有sheet
-     *
-     * @return List
-     * */
-    public List<Sheet> getSheets() {
-        List<Sheet> result = new ArrayList<>();
-        Iterator<org.apache.poi.ss.usermodel.Sheet> sheetIterator = this.workbook.sheetIterator();
-        while (sheetIterator.hasNext()) {
-            result.add(new Sheet(sheetIterator.next(), this.workbook));
-        }
-        return result;
-    }
-
-    /**
      * 保存
      *
      * @param result file
@@ -131,6 +129,10 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         new com.codejune.common.os.File(result.getAbsolutePath());
         try (OutputStream outputStream = IOUtil.getOutputStream(result)) {
             this.workbook.write(outputStream);
+            outputStream.flush();
+            if (this.workbook instanceof SXSSFWorkbook sxssfWorkbook) {
+                sxssfWorkbook.dispose();
+            }
         } catch (Exception e) {
             throw new InfoException(e);
         }
@@ -139,35 +141,32 @@ public final class Excel implements Closeable, Iterable<Sheet> {
 
     @Override
     public void close() {
-        closeWorkbook(this.workbook);
+        if (this.workbook != null) {
+            try {
+                workbook.close();
+            } catch (Exception ignored) {}
+        }
+        if (this.xssfWorkbook != null) {
+            try {
+                xssfWorkbook.close();
+            } catch (Exception ignored) {}
+        }
     }
 
     @Override
     public Iterator<Sheet> iterator() {
-        List<Sheet> sheets = getSheets();
-        final int[] i = new int[]{0};
+        Iterator<org.apache.poi.ss.usermodel.Sheet> sheetIterator = this.workbook.sheetIterator();
         return new Iterator<>() {
             @Override
             public boolean hasNext() {
-                return i[0] < sheets.size();
+                return sheetIterator.hasNext();
             }
 
             @Override
             public Sheet next() {
-                return sheets.get(i[0]++);
+                return new Sheet(sheetIterator.next(), workbook);
             }
         };
-    }
-
-    private void closeWorkbook(Workbook workbook) {
-        if (workbook == null) {
-            return;
-        }
-        try {
-            workbook.close();
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
-        }
     }
 
 }
