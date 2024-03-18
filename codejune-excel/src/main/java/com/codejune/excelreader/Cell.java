@@ -11,9 +11,12 @@ public final class Cell {
 
     private final String value;
 
-    public Cell(int index, String value) {
+    private final Row row;
+
+    public Cell(int index, String value, Row row) {
         this.index = index;
         this.value = value;
+        this.row = row;
     }
 
     public int getIndex() {
@@ -22,6 +25,10 @@ public final class Cell {
 
     public String getValue() {
         return this.value;
+    }
+
+    public Row getRow() {
+        return row;
     }
 
 }

@@ -103,9 +103,9 @@ public final class Sheet {
             XMLReader xmlReader = SAXParserFactory.newNSInstance().newSAXParser().getXMLReader();
             xmlReader.setContentHandler(new XSSFSheetXMLHandler(this.stylesTable, this.sharedStrings, new XSSFSheetXMLHandler.SheetContentsHandler() {
                 @Override
-                public void startRow(int i) {
+                public void startRow(int rowIndex) {
                     dataMap.clear();
-                    finalRowStart.then(new Row(i));
+                    finalRowStart.then(new Row(rowIndex));
                 }
                 @Override
                 public void cell(String index, String data, XSSFComment xssfComment) {
@@ -113,11 +113,11 @@ public final class Sheet {
                     dataMap.put(i, data);
                 }
                 @Override
-                public void endRow(int i) {
-                    for (int j = 0; j <= endIndex[0]; j++) {
-                        finalCellListener.then(new Cell(j, MapUtil.getValue(dataMap, j, String.class)));
+                public void endRow(int rowIndex) {
+                    for (int cellIndex = 0; cellIndex <= endIndex[0]; cellIndex++) {
+                        finalCellListener.then(new Cell(cellIndex, MapUtil.getValue(dataMap, cellIndex, String.class), new Row(rowIndex)));
                     }
-                    finalRowEnd.then(new Row(i));
+                    finalRowEnd.then(new Row(rowIndex));
                 }
             }, false));
             xmlReader.parse(new InputSource(inputStream));
