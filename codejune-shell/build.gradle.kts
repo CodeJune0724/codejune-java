@@ -1,4 +1,4 @@
 dependencies {
     api(project(":codejune-common"))
-    api("ch.ethz.ganymed:ganymed-ssh2:262")
+    api("com.github.mwiede:jsch:0.2.17")
 }

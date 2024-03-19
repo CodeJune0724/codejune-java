@@ -158,6 +158,8 @@ public final class Sftp extends com.codejune.Ftp {
     @Override
     protected void connect() {
         try {
+            JSch.setConfig("kex", JSch.getConfig("kex") + ",diffie-hellman-group1-sha1");
+            JSch.setConfig("server_host_key", JSch.getConfig("server_host_key") + ",ssh-rsa,ssh-dss");
             JSch jSch = new JSch();
             this.session = jSch.getSession(this.getUsername(), this.getHost(), this.getPort());
             this.session.setPassword(this.getPassword());

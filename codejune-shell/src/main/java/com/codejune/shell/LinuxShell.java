@@ -1,16 +1,16 @@
 package com.codejune.shell;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
 import com.codejune.Shell;
 import com.codejune.common.Closeable;
 import com.codejune.common.Listener;
 import com.codejune.common.exception.InfoException;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.util.IOUtil;
-import com.codejune.common.util.StringUtil;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * LinuxShell
@@ -19,58 +19,55 @@ import java.io.InputStream;
  * */
 public final class LinuxShell implements Shell, Closeable {
 
-    private final Connection connection;
+    private final Session session;
 
     public LinuxShell(String host, int port, String username, String password) {
         try {
-            connection = new Connection(host, port);
-            connection.connect();
-            if (!connection.authenticateWithPassword(username, password)) {
-                throw new InfoException("连接失败");
-            }
-        } catch (Exception e) {
-            throw new InfoException(e);
+            JSch.setConfig("kex", JSch.getConfig("kex") + ",diffie-hellman-group1-sha1");
+            JSch.setConfig("server_host_key", JSch.getConfig("server_host_key") + ",ssh-rsa,ssh-dss");
+            JSch jSch = new JSch();
+            this.session = jSch.getSession(username, host, port);
+            this.session.setPassword(password);
+            Properties properties = new Properties();
+            properties.put("StrictHostKeyChecking", "no");
+            this.session.setConfig(properties);
+            this.session.connect();
+        }catch (Exception e) {
+            throw new InfoException(host + ", 连接失败");
         }
     }
 
     @Override
     public ResponseResult command(String command, Listener<String> listener) {
-        if (StringUtil.isEmpty(command)) {
-            return new ResponseResult();
-        }
-        Session session = null;
-        InputStream inputStream = null;
+        ChannelExec channelExec = null;
         try {
-            session = this.connection.openSession();
-            session.execCommand(command);
-            inputStream = session.getStdout();
-            String out = null;
-            if (inputStream != null) {
-                TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-                textInputStreamReader.setListener(listener);
-                out = textInputStreamReader.getData();
-            }
-            if (StringUtil.isEmpty(out)) {
-                inputStream = session.getStderr();
-                TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-                textInputStreamReader.setListener(listener);
-                out = textInputStreamReader.getData();
-            }
-            return ResponseResult.returnFalse(session.getExitStatus(), null, out);
-        } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            channelExec = (ChannelExec) session.openChannel("exec");
+            channelExec.setCommand(command);
+            channelExec.connect();
+            InputStream inputStream = channelExec.getInputStream();
+            InputStream errStream = channelExec.getErrStream();
+            String result = "";
+            TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
+            textInputStreamReader.setListener(listener);
+            result = result + textInputStreamReader.getData();
+            TextInputStreamReader errorTextInputStreamReader = new TextInputStreamReader(errStream);
+            errorTextInputStreamReader.setListener(listener);
+            result = result + errorTextInputStreamReader.getData();
+            return ResponseResult.returnTrue(channelExec.getExitStatus(), null, result);
+        }
+        catch (Exception e) {
+            throw new InfoException(e);
         } finally {
-            if (session != null) {
-                session.close();
+            if (channelExec != null) {
+                channelExec.disconnect();
             }
-            IOUtil.close(inputStream);
         }
     }
 
     @Override
     public void close() {
-        if (this.connection != null) {
-            this.connection.close();
+        if (this.session != null) {
+            this.session.disconnect();
         }
     }
 
