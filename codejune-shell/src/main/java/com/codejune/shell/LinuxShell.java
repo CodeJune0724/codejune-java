@@ -2,12 +2,12 @@ package com.codejune.shell;
 
 import com.codejune.Shell;
 import com.codejune.common.BaseException;
+import com.codejune.common.Closeable;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import java.io.Closeable;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.function.Consumer;

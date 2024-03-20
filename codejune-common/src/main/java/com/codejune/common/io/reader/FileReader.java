@@ -1,10 +1,10 @@
 package com.codejune.common.io.reader;
 
+import com.codejune.common.Closeable;
 import com.codejune.common.Range;
 import com.codejune.common.BaseException;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.ObjectUtil;
-import java.io.Closeable;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 

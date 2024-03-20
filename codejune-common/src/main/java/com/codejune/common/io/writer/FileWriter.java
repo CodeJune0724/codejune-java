@@ -1,10 +1,14 @@
 package com.codejune.common.io.writer;
 
 import com.codejune.common.BaseException;
+import com.codejune.common.Closeable;
 import com.codejune.common.io.Writer;
 import com.codejune.common.io.reader.InputStreamReader;
 import com.codejune.common.util.IOUtil;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 
 /**
  * FileWriter

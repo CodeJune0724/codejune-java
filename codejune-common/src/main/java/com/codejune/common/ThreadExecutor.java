@@ -1,7 +1,6 @@
 package com.codejune.common;
 
 import com.codejune.common.util.ThreadUtil;
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;

@@ -1,6 +1,7 @@
 package com.codejune;
 
 import com.codejune.common.BaseException;
+import com.codejune.common.Closeable;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.*;
 import com.codejune.excelreader.Sheet;
@@ -9,7 +10,6 @@ import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.StylesTable;
-import java.io.Closeable;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Iterator;

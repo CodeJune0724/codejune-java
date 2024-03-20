@@ -1,13 +1,13 @@
 package com.codejune;
 
 import com.codejune.common.BaseException;
+import com.codejune.common.Closeable;
+import com.codejune.common.os.File;
 import com.codejune.common.util.*;
 import com.codejune.excel.Sheet;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import java.io.Closeable;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
@@ -42,7 +42,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     }
 
     public Excel(String path, boolean write) {
-        if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
+        if (StringUtil.isEmpty(path) || !FileUtil.exist(new java.io.File(path))) {
             throw new BaseException("excel文件不存在");
         }
         try (FileInputStream fileInputStream = new FileInputStream(path)) {
@@ -62,11 +62,11 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         this(path, false);
     }
 
-    public Excel(File excelFile, boolean write) {
+    public Excel(java.io.File excelFile, boolean write) {
         this(excelFile == null ? null : excelFile.getAbsolutePath(), write);
     }
 
-    public Excel(File excelFile) {
+    public Excel(java.io.File excelFile) {
         this(excelFile == null ? null : excelFile.getAbsolutePath(), false);
     }
 
@@ -119,14 +119,14 @@ public final class Excel implements Closeable, Iterable<Sheet> {
      *
      * @return file
      * */
-    public File save(File result) {
+    public java.io.File save(java.io.File result) {
         if (result == null) {
             return null;
         }
         if (!result.getName().endsWith(".xlsx")) {
             throw new BaseException("文件错误");
         }
-        new com.codejune.common.os.File(result.getAbsolutePath());
+        new File(result.getAbsolutePath());
         try (OutputStream outputStream = IOUtil.getOutputStream(result)) {
             this.workbook.write(outputStream);
             outputStream.flush();

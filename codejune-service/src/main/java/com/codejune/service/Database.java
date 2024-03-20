@@ -74,9 +74,7 @@ public abstract class Database {
             connection = new Connection(then) {
                 @Override
                 public void close() {
-                    try {
-                        then.close();
-                    } catch (Exception ignored) {}
+                    then.close();
                 }
             };
         } else {
