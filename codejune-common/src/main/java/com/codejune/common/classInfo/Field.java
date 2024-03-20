@@ -2,7 +2,7 @@ package com.codejune.common.classinfo;
 
 import com.codejune.common.ClassInfo;
 import com.codejune.common.Data;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -59,7 +59,7 @@ public final class Field {
         try {
             return this.field.get(object);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -77,7 +77,7 @@ public final class Field {
             ClassInfo classInfo = new ClassInfo(getType());
             List<ClassInfo> genericClass = getGenericClass();
             Object setData;
-            if (classInfo.equals(List.class) && genericClass.size() >= 1) {
+            if (classInfo.equals(List.class) && !genericClass.isEmpty()) {
                 setData = ArrayUtil.parse(ObjectUtil.transform(data, List.class), genericClass.get(0).getOriginClass());
             } else if (classInfo.equals(Map.class) && genericClass.size() >= 2) {
                 setData = MapUtil.parse(data, genericClass.get(0).getOriginClass(), genericClass.get(1).getOriginClass());
@@ -86,7 +86,7 @@ public final class Field {
             }
             this.field.set(object, setData);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

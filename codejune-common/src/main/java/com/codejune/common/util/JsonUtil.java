@@ -2,7 +2,7 @@ package com.codejune.common.util;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +30,7 @@ public class JsonUtil {
         try {
             return JSON.toJSONString(Object, JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.WriteEnumsUsingName);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -50,7 +50,7 @@ public class JsonUtil {
         try {
             return JSON.parseObject(toJsonString(data), tClass);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

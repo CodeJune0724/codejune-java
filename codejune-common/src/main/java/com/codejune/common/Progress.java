@@ -1,6 +1,5 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.ThreadUtil;
 
@@ -9,7 +8,7 @@ import com.codejune.common.util.ThreadUtil;
  *
  * @author ZJ
  * */
-public abstract class Progress implements Listener<Progress> {
+public abstract class Progress {
 
     private long current = 0;
 
@@ -17,15 +16,15 @@ public abstract class Progress implements Listener<Progress> {
 
     public Progress(long total, int listenInterval) {
         if (total < 0) {
-            throw new InfoException("size is < 0");
+            throw new BaseException("size is < 0");
         }
         this.total = total;
         Thread thread = new Thread(() -> {
             while (true) {
-                then(Progress.this);
+                listen(Progress.this);
                 ThreadUtil.sleep(listenInterval);
                 if (current >= total) {
-                    then(Progress.this);
+                    listen(Progress.this);
                     break;
                 }
             }
@@ -45,6 +44,13 @@ public abstract class Progress implements Listener<Progress> {
     public long getCurrent() {
         return current;
     }
+
+    /**
+     * 监听
+     *
+     * @param progress progress
+     * */
+    public abstract void listen(Progress progress);
 
     /**
      * 推进进度

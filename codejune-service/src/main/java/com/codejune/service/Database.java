@@ -1,10 +1,8 @@
 package com.codejune.service;
 
 import com.codejune.Jdbc;
-import com.codejune.common.Action;
+import com.codejune.common.BaseException;
 import com.codejune.common.Pool;
-import com.codejune.common.exception.ErrorException;
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
@@ -18,6 +16,7 @@ import com.codejune.service.handler.FieldToColumnHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * 基础数据库
@@ -30,26 +29,26 @@ public abstract class Database {
 
     private final String databaseName;
 
-    private final Action<?, Jdbc> getJdbcAction;
+    private final Function<?, Jdbc> getJdbcFunction;
 
     public Database(Pool<Jdbc> pool, String databaseName) {
         this.pool = pool;
         this.databaseName = databaseName;
-        this.getJdbcAction = null;
+        this.getJdbcFunction = null;
     }
 
     public Database(Pool<Jdbc> pool) {
         this(pool, null);
     }
 
-    public Database(Action<?, Jdbc> getJdbcAction, String databaseName) {
+    public Database(Function<?, Jdbc> getJdbcFunction, String databaseName) {
         this.pool = null;
         this.databaseName = databaseName;
-        this.getJdbcAction = getJdbcAction;
+        this.getJdbcFunction = getJdbcFunction;
     }
 
-    public Database(Action<?, Jdbc> getJdbcAction) {
-        this(getJdbcAction, null);
+    public Database(Function<?, Jdbc> getJdbcFunction) {
+        this(getJdbcFunction, null);
     }
 
     /**
@@ -70,22 +69,24 @@ public abstract class Database {
                     pool.returnObject(jdbcSource);
                 }
             };
-        } else if (getJdbcAction != null) {
-            Jdbc then = getJdbcAction.then();
+        } else if (this.getJdbcFunction != null) {
+            Jdbc then = this.getJdbcFunction.apply(null);
             connection = new Connection(then) {
                 @Override
                 public void close() {
-                    then.close();
+                    try {
+                        then.close();
+                    } catch (Exception ignored) {}
                 }
             };
         } else {
-            throw new InfoException("数据库异常");
+            throw new BaseException("数据库异常");
         }
         try {
             return new Table<>(this, connection, basePOClass);
         } catch (Exception e) {
             connection.close();
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -107,7 +108,7 @@ public abstract class Database {
             return null;
         }
         if (list.size() != 1) {
-            throw new ErrorException("查询出错");
+            throw new Error("查询出错");
         }
         Map<String, Object> map = list.get(0);
         ColumnToFieldHandler columnToFieldHandler = new ColumnToFieldHandler(tClass);
@@ -254,7 +255,7 @@ public abstract class Database {
                 }
                 return this.database.saveQuery(this.connection.getJdbc(), this.getTableName(), t.getId(), this.getBasePOClass());
             } catch (Exception e) {
-                throw new InfoException(e);
+                throw new BaseException(e);
             } finally {
                 if (close) {
                     this.connection.close();

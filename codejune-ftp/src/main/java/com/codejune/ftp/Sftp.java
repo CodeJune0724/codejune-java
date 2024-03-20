@@ -1,17 +1,17 @@
 package com.codejune.ftp;
 
-import com.codejune.common.Listener;
 import com.codejune.common.os.FileInfo;
 import com.codejune.ftp.os.File;
 import com.codejune.ftp.os.Folder;
 import com.jcraft.jsch.*;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Sftp
@@ -83,7 +83,7 @@ public final class Sftp extends com.codejune.Ftp {
             this.channelSftp.cd(path);
             channelSftp.put(inputStream, updateFileName);
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         } finally {
             if (isCloseInputStream) {
                 IOUtil.close(inputStream);
@@ -92,17 +92,17 @@ public final class Sftp extends com.codejune.Ftp {
     }
 
     @Override
-    public void download(String filePath, Listener<InputStream> listener) {
+    public void download(String filePath, Consumer<InputStream> listener) {
         if (!isFile(filePath)) {
-            throw new InfoException(filePath + " is not file");
+            throw new BaseException(filePath + " is not file");
         }
         if (listener == null) {
             listener = data -> {};
         }
         try (InputStream inputStream = this.channelSftp.get(filePath)) {
-            listener.then(inputStream);
+            listener.accept(inputStream);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -121,7 +121,7 @@ public final class Sftp extends com.codejune.Ftp {
                 this.channelSftp.rmdir(path);
             }
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -134,13 +134,13 @@ public final class Sftp extends com.codejune.Ftp {
             return;
         }
         if (isFile(path)) {
-            throw new InfoException(path + " is file");
+            throw new BaseException(path + " is file");
         }
 
         try {
             this.channelSftp.mkdir(path);
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -170,7 +170,7 @@ public final class Sftp extends com.codejune.Ftp {
             this.channelSftp = (ChannelSftp) session.openChannel("sftp");
             this.channelSftp.connect();
         }catch (Exception e) {
-            throw new InfoException("sftp: " + this.getHost() + ", 连接失败");
+            throw new BaseException("sftp: " + this.getHost() + ", 连接失败");
         }
     }
 
@@ -197,7 +197,7 @@ public final class Sftp extends com.codejune.Ftp {
                             try {
                                 return channelSftp.get(filePath);
                             } catch (Exception e) {
-                                throw new InfoException(e);
+                                throw new BaseException(e);
                             }
                         }
 
@@ -253,7 +253,7 @@ public final class Sftp extends com.codejune.Ftp {
             }
             return result;
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

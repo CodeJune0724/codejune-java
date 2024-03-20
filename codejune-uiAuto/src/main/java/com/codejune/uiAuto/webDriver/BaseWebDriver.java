@@ -1,6 +1,6 @@
 package com.codejune.uiAuto.webDriver;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.uiAuto.Alert;
 import com.codejune.uiAuto.WebElement;
 import com.codejune.uiAuto.Selector;
@@ -53,7 +53,7 @@ public abstract class BaseWebDriver implements com.codejune.uiAuto.WebDriver {
         try {
             Thread.sleep(millisecond);
         } catch (InterruptedException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -62,7 +62,7 @@ public abstract class BaseWebDriver implements com.codejune.uiAuto.WebDriver {
         try {
             this.seleniumWebDriver.get(url);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -109,7 +109,7 @@ public abstract class BaseWebDriver implements com.codejune.uiAuto.WebDriver {
         try {
             findElements(selector, millisecond);
         } catch (Exception e) {
-            throw new InfoException("元素等待超时: " + selector.getSelect());
+            throw new BaseException("元素等待超时: " + selector.getSelect());
         }
     }
 
@@ -157,16 +157,16 @@ public abstract class BaseWebDriver implements com.codejune.uiAuto.WebDriver {
             } catch (Exception e) {
                 webElements = new ArrayList<>();
             }
-            if (webElements.size() == 0) {
+            if (webElements.isEmpty()) {
                 long currentTimeMillis = System.currentTimeMillis();
                 if (currentTimeMillis - startTime > millisecond) {
-                    throw new InfoException("元素未找到：" + selector.getSelect());
+                    throw new BaseException("元素未找到：" + selector.getSelect());
                 }
                 return findElements(selector, millisecond, startTime);
             }
             return webElements;
         } catch (Throwable e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

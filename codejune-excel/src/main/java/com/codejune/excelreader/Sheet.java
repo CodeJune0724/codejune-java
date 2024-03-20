@@ -1,7 +1,6 @@
 package com.codejune.excelreader;
 
-import com.codejune.common.Listener;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -19,6 +18,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Sheet
@@ -56,7 +56,7 @@ public final class Sheet {
             String sheetList = RegexUtil.find("<sheets>(.*?)</sheets>", new TextInputStreamReader(workbookData).getData(), 0);
             return RegexUtil.find(index == 0 ? "<sheet name=\"(.*?)\" sheetId=\"" + (index + 1) + "\" r:id=\"rId"  + (index + 1) +"\"/>" : "/><sheet name=\"(.*?)\" sheetId=\"" + (index + 1) + "\" r:id=\"rId" + (index + 1) + "\"/>", sheetList, 1);
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -67,7 +67,7 @@ public final class Sheet {
      * @param cellListener cellListener
      * @param rowEnd rowEnd
      * */
-    public void read(Listener<Row> rowStart, Listener<Cell> cellListener, Listener<Row> rowEnd) {
+    public void read(Consumer<Row> rowStart, Consumer<Cell> cellListener, Consumer<Row> rowEnd) {
         if (rowStart == null) {
             rowStart = data -> {};
         }
@@ -77,9 +77,9 @@ public final class Sheet {
         if (rowEnd == null) {
             rowEnd = data -> {};
         }
-        Listener<Row> finalRowStart = rowStart;
-        Listener<Row> finalRowEnd = rowEnd;
-        Listener<Cell> finalCellListener = cellListener;
+        Consumer<Row> finalRowStart = rowStart;
+        Consumer<Row> finalRowEnd = rowEnd;
+        Consumer<Cell> finalCellListener = cellListener;
         Map<Integer, String> dataMap = new HashMap<>();
         final int[] endIndex = {0};
         try (InputStream inputStream = this.xssfReader.getSheet("rId" + (this.index + 1))) {
@@ -97,7 +97,7 @@ public final class Sheet {
             });
             xmlReader.parse(new InputSource(inputStream));
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         try (InputStream inputStream = this.xssfReader.getSheet("rId" + (this.index + 1))) {
             XMLReader xmlReader = SAXParserFactory.newNSInstance().newSAXParser().getXMLReader();
@@ -105,7 +105,7 @@ public final class Sheet {
                 @Override
                 public void startRow(int rowIndex) {
                     dataMap.clear();
-                    finalRowStart.then(new Row(rowIndex));
+                    finalRowStart.accept(new Row(rowIndex));
                 }
                 @Override
                 public void cell(String index, String data, XSSFComment xssfComment) {
@@ -115,14 +115,14 @@ public final class Sheet {
                 @Override
                 public void endRow(int rowIndex) {
                     for (int cellIndex = 0; cellIndex <= endIndex[0]; cellIndex++) {
-                        finalCellListener.then(new Cell(cellIndex, MapUtil.getValue(dataMap, cellIndex, String.class), new Row(rowIndex)));
+                        finalCellListener.accept(new Cell(cellIndex, MapUtil.getValue(dataMap, cellIndex, String.class), new Row(rowIndex)));
                     }
-                    finalRowEnd.then(new Row(rowIndex));
+                    finalRowEnd.accept(new Row(rowIndex));
                 }
             }, false));
             xmlReader.parse(new InputSource(inputStream));
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 

@@ -1,6 +1,5 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.InfoException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -82,7 +81,7 @@ public final class Calculator {
             return this;
         }
         if (scale < 0) {
-            throw new InfoException("精确位数必须大于等于0");
+            throw new BaseException("精确位数必须大于等于0");
         }
         this.count = new BigDecimal(Double.toString(this.count)).divide(new BigDecimal(String.valueOf(data)), scale, RoundingMode.HALF_UP).doubleValue();
         return this;
@@ -108,7 +107,7 @@ public final class Calculator {
      * */
     public Calculator scale(int scale) {
         if (scale < 0) {
-            throw new InfoException("精确位数必须大于等于0");
+            throw new BaseException("精确位数必须大于等于0");
         }
         this.count = new BigDecimal(Double.toString(this.count)).setScale(scale, RoundingMode.HALF_UP).doubleValue();
         return this;

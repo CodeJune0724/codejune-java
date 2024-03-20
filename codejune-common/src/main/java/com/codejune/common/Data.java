@@ -2,7 +2,6 @@ package com.codejune.common;
 
 import com.codejune.common.classinfo.Field;
 import com.codejune.common.classinfo.Method;
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.JsonUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -114,7 +113,7 @@ public final class Data {
                 }
             }
             if (objectOfDate == null) {
-                throw new InfoException(objectS + "转日期失败");
+                throw new BaseException(objectS + "转日期失败");
             }
             Date result = (Date) ObjectUtil.newInstance(tClass);
             result.setTime(objectOfDate.getTime());
@@ -130,10 +129,10 @@ public final class Data {
         }
         if (tClassClassInfo.isInstanceof(Map.class)) {
             if (object instanceof Number) {
-                throw new InfoException("object is Number");
+                throw new BaseException("object is Number");
             }
             if (object instanceof Boolean) {
-                throw new InfoException("object is Boolean");
+                throw new BaseException("object is Boolean");
             }
             if (object instanceof String) {
                 return JsonUtil.parse(object, tClass);
@@ -252,7 +251,7 @@ public final class Data {
             genericClass = Object.class;
         }
         if (!new ClassInfo(tClass).isInstanceof(Collection.class)) {
-            throw new InfoException(tClass + " is not Collection");
+            throw new BaseException(tClass + " is not Collection");
         }
         Collection<Object> result;
         if (tClass == List.class) {
@@ -268,7 +267,7 @@ public final class Data {
         } else if (object instanceof String) {
             objectCollection = JsonUtil.parse(object, Collection.class);
         } else {
-            throw new InfoException(object + " to Collection error");
+            throw new BaseException(object + " to Collection error");
         }
         if (genericClass == Object.class && object instanceof Collection<?> collection && !collection.isEmpty()) {
             genericClass = collection.toArray()[0].getClass();

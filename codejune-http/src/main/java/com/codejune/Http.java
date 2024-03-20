@@ -1,7 +1,6 @@
 package com.codejune;
 
-import com.codejune.common.Listener;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.*;
 import com.codejune.http.*;
@@ -23,6 +22,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * http组件
@@ -48,10 +48,10 @@ public final class Http {
 
     public Http(String url, Type type) {
         if (StringUtil.isEmpty(url)) {
-            throw new InfoException("url is null");
+            throw new BaseException("url is null");
         }
         if (type == null) {
-            throw new InfoException("type is null");
+            throw new BaseException("type is null");
         }
         this.url = url;
         this.type = type;
@@ -126,7 +126,7 @@ public final class Http {
      *
      * @param listener listener
      * */
-    public void send(Listener<HttpResponseResult<InputStream>> listener) {
+    public void send(Consumer<HttpResponseResult<InputStream>> listener) {
         HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
         HttpEntity httpEntity = null;
         try (CloseableHttpClient closeableHttpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(new SSLContextBuilder().loadTrustMaterial(null, (chain, authType) -> true).build(), NoopHostnameVerifier.INSTANCE)).build()) {
@@ -193,10 +193,10 @@ public final class Http {
                 if (listener == null) {
                     listener = data -> {};
                 }
-                listener.then(httpResponseResult);
+                listener.accept(httpResponseResult);
             }
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             IOUtil.close(httpResponseResult.getBody());
             try {

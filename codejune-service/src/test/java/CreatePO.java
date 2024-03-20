@@ -1,5 +1,5 @@
+import com.codejune.common.BaseException;
 import com.codejune.common.ClassInfo;
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.os.File;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.StringUtil;
@@ -33,7 +33,7 @@ public final class CreatePO {
 
     private static void createService(Class<?> idClass) {
         if (idClass == null) {
-            throw new InfoException("idClass is null");
+            throw new BaseException("idClass is null");
         }
         new File(new java.io.File(new java.io.File(OUT_PATH, "src/main/java/" + PACKAGE.replace(".", "/") + "/service").getAbsolutePath(), getFileName("Service") + ".java"))
                 .write("package " + PACKAGE + ".service;\r\n" +
@@ -61,7 +61,7 @@ public final class CreatePO {
 
     private static void createController(Class<?> idClass) {
         if (idClass == null) {
-            throw new InfoException("idClass is null");
+            throw new BaseException("idClass is null");
         }
         new File(new java.io.File(new java.io.File(OUT_PATH, "src/main/java/" + PACKAGE.replace(".", "/") + "/controller").getAbsolutePath(), getFileName("Controller") + ".java"))
                 .write("package " + PACKAGE + ".controller;\r\n" +
@@ -90,7 +90,7 @@ public final class CreatePO {
 
     private static void createUiPO(Class<?> idClass) {
         if (idClass == null) {
-            throw new InfoException("idClass is null");
+            throw new BaseException("idClass is null");
         }
         new File(new java.io.File(new java.io.File(OUT_PATH, "ui/src/po").getAbsolutePath(), getFileName("PO") + ".ts"))
                 .write("import BasePO from \"./BasePO\";\r\n" +
@@ -117,7 +117,7 @@ public final class CreatePO {
                                 } else if (classInfo.isInstanceof(Date.class)) {
                                     value = "\"\"";
                                 } else {
-                                    throw new InfoException("classInfo未配置");
+                                    throw new BaseException("classInfo未配置");
                                 }
                             }
                             return "    " + filedString + ": " + type + " = " + value + ";";
@@ -128,7 +128,7 @@ public final class CreatePO {
 
     private static void createUiService(Class<?> idClass) {
         if (idClass == null) {
-            throw new InfoException("idClass is null");
+            throw new BaseException("idClass is null");
         }
         new File(new java.io.File(new java.io.File(OUT_PATH, "ui/src/service").getAbsolutePath(), getFileName("Service") + ".ts"))
                 .write("import POService from \"./POService\";\r\n" +
@@ -153,7 +153,7 @@ public final class CreatePO {
 
     private static String getFirstSmallLetter(String data) {
         if (StringUtil.isEmpty(data)) {
-            throw new InfoException("data is null");
+            throw new BaseException("data is null");
         }
         return data.substring(0, 1).toLowerCase() + data.substring(1);
     }
@@ -169,7 +169,7 @@ public final class CreatePO {
         } else if (classInfo.isInstanceof(Date.class)) {
             return "string";
         } else {
-            throw new InfoException("aClass未配置");
+            throw new BaseException("aClass未配置");
         }
     }
 

@@ -1,6 +1,6 @@
 package com.codejune;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.os.File;
 import com.codejune.common.util.FileUtil;
 import com.codejune.common.util.IOUtil;
@@ -26,7 +26,7 @@ public final class Xml {
 
     public Xml(String data) {
         if (StringUtil.isEmpty(data)) {
-            throw new InfoException("xml data is null");
+            throw new BaseException("xml data is null");
         }
         SAXReader reader = new SAXReader();
         ByteArrayInputStream byteArrayInputStream = null;
@@ -34,7 +34,7 @@ public final class Xml {
             byteArrayInputStream = new ByteArrayInputStream(data.getBytes());
             document = reader.read(byteArrayInputStream);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             IOUtil.close(byteArrayInputStream);
         }
@@ -101,14 +101,12 @@ public final class Xml {
             writer.write(this.document);
             return stringWriter.toString();
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             IOUtil.close(stringWriter);
             try {
                 writer.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignored) {}
         }
     }
 

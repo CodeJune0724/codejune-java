@@ -1,6 +1,6 @@
 package com.codejune.common.io.reader;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.Reader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -22,11 +22,11 @@ public class InputStreamReader extends Reader<ByteBuffer> {
             byte[] bytes = new byte[this.size];
             int size = this.inputStream.read(bytes);
             while (size != -1) {
-                listener.then(ByteBuffer.wrap(bytes, 0, size));
+                listener.accept(ByteBuffer.wrap(bytes, 0, size));
                 size = this.inputStream.read(bytes);
             }
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 

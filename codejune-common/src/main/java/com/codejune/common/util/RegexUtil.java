@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.*;
@@ -36,7 +36,7 @@ public final class RegexUtil {
             }
             return result;
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

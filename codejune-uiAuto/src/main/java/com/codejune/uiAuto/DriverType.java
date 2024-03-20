@@ -1,11 +1,11 @@
 package com.codejune.uiAuto;
 
-import com.codejune.common.Action;
 import com.codejune.common.SystemOS;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import java.util.Arrays;
+import java.util.function.Function;
 
 /**
  * 驱动类型
@@ -48,14 +48,14 @@ public enum DriverType {
         return firefoxOptions;
     });
 
-    private final Action<Boolean, MutableCapabilities> action;
+    private final Function<Boolean, MutableCapabilities> action;
 
-    DriverType(Action<Boolean, MutableCapabilities> action) {
+    DriverType(Function<Boolean, MutableCapabilities> action) {
         this.action = action;
     }
 
     public MutableCapabilities getMutableCapabilities(boolean isShow) {
-        return this.action.then(isShow);
+        return this.action.apply(isShow);
     }
 
 }

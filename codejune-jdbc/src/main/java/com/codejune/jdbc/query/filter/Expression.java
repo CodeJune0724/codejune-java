@@ -1,6 +1,6 @@
 package com.codejune.jdbc.query.filter;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 
 /**
  * 表达式
@@ -25,10 +25,10 @@ public final class Expression {
 
     private Expression(Connector connector, Group group, Compare compare) {
         if (connector == null) {
-            throw new InfoException("connector is null");
+            throw new BaseException("connector is null");
         }
         if ((group == null && compare == null) || (group != null && compare != null)) {
-            throw new InfoException("group && compare error");
+            throw new BaseException("group && compare error");
         }
         this.connector = connector;
         this.group = group;

@@ -1,7 +1,5 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.ErrorException;
-
 /**
  * 系统类型配置
  *
@@ -45,7 +43,7 @@ public enum SystemOS {
                 return systemOS;
             }
         }
-        throw new ErrorException("未找到系统类型");
+        throw new Error("未找到系统类型");
     }
 
 }

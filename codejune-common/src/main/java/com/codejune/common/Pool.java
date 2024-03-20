@@ -1,11 +1,11 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.InfoException;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import java.io.Closeable;
 import java.time.Duration;
 
 /**
@@ -79,7 +79,7 @@ public abstract class Pool<T> implements Closeable {
             return source;
         } catch (Throwable e) {
             returnObject(source);
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 

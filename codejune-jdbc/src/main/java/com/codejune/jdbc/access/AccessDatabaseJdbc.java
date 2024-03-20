@@ -1,9 +1,9 @@
 package com.codejune.jdbc.access;
 
+import com.codejune.common.BaseException;
 import com.codejune.common.os.File;
 import com.codejune.jdbc.oracle.OracleJdbc;
 import com.healthmarketscience.jackcess.*;
-import com.codejune.common.exception.InfoException;
 import com.codejune.jdbc.SqlJdbc;
 import java.io.IOException;
 import java.sql.Connection;
@@ -39,7 +39,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
                 this.database = null;
             }
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -58,7 +58,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
             DatabaseBuilder builder = new DatabaseBuilder(file);
             this.database = builder.open();
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -76,10 +76,10 @@ public class AccessDatabaseJdbc extends SqlJdbc {
                 fileFormat = switch (suffix) {
                     case "MDB" -> Database.FileFormat.V2003;
                     case "ACCDB" -> Database.FileFormat.V2016;
-                    default -> throw new InfoException("类型错误");
+                    default -> throw new BaseException("类型错误");
                 };
             } else {
-                throw new InfoException("文件名错误");
+                throw new BaseException("文件名错误");
             }
             new File(file);
             try {
@@ -88,7 +88,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
                     database.close();
                 }
             } catch (Exception e) {
-                throw new InfoException(e.getMessage());
+                throw new BaseException(e.getMessage());
             }
         }
     }
@@ -98,23 +98,23 @@ public class AccessDatabaseJdbc extends SqlJdbc {
         try {
             return DriverManager.getConnection("jdbc:ucanaccess://" + file.getAbsolutePath() + ";immediatelyReleaseResources=true");
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
     @Override
     public final AccessDatabaseDatabase getDatabase(String databaseName) {
-        throw new InfoException("AccessDatabaseJdbc is not found database");
+        throw new BaseException("AccessDatabaseJdbc is not found database");
     }
 
     @Override
     public final List<AccessDatabaseDatabase> getDatabases() {
-        throw new InfoException("AccessDatabaseJdbc is not found database");
+        throw new BaseException("AccessDatabaseJdbc is not found database");
     }
 
     @Override
     public final AccessDatabaseDatabase switchDatabase(String databaseName) {
-        throw new InfoException("AccessDatabaseJdbc is not found database");
+        throw new BaseException("AccessDatabaseJdbc is not found database");
     }
 
     @Override

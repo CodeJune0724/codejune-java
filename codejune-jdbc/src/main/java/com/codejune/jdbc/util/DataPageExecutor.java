@@ -1,6 +1,6 @@
 package com.codejune.jdbc.util;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.Table;
 import com.codejune.jdbc.query.Filter;
@@ -21,7 +21,7 @@ public abstract class DataPageExecutor extends com.codejune.common.DataPageExecu
     public DataPageExecutor(int size, Table table, Filter filter) {
         super(size);
         if (table == null) {
-            throw new InfoException("table is null");
+            throw new BaseException("table is null");
         }
         this.table = table;
         this.filter = filter;

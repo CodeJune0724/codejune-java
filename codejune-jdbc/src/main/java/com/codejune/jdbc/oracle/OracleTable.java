@@ -2,7 +2,7 @@ package com.codejune.jdbc.oracle;
 
 import com.codejune.Jdbc;
 import com.codejune.common.Data;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -39,7 +39,7 @@ public final class OracleTable implements SqlTable {
         try {
             databaseMetaData = oracleDatabase.oracleJdbc.getConnection().getMetaData();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         List<String> primaryKeyList = new ArrayList<>();
         try (ResultSet resultSet = databaseMetaData.getPrimaryKeys(oracleDatabase.getName(), oracleDatabase.getName(), tableName)) {
@@ -47,7 +47,7 @@ public final class OracleTable implements SqlTable {
                 primaryKeyList.add(resultSet.getString("COLUMN_NAME"));
             }
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         try (ResultSet resultSet = databaseMetaData.getColumns(oracleDatabase.getName(), oracleDatabase.getName(), tableName, null)) {
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
@@ -69,7 +69,7 @@ public final class OracleTable implements SqlTable {
             }
             return result;
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -79,7 +79,7 @@ public final class OracleTable implements SqlTable {
         try {
             metaData = oracleDatabase.oracleJdbc.getConnection().getMetaData();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         try (ResultSet resultSet = metaData.getTables(oracleDatabase.getName(), oracleDatabase.getName(), tableName, new String[]{"TABLE", "REMARKS"})) {
             if (resultSet.next()) {
@@ -87,7 +87,7 @@ public final class OracleTable implements SqlTable {
             }
             return null;
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -145,15 +145,13 @@ public final class OracleTable implements SqlTable {
             connection.commit();
             return dataSize;
         } catch (SQLException e) {
-            throw new InfoException(e.getMessage() + ": " + sql);
+            throw new BaseException(e.getMessage() + ": " + sql);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             try {
                 connection.setAutoCommit(AutoCommit);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignored) {}
         }
     }
 
@@ -205,7 +203,7 @@ public final class OracleTable implements SqlTable {
                     }
                 }
                 if (column == null) {
-                    throw new InfoException(key + "字段不存在");
+                    throw new BaseException(key + "字段不存在");
                 }
                 if (data == null) {
                     preparedStatement.setNull(index, column.getType().getVendorTypeNumber());
@@ -217,7 +215,7 @@ public final class OracleTable implements SqlTable {
             }
             return preparedStatement.executeUpdate();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 

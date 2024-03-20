@@ -1,6 +1,5 @@
 package com.codejune.jdbc.mongodb;
 
-import com.codejune.common.Action;
 import com.codejune.common.util.MapUtil;
 import com.codejune.jdbc.*;
 import com.codejune.jdbc.query.Field;
@@ -15,11 +14,12 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.RegexUtil;
 import org.bson.Document;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -97,7 +97,7 @@ public final class MongodbTable implements Table {
             mongoCollection.insertMany(documents);
             return data.size();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -107,7 +107,7 @@ public final class MongodbTable implements Table {
             DeleteResult deleteResult = mongoCollection.deleteMany(filterHandler(filter));
             return deleteResult.getDeletedCount();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -120,7 +120,7 @@ public final class MongodbTable implements Table {
             UpdateResult updateResult = mongoCollection.updateMany(filterHandler(filter), updateSetValue, updateOptions);
             return updateResult.getModifiedCount();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -182,7 +182,7 @@ public final class MongodbTable implements Table {
         if (filter == null) {
             return new Document();
         }
-        Action<Compare, Map<String, Object>> compareAction = compare -> {
+        Function<Compare, Map<String, Object>> compareAction = compare -> {
             if (compare == null) {
                 return null;
             }
@@ -220,9 +220,9 @@ public final class MongodbTable implements Table {
             }
             return result;
         };
-        Action<List<Expression>, Document> expressionListAction = new Action<>() {
+        Function<List<Expression>, Document> expressionListAction = new Function<>() {
             @Override
-            public Document then(List<Expression> expressionList) {
+            public Document apply(List<Expression> expressionList) {
                 if (ObjectUtil.isEmpty(expressionList)) {
                     return new Document();
                 }
@@ -236,7 +236,7 @@ public final class MongodbTable implements Table {
                     }
                     if (expression.isCompare()) {
                         Compare compare = expression.getCompare();
-                        Map<String, Object> compareActionResult = compareAction.then(compare);
+                        Map<String, Object> compareActionResult = compareAction.apply(compare);
                         if (ObjectUtil.isEmpty(compareActionResult)) {
                             continue;
                         }
@@ -255,10 +255,10 @@ public final class MongodbTable implements Table {
                     }
                     if (expression.isGroup()) {
                         if (connector == Expression.Connector.AND) {
-                            and.add(this.then(expression.getGroup().getExpressionList()));
+                            and.add(this.apply(expression.getGroup().getExpressionList()));
                         }
                         if (connector == Expression.Connector.OR) {
-                            or.add(this.then(expression.getGroup().getExpressionList()));
+                            or.add(this.apply(expression.getGroup().getExpressionList()));
                         }
                     }
                 }
@@ -271,7 +271,7 @@ public final class MongodbTable implements Table {
                 return result;
             }
         };
-        return expressionListAction.then(filter.getExpressionList());
+        return expressionListAction.apply(filter.getExpressionList());
     }
 
 }

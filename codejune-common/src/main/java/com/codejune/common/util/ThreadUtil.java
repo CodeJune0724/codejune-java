@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +21,7 @@ public final class ThreadUtil {
         try {
             Thread.sleep(millis);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -34,7 +34,7 @@ public final class ThreadUtil {
      * */
     public static ThreadPoolExecutor getThreadPoolExecutor(int num) {
         if (num <= 0) {
-            throw new InfoException("线程数 <= 0");
+            throw new BaseException("线程数 <= 0");
         }
         return new ThreadPoolExecutor(num, num, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>());
     }

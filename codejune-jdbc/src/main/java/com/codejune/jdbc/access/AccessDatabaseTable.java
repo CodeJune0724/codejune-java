@@ -1,7 +1,6 @@
 package com.codejune.jdbc.access;
 
-import com.codejune.common.exception.ErrorException;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.Column;
@@ -46,7 +45,7 @@ public final class AccessDatabaseTable implements SqlTable {
      * */
     public void reloadTable(List<Column> columnList) {
         if (ObjectUtil.isEmpty(columnList)) {
-            throw new InfoException("字段不能为空");
+            throw new BaseException("字段不能为空");
         }
         try {
             com.healthmarketscience.jackcess.Table table = accessDatabaseDatabase.accessDatabaseJdbc.database.getTable(tableName);
@@ -80,9 +79,9 @@ public final class AccessDatabaseTable implements SqlTable {
             accessDatabaseDatabase.createTable(tableName, null, columnList);
             this.insert(tableData);
         } catch (IOException e) {
-            throw new ErrorException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -140,7 +139,7 @@ public final class AccessDatabaseTable implements SqlTable {
         try {
             columns = accessDatabaseDatabase.accessDatabaseJdbc.database.getTable(tableName).getColumns();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         for (com.healthmarketscience.jackcess.Column jackcessColumn : columns) {
             String name = jackcessColumn.getName();
@@ -153,7 +152,7 @@ public final class AccessDatabaseTable implements SqlTable {
                     jdbcType = JDBCType.BOOLEAN;
                 }
             } catch (Exception e) {
-                throw new InfoException(e);
+                throw new BaseException(e);
             }
             Column column = new Column(name, jdbcType);
             column.setLength(length);

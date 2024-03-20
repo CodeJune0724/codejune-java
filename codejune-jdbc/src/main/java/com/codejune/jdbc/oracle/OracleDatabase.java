@@ -1,6 +1,6 @@
 package com.codejune.jdbc.oracle;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -35,7 +35,7 @@ public final class OracleDatabase implements SqlDatabase {
     @Override
     public OracleTable getTable(String tableName) {
         if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("tableName is null");
+            throw new BaseException("tableName is null");
         }
         return new OracleTable(this, tableName);
     }
@@ -47,7 +47,7 @@ public final class OracleDatabase implements SqlDatabase {
         try {
             metaData = oracleJdbc.getConnection().getMetaData();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         try (ResultSet resultSet = metaData.getTables(databaseName, databaseName.toUpperCase(), null, new String[]{"TABLE"})) {
             while (resultSet.next()) {
@@ -55,7 +55,7 @@ public final class OracleDatabase implements SqlDatabase {
             }
             return result;
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -70,7 +70,7 @@ public final class OracleDatabase implements SqlDatabase {
     @Override
     public void createTable(String tableName, String tableRemark, List<Column> columnList) {
         if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
-            throw new InfoException("建表参数缺失");
+            throw new BaseException("建表参数缺失");
         }
         String sql = "CREATE TABLE " + tableName + "(\n";
         sql = StringUtil.append(sql, ArrayUtil.toString(columnList, column -> {

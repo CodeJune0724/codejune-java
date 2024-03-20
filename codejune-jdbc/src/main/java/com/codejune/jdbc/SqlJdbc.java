@@ -1,7 +1,7 @@
 package com.codejune.jdbc;
 
 import com.codejune.Jdbc;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.StringUtil;
 import java.sql.*;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public abstract class SqlJdbc implements Jdbc {
         try (PreparedStatement preparedStatement = this.connection.prepareStatement(sql)) {
             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -83,7 +83,7 @@ public abstract class SqlJdbc implements Jdbc {
                 result.add(map);
             }
         } catch (SQLException e) {
-            throw new InfoException(e.getMessage() + "：" + sql);
+            throw new BaseException(e.getMessage() + "：" + sql);
         }
         return result;
     }
@@ -108,7 +108,7 @@ public abstract class SqlJdbc implements Jdbc {
             this.connection.close();
             this.connection = null;
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

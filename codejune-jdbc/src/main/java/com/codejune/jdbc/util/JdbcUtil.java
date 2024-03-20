@@ -1,10 +1,9 @@
 package com.codejune.jdbc.util;
 
 import com.codejune.Jdbc;
-import com.codejune.common.Charset;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.classinfo.Field;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -17,6 +16,8 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import jakarta.persistence.Id;
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +52,7 @@ public final class JdbcUtil {
             tableName = table.name();
         }
         if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException(tClass + " not fount @Table");
+            throw new BaseException(tClass + " not fount @Table");
         }
         Map<String, String> fieldToColumnMap = new HashMap<>();
         Map<String, String> columnToFieldMap = new HashMap<>();
@@ -93,13 +94,13 @@ public final class JdbcUtil {
      * */
     public static void executeSqlScript(Connection connection, File scriptFile, Charset charset) {
         if (scriptFile == null) {
-            throw new InfoException("scriptFile is null");
+            throw new BaseException("scriptFile is null");
         }
         if (charset == null) {
-            throw new InfoException("charset is null");
+            throw new BaseException("charset is null");
         }
         FileSystemResource fileSystemResource = new FileSystemResource(scriptFile);
-        EncodedResource encodedResource = new EncodedResource(fileSystemResource, charset.getName());
+        EncodedResource encodedResource = new EncodedResource(fileSystemResource, charset);
         ScriptUtils.executeSqlScript(connection, encodedResource);
     }
 
@@ -110,7 +111,7 @@ public final class JdbcUtil {
      * @param scriptFile 脚本文件
      * */
     public static void executeSqlScript(Connection connection, File scriptFile) {
-        executeSqlScript(connection, scriptFile, Charset.UTF_8);
+        executeSqlScript(connection, scriptFile, StandardCharsets.UTF_8);
     }
 
 }

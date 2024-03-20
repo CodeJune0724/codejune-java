@@ -1,6 +1,6 @@
 package com.codejune.uiAuto.webDriver;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.uiAuto.DriverType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -32,7 +32,7 @@ public final class FirefoxWebDriver extends BaseWebDriver {
 
     private static WebDriver getWebDriver(File webDriverFile, boolean isShow) {
         if (webDriverFile == null) {
-            throw new InfoException("文件不能为空");
+            throw new BaseException("文件不能为空");
         }
         System.setProperty("webdriver.gecko.driver", webDriverFile.getAbsolutePath());
         FirefoxOptions firefoxOptions = (FirefoxOptions) DriverType.FIREBOX.getMutableCapabilities(isShow);
@@ -40,7 +40,7 @@ public final class FirefoxWebDriver extends BaseWebDriver {
         try {
             result = new FirefoxDriver(firefoxOptions);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
         return result;
     }

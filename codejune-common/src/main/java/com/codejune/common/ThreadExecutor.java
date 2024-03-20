@@ -1,7 +1,7 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ThreadUtil;
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -30,7 +30,7 @@ public final class ThreadExecutor implements Closeable {
 
     public ThreadExecutor(ThreadPoolExecutor threadPoolExecutor) {
         if (threadPoolExecutor == null) {
-            throw new InfoException("threadPoolExecutor is null");
+            throw new BaseException("threadPoolExecutor is null");
         }
         this.threadPoolExecutor = threadPoolExecutor;
         this.isNew = false;
@@ -80,11 +80,11 @@ public final class ThreadExecutor implements Closeable {
                     countDownLatch.await();
                 } else {
                     if (!countDownLatch.await(timeout, TimeUnit.MILLISECONDS)) {
-                        throw new InfoException("等待超时");
+                        throw new BaseException("等待超时");
                     }
                 }
             } catch (Exception e) {
-                throw new InfoException(e.getMessage());
+                throw new BaseException(e.getMessage());
             }
         }
         return throwableList;

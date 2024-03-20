@@ -1,6 +1,6 @@
 package com.codejune.excel;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.StringUtil;
 import org.apache.poi.ss.usermodel.Workbook;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public final class Sheet implements Iterable<Row> {
      * */
     public void setName(String name) {
         if (StringUtil.isEmpty(name)) {
-            throw new InfoException("名称不能为空");
+            throw new BaseException("名称不能为空");
         }
         this.workbook.setSheetName(this.workbook.getSheetIndex(this.getName()), name);
     }

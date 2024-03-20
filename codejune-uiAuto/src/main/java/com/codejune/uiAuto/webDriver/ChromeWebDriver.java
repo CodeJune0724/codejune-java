@@ -1,6 +1,6 @@
 package com.codejune.uiAuto.webDriver;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.MapUtil;
 import com.codejune.uiAuto.DriverType;
 import org.openqa.selenium.*;
@@ -34,7 +34,7 @@ public final class ChromeWebDriver extends BaseWebDriver {
 
     private static WebDriver getWebDriver(File webDriverFile, boolean isShow) {
         if (webDriverFile == null) {
-            throw new InfoException("文件不能为空");
+            throw new BaseException("文件不能为空");
         }
         System.setProperty("webdriver.chrome.driver", webDriverFile.getAbsolutePath());
         ChromeOptions chromeOptions = (ChromeOptions) DriverType.CHROME.getMutableCapabilities(isShow);
@@ -45,7 +45,7 @@ public final class ChromeWebDriver extends BaseWebDriver {
             chromeDriver = new ChromeDriver(chromeOptions);
             chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", MapUtil.parse("{\"source\":\"Object.defineProperty(navigator, 'webdriver', {       get: () => undefined     })\"}", String.class, Object.class));
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
         return chromeDriver;
     }

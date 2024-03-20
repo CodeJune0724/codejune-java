@@ -1,6 +1,5 @@
 package com.codejune.common.classinfo;
 
-import com.codejune.common.exception.InfoException;
 import java.lang.annotation.Annotation;
 
 /**
@@ -46,7 +45,7 @@ public final class Method {
         try {
             return this.method.invoke(object, data);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 

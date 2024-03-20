@@ -1,11 +1,11 @@
 package com.codejune.common.io;
 
-import com.codejune.common.Listener;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.reader.InputStreamReader;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.function.Consumer;
 
 /**
  * 写入
@@ -18,11 +18,11 @@ public class Writer {
 
     protected int size = 1024;
 
-    protected Listener<ByteBuffer> listen = data -> {};
+    protected Consumer<ByteBuffer> listen = data -> {};
 
     protected Writer(OutputStream outputStream) {
         if (outputStream == null) {
-            throw new InfoException("outputStream is null");
+            throw new BaseException("outputStream is null");
         }
         this.outputStream = outputStream;
     }
@@ -34,11 +34,11 @@ public class Writer {
         this.size = size;
     }
 
-    public final void setListen(Listener<ByteBuffer> listen) {
-        if (listen == null) {
+    public final void setListen(Consumer<ByteBuffer> consumer) {
+        if (this.listen == null) {
             return;
         }
-        this.listen = listen;
+        this.listen = consumer;
     }
 
     /**
@@ -53,9 +53,9 @@ public class Writer {
         try {
             this.outputStream.write(byteBuffer.array(), 0, byteBuffer.limit());
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
-        listen.then(byteBuffer);
+        listen.accept(byteBuffer);
     }
 
     /**

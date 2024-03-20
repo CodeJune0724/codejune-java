@@ -1,12 +1,12 @@
 package com.codejune;
 
+import com.codejune.common.BaseException;
 import com.codejune.common.util.*;
-import com.codejune.common.Closeable;
-import com.codejune.common.exception.InfoException;
 import com.codejune.excel.Sheet;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
@@ -33,7 +33,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
             this.workbook.createSheet("Sheet1");
         } catch (Exception e) {
             this.close();
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -43,7 +43,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
 
     public Excel(String path, boolean write) {
         if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
-            throw new InfoException("excel文件不存在");
+            throw new BaseException("excel文件不存在");
         }
         try (FileInputStream fileInputStream = new FileInputStream(path)) {
             if (write) {
@@ -54,7 +54,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
             }
         } catch (Exception e) {
             this.close();
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -124,7 +124,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
             return null;
         }
         if (!result.getName().endsWith(".xlsx")) {
-            throw new InfoException("文件错误");
+            throw new BaseException("文件错误");
         }
         new com.codejune.common.os.File(result.getAbsolutePath());
         try (OutputStream outputStream = IOUtil.getOutputStream(result)) {
@@ -134,7 +134,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
                 sxssfWorkbook.dispose();
             }
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         return result;
     }

@@ -1,7 +1,7 @@
 package com.codejune.http;
 
+import com.codejune.common.BaseException;
 import com.codejune.common.Builder;
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.JsonUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.RegexUtil;
@@ -110,7 +110,7 @@ public final class HttpResponseResult<T> implements Builder {
                 try {
                     result = URLDecoder.decode(result, StandardCharsets.UTF_8);
                 } catch (Exception e) {
-                    throw new InfoException(e);
+                    throw new BaseException(e);
                 }
             }
         }

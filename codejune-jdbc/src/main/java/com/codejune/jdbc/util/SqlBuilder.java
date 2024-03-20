@@ -1,8 +1,7 @@
 package com.codejune.jdbc.util;
 
 import com.codejune.Jdbc;
-import com.codejune.common.Action;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -15,6 +14,7 @@ import com.codejune.jdbc.query.filter.Compare;
 import com.codejune.jdbc.query.filter.Expression;
 import com.codejune.jdbc.query.filter.Group;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Sql生成器
@@ -29,10 +29,10 @@ public final class SqlBuilder {
 
     public SqlBuilder(String tableName, Class<? extends Jdbc> jdbcType) {
         if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("tableName is null");
+            throw new BaseException("tableName is null");
         }
         if (jdbcType == null) {
-            throw new InfoException("jdbcType is null");
+            throw new BaseException("jdbcType is null");
         }
         this.tableName = tableName;
         this.jdbcType = jdbcType;
@@ -162,7 +162,7 @@ public final class SqlBuilder {
         if (filter == null) {
             return "WHERE 1 = 1";
         }
-        Action<Compare, String> compareAction = compare -> {
+        Function<Compare, String> compareAction = compare -> {
             String result = "";
             if (compare == null) {
                 return result;
@@ -214,9 +214,9 @@ public final class SqlBuilder {
             }
             return result;
         };
-        Action<List<Expression>, String> expressionListActon = new Action<>() {
+        Function<List<Expression>, String> expressionListActon = new Function<>() {
             @Override
-            public String then(List<Expression> expressionList) {
+            public String apply(List<Expression> expressionList) {
                 if (ObjectUtil.isEmpty(expressionList)) {
                     return null;
                 }
@@ -232,7 +232,7 @@ public final class SqlBuilder {
                     }
                     String endString = "";
                     if (expression.isCompare()) {
-                        String compareActionResult = compareAction.then(expression.getCompare());
+                        String compareActionResult = compareAction.apply(expression.getCompare());
                         if (!StringUtil.isEmpty(compareActionResult)) {
                             endString = "(" + compareActionResult + ")";
                         }
@@ -240,7 +240,7 @@ public final class SqlBuilder {
                     if (expression.isGroup()) {
                         Group group = expression.getGroup();
                         if (group != null) {
-                            String expressionListResult = this.then(group.getExpressionList());
+                            String expressionListResult = this.apply(group.getExpressionList());
                             if (!StringUtil.isEmpty(expressionListResult)) {
                                 endString = "(" + expressionListResult + ")";
                             }
@@ -256,7 +256,7 @@ public final class SqlBuilder {
                 return result;
             }
         };
-        String expressionListResult = expressionListActon.then(filter.getExpressionList());
+        String expressionListResult = expressionListActon.apply(filter.getExpressionList());
         if (StringUtil.isEmpty(expressionListResult)) {
             return "WHERE 1 = 1";
         } else {
@@ -278,8 +278,8 @@ public final class SqlBuilder {
         if (value instanceof Number) {
             return ObjectUtil.toString(value);
         }
-        if (value instanceof Action) {
-            return ObjectUtil.toString(((Action<Object, Object>) value).then(value));
+        if (value instanceof Function<?,?>) {
+            return ObjectUtil.toString(((Function<Object, Object>) value).apply(value));
         }
         String result = ObjectUtil.toString(value);
         if (result == null) {
@@ -290,7 +290,7 @@ public final class SqlBuilder {
 
     private String inHandler(String key, Object value, boolean isNot) {
         if (StringUtil.isEmpty(key)) {
-            throw new InfoException("不准为null");
+            throw new BaseException("不准为null");
         }
         if (ObjectUtil.isEmpty(value)) {
             return null;

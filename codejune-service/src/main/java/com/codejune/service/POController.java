@@ -1,7 +1,7 @@
 package com.codejune.service;
 
 import com.codejune.common.ResponseResult;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
@@ -60,7 +60,7 @@ public abstract class POController<T extends BasePO<ID>, ID> {
     @PutMapping("{id}")
     public final ResponseResult update(@PathVariable(name = "id", required = false) ID id, @RequestBody(required = false) Map<String, Object> requestBody) {
         if (id == null) {
-            throw new InfoException("参数缺失");
+            throw new BaseException("参数缺失");
         }
         if (requestBody != null) {
             requestBody.put("id", id);

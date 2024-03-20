@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,9 +69,9 @@ public final class Base64Util {
             if (read > 0) {
                 return Base64.getEncoder().encodeToString(bytes);
             }
-            throw new InfoException("转码失败");
+            throw new BaseException("转码失败");
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             IOUtil.close(inputStream);
         }

@@ -1,6 +1,6 @@
 package com.codejune.jdbc.mysql;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -36,14 +36,14 @@ public class MysqlJdbc extends SqlJdbc {
             properties.put("password", password);
             return DriverManager.getConnection(url, properties);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
     @Override
     public final MysqlDatabase getDatabase(String databaseName) {
         if (StringUtil.isEmpty(databaseName)) {
-            throw new InfoException("databaseName is null");
+            throw new BaseException("databaseName is null");
         }
         return new MysqlDatabase(this, databaseName);
     }
@@ -60,7 +60,7 @@ public class MysqlJdbc extends SqlJdbc {
     @Override
     public final MysqlDatabase switchDatabase(String databaseName) {
         if (StringUtil.isEmpty(databaseName)) {
-            throw new InfoException("databaseName is null");
+            throw new BaseException("databaseName is null");
         }
         execute("USE " + databaseName);
         return getDatabase(databaseName);
@@ -70,7 +70,7 @@ public class MysqlJdbc extends SqlJdbc {
     public final MysqlDatabase getDefaultDatabase() {
         List<Map<String, Object>> query = oracleJdbc.query("SELECT database()");
         if (ObjectUtil.isEmpty(query)) {
-            throw new InfoException("not query database");
+            throw new BaseException("not query database");
         }
         return getDatabase(MapUtil.getValue(query.get(0), "database()", String.class));
     }

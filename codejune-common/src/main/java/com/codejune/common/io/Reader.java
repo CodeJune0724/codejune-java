@@ -1,8 +1,8 @@
 package com.codejune.common.io;
 
-import com.codejune.common.Listener;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 /**
  * Reader
@@ -15,11 +15,11 @@ public abstract class Reader<T> {
 
     protected int size = 1024;
 
-    protected Listener<T> listener = data -> {};
+    protected Consumer<T> listener = data -> {};
 
     protected Reader(InputStream inputStream) {
         if (inputStream == null) {
-            throw new InfoException("inputStream is null");
+            throw new BaseException("inputStream is null");
         }
         this.inputStream = inputStream;
     }
@@ -31,11 +31,11 @@ public abstract class Reader<T> {
         this.size = size;
     }
 
-    public final void setListener(Listener<T> listener) {
-        if (listener == null) {
+    public final void setListener(Consumer<T> consumer) {
+        if (this.listener == null) {
             return;
         }
-        this.listener = listener;
+        this.listener = consumer;
     }
 
     /**
@@ -52,7 +52,7 @@ public abstract class Reader<T> {
         try {
             return this.inputStream.available();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 

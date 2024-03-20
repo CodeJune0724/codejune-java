@@ -1,6 +1,6 @@
 package com.codejune.common.os;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.StringUtil;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,11 +20,11 @@ public final class Folder implements FileInfo {
         java.io.File file = new java.io.File(path);
         if (file.exists()) {
             if (!file.isDirectory()) {
-                throw new InfoException("非文件夹");
+                throw new BaseException("非文件夹");
             }
         } else {
             if (!file.mkdirs()) {
-                throw new InfoException("创建文件夹失败");
+                throw new BaseException("创建文件夹失败");
             }
         }
         this.path = path;
@@ -120,7 +120,7 @@ public final class Folder implements FileInfo {
             folder.delete();
         }
         if (!new java.io.File(this.path).delete()) {
-            throw new InfoException("删除文件夹失败");
+            throw new BaseException("删除文件夹失败");
         }
     }
 
@@ -181,7 +181,7 @@ public final class Folder implements FileInfo {
         java.io.File file = new java.io.File(this.getPath());
         java.io.File newFile = new java.io.File(file.getParent(), name);
         if (!file.renameTo(newFile)) {
-            throw new InfoException("重命名失败");
+            throw new BaseException("重命名失败");
         }
         this.path = newFile.getAbsolutePath();
     }

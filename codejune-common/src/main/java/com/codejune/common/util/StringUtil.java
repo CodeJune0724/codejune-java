@@ -15,7 +15,7 @@ public final class StringUtil {
      * @return 空返回true
      * */
     public static boolean isEmpty(Object s) {
-        return s == null || "".equals(s.toString()) || "".equals(s.toString().replaceAll(" ", ""));
+        return s == null || "".equals(s.toString()) || s.toString().replaceAll(" ", "").isEmpty();
     }
 
     /**
@@ -46,7 +46,7 @@ public final class StringUtil {
      */
     public static String humpToUnderline(String data) {
         StringBuilder result = new StringBuilder();
-        if (data != null && data.length() > 0) {
+        if (data != null && !data.isEmpty()) {
             result.append(data.substring(0, 1).toUpperCase());
             for (int i = 1; i < data.length(); i++) {
                 String s = data.substring(i, i + 1);

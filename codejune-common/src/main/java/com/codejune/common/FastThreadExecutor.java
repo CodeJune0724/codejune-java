@@ -1,6 +1,5 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ObjectUtil;
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +21,7 @@ public abstract class FastThreadExecutor<T> {
 
     public FastThreadExecutor(int threadNum, long timeout) {
         if (threadNum <= 0) {
-            throw new InfoException("threadNum <= 0");
+            throw new BaseException("threadNum <= 0");
         }
         this.threadNum = threadNum;
         this.threadExecutor = null;
@@ -35,7 +34,7 @@ public abstract class FastThreadExecutor<T> {
 
     public FastThreadExecutor(ThreadExecutor threadExecutor, long timeout) {
         if (threadExecutor == null) {
-            throw new InfoException("threadExecutor is null");
+            throw new BaseException("threadExecutor is null");
         }
         this.threadNum = 0;
         this.threadExecutor = threadExecutor;
@@ -75,7 +74,7 @@ public abstract class FastThreadExecutor<T> {
             }
             List<Throwable> await = threadExecutor.await(timeout);
             if (!ObjectUtil.isEmpty(await)) {
-                throw new InfoException(await);
+                throw new BaseException(await);
             }
         } finally {
             threadExecutor.close();

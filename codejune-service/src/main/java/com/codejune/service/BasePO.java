@@ -1,9 +1,8 @@
 package com.codejune.service;
 
+import com.codejune.common.BaseException;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.classinfo.Field;
-import com.codejune.common.exception.ErrorException;
-import com.codejune.common.exception.InfoException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -40,7 +39,7 @@ public abstract class BasePO<ID> {
                 return field.getOriginField();
             }
         }
-        throw new ErrorException("ID未配置");
+        throw new Error("ID未配置");
     }
 
     /**
@@ -52,7 +51,7 @@ public abstract class BasePO<ID> {
      * */
     public static List<java.lang.reflect.Field> getColumnFields(Class<? extends BasePO<?>> c) {
         if (c == null) {
-            throw new InfoException("c is null");
+            throw new BaseException("c is null");
         }
         List<java.lang.reflect.Field> result = new ArrayList<>();
         List<Field> allFields = new ClassInfo(c).getFields();
@@ -73,7 +72,7 @@ public abstract class BasePO<ID> {
      * */
     public static List<java.lang.reflect.Field> getAllFields(Class<? extends BasePO<?>> c) {
         if (c == null) {
-            throw new InfoException("c is null");
+            throw new BaseException("c is null");
         }
         List<java.lang.reflect.Field> result = new ArrayList<>();
         result.add(getIdField());
@@ -90,11 +89,11 @@ public abstract class BasePO<ID> {
      * */
     public static String getTableName(Class<? extends BasePO<?>> c) {
         if (c == null) {
-            throw new InfoException("c is null");
+            throw new BaseException("c is null");
         }
         Table table = c.getAnnotation(Table.class);
         if (table == null) {
-            throw new InfoException("未配置表名");
+            throw new BaseException("未配置表名");
         }
         return table.name();
     }

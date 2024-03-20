@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.io.writer.OutputStreamWriter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,7 +42,7 @@ public final class ServletUtil {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
             outputStreamWriter.write(inputStream);
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -59,7 +59,7 @@ public final class ServletUtil {
         try (InputStream inputStream = IOUtil.getInputStream(file)) {
             download(httpServletResponse, inputStream, file.getName());
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -77,7 +77,7 @@ public final class ServletUtil {
             TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
             return textInputStreamReader.getData();
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             IOUtil.close(inputStream);
         }
@@ -93,19 +93,19 @@ public final class ServletUtil {
      * */
     public static File parseFile(MultipartFile multipartFile, String path) {
         if (multipartFile == null) {
-            throw new InfoException("multipartFile is null");
+            throw new BaseException("multipartFile is null");
         }
         if (path == null) {
-            throw new InfoException("path is null");
+            throw new BaseException("path is null");
         }
         if (StringUtil.isEmpty(multipartFile.getOriginalFilename())) {
-            throw new InfoException("multipartFile.getOriginalFilename() is null");
+            throw new BaseException("multipartFile.getOriginalFilename() is null");
         }
         File result = new File(path, multipartFile.getOriginalFilename());
         try (InputStream inputStream = multipartFile.getInputStream()) {
             new com.codejune.common.os.File(result).write(inputStream);
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         return result;
     }

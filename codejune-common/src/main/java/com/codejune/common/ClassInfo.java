@@ -2,8 +2,6 @@ package com.codejune.common;
 
 import com.codejune.common.classinfo.Field;
 import com.codejune.common.classinfo.Method;
-import com.codejune.common.exception.ErrorException;
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import java.beans.BeanInfo;
@@ -42,7 +40,7 @@ public final class ClassInfo {
                 aClass = (Class<?>) wildcardType.getUpperBounds()[0];
             }
         } else {
-            throw new ErrorException("class未配置");
+            throw new BaseException("class未配置");
         }
     }
 
@@ -70,7 +68,7 @@ public final class ClassInfo {
      * @return 存在返回true
      * */
     public boolean existsGenericClass() {
-        return this.getGenericClass().size() != 0;
+        return !this.getGenericClass().isEmpty();
     }
 
     /**
@@ -79,7 +77,7 @@ public final class ClassInfo {
      * @return 存在返回true
      * */
     public boolean existsSuperClass() {
-        return this.getSuperClass().size() != 0;
+        return !this.getSuperClass().isEmpty();
     }
 
     /**
@@ -248,7 +246,7 @@ public final class ClassInfo {
             }
             return null;
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -289,7 +287,7 @@ public final class ClassInfo {
             }
             return null;
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 

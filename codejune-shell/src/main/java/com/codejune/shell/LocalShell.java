@@ -1,13 +1,13 @@
 package com.codejune.shell;
 
 import com.codejune.Shell;
-import com.codejune.common.Listener;
 import com.codejune.common.ResponseResult;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 /**
  * WindowsShell
@@ -17,7 +17,7 @@ import java.io.InputStream;
 public final class LocalShell implements Shell {
 
     @Override
-    public ResponseResult command(String command, Listener<String> listener) {
+    public ResponseResult command(String command, Consumer<String> listener) {
         if (StringUtil.isEmpty(command)) {
             return null;
         }
@@ -44,7 +44,7 @@ public final class LocalShell implements Shell {
                 return ResponseResult.returnFalse(i, null, error);
             }
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             IOUtil.close(inputStream);
             IOUtil.close(errorStream);

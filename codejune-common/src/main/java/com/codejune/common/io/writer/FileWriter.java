@@ -1,14 +1,10 @@
 package com.codejune.common.io.writer;
 
-import com.codejune.common.Closeable;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.Writer;
 import com.codejune.common.io.reader.InputStreamReader;
 import com.codejune.common.util.IOUtil;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 
 /**
  * FileWriter
@@ -44,7 +40,7 @@ public final class FileWriter extends Writer implements Closeable {
             return;
         }
         if (position < 0) {
-            throw new InfoException("position < 0");
+            throw new BaseException("position < 0");
         }
         RandomAccessFile randomAccessFile = null;
         try {
@@ -56,13 +52,13 @@ public final class FileWriter extends Writer implements Closeable {
                 try {
                     finalRandomAccessFile.write(data.array(), 0, data.limit());
                 } catch (Exception e) {
-                    throw new InfoException(e);
+                    throw new BaseException(e);
                 }
-                listen.then(data);
+                listen.accept(data);
             });
             inputStreamReader.read();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         } finally {
             IOUtil.close(randomAccessFile);
         }

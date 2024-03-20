@@ -1,6 +1,6 @@
 package com.codejune.uiAuto.webDriver;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.uiAuto.DriverType;
 import org.openqa.selenium.WebDriver;
 import java.net.URL;
@@ -24,7 +24,7 @@ public final class RemoteWebDriver extends BaseWebDriver {
         try {
             return new org.openqa.selenium.remote.RemoteWebDriver(new URL(url), driverType.getMutableCapabilities(isShow));
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

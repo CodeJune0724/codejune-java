@@ -1,7 +1,8 @@
 package com.codejune;
 
-import com.codejune.common.Closeable;
 import com.codejune.jdbc.Database;
+
+import java.io.Closeable;
 import java.util.List;
 
 /**

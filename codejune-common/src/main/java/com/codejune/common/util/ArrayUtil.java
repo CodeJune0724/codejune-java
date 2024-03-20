@@ -1,7 +1,7 @@
 package com.codejune.common.util;
 
-import com.codejune.common.Action;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * ArrayUtil
@@ -18,10 +18,7 @@ public final class ArrayUtil {
      * @param index index
      * */
     public static <E> void prev(List<E> list, int index) {
-        if (list == null) {
-            return;
-        }
-        if (list.size() == 0) {
+        if (ObjectUtil.isEmpty(list)) {
             return;
         }
         if (index <= 0 || index >= list.size()) {
@@ -41,10 +38,7 @@ public final class ArrayUtil {
      * @param index index
      * */
     public static <E> void next(List<E> list, int index) {
-        if (list == null) {
-            return;
-        }
-        if (list.size() == 0) {
+        if (ObjectUtil.isEmpty(list)) {
             return;
         }
         if (index < 0 || index >= list.size() - 1) {
@@ -65,10 +59,7 @@ public final class ArrayUtil {
      * @param toIndex 要移动的位置
      * */
     public static <E> void move(List<E> list, int index, int toIndex) {
-        if (list == null) {
-            return;
-        }
-        if (list.size() == 0) {
+        if (ObjectUtil.isEmpty(list)) {
             return;
         }
         if (index == toIndex) {
@@ -100,7 +91,7 @@ public final class ArrayUtil {
      *
      * @return list
      * */
-    public static <PARAM, RETURN> List<RETURN> parse(List<PARAM> list, Action<PARAM, RETURN> action) {
+    public static <PARAM, RETURN> List<RETURN> parse(List<PARAM> list, Function<PARAM, RETURN> action) {
         if (list == null) {
             return null;
         }
@@ -109,7 +100,7 @@ public final class ArrayUtil {
         }
         List<RETURN> result = new ArrayList<>();
         for (PARAM item : list) {
-            RETURN then = action.then(item);
+            RETURN then = action.apply(item);
             if (then == null) {
                 continue;
             }
@@ -155,7 +146,7 @@ public final class ArrayUtil {
      * @param split 分隔符
      * @param <T> 航行
      * */
-    public static <T> String toString(Collection<T> collection, Action<T, String> action, String split) {
+    public static <T> String toString(Collection<T> collection, Function<T, String> action, String split) {
         if (ObjectUtil.isEmpty(collection)) {
             return null;
         }
@@ -167,7 +158,7 @@ public final class ArrayUtil {
         }
         String result = "";
         for (T t : collection) {
-            String string = action.then(t);
+            String string = action.apply(t);
             if (string == null) {
                 continue;
             }

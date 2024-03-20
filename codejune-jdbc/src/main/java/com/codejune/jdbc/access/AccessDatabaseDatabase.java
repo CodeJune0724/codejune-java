@@ -1,6 +1,6 @@
 package com.codejune.jdbc.access;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Column;
@@ -36,7 +36,7 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
     @Override
     public AccessDatabaseTable getTable(String tableName) {
         if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("tableName is null");
+            throw new BaseException("tableName is null");
         }
         return new AccessDatabaseTable(this, tableName);
     }
@@ -53,7 +53,7 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
             }
             return result;
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -67,11 +67,11 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
     public void createTable(String tableName, String tableRemark, List<Column> columnList) {
         try {
             if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
-                throw new InfoException("建表参数缺失");
+                throw new BaseException("建表参数缺失");
             }
             com.healthmarketscience.jackcess.Table table = accessDatabaseJdbc.database.getTable(tableName);
             if (table != null) {
-                throw new InfoException(tableName + "表已存在");
+                throw new BaseException(tableName + "表已存在");
             }
             TableBuilder tableBuilder = new TableBuilder(tableName);
             List<ColumnBuilder> columnBuilderList = new ArrayList<>();
@@ -96,7 +96,7 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
             tableBuilder.toTable(accessDatabaseJdbc.database);
             accessDatabaseJdbc.reload(true);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

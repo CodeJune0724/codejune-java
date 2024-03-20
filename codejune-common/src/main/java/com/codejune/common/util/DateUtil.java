@@ -1,12 +1,8 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.InfoException;
-import com.codejune.common.DateType;
+import com.codejune.common.BaseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * DateUtil
@@ -42,8 +38,7 @@ public final class DateUtil {
         if (date == null || StringUtil.isEmpty(pattern)) {
             return null;
         }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-        return simpleDateFormat.format(date);
+        return new SimpleDateFormat(pattern).format(date);
     }
 
     /**
@@ -68,7 +63,7 @@ public final class DateUtil {
         try {
             return simpleDateFormat.parse(date);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -82,30 +77,6 @@ public final class DateUtil {
      * */
     public static Date parse(String date, String pattern) {
         return parse(date, pattern, null);
-    }
-
-    /**
-     * 将指定格式日期转成毫秒
-     *
-     * @param date 日期
-     * @param dateType 日期类型
-     *
-     * @return 对应的毫秒数
-     * */
-    public static long transformMillisecond(long date, DateType dateType) {
-        if (date == 0 || dateType == null) {
-            return 0L;
-        }
-        return switch (dateType) {
-            case YEAR -> transformMillisecond(date * 365, DateType.DAY);
-            case MONTH -> transformMillisecond(date * 30, DateType.DAY);
-            case week -> transformMillisecond(date * 7, DateType.DAY);
-            case DAY -> transformMillisecond(date * 24, DateType.HOUR);
-            case HOUR -> transformMillisecond(date * 60, DateType.MINUTE);
-            case MINUTE -> transformMillisecond(date * 60, DateType.SECOND);
-            case SECOND -> transformMillisecond(date * 1000, DateType.MILLISECOND);
-            case MILLISECOND -> date;
-        };
     }
 
 }

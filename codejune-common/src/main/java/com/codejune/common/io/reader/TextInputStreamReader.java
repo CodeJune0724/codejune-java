@@ -1,14 +1,15 @@
 package com.codejune.common.io.reader;
 
-import com.codejune.common.Charset;
+import com.codejune.common.BaseException;
 import com.codejune.common.Range;
-import com.codejune.common.exception.InfoException;
 import com.codejune.common.io.Reader;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.ObjectUtil;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 文本输入流读取器
@@ -17,7 +18,7 @@ import java.io.InputStreamReader;
  * */
 public final class TextInputStreamReader extends Reader<String> {
 
-    private Charset charset = Charset.UTF_8;
+    private Charset charset = StandardCharsets.UTF_8;
 
     public TextInputStreamReader(InputStream inputStream) {
         super(inputStream);
@@ -50,7 +51,7 @@ public final class TextInputStreamReader extends Reader<String> {
         InputStreamReader inputStreamReader = null;
         BufferedReader bufferedReader = null;
         try {
-            inputStreamReader = new InputStreamReader(inputStream, charset.getName());
+            inputStreamReader = new InputStreamReader(inputStream, charset);
             bufferedReader = new BufferedReader(inputStreamReader);
             String line = bufferedReader.readLine();
             int lineNum = 0;
@@ -59,13 +60,13 @@ public final class TextInputStreamReader extends Reader<String> {
                     break;
                 }
                 if (lineNum >= range.getStart()) {
-                    listener.then(line);
+                    listener.accept(line);
                 }
                 line = bufferedReader.readLine();
                 lineNum = lineNum + 1;
             }
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             IOUtil.close(inputStreamReader);
             IOUtil.close(bufferedReader);
@@ -82,7 +83,7 @@ public final class TextInputStreamReader extends Reader<String> {
         TextInputStreamReader textInputStreamReader = new TextInputStreamReader(this.inputStream);
         textInputStreamReader.setListener(data -> {
             result.append(data).append("\n");
-            TextInputStreamReader.this.listener.then(data);
+            TextInputStreamReader.this.listener.accept(data);
         });
         textInputStreamReader.read();
         return ObjectUtil.toString(ObjectUtil.subString(result.toString(), result.length() - 1));

@@ -1,6 +1,6 @@
 package com.codejune.uiAuto.webElement;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.uiAuto.WebElement;
 import com.codejune.uiAuto.WebDriver;
 import org.openqa.selenium.*;
@@ -37,7 +37,7 @@ public final class BaseWebElement implements WebElement {
         while (true) {
             long nowTime = new Date().getTime();
             if (startTime < nowTime) {
-                throw new InfoException("元素点击超时");
+                throw new BaseException("元素点击超时");
             }
             try {
                 baseClick();
@@ -60,7 +60,7 @@ public final class BaseWebElement implements WebElement {
         while (true) {
             long nowTime = new Date().getTime();
             if (nowTime - time > 10000) {
-                throw new InfoException("元素输入超时");
+                throw new BaseException("元素输入超时");
             }
             try {
                 if (isClean) {
@@ -79,7 +79,7 @@ public final class BaseWebElement implements WebElement {
             this.seleniumElement.sendKeys(keys);
             this.webDriver.sleep(100);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -99,7 +99,7 @@ public final class BaseWebElement implements WebElement {
             org.openqa.selenium.WebElement element = this.seleniumElement.findElement(By.xpath("./.."));
             return new BaseWebElement(this.webDriver, element, this.jsDocument + ".parentElement");
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -119,7 +119,7 @@ public final class BaseWebElement implements WebElement {
             org.openqa.selenium.WebElement element = this.seleniumElement.findElement(By.xpath("./following-sibling::*[1]"));
             return new BaseWebElement(this.webDriver, element, this.jsDocument + ".nextElementSibling");
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -129,7 +129,7 @@ public final class BaseWebElement implements WebElement {
             org.openqa.selenium.WebElement element = this.seleniumElement.findElement(By.xpath("./preceding-sibling::*[1]"));
             return new BaseWebElement(this.webDriver, element, this.jsDocument + ".previousElementSibling");
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -152,7 +152,7 @@ public final class BaseWebElement implements WebElement {
         try {
             return this.seleniumElement.getAttribute("innerText");
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -161,7 +161,7 @@ public final class BaseWebElement implements WebElement {
         try {
             return this.seleniumElement.isDisplayed();
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -175,7 +175,7 @@ public final class BaseWebElement implements WebElement {
             }
             return result;
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -185,7 +185,7 @@ public final class BaseWebElement implements WebElement {
             this.seleniumElement.clear();
             this.webDriver.executeScript(this.jsDocument + ".value = \"\";");
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -216,7 +216,7 @@ public final class BaseWebElement implements WebElement {
             try {
                 this.event("click");
             } catch (Exception e1) {
-                throw new InfoException(e1.getMessage());
+                throw new BaseException(e1.getMessage());
             }
         }
     }

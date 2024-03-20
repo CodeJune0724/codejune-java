@@ -1,7 +1,6 @@
 package com.codejune.ftp;
 
-import com.codejune.common.Listener;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.os.FileInfo;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
@@ -13,6 +12,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Ftp
@@ -48,7 +48,7 @@ public final class Ftp extends com.codejune.Ftp {
         try {
             return this.ftpClient.getStatus(path) != null;
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -59,7 +59,7 @@ public final class Ftp extends com.codejune.Ftp {
             this.ftpClient.changeWorkingDirectory("/");
             return !result;
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -82,7 +82,7 @@ public final class Ftp extends com.codejune.Ftp {
             this.ftpClient.enterLocalPassiveMode();
             this.ftpClient.storeFile(path + "/" + updateFileName, inputStream);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         } finally {
             if (isCloseInputStream) {
                 IOUtil.close(inputStream);
@@ -91,17 +91,17 @@ public final class Ftp extends com.codejune.Ftp {
     }
 
     @Override
-    public void download(String filePath, Listener<InputStream> listener) {
+    public void download(String filePath, Consumer<InputStream> listener) {
         if (!isFile(filePath)) {
-            throw new InfoException(filePath + " is not file");
+            throw new BaseException(filePath + " is not file");
         }
         if (listener == null) {
             listener = data -> {};
         }
         try (InputStream inputStream = this.ftpClient.retrieveFileStream(filePath)) {
-            listener.then(inputStream);
+            listener.accept(inputStream);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -120,19 +120,19 @@ public final class Ftp extends com.codejune.Ftp {
                 this.ftpClient.removeDirectory(path);
             }
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
     @Override
     public void createFolder(String path) {
         if (isFile(path)) {
-            throw new InfoException(path + " is file");
+            throw new BaseException(path + " is file");
         }
         try {
             this.ftpClient.mkd(path);
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -142,7 +142,7 @@ public final class Ftp extends com.codejune.Ftp {
             this.ftpClient.logout();
             this.ftpClient.disconnect();
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -154,7 +154,7 @@ public final class Ftp extends com.codejune.Ftp {
             this.ftpClient.login(this.getUsername(), this.getPassword());
             this.ftpClient.enterLocalPassiveMode();
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -179,7 +179,7 @@ public final class Ftp extends com.codejune.Ftp {
                             try {
                                 return ftpClient.retrieveFileStream(filePath);
                             } catch (Exception e) {
-                                throw new InfoException(e);
+                                throw new BaseException(e);
                             }
                         }
 
@@ -235,7 +235,7 @@ public final class Ftp extends com.codejune.Ftp {
             }
             return result;
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

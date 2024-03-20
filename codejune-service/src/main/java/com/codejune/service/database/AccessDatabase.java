@@ -1,10 +1,8 @@
 package com.codejune.service.database;
 
 import com.codejune.Jdbc;
-import com.codejune.common.Action;
 import com.codejune.common.ClassInfo;
 import com.codejune.common.Pool;
-import com.codejune.common.exception.ErrorException;
 import com.codejune.common.util.PackageUtil;
 import com.codejune.jdbc.access.AccessDatabaseJdbc;
 import com.codejune.service.BasePO;
@@ -17,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * AccessDatabase
@@ -26,7 +25,7 @@ import java.util.UUID;
 public class AccessDatabase extends Database {
 
     @SuppressWarnings("unchecked")
-    public AccessDatabase(File databaseFile, String packageName, Class<?> tCLass, Action<AccessDatabaseJdbc, Boolean> check) {
+    public AccessDatabase(File databaseFile, String packageName, Class<?> tCLass, Function<AccessDatabaseJdbc, Boolean> check) {
         super(new Pool<>(10) {
             @Override
             public Jdbc create() {
@@ -37,7 +36,7 @@ public class AccessDatabase extends Database {
                 if (check == null) {
                     return true;
                 }
-                return check.then((AccessDatabaseJdbc) jdbc);
+                return check.apply((AccessDatabaseJdbc) jdbc);
             }
         });
         List<Class<?>> scan = PackageUtil.scan(packageName, tCLass);
@@ -66,7 +65,7 @@ public class AccessDatabase extends Database {
                     } else if (classInfo.isInstanceof(Date.class)) {
                         jdbcType = JDBCType.DATE;
                     } else {
-                        throw new ErrorException("sqlType未配置");
+                        throw new Error("sqlType未配置");
                     }
                     column = new com.codejune.jdbc.Column(field.getAnnotation(Column.class).name(), jdbcType);
                     column.setLength(field.getAnnotation(Column.class).length());

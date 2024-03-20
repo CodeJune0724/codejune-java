@@ -4,7 +4,7 @@ import com.codejune.common.ClassInfo;
 import com.codejune.common.Data;
 import com.codejune.common.classinfo.Field;
 import com.codejune.common.classinfo.Method;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -125,7 +125,7 @@ public final class ObjectUtil {
         try {
             return (T) Data.transform(t, t.getClass(), true);
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -219,7 +219,7 @@ public final class ObjectUtil {
                 }
             }
         }
-        throw new InfoException(error.getMessage());
+        throw new BaseException(error.getMessage());
     }
 
     /**

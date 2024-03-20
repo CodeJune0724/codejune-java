@@ -1,7 +1,7 @@
 package com.codejune.jdbc.query.filter;
 
 import com.codejune.common.Builder;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
 import java.util.HashMap;
@@ -232,7 +232,7 @@ public final class Compare implements Builder {
             map = new HashMap<>();
         }
         if (map.size() != 1) {
-            throw new InfoException("Compare build error");
+            throw new BaseException("Compare build error");
         }
         for (String key : map.keySet()) {
             Object value = map.get(key);
@@ -299,7 +299,7 @@ public final class Compare implements Builder {
                     return typeItem;
                 }
             }
-            throw new InfoException(value + " is not transform Type");
+            throw new BaseException(value + " is not transform Type");
         }
 
     }

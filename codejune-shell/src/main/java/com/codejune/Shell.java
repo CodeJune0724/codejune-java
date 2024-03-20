@@ -1,7 +1,7 @@
 package com.codejune;
 
-import com.codejune.common.Listener;
 import com.codejune.common.ResponseResult;
+import java.util.function.Consumer;
 
 /**
  * Shell
@@ -18,7 +18,7 @@ public interface Shell {
      *
      * @return ResponseResult
      * */
-    ResponseResult command(String command, Listener<String> listener);
+    ResponseResult command(String command, Consumer<String> listener);
 
     default ResponseResult command(String command) {
         return command(command, null);

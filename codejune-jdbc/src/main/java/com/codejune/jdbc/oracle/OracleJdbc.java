@@ -1,6 +1,6 @@
 package com.codejune.jdbc.oracle;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.jdbc.*;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.StringUtil;
@@ -21,7 +21,7 @@ public class OracleJdbc extends SqlJdbc {
         try {
             this.username = getConnection().getMetaData().getUserName();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -41,11 +41,11 @@ public class OracleJdbc extends SqlJdbc {
             return null;
         }
         List<Map<String, Object>> query = query("SELECT " + sequence + ".NEXTVAL ID FROM DUAL");
-        if (query.size() == 0) {
+        if (query.isEmpty()) {
             return null;
         }
         if (query.size() != 1) {
-            throw new InfoException("查询序列出错");
+            throw new BaseException("查询序列出错");
         }
         return MapUtil.getValue(query.get(0), "ID", Long.class);
     }
@@ -59,14 +59,14 @@ public class OracleJdbc extends SqlJdbc {
             properties.put("remarksReporting", "true");
             return DriverManager.getConnection(url, properties);
         } catch (Exception e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
     @Override
     public final OracleDatabase getDatabase(String databaseName) {
         if (databaseName == null) {
-            throw new InfoException("databaseName is null");
+            throw new BaseException("databaseName is null");
         }
         return new OracleDatabase(this, databaseName);
     }
@@ -84,7 +84,7 @@ public class OracleJdbc extends SqlJdbc {
     @Override
     public final OracleDatabase switchDatabase(String databaseName) {
         if (StringUtil.isEmpty(databaseName)) {
-            throw new InfoException("databaseName is null");
+            throw new BaseException("databaseName is null");
         }
         execute("ALTER SESSION SET CURRENT_SCHEMA = " + databaseName);
         return getDatabase(databaseName);

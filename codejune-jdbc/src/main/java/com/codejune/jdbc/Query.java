@@ -1,6 +1,5 @@
 package com.codejune.jdbc;
 
-import com.codejune.common.Action;
 import com.codejune.common.Builder;
 import com.codejune.common.Data;
 import com.codejune.common.util.ArrayUtil;
@@ -11,6 +10,7 @@ import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.Sort;
 import com.codejune.jdbc.query.filter.Compare;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * 查询
@@ -122,13 +122,13 @@ public class Query implements Builder {
      *
      * @return this
      * */
-    public Query keyHandler(Action<String, String> action) {
+    public Query keyHandler(Function<String, String> action) {
         if (action == null) {
             return this;
         }
         getFilter().getConfig().setCleanNullExclude(ArrayUtil.parse(getFilter().getConfig().getCleanNullExclude(), action));
         getFilter().compareHandler(item -> {
-            item.setKey(action.then(item.getKey()));
+            item.setKey(action.apply(item.getKey()));
             return item;
         });
         for (Sort item : getSort()) {

@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -82,7 +82,7 @@ public final class PackageUtil {
         try {
             urlConnection = url.openConnection();
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
 
         JarURLConnection jarURLConnection;
@@ -96,7 +96,7 @@ public final class PackageUtil {
         try {
             file = jarURLConnection.getJarFile();
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
         Enumeration<JarEntry> enumeration = file.entries();
         while (enumeration.hasMoreElements()) {
@@ -110,7 +110,7 @@ public final class PackageUtil {
                 try {
                     result.add(Class.forName(name));
                 } catch (ClassNotFoundException e) {
-                    throw new InfoException(e.getMessage());
+                    throw new BaseException(e.getMessage());
                 }
             }
         }
@@ -138,7 +138,7 @@ public final class PackageUtil {
                     try {
                         classes.add(Class.forName(addClassPath));
                     } catch (ClassNotFoundException e) {
-                        throw new InfoException(e.getMessage());
+                        throw new BaseException(e.getMessage());
                     }
                 }
             }

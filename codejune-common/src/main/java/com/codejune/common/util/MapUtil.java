@@ -1,8 +1,8 @@
 package com.codejune.common.util;
 
-import com.codejune.common.Action;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * MapUtil
@@ -93,7 +93,7 @@ public final class MapUtil {
      * @return map
      * */
     @SuppressWarnings("unchecked")
-    public static <KEY> Map<KEY, Object> keyHandler(Map<KEY, Object> map, Action<KEY, KEY> action) {
+    public static <KEY> Map<KEY, Object> keyHandler(Map<KEY, Object> map, Function<KEY, KEY> action) {
         if (ObjectUtil.isEmpty(map) || action == null) {
             return map;
         }
@@ -101,10 +101,10 @@ public final class MapUtil {
         try {
             result = map.getClass().getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         for (KEY key : map.keySet()) {
-            KEY newKey = action.then(key);
+            KEY newKey = action.apply(key);
             if (newKey == null) {
                 continue;
             }

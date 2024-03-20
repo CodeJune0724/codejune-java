@@ -1,6 +1,6 @@
 package com.codejune.jdbc.mongodb;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Database;
 import com.mongodb.client.MongoDatabase;
@@ -36,7 +36,7 @@ public final class MongodbDatabase implements Database {
     @Override
     public MongodbTable getTable(String tableName) {
         if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("tableName is null");
+            throw new BaseException("tableName is null");
         }
         return new MongodbTable(this, tableName);
     }
@@ -53,7 +53,7 @@ public final class MongodbDatabase implements Database {
     @Override
     public void deleteTable(String tableName) {
         if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("tableName is null");
+            throw new BaseException("tableName is null");
         }
         mongoDatabase.getCollection(tableName).drop();
     }

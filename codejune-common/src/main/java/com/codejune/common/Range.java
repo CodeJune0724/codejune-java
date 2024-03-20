@@ -1,7 +1,5 @@
 package com.codejune.common;
 
-import com.codejune.common.exception.InfoException;
-
 /**
  * 范围
  *
@@ -18,7 +16,7 @@ public class Range {
             start = 0L;
         }
         if (end != null && end < start) {
-            throw new InfoException("end < start");
+            throw new BaseException("end < start");
         }
         this.start = start;
         this.end = end;

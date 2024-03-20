@@ -1,6 +1,6 @@
 package com.codejune.jdbc.mongodb;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.StringUtil;
 import com.mongodb.*;
 import com.codejune.Jdbc;
@@ -39,7 +39,7 @@ public class MongodbJdbc implements Jdbc {
     @Override
     public final MongodbDatabase getDatabase(String databaseName) {
         if (StringUtil.isEmpty(databaseName)) {
-            throw new InfoException("databaseName is null");
+            throw new BaseException("databaseName is null");
         }
         return new MongodbDatabase(this, databaseName);
     }
@@ -62,7 +62,7 @@ public class MongodbJdbc implements Jdbc {
     public final MongodbDatabase getDefaultDatabase() {
         List<MongodbDatabase> databases = getDatabases();
         if (databases.isEmpty()) {
-            throw new InfoException("mongoCredential is null");
+            throw new BaseException("mongoCredential is null");
         } else {
             return getDatabase(databases.get(0).getName());
         }

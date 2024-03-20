@@ -1,16 +1,16 @@
 package com.codejune.shell;
 
 import com.codejune.Shell;
-import com.codejune.common.Closeable;
-import com.codejune.common.Listener;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+import java.io.Closeable;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 /**
  * LinuxShell
@@ -33,12 +33,12 @@ public final class LinuxShell implements Shell, Closeable {
             this.session.setConfig(properties);
             this.session.connect();
         }catch (Exception e) {
-            throw new InfoException(host + ", 连接失败");
+            throw new BaseException(host + ", 连接失败");
         }
     }
 
     @Override
-    public ResponseResult command(String command, Listener<String> listener) {
+    public ResponseResult command(String command, Consumer<String> listener) {
         ChannelExec channelExec = null;
         try {
             channelExec = (ChannelExec) session.openChannel("exec");
@@ -56,7 +56,7 @@ public final class LinuxShell implements Shell, Closeable {
             return ResponseResult.returnTrue(channelExec.getExitStatus(), null, result);
         }
         catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         } finally {
             if (channelExec != null) {
                 channelExec.disconnect();

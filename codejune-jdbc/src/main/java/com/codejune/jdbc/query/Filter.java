@@ -1,6 +1,5 @@
 package com.codejune.jdbc.query;
 
-import com.codejune.common.Action;
 import com.codejune.common.Builder;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * 过滤
@@ -112,21 +112,21 @@ public final class Filter implements Builder {
      *
      * @return this
      * */
-    public Filter compareHandler(Action<Compare, Compare> action) {
-        Action<List<Expression>, List<Expression>> compareHandlerAction = new Action<>() {
+    public Filter compareHandler(Function<Compare, Compare> action) {
+        Function<List<Expression>, List<Expression>> compareHandlerAction = new Function<>() {
             @Override
-            public List<Expression> then(List<Expression> expressionsList) {
+            public List<Expression> apply(List<Expression> expressionsList) {
                 List<Expression> result = new ArrayList<>();
                 for (Expression expression : expressionsList) {
                     if (expression.isCompare()) {
-                        Compare compare = action.then(expression.getCompare());
+                        Compare compare = action.apply(expression.getCompare());
                         if (compare != null) {
                             result.add(expression);
                         }
                     }
                     if (expression.isGroup()) {
                         Group group = expression.getGroup();
-                        List<Expression> newGroupExpressionList = this.then(group.getExpressionList());
+                        List<Expression> newGroupExpressionList = this.apply(group.getExpressionList());
                         if (!ObjectUtil.isEmpty(newGroupExpressionList)) {
                             group.getExpressionList().clear();
                             group.getExpressionList().addAll(newGroupExpressionList);
@@ -137,7 +137,7 @@ public final class Filter implements Builder {
                 return result;
             }
         };
-        List<Expression> newExpressionList = compareHandlerAction.then(this.expressionList);
+        List<Expression> newExpressionList = compareHandlerAction.apply(this.expressionList);
         this.expressionList.clear();
         this.expressionList.addAll(newExpressionList);
         return this;
@@ -151,9 +151,9 @@ public final class Filter implements Builder {
         }
         this.expressionList.clear();
         ObjectUtil.assignment(this.getConfig(), map.remove("$config"));
-        Action<Map<?, ?>, List<Expression>> expressionAction = new Action<>() {
+        Function<Map<?, ?>, List<Expression>> expressionAction = new Function<>() {
             @Override
-            public List<Expression> then(Map<?, ?> map) {
+            public List<Expression> apply(Map<?, ?> map) {
                 if (map == null) {
                     return new ArrayList<>();
                 }
@@ -208,8 +208,8 @@ public final class Filter implements Builder {
                     result.add(new Expression(connector, ObjectUtil.transform(compare, Compare.class)));
                 } else {
                     for (Object item : or) {
-                        List<Expression> orExpressionList = this.then(MapUtil.parse(item));
-                        if (orExpressionList.size() == 0) {
+                        List<Expression> orExpressionList = this.apply(MapUtil.parse(item));
+                        if (orExpressionList.isEmpty()) {
                             continue;
                         }
                         if (orExpressionList.size() == 1) {
@@ -221,8 +221,8 @@ public final class Filter implements Builder {
                         }
                     }
                     for (Object item : and) {
-                        List<Expression> andExpressionList = this.then(MapUtil.parse(item));
-                        if (andExpressionList.size() == 0) {
+                        List<Expression> andExpressionList = this.apply(MapUtil.parse(item));
+                        if (andExpressionList.isEmpty()) {
                             continue;
                         }
                         if (andExpressionList.size() == 1) {
@@ -237,7 +237,7 @@ public final class Filter implements Builder {
                 return result;
             }
         };
-        this.expressionList.addAll(expressionAction.then(map));
+        this.expressionList.addAll(expressionAction.apply(map));
     }
 
 }

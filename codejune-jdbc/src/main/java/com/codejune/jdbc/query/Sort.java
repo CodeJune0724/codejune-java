@@ -1,7 +1,7 @@
 package com.codejune.jdbc.query;
 
-import com.codejune.common.Action;
 import com.codejune.common.util.ObjectUtil;
+import java.util.function.Function;
 
 /**
  * 排序
@@ -39,11 +39,11 @@ public final class Sort {
      *
      * @param action action
      * */
-    public void keyHandler(Action<String, String> action) {
+    public void keyHandler(Function<String, String> action) {
         if (action == null) {
             return;
         }
-        this.setField(action.then(this.field));
+        this.setField(action.apply(this.field));
     }
 
     /**

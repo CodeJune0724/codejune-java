@@ -1,6 +1,6 @@
 package com.codejune.uiAuto;
 
-import com.codejune.common.Closeable;
+import java.io.Closeable;
 import java.util.List;
 
 /**

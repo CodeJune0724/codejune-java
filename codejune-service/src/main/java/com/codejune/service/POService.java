@@ -1,6 +1,6 @@
 package com.codejune.service;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Query;
@@ -78,11 +78,11 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      * */
     public T queryById(ID id) {
         if (id == null) {
-            throw new InfoException("id not found");
+            throw new BaseException("id not found");
         }
         QueryResult<T> query = query(new Query().setFilter(new Filter().and(Compare.equals(BasePO.getIdField().getName(), id))));
         if (query.getCount() == 0) {
-            throw new InfoException("id not found");
+            throw new BaseException("id not found");
         }
         return query.getData().get(0);
     }
@@ -153,7 +153,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      * */
     public void beforeSave(T t) {
         if (t == null) {
-            throw new InfoException("参数缺失");
+            throw new BaseException("参数缺失");
         }
         for (Field field : BasePO.getColumnFields(getPOClass())) {
             Column column = field.getAnnotation(Column.class);
@@ -163,19 +163,19 @@ public abstract class POService<T extends BasePO<ID>, ID> {
                 field.setAccessible(true);
                 o = field.get(t);
             } catch (Exception e) {
-                throw new InfoException(e.getMessage());
+                throw new BaseException(e.getMessage());
             }
             boolean nullable = column.nullable();
             if (!nullable) {
                 if (ObjectUtil.isEmpty(o)) {
-                    throw new InfoException(fieldName + "必填");
+                    throw new BaseException(fieldName + "必填");
                 }
             }
             int length = column.length();
             if (length > 0) {
                 String s = ObjectUtil.toString(o);
                 if (!StringUtil.isEmpty(s) && s.length() > length) {
-                    throw new InfoException(fieldName + "超长，最大为" + length);
+                    throw new BaseException(fieldName + "超长，最大为" + length);
                 }
             }
             boolean unique = column.unique();
@@ -184,10 +184,10 @@ public abstract class POService<T extends BasePO<ID>, ID> {
                 if (query.getCount() != 0) {
                     String id = ObjectUtil.toString(query.getData().get(0).getId());
                     if (StringUtil.isEmpty(id)) {
-                        throw new InfoException("检查数据库数据存在id为空");
+                        throw new BaseException("检查数据库数据存在id为空");
                     }
                     if (!id.equals(ObjectUtil.toString(t.getId()))) {
-                        throw new InfoException(fieldName + "不能重复");
+                        throw new BaseException(fieldName + "不能重复");
                     }
                 }
             }
@@ -268,11 +268,11 @@ public abstract class POService<T extends BasePO<ID>, ID> {
     private Database.Table<T, ID> getTable() {
         Database database = getDatabase();
         if (database == null) {
-            throw new InfoException("database is null");
+            throw new BaseException("database is null");
         }
         Class<T> poClass = getPOClass();
         if (poClass == null) {
-            throw new InfoException("poClass is null");
+            throw new BaseException("poClass is null");
         }
         return database.getTable(poClass);
     }

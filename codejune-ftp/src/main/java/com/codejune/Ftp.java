@@ -1,11 +1,11 @@
 package com.codejune;
 
-import com.codejune.common.Closeable;
-import com.codejune.common.Listener;
 import com.codejune.common.os.FileInfo;
 import com.codejune.common.util.ArrayUtil;
+import java.io.Closeable;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Ftp
@@ -117,7 +117,7 @@ public abstract class Ftp implements Closeable {
      * @param filePath 文件路径
      * @param listener listener
      * */
-    public abstract void download(String filePath, Listener<InputStream> listener);
+    public abstract void download(String filePath, Consumer<InputStream> listener);
 
     /**
      * 删除

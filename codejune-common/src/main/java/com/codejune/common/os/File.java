@@ -1,6 +1,6 @@
 package com.codejune.common.os;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.io.writer.OutputStreamWriter;
 import com.codejune.common.util.IOUtil;
@@ -20,21 +20,21 @@ public final class File implements FileInfo {
 
     public File(java.io.File file) {
         if (file == null) {
-            throw new InfoException("file is null");
+            throw new BaseException("file is null");
         }
         try {
             if (file.exists()) {
                 if (!file.isFile()) {
-                    throw new InfoException("非文件");
+                    throw new BaseException("非文件");
                 }
             } else {
                 new Folder(file.getParent());
                 if (!file.createNewFile()) {
-                    throw new InfoException("创建文件失败");
+                    throw new BaseException("创建文件失败");
                 }
             }
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
         this.file = file;
     }
@@ -75,7 +75,7 @@ public final class File implements FileInfo {
      * */
     public void delete() {
         if (!file.delete()) {
-            throw new InfoException("删除文件失败");
+            throw new BaseException("删除文件失败");
         }
     }
 
@@ -228,7 +228,7 @@ public final class File implements FileInfo {
         }
         java.io.File newFile = new java.io.File(this.file.getParent(), name);
         if (!this.file.renameTo(newFile)) {
-            throw new InfoException("重命名失败");
+            throw new BaseException("重命名失败");
         }
         this.file = newFile.getAbsoluteFile();
     }

@@ -1,6 +1,6 @@
 package com.codejune.uiAuto;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.uiAuto.webElement.BaseWebElement;
 import org.openqa.selenium.By;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public abstract class Selector {
                     }
                     return result;
                 } catch (Exception e) {
-                    throw new InfoException(e.getMessage());
+                    throw new BaseException(e.getMessage());
                 }
             }
         };
@@ -77,7 +77,7 @@ public abstract class Selector {
                     }
                     return result;
                 } catch (Exception e) {
-                    throw new InfoException(e.getMessage());
+                    throw new BaseException(e.getMessage());
                 }
             }
         };
@@ -108,7 +108,7 @@ public abstract class Selector {
                     }
                     return result;
                 } catch (Exception e) {
-                    throw new InfoException(e.getMessage());
+                    throw new BaseException(e.getMessage());
                 }
             }
         };

@@ -1,7 +1,6 @@
 package com.codejune.jdbc.mysql;
 
-import com.codejune.common.exception.ErrorException;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
@@ -39,7 +38,7 @@ public final class MysqlDatabase implements SqlDatabase {
     @Override
     public MysqlTable getTable(String tableName) {
         if (StringUtil.isEmpty(tableName)) {
-            throw new InfoException("tableName is null");
+            throw new BaseException("tableName is null");
         }
         return new MysqlTable(this, tableName);
     }
@@ -61,7 +60,7 @@ public final class MysqlDatabase implements SqlDatabase {
     @Override
     public void createTable(String tableName, String tableRemark, List<Column> columnList) {
         if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
-            throw new InfoException("建表参数缺失");
+            throw new BaseException("建表参数缺失");
         }
         String sql = "CREATE TABLE " + tableName + " (\n";
         sql = StringUtil.append(sql, ArrayUtil.toString(columnList, column -> {
@@ -71,7 +70,7 @@ public final class MysqlDatabase implements SqlDatabase {
                 case VARCHAR -> result + "VARCHAR(" + column.getLength() + ")";
                 case DATE -> result + "DATETIME";
                 case DOUBLE -> result + "DOUBLE";
-                default -> throw new ErrorException("column.getDataType()未配置");
+                default -> throw new Error("column.getDataType()未配置");
             };
             if (!column.isNullable()) {
                 result = result + " NOT NULL";

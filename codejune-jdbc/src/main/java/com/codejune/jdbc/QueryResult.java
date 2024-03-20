@@ -1,10 +1,10 @@
 package com.codejune.jdbc;
 
-import com.codejune.common.Action;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * 查询结果
@@ -43,7 +43,7 @@ public final class QueryResult<T> {
      * */
     public <E> QueryResult<E> parse(Class<E> eClass) {
         if (eClass == null) {
-            throw new InfoException("eClass不能为空");
+            throw new BaseException("eClass不能为空");
         }
         QueryResult<E> result = new QueryResult<>();
         result.setCount(this.count);
@@ -62,7 +62,7 @@ public final class QueryResult<T> {
      *
      * @return QueryResult
      * */
-    public QueryResult<T> parse(Action<T, T> action) {
+    public QueryResult<T> parse(Function<T, T> action) {
         if (action == null) {
             return this;
         }
@@ -70,7 +70,7 @@ public final class QueryResult<T> {
         result.setCount(this.count);
         List<T> newData = new ArrayList<>();
         for (T t : this.data) {
-            T newT = action.then(t);
+            T newT = action.apply(t);
             if (newT == null) {
                 continue;
             }

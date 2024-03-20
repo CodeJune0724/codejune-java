@@ -1,13 +1,13 @@
 package com.codejune.common.util;
 
-import com.codejune.common.Listener;
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import com.codejune.common.io.writer.OutputStreamWriter;
 import com.codejune.common.os.Folder;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -23,13 +23,13 @@ public final class ZipUtil {
      * 压缩
      *
      * @param fileList 源文件或者文件夹
-     * @param listener listener
+     * @param consumer consumer
      * */
-    public static void zip(List<String> fileList, Listener<InputStream> listener) {
+    public static void zip(List<String> fileList, Consumer<InputStream> consumer) {
         if (ObjectUtil.isEmpty(fileList)) {
             return;
         }
-        if (listener == null) {
+        if (consumer == null) {
             return;
         }
         try (
@@ -42,10 +42,10 @@ public final class ZipUtil {
             zipOutputStream.flush();
             zipOutputStream.finish();
             try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())) {
-                listener.then(byteArrayInputStream);
+                consumer.accept(byteArrayInputStream);
             }
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -71,7 +71,7 @@ public final class ZipUtil {
                 }
                 zipOutputStream.closeEntry();
             } catch (Exception e) {
-                throw new InfoException(e);
+                throw new BaseException(e);
             }
         } else {
             File[] fileList = file.listFiles();
@@ -85,7 +85,7 @@ public final class ZipUtil {
                     zip(zipOutputStream, fileListItem, path + file.getName());
                 }
             } catch (Exception e) {
-                throw new InfoException(e);
+                throw new BaseException(e);
             }
         }
     }
@@ -114,7 +114,7 @@ public final class ZipUtil {
                 }
             }
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 

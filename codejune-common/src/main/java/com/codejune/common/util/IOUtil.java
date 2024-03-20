@@ -1,6 +1,6 @@
 package com.codejune.common.util;
 
-import com.codejune.common.exception.InfoException;
+import com.codejune.common.BaseException;
 import java.io.*;
 import java.nio.file.Files;
 
@@ -24,7 +24,7 @@ public final class IOUtil {
         try {
             inputStream.close();
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -40,7 +40,7 @@ public final class IOUtil {
         try {
             reader.close();
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -56,7 +56,7 @@ public final class IOUtil {
         try {
             outputStream.close();
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ public final class IOUtil {
         try {
             writer.close();
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -88,7 +88,7 @@ public final class IOUtil {
         try {
             randomAccessFile.close();
         } catch (IOException e) {
-            throw new InfoException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -101,15 +101,15 @@ public final class IOUtil {
      * */
     public static InputStream getInputStream(java.io.File file) {
         if (!FileUtil.exist(file)) {
-            throw new InfoException("文件不存在");
+            throw new BaseException("文件不存在");
         }
         if (!file.isFile()) {
-            throw new InfoException("非文件");
+            throw new BaseException("非文件");
         }
         try {
             return Files.newInputStream(file.toPath());
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
@@ -123,12 +123,12 @@ public final class IOUtil {
      * */
     public static OutputStream getOutputStream(java.io.File file, boolean append) {
         if (!FileUtil.exist(file)) {
-            throw new InfoException("文件不存在");
+            throw new BaseException("文件不存在");
         }
         try {
             return new FileOutputStream(file, append);
         } catch (Exception e) {
-            throw new InfoException(e);
+            throw new BaseException(e);
         }
     }
 
