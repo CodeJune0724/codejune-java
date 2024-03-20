@@ -3,17 +3,14 @@ package com.codejune.excelreader;
 import com.codejune.common.BaseException;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.RegexUtil;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFComment;
-import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -64,48 +61,20 @@ public final class Sheet {
      * 读
      *
      * @param rowStart rowStart
-     * @param cellListener cellListener
+     * @param cell cell
      * @param rowEnd rowEnd
      * */
-    public void read(Consumer<Row> rowStart, Consumer<Cell> cellListener, Consumer<Row> rowEnd) {
-        if (rowStart == null) {
-            rowStart = data -> {};
-        }
-        if (cellListener == null) {
-            cellListener = data -> {};
-        }
-        if (rowEnd == null) {
-            rowEnd = data -> {};
-        }
-        Consumer<Row> finalRowStart = rowStart;
-        Consumer<Row> finalRowEnd = rowEnd;
-        Consumer<Cell> finalCellListener = cellListener;
+    public void read(final Consumer<Row> rowStart, final Consumer<Cell> cell, final Consumer<Row> rowEnd) {
         Map<Integer, String> dataMap = new HashMap<>();
-        final int[] endIndex = {0};
-        try (InputStream inputStream = this.xssfReader.getSheet("rId" + (this.index + 1))) {
-            XMLReader xmlReader = SAXParserFactory.newNSInstance().newSAXParser().getXMLReader();
-            xmlReader.setContentHandler(new DefaultHandler() {
-                @Override
-                public void startElement(String uri, String localName, String qName, Attributes attributes) {
-                    if ("row".equals(localName)) {
-                        Integer lastCell = ObjectUtil.transform(attributes.getValue("spans").replace("1:", ""), Integer.class);
-                        if (lastCell > endIndex[0]) {
-                            endIndex[0] = lastCell;
-                        }
-                    }
-                }
-            });
-            xmlReader.parse(new InputSource(inputStream));
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
         try (InputStream inputStream = this.xssfReader.getSheet("rId" + (this.index + 1))) {
             XMLReader xmlReader = SAXParserFactory.newNSInstance().newSAXParser().getXMLReader();
             xmlReader.setContentHandler(new XSSFSheetXMLHandler(this.stylesTable, this.sharedStrings, new XSSFSheetXMLHandler.SheetContentsHandler() {
                 @Override
                 public void startRow(int rowIndex) {
                     dataMap.clear();
-                    finalRowStart.accept(new Row(rowIndex));
+                    if (rowStart != null) {
+                        rowStart.accept(new Row(rowIndex));
+                    }
                 }
                 @Override
                 public void cell(String index, String data, XSSFComment xssfComment) {
@@ -114,10 +83,21 @@ public final class Sheet {
                 }
                 @Override
                 public void endRow(int rowIndex) {
-                    for (int cellIndex = 0; cellIndex <= endIndex[0]; cellIndex++) {
-                        finalCellListener.accept(new Cell(cellIndex, MapUtil.getValue(dataMap, cellIndex, String.class), new Row(rowIndex)));
+                    Integer max = 0;
+                    for (Integer item : dataMap.keySet()) {
+                        if (item > max) {
+                            max = item;
+                        }
                     }
-                    finalRowEnd.accept(new Row(rowIndex));
+
+                    for (int cellIndex = 0; cellIndex <= max; cellIndex++) {
+                        if (cell != null) {
+                            cell.accept(new Cell(cellIndex, MapUtil.getValue(dataMap, cellIndex, String.class), new Row(rowIndex)));
+                        }
+                    }
+                    if (rowEnd != null) {
+                        rowEnd.accept(new Row(rowIndex));
+                    }
                 }
             }, false));
             xmlReader.parse(new InputSource(inputStream));
