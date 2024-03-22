@@ -28,7 +28,7 @@ public class JsonUtil {
             return ObjectUtil.toString(Object);
         }
         try {
-            return JSON.toJSONString(Object, JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.WriteEnumsUsingName);
+            return JSON.toJSONString(Object, JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.WriteEnumsUsingName, JSONWriter.Feature.LargeObject);
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
