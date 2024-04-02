@@ -52,6 +52,7 @@ public class Writer {
         }
         try {
             this.outputStream.write(byteBuffer.array(), 0, byteBuffer.limit());
+            this.outputStream.flush();
         } catch (Exception e) {
             throw new BaseException(e);
         }

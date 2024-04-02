@@ -20,12 +20,9 @@ public final class IOUtil {
         if (inputStream == null) {
             return;
         }
-
         try {
             inputStream.close();
-        } catch (IOException e) {
-            throw new BaseException(e.getMessage());
-        }
+        } catch (IOException ignored) {}
     }
 
     /**
@@ -55,9 +52,7 @@ public final class IOUtil {
         }
         try {
             outputStream.close();
-        } catch (IOException e) {
-            throw new BaseException(e.getMessage());
-        }
+        } catch (IOException ignored) {}
     }
 
     /**

@@ -113,6 +113,15 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     }
 
     /**
+     * 获取sheet数量
+     *
+     * @return sheet数量
+     * */
+    public int getSheetNumber() {
+        return this.workbook.getNumberOfSheets();
+    }
+
+    /**
      * 保存
      *
      * @param result file

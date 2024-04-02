@@ -31,11 +31,11 @@ public abstract class Reader<T> {
         this.size = size;
     }
 
-    public final void setListener(Consumer<T> consumer) {
+    public final void setListener(Consumer<T> listener) {
         if (this.listener == null) {
             return;
         }
-        this.listener = consumer;
+        this.listener = listener;
     }
 
     /**

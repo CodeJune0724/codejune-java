@@ -1,9 +1,13 @@
 package com.codejune.excel;
 
 import com.codejune.common.util.ObjectUtil;
+import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.*;
+import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
 import java.util.Date;
 
 /**
@@ -130,6 +134,52 @@ public final class Cell {
         newCell.cell.setCellComment(this.cell.getCellComment());
         newCell.setStyle(this.getStyle());
         newCell.setValue(this.getValue());
+    }
+
+    /**
+     * 获取图片
+     *
+     * @return Image
+     * */
+    public Image getImage() {
+        Sheet sheet = this.cell.getSheet();
+        if (sheet instanceof XSSFSheet xssfSheet) {
+            for (POIXMLDocumentPart poixmlDocumentPart : xssfSheet.getRelations()) {
+                if (poixmlDocumentPart instanceof XSSFDrawing xssfDrawing) {
+                    for (XSSFShape xssfShape : xssfDrawing.getShapes()) {
+                        if (xssfShape instanceof XSSFPicture xssfPicture) {
+                            CTMarker ctMarker = xssfPicture.getPreferredSize().getFrom();
+                            if (this.getRow().getIndex() == ctMarker.getRow() && this.getIndex() == ctMarker.getCol()) {
+                                XSSFPictureData pictureData = xssfPicture.getPictureData();
+                                return new Image(pictureData.suggestFileExtension(), pictureData.getData());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static class Image {
+
+        private final String suffix;
+
+        private final byte[] data;
+
+        public Image(String suffix, byte[] data) {
+            this.suffix = suffix;
+            this.data = data;
+        }
+
+        public String getSuffix() {
+            return suffix;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+
     }
 
 }
