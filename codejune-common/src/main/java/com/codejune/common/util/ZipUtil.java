@@ -23,24 +23,38 @@ public final class ZipUtil {
      * 压缩
      *
      * @param fileList 源文件或者文件夹
-     * @param consumer consumer
+     * @param outputStream outputStream
      * */
-    public static void zip(List<String> fileList, Consumer<InputStream> consumer) {
+    public static void zip(List<String> fileList, OutputStream outputStream) {
         if (ObjectUtil.isEmpty(fileList)) {
             return;
         }
-        if (consumer == null) {
+        if (outputStream == null) {
             return;
         }
-        try (
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)
-        ) {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
             for (String file : fileList) {
                 zip(zipOutputStream, new File(file), "");
             }
             zipOutputStream.flush();
             zipOutputStream.finish();
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+    }
+
+    /**
+     * 压缩
+     *
+     * @param fileList 源文件或者文件夹
+     * @param consumer consumer
+     * */
+    public static void zip(List<String> fileList, Consumer<InputStream> consumer) {
+        if (consumer == null) {
+            return;
+        }
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            zip(fileList, byteArrayOutputStream);
             try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())) {
                 consumer.accept(byteArrayInputStream);
             }

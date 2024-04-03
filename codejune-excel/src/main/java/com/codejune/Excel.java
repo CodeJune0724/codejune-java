@@ -124,6 +124,26 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     /**
      * 保存
      *
+     * @param outputStream outputStream
+     * */
+    public void save(OutputStream outputStream) {
+        if (outputStream == null) {
+            return;
+        }
+        try {
+            this.workbook.write(outputStream);
+            outputStream.flush();
+            if (this.workbook instanceof SXSSFWorkbook sxssfWorkbook) {
+                sxssfWorkbook.dispose();
+            }
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+    }
+
+    /**
+     * 保存
+     *
      * @param result file
      *
      * @return file
@@ -137,11 +157,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         }
         new File(result.getAbsolutePath());
         try (OutputStream outputStream = IOUtil.getOutputStream(result)) {
-            this.workbook.write(outputStream);
-            outputStream.flush();
-            if (this.workbook instanceof SXSSFWorkbook sxssfWorkbook) {
-                sxssfWorkbook.dispose();
-            }
+            save(outputStream);
         } catch (Exception e) {
             throw new BaseException(e);
         }
