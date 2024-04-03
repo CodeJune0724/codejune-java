@@ -186,6 +186,14 @@ public final class Cell {
             return data;
         }
 
+        public int getRowIndex() {
+            return rowIndex;
+        }
+
+        public int getCellIndex() {
+            return cellIndex;
+        }
+
     }
 
 }
