@@ -2,10 +2,13 @@ package com.codejune.excel;
 
 import com.codejune.common.BaseException;
 import com.codejune.common.util.StringUtil;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ooxml.POIXMLDocumentPart;
+import org.apache.poi.xssf.usermodel.*;
+import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Sheet
@@ -16,11 +19,8 @@ public final class Sheet implements Iterable<Row> {
 
     private final org.apache.poi.ss.usermodel.Sheet sheet;
 
-    private final Workbook workbook;
-
-    public Sheet(org.apache.poi.ss.usermodel.Sheet sheet, Workbook workbook) {
+    public Sheet(org.apache.poi.ss.usermodel.Sheet sheet) {
         this.sheet = sheet;
-        this.workbook = workbook;
         this.sheet.setForceFormulaRecalculation(true);
     }
 
@@ -42,7 +42,7 @@ public final class Sheet implements Iterable<Row> {
         if (StringUtil.isEmpty(name)) {
             throw new BaseException("名称不能为空");
         }
-        this.workbook.setSheetName(this.workbook.getSheetIndex(this.getName()), name);
+        this.sheet.getWorkbook().setSheetName(this.sheet.getWorkbook().getSheetIndex(this.getName()), name);
     }
 
     /**
@@ -51,7 +51,7 @@ public final class Sheet implements Iterable<Row> {
      * @return index
      * */
     public int getIndex() {
-        return this.workbook.getSheetIndex(this.getName());
+        return this.sheet.getWorkbook().getSheetIndex(this.getName());
     }
 
     /**
@@ -110,6 +110,30 @@ public final class Sheet implements Iterable<Row> {
     public void deleteCell(int cellIndex) {
         for (Row row : this) {
             row.deleteCell(cellIndex);
+        }
+    }
+
+    /**
+     * 获取图片
+     *
+     * @param consumer consumer
+     * */
+    public void getImage(Consumer<Cell.Image> consumer) {
+        if (consumer == null) {
+            return;
+        }
+        if (this.sheet instanceof XSSFSheet xssfSheet) {
+            for (POIXMLDocumentPart poixmlDocumentPart : xssfSheet.getRelations()) {
+                if (poixmlDocumentPart instanceof XSSFDrawing xssfDrawing) {
+                    for (XSSFShape xssfShape : xssfDrawing.getShapes()) {
+                        if (xssfShape instanceof XSSFPicture xssfPicture) {
+                            CTMarker ctMarker = xssfPicture.getPreferredSize().getFrom();
+                            XSSFPictureData pictureData = xssfPicture.getPictureData();
+                            consumer.accept(new com.codejune.excel.Cell.Image(ctMarker.getRow(), ctMarker.getCol(), pictureData.suggestFileExtension(), pictureData.getData()));
+                        }
+                    }
+                }
+            }
         }
     }
 

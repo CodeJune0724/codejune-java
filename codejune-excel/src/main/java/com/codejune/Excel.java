@@ -7,7 +7,7 @@ import com.codejune.common.util.*;
 import com.codejune.excel.Sheet;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
@@ -94,7 +94,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         if (sheet == null) {
             sheet = this.workbook.createSheet(sheetName);
         }
-        return new Sheet(sheet, this.workbook);
+        return new Sheet(sheet);
     }
 
     /**
@@ -109,7 +109,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         if (sheetAt == null) {
             return null;
         }
-        return new Sheet(sheetAt, this.workbook);
+        return new Sheet(sheetAt);
     }
 
     /**
@@ -173,7 +173,7 @@ public final class Excel implements Closeable, Iterable<Sheet> {
 
             @Override
             public Sheet next() {
-                return new Sheet(sheetIterator.next(), workbook);
+                return new Sheet(sheetIterator.next());
             }
         };
     }

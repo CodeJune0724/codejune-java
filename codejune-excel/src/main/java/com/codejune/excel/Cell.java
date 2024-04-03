@@ -151,7 +151,7 @@ public final class Cell {
                             CTMarker ctMarker = xssfPicture.getPreferredSize().getFrom();
                             if (this.getRow().getIndex() == ctMarker.getRow() && this.getIndex() == ctMarker.getCol()) {
                                 XSSFPictureData pictureData = xssfPicture.getPictureData();
-                                return new Image(pictureData.suggestFileExtension(), pictureData.getData());
+                                return new Image(ctMarker.getRow(), ctMarker.getCol(), pictureData.suggestFileExtension(), pictureData.getData());
                             }
                         }
                     }
@@ -163,11 +163,17 @@ public final class Cell {
 
     public static class Image {
 
+        private final int rowIndex;
+
+        private final int cellIndex;
+
         private final String suffix;
 
         private final byte[] data;
 
-        public Image(String suffix, byte[] data) {
+        public Image(int rowIndex, int cellIndex, String suffix, byte[] data) {
+            this.rowIndex = rowIndex;
+            this.cellIndex = cellIndex;
             this.suffix = suffix;
             this.data = data;
         }
