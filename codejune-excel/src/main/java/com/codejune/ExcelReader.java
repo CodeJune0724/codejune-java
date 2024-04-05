@@ -29,6 +29,21 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
 
     private final StylesTable stylesTable;
 
+    public ExcelReader(InputStream inputStream) {
+        if (inputStream == null) {
+            throw new BaseException("inputStream is null");
+        }
+        try {
+            this.opcPackage = OPCPackage.open(inputStream);
+            this.xssfReader = new XSSFReader(opcPackage);
+            this.sharedStrings = xssfReader.getSharedStringsTable();
+            this.stylesTable = xssfReader.getStylesTable();
+        } catch (Exception e) {
+            this.close();
+            throw new BaseException(e.getMessage());
+        }
+    }
+
     public ExcelReader(String path) {
         if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
             throw new BaseException("excel文件不存在");
