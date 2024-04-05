@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 
@@ -39,6 +40,26 @@ public final class Excel implements Closeable, Iterable<Sheet> {
 
     public Excel() {
         this(false);
+    }
+
+    public Excel(InputStream inputStream, boolean write) {
+        if (inputStream == null) {
+            throw new BaseException("inputStream is null");
+        }
+        try {
+            if (write) {
+                this.xssfWorkbook = new XSSFWorkbook(inputStream);
+                this.workbook = new SXSSFWorkbook(this.xssfWorkbook, 100);
+            } else {
+                this.workbook = WorkbookFactory.create(inputStream);
+            }
+        } catch (Exception exception) {
+            throw new BaseException(exception);
+        }
+    }
+
+    public Excel(InputStream inputStream) {
+        this(inputStream, false);
     }
 
     public Excel(String path, boolean write) {
