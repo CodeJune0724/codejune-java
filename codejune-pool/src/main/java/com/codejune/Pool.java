@@ -1,5 +1,7 @@
-package com.codejune.common;
+package com.codejune;
 
+import com.codejune.common.BaseException;
+import com.codejune.common.Closeable;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;

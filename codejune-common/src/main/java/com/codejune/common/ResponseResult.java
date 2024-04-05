@@ -1,7 +1,5 @@
 package com.codejune.common;
 
-import com.codejune.common.util.JsonUtil;
-
 /**
  * 响应结果
  *
@@ -47,11 +45,6 @@ public class ResponseResult {
 
     public void setResult(Object result) {
         this.result = result;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtil.toJsonString(this);
     }
 
     /**

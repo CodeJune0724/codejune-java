@@ -3,7 +3,6 @@ package com.codejune.common;
 import com.codejune.common.classinfo.Field;
 import com.codejune.common.classinfo.Method;
 import com.codejune.common.util.DateUtil;
-import com.codejune.common.util.JsonUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import java.math.BigDecimal;
@@ -134,9 +133,6 @@ public final class Data {
             if (object instanceof Boolean) {
                 throw new BaseException("object is Boolean");
             }
-            if (object instanceof String) {
-                return JsonUtil.parse(object, tClass);
-            }
             Map<String, Object> result;
             if (tClass == Map.class) {
                 result = new LinkedHashMap<>();
@@ -261,19 +257,13 @@ public final class Data {
         } else {
             result = (Collection<Object>) ObjectUtil.newInstance(tClass);
         }
-        Collection<?> objectCollection;
-        if (object instanceof Collection<?> collection) {
-            objectCollection = collection;
-        } else if (object instanceof String) {
-            objectCollection = JsonUtil.parse(object, Collection.class);
-        } else {
-            throw new BaseException(object + " to Collection error");
-        }
         if (genericClass == Object.class && object instanceof Collection<?> collection && !collection.isEmpty()) {
             genericClass = collection.toArray()[0].getClass();
         }
-        for (Object item : objectCollection) {
-            result.add(transform(item, genericClass, true, builder));
+        if (object instanceof Collection<?> collection) {
+            for (Object item : collection) {
+                result.add(transform(item, genericClass, true, builder));
+            }
         }
         return result;
     }
@@ -304,9 +294,6 @@ public final class Data {
         }
         if (object instanceof Double d) {
             return BigDecimal.valueOf(d).toString();
-        }
-        if (object instanceof Map<?,?>) {
-            return JsonUtil.toJsonString(object);
         }
         return object.toString();
     }

@@ -1,8 +1,8 @@
 package com.codejune.service;
 
+import com.codejune.Json;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.BaseException;
-import com.codejune.common.util.JsonUtil;
 import jakarta.websocket.*;
 import java.nio.ByteBuffer;
 
@@ -61,7 +61,7 @@ public class Websocket {
         }
         synchronized (this) {
             try {
-                session.getBasicRemote().sendText(JsonUtil.toJsonString(message));
+                session.getBasicRemote().sendText(Json.toString(message));
             } catch (Exception e) {
                 throw new BaseException(e);
             }
@@ -92,7 +92,7 @@ public class Websocket {
      * @param message message
      * */
     public final void sendSuccess(Object message) {
-        send(JsonUtil.toJsonString(ResponseResult.returnTrue(message)));
+        send(Json.toString(ResponseResult.returnTrue(message)));
     }
 
     /**
@@ -101,7 +101,7 @@ public class Websocket {
      * @param message message
      * */
     public final void sendError(Object message) {
-        send(JsonUtil.toJsonString(ResponseResult.returnFalse(null, message, null)));
+        send(Json.toString(ResponseResult.returnFalse(null, message, null)));
     }
 
     /**

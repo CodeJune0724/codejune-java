@@ -2,7 +2,7 @@ package com.codejune.service.database;
 
 import com.codejune.Jdbc;
 import com.codejune.common.ClassInfo;
-import com.codejune.common.Pool;
+import com.codejune.Pool;
 import com.codejune.common.util.PackageUtil;
 import com.codejune.jdbc.access.AccessDatabaseJdbc;
 import com.codejune.service.BasePO;

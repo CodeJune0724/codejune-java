@@ -1,8 +1,8 @@
 package com.codejune.http;
 
+import com.codejune.Json;
 import com.codejune.common.BaseException;
 import com.codejune.common.Builder;
-import com.codejune.common.util.JsonUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.RegexUtil;
 import com.codejune.common.util.StringUtil;
@@ -126,7 +126,7 @@ public final class HttpResponseResult<T> implements Builder {
     public <E> HttpResponseResult<E> parse(Class<E> tClass) {
         HttpResponseResult<E> result = new HttpResponseResult<>();
         result.build(this);
-        result.setBody(JsonUtil.parse(this.getBody(), tClass));
+        result.setBody(Json.parse(this.getBody(), tClass));
         return result;
     }
 

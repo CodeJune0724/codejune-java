@@ -1,17 +1,19 @@
-package com.codejune.common.util;
+package com.codejune;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.codejune.common.BaseException;
+import com.codejune.common.util.ObjectUtil;
+import com.codejune.common.util.StringUtil;
 import java.util.List;
 import java.util.Map;
 
 /**
- * JsonUtil
+ * Json
  *
  * @author ZJ
  * */
-public class JsonUtil {
+public class Json {
 
     /**
      * 转成json字符串
@@ -20,7 +22,7 @@ public class JsonUtil {
      *
      * @return json字符串
      * */
-    public static String toJsonString(Object Object) {
+    public static String toString(Object Object) {
         if (Object == null) {
             return null;
         }
@@ -48,7 +50,7 @@ public class JsonUtil {
             return  null;
         }
         try {
-            return JSON.parseObject(toJsonString(data), tClass);
+            return JSON.parseObject(toString(data), tClass);
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
@@ -64,11 +66,11 @@ public class JsonUtil {
     public static boolean isJson(String data) {
         if (!StringUtil.isEmpty(data)) {
             try {
-                JsonUtil.parse(data, Map.class);
+                Json.parse(data, Map.class);
                 return true;
             } catch (Exception e) {
                 try {
-                    JsonUtil.parse(data, List.class);
+                    Json.parse(data, List.class);
                     return true;
                 } catch (Exception ignored) {}
             }

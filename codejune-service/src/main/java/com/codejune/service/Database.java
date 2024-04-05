@@ -2,7 +2,7 @@ package com.codejune.service;
 
 import com.codejune.Jdbc;
 import com.codejune.common.BaseException;
-import com.codejune.common.Pool;
+import com.codejune.Pool;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;

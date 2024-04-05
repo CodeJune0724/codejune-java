@@ -143,7 +143,7 @@ public final class Http {
             }
             if (body != null) {
                 if (contentType == ContentType.APPLICATION_JSON) {
-                    httpEntity = new StringEntity(JsonUtil.toJsonString(body), "UTF-8");
+                    httpEntity = new StringEntity(Json.toString(body), "UTF-8");
                 } else if (contentType == ContentType.FORM_DATA) {
                     MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
                     Map<String, Object> mapBody = MapUtil.parse(body, String.class, Object.class);
