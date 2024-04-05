@@ -30,6 +30,10 @@ public final class Folder implements FileInfo {
         this.path = path;
     }
 
+    public Folder(String parent, String name) {
+        this(new java.io.File(parent, name).getAbsolutePath());
+    }
+
     @Override
     public String getName() {
         return new java.io.File(path).getName();
