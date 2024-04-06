@@ -56,7 +56,7 @@ public class Websocket {
      * @param message message
      * */
     public final void send(Object message) {
-        if (session == null) {
+        if (session == null || !this.session.isOpen()) {
             return;
         }
         synchronized (this) {
@@ -74,7 +74,7 @@ public class Websocket {
      * @param byteBuffer byteBuffer
      * */
     public final void send(ByteBuffer byteBuffer) {
-        if (session == null) {
+        if (session == null || !this.session.isOpen() || byteBuffer == null) {
             return;
         }
         synchronized (this) {
@@ -110,9 +110,7 @@ public class Websocket {
     public final void close() {
         try {
             session.close();
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
+        } catch (Exception ignored) {}
     }
 
 }
