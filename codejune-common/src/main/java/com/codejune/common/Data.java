@@ -77,8 +77,8 @@ public final class Data {
             return Float.valueOf(objectS);
         }
         if (tClass == Double.class) {
-            if (object instanceof BigDecimal) {
-                return object;
+            if (object instanceof BigDecimal bigDecimal) {
+                return bigDecimal.doubleValue();
             }
             return Double.parseDouble(objectS);
         }
