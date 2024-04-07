@@ -5,7 +5,6 @@ import com.codejune.common.io.reader.InputStreamReader;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.function.Consumer;
 
 /**
  * 写入
@@ -17,8 +16,6 @@ public class Writer {
     protected final OutputStream outputStream;
 
     protected int size = 1024;
-
-    protected Consumer<ByteBuffer> listen = data -> {};
 
     protected Writer(OutputStream outputStream) {
         if (outputStream == null) {
@@ -32,13 +29,6 @@ public class Writer {
             return;
         }
         this.size = size;
-    }
-
-    public final void setListen(Consumer<ByteBuffer> consumer) {
-        if (this.listen == null) {
-            return;
-        }
-        this.listen = consumer;
     }
 
     /**
@@ -56,7 +46,6 @@ public class Writer {
         } catch (Exception e) {
             throw new BaseException(e);
         }
-        listen.accept(byteBuffer);
     }
 
     /**

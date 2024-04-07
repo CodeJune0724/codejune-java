@@ -1,10 +1,8 @@
 package com.codejune.common.io.writer;
 
 import com.codejune.common.BaseException;
-import com.codejune.common.Closeable;
-import com.codejune.common.io.Writer;
 import com.codejune.common.io.reader.InputStreamReader;
-import com.codejune.common.util.IOUtil;
+import com.codejune.common.util.FileUtil;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -15,22 +13,12 @@ import java.io.RandomAccessFile;
  *
  * @author ZJ
  * */
-public final class FileWriter extends Writer implements Closeable {
+public final class FileWriter {
 
     private final File file;
 
-    public FileWriter(File file, boolean append) {
-        super(IOUtil.getOutputStream(file, append));
-        this.file = file;
-    }
-
     public FileWriter(File file) {
-        this(file, false);
-    }
-
-    @Override
-    public void close() {
-        IOUtil.close(outputStream);
+        this.file = file;
     }
 
     /**
@@ -46,25 +34,25 @@ public final class FileWriter extends Writer implements Closeable {
         if (position < 0) {
             throw new BaseException("position < 0");
         }
-        RandomAccessFile randomAccessFile = null;
-        try {
-            randomAccessFile = new RandomAccessFile(this.file, "rw");
+        if (!FileUtil.isFile(this.file)) {
+            throw new BaseException("not file");
+        }
+        if (!FileUtil.exist(this.file)) {
+            new com.codejune.common.os.File(this.file);
+        }
+        try (final RandomAccessFile randomAccessFile = new RandomAccessFile(this.file, "rw")) {
             randomAccessFile.seek(position);
-            final RandomAccessFile finalRandomAccessFile = randomAccessFile;
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             inputStreamReader.setListener(data -> {
                 try {
-                    finalRandomAccessFile.write(data.array(), 0, data.limit());
+                    randomAccessFile.write(data.array(), 0, data.limit());
                 } catch (Exception e) {
                     throw new BaseException(e);
                 }
-                listen.accept(data);
             });
             inputStreamReader.read();
         } catch (Exception e) {
             throw new BaseException(e);
-        } finally {
-            IOUtil.close(randomAccessFile);
         }
     }
 
@@ -78,12 +66,49 @@ public final class FileWriter extends Writer implements Closeable {
         if (bytes == null) {
             return;
         }
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-        try {
+        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
             write(byteArrayInputStream, position);
-        } finally {
-            IOUtil.close(byteArrayInputStream);
+        } catch (Exception exception) {
+            throw new BaseException(exception);
         }
+    }
+
+    /**
+     * 写入
+     *
+     * @param inputStream inputStream
+     * */
+    public void write(InputStream inputStream) {
+        this.write(inputStream, 0);
+    }
+
+    /**
+     * 写入
+     *
+     * @param bytes bytes
+     * */
+    public void write(byte[] bytes) {
+        this.write(bytes, 0);
+    }
+
+    /**
+     * 写入
+     *
+     * @param inputStream inputStream
+     * @param append 是否追加
+     * */
+    public void write(InputStream inputStream, boolean append) {
+        this.write(inputStream, append ? new com.codejune.common.os.File(this.file).getSize() : 0);
+    }
+
+    /**
+     * 写入
+     *
+     * @param bytes bytes
+     * @param append 追加
+     * */
+    public void write(byte[] bytes, boolean append) {
+        this.write(bytes, append ? new com.codejune.common.os.File(this.file).getSize() : 0);
     }
 
 }
