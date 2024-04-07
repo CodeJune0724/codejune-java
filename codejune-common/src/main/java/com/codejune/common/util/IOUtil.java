@@ -36,9 +36,7 @@ public final class IOUtil {
         }
         try {
             reader.close();
-        } catch (IOException e) {
-            throw new BaseException(e.getMessage());
-        }
+        } catch (IOException ignored) {}
     }
 
     /**
@@ -66,9 +64,7 @@ public final class IOUtil {
         }
         try {
             writer.close();
-        } catch (IOException e) {
-            throw new BaseException(e.getMessage());
-        }
+        } catch (IOException ignored) {}
     }
 
     /**
@@ -82,9 +78,7 @@ public final class IOUtil {
         }
         try {
             randomAccessFile.close();
-        } catch (IOException e) {
-            throw new BaseException(e.getMessage());
-        }
+        } catch (IOException ignored) {}
     }
 
     /**
@@ -118,7 +112,10 @@ public final class IOUtil {
      * */
     public static OutputStream getOutputStream(java.io.File file, boolean append) {
         if (!FileUtil.exist(file)) {
-            throw new BaseException("文件不存在");
+            new com.codejune.common.os.File(file);
+        }
+        if (!FileUtil.isFile(file)) {
+            throw new BaseException("非文件");
         }
         try {
             return new FileOutputStream(file, append);
