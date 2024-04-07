@@ -1,6 +1,7 @@
 package com.codejune;
 
 import com.codejune.common.BaseException;
+import com.codejune.common.io.writer.OutputStreamWriter;
 import com.codejune.common.os.File;
 import com.codejune.common.util.FileUtil;
 import com.codejune.common.util.IOUtil;
@@ -13,6 +14,7 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.BaseElement;
 import java.io.ByteArrayInputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
 
 /**
@@ -46,6 +48,11 @@ public final class Xml {
 
     public Xml() {
         this.document = DocumentHelper.createDocument();
+    }
+
+    @Override
+    public String toString() {
+        return toString(true);
     }
 
     /**
@@ -86,47 +93,47 @@ public final class Xml {
      * @return xml所有的数据
      * */
     public String toString(boolean isFormat) {
-        OutputFormat outputFormat = OutputFormat.createPrettyPrint();
-        outputFormat.setEncoding("UTF-8");
-        outputFormat.setNewlines(true);
-        outputFormat.setIndent("    ");
-        StringWriter stringWriter = new StringWriter();
-        XMLWriter writer;
-        if (isFormat) {
-            writer = new XMLWriter(stringWriter, outputFormat);
-        } else {
-            writer = new XMLWriter(stringWriter);
-        }
-        try {
+        XMLWriter writer = null;
+        try (StringWriter stringWriter = new StringWriter()) {
+            if (isFormat) {
+                OutputFormat outputFormat = OutputFormat.createPrettyPrint();
+                outputFormat.setEncoding("UTF-8");
+                outputFormat.setNewlines(true);
+                outputFormat.setIndent("    ");
+                writer = new XMLWriter(stringWriter, outputFormat);
+            } else {
+                writer = new XMLWriter(stringWriter);
+            }
             writer.write(this.document);
             return stringWriter.toString();
-        } catch (Exception e) {
-            throw new BaseException(e.getMessage());
+        } catch (Exception exception) {
+            throw new BaseException(exception);
         } finally {
-            IOUtil.close(stringWriter);
-            try {
-                writer.close();
-            } catch (Exception ignored) {}
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (Exception ignored) {}
+            }
         }
-    }
-
-    @Override
-    public String toString() {
-        return toString(true);
     }
 
     /**
      * 保存
      *
-     * @param file file
+     * @param outputStream file
      * @param isFormat 是否格式化
      * */
-    public void save(java.io.File file, boolean isFormat) {
-        new File(file).write(toString(isFormat));
+    public void save(OutputStream outputStream, boolean isFormat) {
+        new OutputStreamWriter(outputStream).write(this.toString(isFormat).getBytes());
     }
 
-    public void save(java.io.File file) {
-        save(file, true);
+    /**
+     * 保存
+     *
+     * @param outputStream file
+     * */
+    public void save(OutputStream outputStream) {
+        this.save(outputStream, true);
     }
 
 }

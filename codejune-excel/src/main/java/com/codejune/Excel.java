@@ -2,7 +2,6 @@ package com.codejune;
 
 import com.codejune.common.BaseException;
 import com.codejune.common.Closeable;
-import com.codejune.common.os.File;
 import com.codejune.common.util.*;
 import com.codejune.excel.Sheet;
 import org.apache.poi.ss.usermodel.*;
@@ -160,29 +159,6 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         } catch (Exception e) {
             throw new BaseException(e);
         }
-    }
-
-    /**
-     * 保存
-     *
-     * @param result file
-     *
-     * @return file
-     * */
-    public java.io.File save(java.io.File result) {
-        if (result == null) {
-            return null;
-        }
-        if (!result.getName().endsWith(".xlsx")) {
-            throw new BaseException("文件错误");
-        }
-        new File(result.getAbsolutePath());
-        try (OutputStream outputStream = IOUtil.getOutputStream(result)) {
-            save(outputStream);
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
-        return result;
     }
 
     @Override

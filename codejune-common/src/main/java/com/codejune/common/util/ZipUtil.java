@@ -7,7 +7,6 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -38,26 +37,6 @@ public final class ZipUtil {
             }
             zipOutputStream.flush();
             zipOutputStream.finish();
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
-    }
-
-    /**
-     * 压缩
-     *
-     * @param fileList 源文件或者文件夹
-     * @param consumer consumer
-     * */
-    public static void zip(List<String> fileList, Consumer<InputStream> consumer) {
-        if (consumer == null) {
-            return;
-        }
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            zip(fileList, byteArrayOutputStream);
-            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())) {
-                consumer.accept(byteArrayInputStream);
-            }
         } catch (Exception e) {
             throw new BaseException(e);
         }
