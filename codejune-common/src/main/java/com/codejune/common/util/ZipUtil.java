@@ -42,6 +42,23 @@ public final class ZipUtil {
         }
     }
 
+    /**
+     * 压缩
+     *
+     * @param fileList 源文件或者文件夹
+     * @param file file
+     *
+     * @return file
+     * */
+    public static File zip(List<String> fileList, File file) {
+        try (OutputStream outputStream = IOUtil.getOutputStream(file)) {
+            zip(fileList, outputStream);
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+        return file;
+    }
+
     private static void zip(ZipOutputStream zipOutputStream, File file, String path) {
         if (zipOutputStream == null) {
             return;

@@ -1,9 +1,11 @@
 package com.codejune.excelreader;
 
+import com.codejune.Xml;
 import com.codejune.common.BaseException;
 import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.RegexUtil;
+import com.codejune.common.util.*;
+import com.codejune.excel.Image;
+import com.codejune.xml.Element;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.model.SharedStrings;
@@ -12,8 +14,10 @@ import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -32,11 +36,17 @@ public final class Sheet {
 
     private final StylesTable stylesTable;
 
-    public Sheet(int index, XSSFReader xssfReader, SharedStrings sharedStrings, StylesTable stylesTable) {
+    private final String tempPath;
+
+    private final File file;
+
+    public Sheet(int index, XSSFReader xssfReader, SharedStrings sharedStrings, StylesTable stylesTable, String tempPath, File file) {
         this.index = index;
         this.xssfReader = xssfReader;
         this.sharedStrings = sharedStrings;
         this.stylesTable = stylesTable;
+        this.tempPath = tempPath;
+        this.file = file;
     }
 
     public int getIndex() {
@@ -103,6 +113,76 @@ public final class Sheet {
             xmlReader.parse(new InputSource(inputStream));
         } catch (Exception e) {
             throw new BaseException(e);
+        }
+    }
+
+    /**
+     * 读图片
+     *
+     * @param consumer consumer
+     * */
+    public void readFile(Consumer<Image> consumer) {
+        if (consumer == null) {
+            return;
+        }
+        if (!FileUtil.isFile(this.file)) {
+            throw new BaseException("no file");
+        }
+        if (StringUtil.isEmpty(this.tempPath)) {
+            throw new BaseException("tempPath is null");
+        }
+        com.codejune.common.os.File copFile = new com.codejune.common.os.File(this.file).copy(this.tempPath);
+        File zipFile = new File(copFile.getPath() + ".zip");
+        FileUtil.delete(zipFile);
+        copFile.rename(zipFile.getName());
+        ZipUtil.unzip(new File(zipFile.getPath()), this.tempPath);
+        Xml xml = new Xml(new File(this.tempPath, "xl/drawings/drawing" + (this.index + 1) + ".xml"));
+        List<Element> relationshipList = new Xml(new File(this.tempPath, "xl/drawings/_rels/drawing" + (this.index + 1) + ".xml.rels")).getRootElement().getElement();
+        for (Element twoCellAnchor : xml.getRootElement().getElement()) {
+            Element from = twoCellAnchor.getElement("from");
+            if (from == null) {
+                continue;
+            }
+            Element row = from.getElement("row");
+            Element col = from.getElement("col");
+            if (row == null) {
+                continue;
+            }
+            if (col == null) {
+                continue;
+            }
+            int rowIndex = ObjectUtil.transform(row.getText(), Integer.class);
+            int cellIndex = ObjectUtil.transform(col.getText(), Integer.class);
+            Element pic = twoCellAnchor.getElement("pic");
+            if (pic == null) {
+                continue;
+            }
+            Element blipFill = pic.getElement("blipFill");
+            if (blipFill == null) {
+                continue;
+            }
+            Element blip = blipFill.getElement("blip");
+            if (blip == null) {
+                continue;
+            }
+            String embed = blip.getAttribute("embed");
+            if (StringUtil.isEmpty(embed)) {
+                continue;
+            }
+            File imageFile = null;
+            for (Element relationship : relationshipList) {
+                if (embed.equals(relationship.getAttribute("Id"))) {
+                    imageFile = new File(this.tempPath + "/xl/drawings", relationship.getAttribute("Target"));
+                }
+            }
+            if (!FileUtil.isFile(imageFile)) {
+                continue;
+            }
+            try (InputStream inputStream = IOUtil.getInputStream(imageFile)) {
+                consumer.accept(new Image(rowIndex, cellIndex, new com.codejune.common.os.File(imageFile).getSuffix(), inputStream));
+            } catch (Exception e) {
+                throw new BaseException(e);
+            }
         }
     }
 

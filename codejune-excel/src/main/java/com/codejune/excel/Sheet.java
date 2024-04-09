@@ -5,6 +5,7 @@ import com.codejune.common.util.StringUtil;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.xssf.usermodel.*;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -118,7 +119,7 @@ public final class Sheet implements Iterable<Row> {
      *
      * @param consumer consumer
      * */
-    public void getImage(Consumer<Cell.Image> consumer) {
+    public void getImage(Consumer<Image> consumer) {
         if (consumer == null) {
             return;
         }
@@ -129,7 +130,11 @@ public final class Sheet implements Iterable<Row> {
                         if (xssfShape instanceof XSSFPicture xssfPicture) {
                             CTMarker ctMarker = xssfPicture.getPreferredSize().getFrom();
                             XSSFPictureData pictureData = xssfPicture.getPictureData();
-                            consumer.accept(new com.codejune.excel.Cell.Image(ctMarker.getRow(), ctMarker.getCol(), pictureData.suggestFileExtension(), pictureData.getData()));
+                            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(pictureData.getData())) {
+                                consumer.accept(new Image(ctMarker.getRow(), ctMarker.getCol(), pictureData.suggestFileExtension(), byteArrayInputStream));
+                            } catch (Exception e) {
+                                throw new BaseException(e);
+                            }
                         }
                     }
                 }

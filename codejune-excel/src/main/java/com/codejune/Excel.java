@@ -7,6 +7,7 @@ import com.codejune.excel.Sheet;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -159,6 +160,22 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         } catch (Exception e) {
             throw new BaseException(e);
         }
+    }
+
+    /**
+     * 保存
+     *
+     * @param file file
+     *
+     * @return file
+     * */
+    public File save(File file) {
+        try (OutputStream outputStream = IOUtil.getOutputStream(file)) {
+            this.save(outputStream);
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+        return file;
     }
 
     @Override

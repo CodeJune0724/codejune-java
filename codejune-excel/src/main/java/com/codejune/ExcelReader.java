@@ -12,7 +12,9 @@ import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.StylesTable;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.function.Function;
 
 /**
  * 读excel
@@ -29,23 +31,12 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
 
     private final StylesTable stylesTable;
 
-    public ExcelReader(InputStream inputStream) {
-        if (inputStream == null) {
-            throw new BaseException("inputStream is null");
-        }
-        try {
-            this.opcPackage = OPCPackage.open(inputStream);
-            this.xssfReader = new XSSFReader(opcPackage);
-            this.sharedStrings = xssfReader.getSharedStringsTable();
-            this.stylesTable = xssfReader.getStylesTable();
-        } catch (Exception e) {
-            this.close();
-            throw new BaseException(e.getMessage());
-        }
-    }
+    private String tempPath = null;
+
+    private final File file;
 
     public ExcelReader(String path) {
-        if (StringUtil.isEmpty(path) || !FileUtil.exist(new File(path))) {
+        if (!FileUtil.isFile(new File(path))) {
             throw new BaseException("excel文件不存在");
         }
         try {
@@ -53,6 +44,7 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
             this.xssfReader = new XSSFReader(opcPackage);
             this.sharedStrings = xssfReader.getSharedStringsTable();
             this.stylesTable = xssfReader.getStylesTable();
+            this.file = new File(path);
         } catch (Exception e) {
             this.close();
             throw new BaseException(e.getMessage());
@@ -63,6 +55,14 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
         this(file == null ? null : file.getAbsolutePath());
     }
 
+    public ExcelReader(InputStream inputStream) {
+        this(((Function<Object, File>) o -> {
+            File result = new File(System.getProperty("java.io.tmpdir"), "ExcelReader-" + DateUtil.format(new Date(), "yyyyMMddHHmmss") + ".xlsx");
+            new com.codejune.common.os.File(result).write(inputStream);
+            return result;
+        }).apply(null));
+    }
+
     /**
      * 获取sheet
      *
@@ -71,7 +71,7 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
      * @return Sheet
      * */
     public Sheet getSheet(int index) {
-        return new Sheet(index, this.xssfReader, this.sharedStrings, this.stylesTable);
+        return new Sheet(index, this.xssfReader, this.sharedStrings, this.stylesTable, this.tempPath, this.file);
     }
 
     /**
@@ -95,6 +95,15 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
         } catch (Exception e) {
             throw new BaseException(e);
         }
+    }
+
+    /**
+     * 设置缓存目录
+     *
+     * @param tempPath tempPath
+     * */
+    public void setTempPath(String tempPath) {
+        this.tempPath = tempPath;
     }
 
     @Override

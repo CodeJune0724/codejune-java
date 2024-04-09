@@ -1,5 +1,6 @@
 package com.codejune.excel;
 
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ObjectUtil;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -8,7 +9,9 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.*;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
+import java.io.ByteArrayInputStream;
 import java.util.Date;
+import java.util.function.Consumer;
 
 /**
  * Cell
@@ -139,9 +142,12 @@ public final class Cell {
     /**
      * 获取图片
      *
-     * @return Image
+     * @param consumer consumer
      * */
-    public Image getImage() {
+    public void getImage(Consumer<Image> consumer) {
+        if (consumer == null) {
+            return;
+        }
         Sheet sheet = this.cell.getSheet();
         if (sheet instanceof XSSFSheet xssfSheet) {
             for (POIXMLDocumentPart poixmlDocumentPart : xssfSheet.getRelations()) {
@@ -151,49 +157,17 @@ public final class Cell {
                             CTMarker ctMarker = xssfPicture.getPreferredSize().getFrom();
                             if (this.getRow().getIndex() == ctMarker.getRow() && this.getIndex() == ctMarker.getCol()) {
                                 XSSFPictureData pictureData = xssfPicture.getPictureData();
-                                return new Image(ctMarker.getRow(), ctMarker.getCol(), pictureData.suggestFileExtension(), pictureData.getData());
+                                try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(pictureData.getData())) {
+                                    consumer.accept(new Image(ctMarker.getRow(), ctMarker.getCol(), pictureData.suggestFileExtension(), byteArrayInputStream));
+                                } catch (Exception e) {
+                                    throw new BaseException(e);
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        return null;
-    }
-
-    public static class Image {
-
-        private final int rowIndex;
-
-        private final int cellIndex;
-
-        private final String suffix;
-
-        private final byte[] data;
-
-        public Image(int rowIndex, int cellIndex, String suffix, byte[] data) {
-            this.rowIndex = rowIndex;
-            this.cellIndex = cellIndex;
-            this.suffix = suffix;
-            this.data = data;
-        }
-
-        public String getSuffix() {
-            return suffix;
-        }
-
-        public byte[] getData() {
-            return data;
-        }
-
-        public int getRowIndex() {
-            return rowIndex;
-        }
-
-        public int getCellIndex() {
-            return cellIndex;
-        }
-
     }
 
 }

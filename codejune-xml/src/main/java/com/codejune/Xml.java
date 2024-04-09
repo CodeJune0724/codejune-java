@@ -63,7 +63,7 @@ public final class Xml {
     public Element getRootElement() {
         org.dom4j.Element rootElement = this.document.getRootElement();
         if (rootElement == null) {
-            return null;
+            throw new BaseException("rootElement is null");
         }
         return new Element(rootElement);
     }

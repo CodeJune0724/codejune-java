@@ -233,4 +233,13 @@ public final class File implements FileInfo {
         this.file = newFile.getAbsoluteFile();
     }
 
+    /**
+     * 获取后缀
+     *
+     * @return 后缀
+     * */
+    public String getSuffix() {
+        return this.getName().split("\\.")[1];
+    }
+
 }
