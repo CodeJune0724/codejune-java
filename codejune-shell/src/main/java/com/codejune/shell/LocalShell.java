@@ -3,6 +3,7 @@ package com.codejune.shell;
 import com.codejune.Shell;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.BaseException;
+import com.codejune.common.SystemOS;
 import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
@@ -25,8 +26,13 @@ public final class LocalShell implements Shell {
         InputStream inputStream = null;
         InputStream errorStream = null;
         try {
-            process = Runtime.getRuntime().exec("cmd.exe /c " + command);
-
+            if (SystemOS.getCurrentSystemOS() == SystemOS.WINDOWS) {
+                process = Runtime.getRuntime().exec("cmd.exe /c " + command);
+            } else if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
+                process = Runtime.getRuntime().exec(command);
+            } else {
+                throw new BaseException("系统不支持");
+            }
             inputStream = process.getInputStream();
             TextInputStreamReader successTextInputStreamReader = new TextInputStreamReader(inputStream);
             successTextInputStreamReader.setListener(listener);
