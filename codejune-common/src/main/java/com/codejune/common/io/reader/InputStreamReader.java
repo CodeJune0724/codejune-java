@@ -20,10 +20,10 @@ public class InputStreamReader extends Reader<ByteBuffer> {
     public final void read() {
         try {
             byte[] bytes = new byte[this.size];
-            int size = this.inputStream.read(bytes);
+            int size = this.inputStream.read(bytes, 0, this.size);
             while (size != -1) {
                 listener.accept(ByteBuffer.wrap(bytes, 0, size));
-                size = this.inputStream.read(bytes);
+                size = this.inputStream.read(bytes, 0, this.size);
             }
         } catch (Exception e) {
             throw new BaseException(e);
