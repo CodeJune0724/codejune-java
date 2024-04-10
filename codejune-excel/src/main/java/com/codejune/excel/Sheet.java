@@ -3,6 +3,7 @@ package com.codejune.excel;
 import com.codejune.common.BaseException;
 import com.codejune.common.util.StringUtil;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
 import java.io.ByteArrayInputStream;
@@ -140,6 +141,18 @@ public final class Sheet implements Iterable<Row> {
                 }
             }
         }
+    }
+
+    /**
+     * 合并单元格
+     *
+     * @param startRowIndex startRowIndex
+     * @param endRowIndex endRowIndex
+     * @param startCellIndex startCellIndex
+     * @param endCellIndex endCellIndex
+     * */
+    public void merge(int startRowIndex, int endRowIndex, int startCellIndex, int endCellIndex) {
+        this.sheet.addMergedRegion(new CellRangeAddress(startRowIndex, endRowIndex, startCellIndex, endCellIndex));
     }
 
     @Override
