@@ -43,7 +43,7 @@ public final class LocalShell implements Shell {
             errorTextInputStreamReader.setListener(listener);
             String error = errorTextInputStreamReader.getData();
 
-            int i = process.exitValue();
+            int i = process.waitFor();
             if (i == 0) {
                 return ResponseResult.returnTrue(i, null, success);
             } else {
