@@ -32,7 +32,7 @@ public abstract class Reader<T> {
     }
 
     public final void setListener(Consumer<T> listener) {
-        if (this.listener == null) {
+        if (listener == null) {
             return;
         }
         this.listener = listener;

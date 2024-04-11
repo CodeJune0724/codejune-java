@@ -23,6 +23,7 @@ public final class TextInputStreamReader extends Reader<String> {
     public TextInputStreamReader(InputStream inputStream) {
         super(inputStream);
     }
+
     public void setCharset(Charset charset) {
         if (charset == null) {
             return;
