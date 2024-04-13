@@ -152,6 +152,9 @@ public final class Sheet implements Iterable<Row> {
      * @param endCellIndex endCellIndex
      * */
     public void merge(int startRowIndex, int endRowIndex, int startCellIndex, int endCellIndex) {
+        if (startRowIndex == endRowIndex && startCellIndex == endCellIndex) {
+            return;
+        }
         this.sheet.addMergedRegion(new CellRangeAddress(startRowIndex, endRowIndex, startCellIndex, endCellIndex));
     }
 
