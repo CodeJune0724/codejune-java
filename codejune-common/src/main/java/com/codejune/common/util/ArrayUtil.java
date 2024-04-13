@@ -226,4 +226,37 @@ public final class ArrayUtil {
         return tList.subList(startIndex, endIndex);
     }
 
+    /**
+     * 获取
+     *
+     * @param collection collection
+     * @param index index
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return T
+     * */
+    public static <T> T get(List<?> collection, int index, Class<T> tClass) {
+        if (ObjectUtil.isEmpty(collection) || index >= collection.size()) {
+            return null;
+        }
+        return ObjectUtil.transform(collection.get(index), tClass);
+    }
+
+    /**
+     * 获取
+     *
+     * @param collection collection
+     * @param index index
+     * @param <T> T
+     *
+     * @return T
+     * */
+    public static <T> T get(List<T> collection, int index) {
+        if (ObjectUtil.isEmpty(collection) || index >= collection.size()) {
+            return null;
+        }
+        return collection.get(index);
+    }
+
 }
