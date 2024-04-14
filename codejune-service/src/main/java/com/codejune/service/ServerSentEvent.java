@@ -21,7 +21,7 @@ public final class ServerSentEvent extends SseEmitter {
     }
 
     /**
-     * 发送成功
+     * 发送
      *
      * @param type type
      * @param message message
@@ -32,6 +32,15 @@ public final class ServerSentEvent extends SseEmitter {
         } catch (Exception e) {
             throw new BaseException(e);
         }
+    }
+
+    /**
+     * 发送失败
+     *
+     * @param message message
+     * */
+    public void sendError(Object message) {
+        this.send("error", message);
     }
 
     /**
