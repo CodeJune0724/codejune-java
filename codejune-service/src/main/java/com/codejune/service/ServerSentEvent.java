@@ -40,7 +40,7 @@ public final class ServerSentEvent extends SseEmitter {
      * @param message message
      * */
     public void sendError(Object message) {
-        this.send("error", message);
+        this.send("$error", message);
     }
 
     /**
