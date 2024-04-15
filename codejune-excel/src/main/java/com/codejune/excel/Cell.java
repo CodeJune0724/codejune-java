@@ -72,6 +72,18 @@ public final class Cell {
     }
 
     /**
+     * 获取值
+     *
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return 值
+     * */
+    public <T> T getValue(Class<T> tClass) {
+        return ObjectUtil.transform(this.getValue(), tClass);
+    }
+
+    /**
      * 设置值
      *
      * @param value 值
