@@ -47,7 +47,7 @@ public class OracleJdbc extends SqlJdbc {
         if (query.size() != 1) {
             throw new BaseException("查询序列出错");
         }
-        return MapUtil.getValue(query.get(0), "ID", Long.class);
+        return MapUtil.get(query.get(0), "ID", Long.class);
     }
 
     private static Connection getConnection(String host, int port, String sid, String username, String password) {
@@ -76,7 +76,7 @@ public class OracleJdbc extends SqlJdbc {
         List<OracleDatabase> result = new ArrayList<>();
         List<Map<String, Object>> users = query("SELECT * FROM ALL_USERS");
         for (Map<String, Object> map : users) {
-            result.add(getDatabase(MapUtil.getValue(map, "USERNAME", String.class)));
+            result.add(getDatabase(MapUtil.get(map, "USERNAME", String.class)));
         }
         return result;
     }

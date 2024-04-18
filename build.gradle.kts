@@ -12,7 +12,7 @@ subprojects {
     }
 
     group = "com.codejune"
-    version = "1.8.134-beta"
+    version = "1.8.135-beta"
 
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"

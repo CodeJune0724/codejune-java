@@ -154,32 +154,32 @@ public class Query implements Builder {
     @Override
     public void build(Object object) {
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
-        Object sort = MapUtil.getValue(map, "sort", Object.class);
+        Object sort = MapUtil.get(map, "sort", Object.class);
         if (sort instanceof Map<?,?> sortMap) {
             List<Sort> list = new ArrayList<>();
             for (Object key : sortMap.keySet()) {
                 Sort sortItem = new Sort();
                 sortItem.setField(key);
-                sortItem.setOrderBy(MapUtil.getValue(sortMap, Data.toString(key), Sort.OderBy.class));
+                sortItem.setOrderBy(MapUtil.get(sortMap, Data.toString(key), Sort.OderBy.class));
                 list.add(sortItem);
             }
             map.put("sort", list);
         }
         if (map != null) {
-            map.put("sort", ArrayUtil.parse(MapUtil.getValue(map, "sort", List.class), Sort.class));
+            map.put("sort", ArrayUtil.parse(MapUtil.get(map, "sort", List.class), Sort.class));
         }
-        Object field = MapUtil.getValue(map, "field", Object.class);
+        Object field = MapUtil.get(map, "field", Object.class);
         if (field instanceof Map<?,?> fieldMap) {
             List<Field> list = new ArrayList<>();
             for (Object key : fieldMap.keySet()) {
                 Field fieldItem = new Field();
                 fieldItem.setName(ObjectUtil.toString(key));
-                fieldItem.setAlias(MapUtil.getValue(fieldMap, Data.toString(key), String.class));
+                fieldItem.setAlias(MapUtil.get(fieldMap, Data.toString(key), String.class));
                 list.add(fieldItem);
             }
             map.put("field", list);
         }
-        List<?> fieldList = MapUtil.getValue(map, "field", List.class);
+        List<?> fieldList = MapUtil.get(map, "field", List.class);
         if (!ObjectUtil.isEmpty(fieldList)) {
             List<Field> newFieldList = new ArrayList<>();
             for (Object item : fieldList) {
@@ -192,18 +192,18 @@ public class Query implements Builder {
                     name = itemString;
                 } else {
                     Map<?, ?> itemMap = MapUtil.parse(item);
-                    name = MapUtil.getValue(itemMap, "name", String.class);
-                    alias = MapUtil.getValue(itemMap, "alias", String.class);
+                    name = MapUtil.get(itemMap, "name", String.class);
+                    alias = MapUtil.get(itemMap, "alias", String.class);
                 }
                 newFieldList.add(new Field().setName(name).setAlias(alias));
             }
             map.put("field", newFieldList);
         }
-        this.setPage(MapUtil.getValue(map, "page", Integer.class));
-        this.setSize(MapUtil.getValue(map, "size", Integer.class));
-        this.setFilter(MapUtil.getValue(map, "filter", Filter.class));
-        this.setSort(ArrayUtil.parse(MapUtil.getValue(map, "sort", List.class), Sort.class));
-        this.setField(ArrayUtil.parse(MapUtil.getValue(map, "field", List.class), Field.class));
+        this.setPage(MapUtil.get(map, "page", Integer.class));
+        this.setSize(MapUtil.get(map, "size", Integer.class));
+        this.setFilter(MapUtil.get(map, "filter", Filter.class));
+        this.setSort(ArrayUtil.parse(MapUtil.get(map, "sort", List.class), Sort.class));
+        this.setField(ArrayUtil.parse(MapUtil.get(map, "field", List.class), Field.class));
     }
 
     /**

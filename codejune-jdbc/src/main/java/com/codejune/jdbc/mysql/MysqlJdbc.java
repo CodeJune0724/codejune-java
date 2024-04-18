@@ -52,7 +52,7 @@ public class MysqlJdbc extends SqlJdbc {
     public final List<MysqlDatabase> getDatabases() {
         List<MysqlDatabase> result = new ArrayList<>();
         for (Map<String, Object> item : query("SHOW DATABASES")) {
-            result.add(getDatabase(MapUtil.getValue(item, "Database", String.class)));
+            result.add(getDatabase(MapUtil.get(item, "Database", String.class)));
         }
         return result;
     }
@@ -72,7 +72,7 @@ public class MysqlJdbc extends SqlJdbc {
         if (ObjectUtil.isEmpty(query)) {
             throw new BaseException("not query database");
         }
-        return getDatabase(MapUtil.getValue(query.get(0), "database()", String.class));
+        return getDatabase(MapUtil.get(query.get(0), "database()", String.class));
     }
 
 }

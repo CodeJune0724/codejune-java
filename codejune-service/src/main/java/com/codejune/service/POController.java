@@ -36,8 +36,8 @@ public abstract class POController<T extends BasePO<ID>, ID> {
     @PostMapping("saveList")
     public final ResponseResult saveList(@RequestBody(required = false) Map<String, Object> requestBody) {
         return ResponseResult.returnTrue(getService().save(
-                ArrayUtil.parse(MapUtil.getValue(requestBody, "data", List.class), getService().getPOClass()),
-                MapUtil.getValue(requestBody, "filter", Filter.class)
+                ArrayUtil.parse(MapUtil.get(requestBody, "data", List.class), getService().getPOClass()),
+                MapUtil.get(requestBody, "filter", Filter.class)
         ));
     }
 

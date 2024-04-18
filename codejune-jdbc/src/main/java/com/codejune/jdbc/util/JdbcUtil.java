@@ -70,14 +70,14 @@ public final class JdbcUtil {
             columnToFieldMap.put(columnName, fieldName);
         }
         query.keyHandler(filed -> {
-            String result = MapUtil.getValue(fieldToColumnMap, filed, String.class);
+            String result = MapUtil.get(fieldToColumnMap, filed, String.class);
             if (StringUtil.isEmpty(result)) {
                 return filed;
             }
             return result;
         });
         return jdbc.getDefaultDatabase().getTable(tableName).query(query).parse(map -> MapUtil.keyHandler(map, column -> {
-            String result = MapUtil.getValue(columnToFieldMap, ObjectUtil.toString(column), String.class);
+            String result = MapUtil.get(columnToFieldMap, ObjectUtil.toString(column), String.class);
             if (StringUtil.isEmpty(result)) {
                 return column;
             }

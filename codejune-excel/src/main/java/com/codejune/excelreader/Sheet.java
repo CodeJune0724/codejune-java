@@ -102,7 +102,7 @@ public final class Sheet {
 
                     for (int cellIndex = 0; cellIndex <= max; cellIndex++) {
                         if (cell != null) {
-                            cell.accept(new Cell(cellIndex, MapUtil.getValue(dataMap, cellIndex, String.class), new Row(rowIndex)));
+                            cell.accept(new Cell(cellIndex, MapUtil.get(dataMap, cellIndex, String.class), new Row(rowIndex)));
                         }
                     }
                     if (rowEnd != null) {

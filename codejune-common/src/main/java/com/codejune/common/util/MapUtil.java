@@ -75,7 +75,7 @@ public final class MapUtil {
      *
      * @return T
      * */
-    public static <T> T getValue(Map<?, ?> map, Object key, Class<T> tClass) {
+    public static <T> T get(Map<?, ?> map, Object key, Class<T> tClass) {
         if (map == null) {
             return null;
         }
