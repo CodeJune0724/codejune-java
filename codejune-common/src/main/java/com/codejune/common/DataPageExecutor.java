@@ -35,7 +35,7 @@ public abstract class DataPageExecutor<T> {
      *
      * @return 查询到的数据
      * */
-    public abstract List<T> queryData(int page, int size);
+    public abstract List<T> query(int page, int size);
 
     /**
      * 数据处理
@@ -61,7 +61,7 @@ public abstract class DataPageExecutor<T> {
             } else {
                 size = this.size;
             }
-            List<T> data = queryData(page, size);
+            List<T> data = query(page, size);
             if (count <= 0 && ObjectUtil.isEmpty(data)) {
                 break;
             }
