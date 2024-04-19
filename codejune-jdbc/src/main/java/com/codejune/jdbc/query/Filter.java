@@ -50,11 +50,12 @@ public final class Filter implements Builder {
         return config;
     }
 
-    public void setConfig(Config config) {
+    public Filter setConfig(Config config) {
         if (config == null) {
-            return;
+            return this;
         }
         this.config = config;
+        return this;
     }
 
     /**
