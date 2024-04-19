@@ -17,16 +17,18 @@ public final class Config {
         return cleanNull;
     }
 
-    public void setCleanNull(Boolean cleanNull) {
+    public Config setCleanNull(Boolean cleanNull) {
         this.cleanNull = cleanNull;
+        return this;
     }
 
     public List<String> getCleanNullExclude() {
         return cleanNullExclude;
     }
 
-    public void setCleanNullExclude(List<String> cleanNullExclude) {
+    public Config setCleanNullExclude(List<String> cleanNullExclude) {
         this.cleanNullExclude = cleanNullExclude;
+        return this;
     }
 
 }
