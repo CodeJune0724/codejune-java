@@ -32,7 +32,7 @@ public abstract class DataPageExecutor extends com.codejune.common.DataPageExecu
     }
 
     @Override
-    public final List<Map<String, Object>> queryData(int page, int size) {
+    public final List<Map<String, Object>> query(int page, int size) {
         return table.query(new Query().setPage(page).setSize(size).setFilter(filter)).getData();
     }
 
