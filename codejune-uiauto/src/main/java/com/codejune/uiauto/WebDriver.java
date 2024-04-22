@@ -68,10 +68,14 @@ public interface WebDriver extends Closeable {
     /**
      * 执行脚本
      *
-     * @param script script
      * @param ags ags
      * */
-    void executeScript(String script, Object... ags);
+    Object executeScript(String script, Object... ags);
+
+    /**
+     * 执行脚本
+     * */
+    Object executeScript(String script);
 
     /**
      * 切换iframe

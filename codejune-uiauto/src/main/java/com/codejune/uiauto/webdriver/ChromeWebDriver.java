@@ -1,7 +1,6 @@
 package com.codejune.uiauto.webdriver;
 
 import com.codejune.common.BaseException;
-import com.codejune.common.util.MapUtil;
 import com.codejune.uiauto.DriverType;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -40,15 +39,10 @@ public final class ChromeWebDriver extends BaseWebDriver {
         ChromeOptions chromeOptions = (ChromeOptions) DriverType.CHROME.getMutableCapabilities(isShow);
         chromeOptions.setExperimentalOption("excludeSwitches", Arrays.asList("enable-automation", "enable-logging"));
         chromeOptions.setExperimentalOption("useAutomationExtension", false);
-        ChromeDriver chromeDriver = null;
+        ChromeDriver chromeDriver;
         try {
             chromeDriver = new ChromeDriver(chromeOptions);
-            chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", MapUtil.parse("{\"source\":\"Object.defineProperty(navigator, 'webdriver', {       get: () => undefined     })\"}", String.class, Object.class));
         } catch (Exception e) {
-            if (chromeDriver != null) {
-                chromeDriver.quit();
-                chromeDriver.close();
-            }
             throw new BaseException(e.getMessage());
         }
         return chromeDriver;

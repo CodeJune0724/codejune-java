@@ -75,9 +75,15 @@ public abstract class BaseWebDriver implements com.codejune.uiauto.WebDriver {
     }
 
     @Override
-    public final void executeScript(String script, Object... ags) {
-        JavascriptExecutor js = (JavascriptExecutor) this.seleniumWebDriver;
-        js.executeScript(script, ags);
+    public final Object executeScript(String script, Object... ags) {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) this.seleniumWebDriver;
+        return javascriptExecutor.executeScript(script, ags);
+    }
+
+    @Override
+    public final Object executeScript(String script) {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) this.seleniumWebDriver;
+        return javascriptExecutor.executeScript(script);
     }
 
     @Override
