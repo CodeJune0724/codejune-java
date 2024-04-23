@@ -40,7 +40,7 @@ public interface Database {
      *
      * @return 表是否存在
      * */
-    default boolean isExistTable(String tableName) {
+    default boolean existTable(String tableName) {
         if (StringUtil.isEmpty(tableName)) {
             return false;
         }
