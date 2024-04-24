@@ -1,6 +1,9 @@
 package com.codejune.xml;
 
+import com.codejune.common.util.ArrayUtil;
+import com.codejune.common.util.StringUtil;
 import org.dom4j.Attribute;
+import org.dom4j.Node;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,16 +37,49 @@ public final class Element implements Iterable<Element> {
     }
 
     /**
+     * 获取element
+     *
+     * @param index index
+     *
+     * @return Element
+     * */
+    public Element getElement(int index) {
+        List<Element> elementList = this.getElementList();
+        if (index >= elementList.size()) {
+            return null;
+        }
+        return elementList.get(index);
+    }
+
+    /**
      * 获取elements
      *
      * @return List
      * */
-    public List<Element> getElement() {
-        List<Element> elements = new ArrayList<>();
+    public List<Element> getElementList() {
+        List<Element> result = new ArrayList<>();
         for (org.dom4j.Element element : this.element.elements()) {
-            elements.add(new Element(element));
+            result.add(new Element(element));
         }
-        return elements;
+        return result;
+    }
+
+    /**
+     * 获取elements
+     *
+     * @param name name
+     *
+     * @return List
+     * */
+    public List<Element> getElementList(String name) {
+        List<Element> result = new ArrayList<>();
+        if (StringUtil.isEmpty(name)) {
+            return result;
+        }
+        for (org.dom4j.Element element : this.element.elements(name)) {
+            result.add(new Element(element));
+        }
+        return result;
     }
 
     /**
@@ -73,6 +109,15 @@ public final class Element implements Iterable<Element> {
      * */
     public String getName() {
         return this.element.getName();
+    }
+
+    /**
+     * 获取父级
+     *
+     * @return 父级
+     * */
+    public Element getParent() {
+        return new Element(this.element.getParent());
     }
 
     /**
@@ -140,9 +185,55 @@ public final class Element implements Iterable<Element> {
         }
     }
 
+    /**
+     * xpath查找
+     *
+     * @param xpath xpath
+     *
+     * @return List
+     * */
+    public List<Element> xpathList(String xpath) {
+        List<Element> result = new ArrayList<>();
+        for (Node node : this.element.selectNodes(xpath)) {
+            if (node instanceof org.dom4j.Element nodeElement) {
+                result.add(new Element(nodeElement));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * xpath查找
+     *
+     * @param xpath xpath
+     *
+     * @return List
+     * */
+    public Element xpath(String xpath) {
+        return ArrayUtil.get(this.xpathList(xpath), 0);
+    }
+
+    /**
+     * 获取下一个元素
+     *
+     * @return 下一个元素
+     * */
+    public Element getNext() {
+        return this.xpath("./following-sibling::*[1]");
+    }
+
+    /**
+     * 获取上一个元素
+     *
+     * @return 上一个元素
+     * */
+    public Element getPrev() {
+        return this.xpath("./preceding-sibling::*[1]");
+    }
+
     @Override
     public Iterator<Element> iterator() {
-        List<Element> elementList = getElement();
+        List<Element> elementList = getElementList();
         final int[] i = {0};
         return new Iterator<>() {
             @Override
