@@ -30,6 +30,14 @@ public class AccessDatabaseJdbc extends SqlJdbc {
         this.oracleJdbc = new OracleJdbc(this.getConnection());
     }
 
+    public AccessDatabaseJdbc(String path) {
+        this(new java.io.File(path));
+    }
+
+    public AccessDatabaseJdbc(String parent, String path) {
+        this(new java.io.File(parent, path));
+    }
+
     @Override
     public final void close() {
         super.close();
