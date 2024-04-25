@@ -1,8 +1,10 @@
 package com.codejune.xml;
 
+import com.codejune.common.BaseException;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.StringUtil;
 import org.dom4j.Attribute;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Node;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -156,7 +158,29 @@ public final class Element implements Iterable<Element> {
      * @return Element
      * */
     public Element addElement(String name) {
-        return new Element(this.element.addElement(name));
+        try {
+            return new Element(this.element.addElement(name));
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+    }
+
+    /**
+     * 添加element
+     *
+     * @param name 节点名
+     * @param index index
+     *
+     * @return Element
+     * */
+    public Element addElement(String name, int index) {
+        try {
+            org.dom4j.Element result = DocumentHelper.createElement(name);
+            this.element.elements().add(index, result);
+            return new Element(result);
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
     }
 
     /**
@@ -246,6 +270,11 @@ public final class Element implements Iterable<Element> {
                 return elementList.get(i[0]++);
             }
         };
+    }
+
+    @Override
+    public String toString() {
+        return this.element.asXML();
     }
 
 }
