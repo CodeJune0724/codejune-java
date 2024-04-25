@@ -113,4 +113,53 @@ public final class MapUtil {
         return result;
     }
 
+    /**
+     * 生成map
+     *
+     * @param kClass kClass
+     * @param vClass vClass
+     * @param <K> K
+     * @param <V> V
+     * @param entryList entryList
+     *
+     * @return map
+     * */
+    public static <K, V> Map<K, V> asMap(Class<K> kClass, Class<V> vClass, Map.Entry<?, ?>... entryList) {
+        if (entryList == null) {
+            return null;
+        }
+        Map<K, V> result = new HashMap<>();
+        for (Map.Entry<?, ?> entry : entryList) {
+            if (entry.getKey() == null) {
+                continue;
+            }
+            result.put(ObjectUtil.transform(entry.getKey(), kClass), ObjectUtil.transform(entry.getValue(), vClass));
+        }
+        return result;
+    }
+
+    /**
+     * 生成map
+     *
+     * @param <K> K
+     * @param <V> V
+     * @param entryList entryList
+     *
+     * @return map
+     * */
+    @SafeVarargs
+    public static <K, V> Map<K, V> asMap(Map.Entry<K, V>... entryList) {
+        if (entryList == null) {
+            return null;
+        }
+        Map<K, V> result = new HashMap<>();
+        for (Map.Entry<K, V> entry : entryList) {
+            if (entry.getKey() == null) {
+                continue;
+            }
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
+
 }
