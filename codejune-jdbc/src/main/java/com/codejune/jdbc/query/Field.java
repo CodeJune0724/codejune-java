@@ -1,5 +1,7 @@
 package com.codejune.jdbc.query;
 
+import java.util.function.Function;
+
 /**
  * 字段
  *
@@ -27,6 +29,18 @@ public final class Field {
     public Field setAlias(String alias) {
         this.alias = alias;
         return this;
+    }
+
+    /**
+     * 设置key
+     *
+     * @param action action
+     * */
+    public void keyHandler(Function<String, String> action) {
+        if (action == null) {
+            return;
+        }
+        this.setName(action.apply(this.name));
     }
 
 }

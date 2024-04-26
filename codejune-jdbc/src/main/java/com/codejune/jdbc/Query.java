@@ -134,6 +134,9 @@ public class Query implements Builder {
         for (Sort item : getSort()) {
             item.keyHandler(action);
         }
+        for (Field field : getField()) {
+            field.keyHandler(action);
+        }
         return this;
     }
 
