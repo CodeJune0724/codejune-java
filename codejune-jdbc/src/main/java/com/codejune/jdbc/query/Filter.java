@@ -109,8 +109,9 @@ public final class Filter implements Builder {
      * @return this
      * */
     public Filter compareHandler(Function<Compare, Compare> action) {
+        List<Expression> newExpressionList = compareHandlerAction(this.expressionList, action);
         this.expressionList.clear();
-        this.expressionList.addAll(compareHandlerAction(this.expressionList, action));
+        this.expressionList.addAll(newExpressionList);
         return this;
     }
 
