@@ -1,5 +1,6 @@
 package com.codejune.jdbc;
 
+import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.query.Filter;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,8 +120,12 @@ public interface Table {
             query = new Query();
         }
         QueryResult<Map<String, Object>> result = new QueryResult<>();
-        result.setCount(count(query.getFilter()));
         result.setData(queryData(query));
+        if (query.getCount() == null || query.getCount()) {
+            result.setCount(count(query.getFilter()));
+        } else {
+            result.setCount(ObjectUtil.transform(result.getData().size(), Long.class));
+        }
         return result;
     }
 

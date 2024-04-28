@@ -145,10 +145,10 @@ public final class MongodbTable implements Table {
             }
             queryData = queryData.projection(document);
         }
-        if (query.isPaging()) {
+        if (query.paging()) {
             queryData = queryData.limit(query.getSize()).skip(query.getSize() * (query.getPage() - 1));
         }
-        if (query.isSort()) {
+        if (!ObjectUtil.isEmpty(query.getSort())) {
             List<Sort> sortList = query.getSort();
             for (Sort sort : sortList) {
                 int sortInt;

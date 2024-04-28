@@ -23,6 +23,8 @@ public class Query implements Builder {
 
     private Integer size;
 
+    private Boolean count;
+
     private Filter filter;
 
     private List<Sort> sort;
@@ -44,6 +46,15 @@ public class Query implements Builder {
 
     public Query setSize(Integer size) {
         this.size = size;
+        return this;
+    }
+
+    public Boolean getCount() {
+        return count;
+    }
+
+    public Query setCount(Boolean count) {
+        this.count = count;
         return this;
     }
 
@@ -88,7 +99,7 @@ public class Query implements Builder {
      *
      * @return 分页返回true
      * */
-    public boolean isPaging() {
+    public boolean paging() {
         return page != null && size != null && page > 0 && size > 0;
     }
 
@@ -104,15 +115,6 @@ public class Query implements Builder {
             this.getSort().add(sort);
         }
         return this;
-    }
-
-    /**
-     * 是否排序
-     *
-     * @return 是否排序
-     * */
-    public boolean isSort() {
-        return !ObjectUtil.isEmpty(sort);
     }
 
     /**
@@ -204,6 +206,10 @@ public class Query implements Builder {
         }
         this.setPage(MapUtil.get(map, "page", Integer.class));
         this.setSize(MapUtil.get(map, "size", Integer.class));
+        this.setCount(MapUtil.get(map, "count", Boolean.class));
+        if (this.getCount() == null) {
+            this.setCount(this.paging());
+        }
         this.setFilter(MapUtil.get(map, "filter", Filter.class));
         this.setSort(ArrayUtil.parse(MapUtil.get(map, "sort", List.class), Sort.class));
         this.setField(ArrayUtil.parse(MapUtil.get(map, "field", List.class), Field.class));

@@ -135,10 +135,10 @@ public final class SqlBuilder {
             return result;
         }, ", ")) + " FROM " + tableName;
         sql = sql + " " + parseWhere(query.getFilter());
-        if (query.isSort()) {
+        if (!ObjectUtil.isEmpty(query.getSort())) {
             sql = StringUtil.append(sql, " ORDER BY ", ArrayUtil.toString(query.getSort(), sort -> sort.getField() + " " + sort.getOrderBy().name(), ", "));
         }
-        if (query.isPaging()) {
+        if (query.paging()) {
             Integer page = query.getPage();
             Integer size = query.getSize();
             if (jdbcType == MysqlJdbc.class) {
