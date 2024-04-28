@@ -91,24 +91,6 @@ public interface Table {
     }
 
     /**
-     * 查询数据
-     *
-     * @param query query
-     *
-     * @return List
-     * */
-    List<Map<String, Object>> queryData(Query query);
-
-    /**
-     * 查询数据
-     *
-     * @return List
-     * */
-    default List<Map<String, Object>> queryData() {
-        return queryData(null);
-    }
-
-    /**
      * 查询
      *
      * @param query query
@@ -137,5 +119,14 @@ public interface Table {
     default QueryResult<Map<String, Object>> query() {
         return query(null);
     }
+
+    /**
+     * 查询数据
+     *
+     * @param query query
+     *
+     * @return List
+     * */
+    List<Map<String, Object>> queryData(Query query);
 
 }

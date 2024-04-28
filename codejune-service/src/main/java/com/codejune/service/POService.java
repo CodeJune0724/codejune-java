@@ -37,7 +37,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      * @return QueryResult
      * */
     public QueryResult<T> query(Query query) {
-        return getTable().query(this.queryHandler(query));
+        return getTable().query(query);
     }
 
     /**
@@ -47,26 +47,6 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      * */
     public final QueryResult<T> query() {
         return query(null);
-    }
-
-    /**
-     * 查询
-     *
-     * @param query query
-     *
-     * @return List
-     * */
-    public final List<T> queryData(Query query) {
-        return getTable().queryData(this.queryHandler(query));
-    }
-
-    /**
-     * 查询
-     *
-     * @return QueryResult
-     * */
-    public final List<T> queryData() {
-        return queryData(null);
     }
 
     /**
@@ -80,7 +60,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
         if (id == null) {
             throw new BaseException("id not found");
         }
-        QueryResult<T> query = query(new Query().setFilter(new Filter().and(Compare.equals(BasePO.getIdField().getName(), id))));
+        QueryResult<T> query = query(Query.and(Compare.equals(BasePO.getIdField().getName(), id)));
         if (query.getCount() == 0) {
             throw new BaseException("id not found");
         }
@@ -96,17 +76,6 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      */
     public Object getDetails(ID id) {
         return queryById(id);
-    }
-
-    /**
-     * query处理
-     *
-     * @param query query
-     *
-     * @return Query
-     * */
-    public Query queryHandler(Query query) {
-        return query;
     }
 
     /**
@@ -135,15 +104,35 @@ public abstract class POService<T extends BasePO<ID>, ID> {
         if (tList == null) {
             tList = new ArrayList<>();
         }
+        if (filter == null) {
+            filter = new Filter();
+        }
         for (T t : tList) {
             beforeSave(t);
         }
-        this.deleteBySave(tList, filter);
+        filter.and(Compare.notIn("id", ArrayUtil.parse(tList, t -> {
+            if (t == null) {
+                return null;
+            }
+            return t.getId();
+        })));
+        delete(query(new Query().setFilter(filter)).getData());
         List<T> result = getTable().save(tList);
         for (T t : result) {
             afterSave(t);
         }
         return result;
+    }
+
+    /**
+     * 保存
+     *
+     * @param tList tList
+     *
+     * @return List
+     * */
+    public final List<T> save(List<T> tList) {
+        return this.save(tList, null);
     }
 
     /**
@@ -180,7 +169,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
             }
             boolean unique = column.unique();
             if (unique && !ObjectUtil.isEmpty(o)) {
-                QueryResult<T> query = query(new Query().setFilter(new Filter().and(Compare.equals(fieldName, o))));
+                QueryResult<T> query = query(Query.and(Compare.equals(fieldName, o)));
                 if (query.getCount() != 0) {
                     String id = ObjectUtil.toString(query.getData().get(0).getId());
                     if (StringUtil.isEmpty(id)) {
@@ -241,28 +230,6 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      * */
     public final void delete() {
         delete(query().getData());
-    }
-
-    /**
-     * 删除不需要保存的数据
-     *
-     * @param tList tList
-     * @param filter filter
-     * */
-    public final void deleteBySave(List<T> tList, Filter filter) {
-        if (tList == null) {
-            tList = new ArrayList<>();
-        }
-        if (filter == null) {
-            filter = new Filter();
-        }
-        filter.and(Compare.notIn("id", ArrayUtil.parse(tList, t -> {
-            if (t == null) {
-                return null;
-            }
-            return t.getId();
-        })));
-        delete(query(new Query().setFilter(filter)).getData());
     }
 
     private Database.Table<T, ID> getTable() {

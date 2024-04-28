@@ -3,7 +3,6 @@ package com.codejune.service;
 import com.codejune.Jdbc;
 import com.codejune.common.BaseException;
 import com.codejune.Pool;
-import com.codejune.common.util.ArrayUtil;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
 import com.codejune.common.util.MapUtil;
@@ -101,7 +100,7 @@ public abstract class Database {
      * @return T
      * */
     public <T extends BasePO<ID>, ID> T saveQuery(Jdbc jdbc, String tableName, ID id, Class<T> tClass) {
-        List<Map<String, Object>> list = jdbc.getDefaultDatabase().getTable(tableName).queryData(new Query().setFilter(new Filter().and(Compare.equals(BasePO.getIdField().getName(), id))));
+        List<Map<String, Object>> list = jdbc.getDefaultDatabase().getTable(tableName).query(Query.and(Compare.equals(BasePO.getIdField().getName(), id))).getData();
         if (list.isEmpty()) {
             return null;
         }
@@ -198,33 +197,6 @@ public abstract class Database {
          * */
         public QueryResult<T> query() {
             return query(null);
-        }
-
-        /**
-         * 查询数据
-         *
-         * @param query query
-         *
-         * @return List
-         * */
-        public List<T> queryData(Query query) {
-            try {
-                if (query == null) {
-                    query = new Query();
-                }
-                return ArrayUtil.parse(getTable().queryData(query.keyHandler(fieldToColumnHandler::handler)), map -> MapUtil.transform(MapUtil.keyHandler(map, columnToFieldHandler::handler), basePOClass));
-            } finally {
-                this.connection.close();
-            }
-        }
-
-        /**
-         * 查询数据
-         *
-         * @return List
-         * */
-        public List<T> queryData() {
-            return queryData(null);
         }
 
         /**

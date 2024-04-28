@@ -11,7 +11,6 @@ import com.codejune.jdbc.oracle.OracleTable;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
 import com.codejune.jdbc.util.SqlBuilder;
-import java.io.IOException;
 import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,8 +77,6 @@ public final class AccessDatabaseTable implements SqlTable {
             }
             accessDatabaseDatabase.createTable(tableName, null, columnList);
             this.insert(tableData);
-        } catch (IOException e) {
-            throw new BaseException(e.getMessage());
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
@@ -98,8 +95,12 @@ public final class AccessDatabaseTable implements SqlTable {
             query = new Query();
         }
         QueryResult<Map<String, Object>> result = new QueryResult<>();
-        result.setCount(count(query.getFilter(), isCase));
         result.setData(queryData(query, isCase));
+        if (query.getCount() == null || query.getCount()) {
+            result.setCount(count(query.getFilter(), isCase));
+        } else {
+            result.setCount(ObjectUtil.transform(result.getData().size(), Long.class));
+        }
         return result;
     }
 

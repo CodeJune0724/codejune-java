@@ -106,7 +106,7 @@ public final class OracleTable implements SqlTable {
 
     @Override
     public long insert(List<Map<String, Object>> data) {
-        if (data.size() == 0) {
+        if (ObjectUtil.isEmpty(data)) {
             return 0;
         }
         List<Column> allColumn = getColumns();
