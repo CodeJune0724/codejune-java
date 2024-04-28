@@ -5,6 +5,7 @@ import com.codejune.common.Data;
 import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.MapUtil;
 import com.codejune.common.util.ObjectUtil;
+import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.query.Field;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.Sort;
@@ -109,15 +110,47 @@ public class Query implements Builder {
     /**
      * 添加sort
      *
-     * @param sort sort
+     * @param field field
+     * @param orderBy orderBy
      *
      * @return this
      * */
-    public Query addSort(Sort sort) {
-        if (sort != null) {
-            this.getSort().add(sort);
+    public Query addSort(String field, Sort.OderBy orderBy) {
+        if (StringUtil.isEmpty(field)) {
+            return this;
         }
+        if (orderBy == null) {
+            orderBy = Sort.OderBy.ASC;
+        }
+        this.getSort().add(new Sort().setField(field).setOrderBy(orderBy));
         return this;
+    }
+
+    /**
+     * 添加field
+     *
+     * @param name name
+     * @param alias alias
+     *
+     * @return this
+     * */
+    public Query addField(String name, String alias) {
+        if (StringUtil.isEmpty(field)) {
+            return this;
+        }
+        this.getField().add(new Field().setName(name).setAlias(alias));
+        return this;
+    }
+
+    /**
+     * 添加field
+     *
+     * @param name name
+     *
+     * @return this
+     * */
+    public Query addField(String name) {
+        return this.addField(name, null);
     }
 
     /**
@@ -141,20 +174,6 @@ public class Query implements Builder {
         }
         for (Field field : getField()) {
             field.keyHandler(action);
-        }
-        return this;
-    }
-
-    /**
-     * 添加field
-     *
-     * @param field field
-     *
-     * @return this
-     * */
-    public Query addField(Field field) {
-        if (field != null) {
-            this.getField().add(field);
         }
         return this;
     }
