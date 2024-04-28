@@ -144,6 +144,16 @@ public final class Filter implements Builder {
         return this;
     }
 
+    /**
+     * 添加表达式
+     *
+     * @param expressionList expressionList
+     * */
+    public Filter addExpression(List<Expression> expressionList) {
+        this.expressionList.addAll(expressionList);
+        return this;
+    }
+
     @Override
     public void build(Object object) {
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
