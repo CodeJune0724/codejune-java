@@ -26,24 +26,19 @@ public final class Filter implements Builder {
     private Config config = new Config();
 
     public List<Expression> getExpressionList() {
-        Filter clone = ObjectUtil.clone(this);
-        Config config = getConfig();
-        if (config.getCleanNull() != null && config.getCleanNull()) {
-            return clone.compareHandler(compare -> {
-                if (compare == null) {
+        boolean cleanNull = config.getCleanNull() != null && config.getCleanNull();
+        List<String> cleanNullExclude = config.getCleanNullExclude();
+        return compareHandlerAction(this.expressionList, compare -> {
+            if (compare == null) {
+                return null;
+            }
+            if (cleanNull) {
+                if (ObjectUtil.isEmpty(compare.getValue()) && (cleanNullExclude == null || !cleanNullExclude.contains(compare.getKey()))) {
                     return null;
                 }
-                List<String> cleanNullExclude = config.getCleanNullExclude();
-                if (cleanNullExclude == null) {
-                    cleanNullExclude = new ArrayList<>();
-                }
-                if (ObjectUtil.isEmpty(compare.getValue()) && !cleanNullExclude.contains(compare.getKey())) {
-                    return null;
-                }
-                return compare;
-            }).expressionList;
-        }
-        return clone.expressionList;
+            }
+            return compare;
+        });
     }
 
     public Config getConfig() {
@@ -114,33 +109,8 @@ public final class Filter implements Builder {
      * @return this
      * */
     public Filter compareHandler(Function<Compare, Compare> action) {
-        Function<List<Expression>, List<Expression>> compareHandlerAction = new Function<>() {
-            @Override
-            public List<Expression> apply(List<Expression> expressionsList) {
-                List<Expression> result = new ArrayList<>();
-                for (Expression expression : expressionsList) {
-                    if (expression.isCompare()) {
-                        Compare compare = action.apply(expression.getCompare());
-                        if (compare != null) {
-                            result.add(expression);
-                        }
-                    }
-                    if (expression.isGroup()) {
-                        Group group = expression.getGroup();
-                        List<Expression> newGroupExpressionList = this.apply(group.getExpressionList());
-                        if (!ObjectUtil.isEmpty(newGroupExpressionList)) {
-                            group.getExpressionList().clear();
-                            group.getExpressionList().addAll(newGroupExpressionList);
-                            result.add(expression);
-                        }
-                    }
-                }
-                return result;
-            }
-        };
-        List<Expression> newExpressionList = compareHandlerAction.apply(this.expressionList);
         this.expressionList.clear();
-        this.expressionList.addAll(newExpressionList);
+        this.expressionList.addAll(compareHandlerAction(this.expressionList, action));
         return this;
     }
 
@@ -249,6 +219,34 @@ public final class Filter implements Builder {
             }
         };
         this.expressionList.addAll(expressionAction.apply(map));
+    }
+
+    private static List<Expression> compareHandlerAction(List<Expression> expressionList, Function<Compare, Compare> action) {
+        Function<List<Expression>, List<Expression>> function = new Function<>() {
+            @Override
+            public List<Expression> apply(List<Expression> expressionsList) {
+                List<Expression> result = new ArrayList<>();
+                for (Expression expression : expressionsList) {
+                    if (expression.isCompare()) {
+                        Compare compare = action.apply(expression.getCompare());
+                        if (compare != null) {
+                            result.add(expression);
+                        }
+                    }
+                    if (expression.isGroup()) {
+                        Group group = expression.getGroup();
+                        List<Expression> newGroupExpressionList = this.apply(group.getExpressionList());
+                        if (!ObjectUtil.isEmpty(newGroupExpressionList)) {
+                            group.getExpressionList().clear();
+                            group.getExpressionList().addAll(newGroupExpressionList);
+                            result.add(expression);
+                        }
+                    }
+                }
+                return result;
+            }
+        };
+        return function.apply(expressionList);
     }
 
 }
