@@ -50,6 +50,9 @@ public class Query implements Builder {
     }
 
     public Boolean getCount() {
+        if (this.count == null) {
+            return this.paging();
+        }
         return count;
     }
 
@@ -207,9 +210,6 @@ public class Query implements Builder {
         this.setPage(MapUtil.get(map, "page", Integer.class));
         this.setSize(MapUtil.get(map, "size", Integer.class));
         this.setCount(MapUtil.get(map, "count", Boolean.class));
-        if (this.getCount() == null) {
-            this.setCount(this.paging());
-        }
         this.setFilter(MapUtil.get(map, "filter", Filter.class));
         this.setSort(ArrayUtil.parse(MapUtil.get(map, "sort", List.class), Sort.class));
         this.setField(ArrayUtil.parse(MapUtil.get(map, "field", List.class), Field.class));
