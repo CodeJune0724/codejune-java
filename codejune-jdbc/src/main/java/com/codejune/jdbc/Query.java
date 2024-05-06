@@ -135,9 +135,6 @@ public class Query implements Builder {
      * @return this
      * */
     public Query addField(String name, String alias) {
-        if (StringUtil.isEmpty(field)) {
-            return this;
-        }
         this.getField().add(new Field().setName(name).setAlias(alias));
         return this;
     }
