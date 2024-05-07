@@ -5,28 +5,25 @@ plugins {
 }
 
 subprojects {
+    group = "com.codejune"
+
+    version = "1.8.153-beta"
+
     apply {
         plugin("java")
         plugin("java-library")
         plugin("maven-publish")
     }
 
-    group = "com.codejune"
-    version = "1.8.153-beta"
-
-    tasks.withType<JavaCompile> {
-        options.encoding = "UTF-8"
+    repositories {
+        mavenCentral()
     }
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
+            languageVersion = JavaLanguageVersion.of(17)
         }
         withSourcesJar()
-    }
-
-    repositories {
-        mavenCentral()
     }
 
     publishing {
@@ -59,5 +56,9 @@ subprojects {
                 }
             }
         }
+    }
+
+    tasks.withType<JavaCompile> {
+        options.encoding = "UTF-8"
     }
 }
