@@ -84,22 +84,22 @@ public final class ArrayUtil {
     /**
      * 数据转换
      *
-     * @param list list
+     * @param collection collection
      * @param action action
      * @param <PARAM> 参数类型
      * @param <RETURN> 返回类型
      *
      * @return list
      * */
-    public static <PARAM, RETURN> List<RETURN> parse(List<PARAM> list, Function<PARAM, RETURN> action) {
-        if (list == null) {
+    public static <PARAM, RETURN> List<RETURN> parse(Collection<PARAM> collection, Function<PARAM, RETURN> action) {
+        if (collection == null) {
             return null;
         }
         if (action == null) {
             action = param -> null;
         }
         List<RETURN> result = new ArrayList<>();
-        for (PARAM item : list) {
+        for (PARAM item : collection) {
             RETURN then = action.apply(item);
             if (then == null) {
                 continue;
@@ -112,14 +112,14 @@ public final class ArrayUtil {
     /**
      * 转换泛型
      *
-     * @param list list
+     * @param collection collection
      * @param tClass tClass
      * @param <T> T
      *
      * @return List
      * */
-    public static <T> List<T> parse(List<?> list, Class<T> tClass) {
-        return parse(list, o -> ObjectUtil.transform(o, tClass));
+    public static <T> List<T> parse(Collection<?> collection, Class<T> tClass) {
+        return parse(collection, o -> ObjectUtil.transform(o, tClass));
     }
 
     /**
@@ -229,34 +229,34 @@ public final class ArrayUtil {
     /**
      * 获取
      *
-     * @param collection collection
+     * @param list list
      * @param index index
      * @param tClass tClass
      * @param <T> T
      *
      * @return T
      * */
-    public static <T> T get(List<?> collection, int index, Class<T> tClass) {
-        if (ObjectUtil.isEmpty(collection) || index >= collection.size()) {
+    public static <T> T get(List<?> list, int index, Class<T> tClass) {
+        if (ObjectUtil.isEmpty(list) || index >= list.size()) {
             return null;
         }
-        return ObjectUtil.transform(collection.get(index), tClass);
+        return ObjectUtil.transform(list.get(index), tClass);
     }
 
     /**
      * 获取
      *
-     * @param collection collection
+     * @param list list
      * @param index index
      * @param <T> T
      *
      * @return T
      * */
-    public static <T> T get(List<T> collection, int index) {
-        if (ObjectUtil.isEmpty(collection) || index >= collection.size()) {
+    public static <T> T get(List<T> list, int index) {
+        if (ObjectUtil.isEmpty(list) || index >= list.size()) {
             return null;
         }
-        return collection.get(index);
+        return list.get(index);
     }
 
 }
