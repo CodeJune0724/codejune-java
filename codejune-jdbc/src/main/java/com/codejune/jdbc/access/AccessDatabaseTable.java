@@ -1,16 +1,12 @@
 package com.codejune.jdbc.access;
 
 import com.codejune.common.BaseException;
-import com.codejune.common.util.ArrayUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Query;
-import com.codejune.jdbc.QueryResult;
-import com.codejune.jdbc.oracle.OracleJdbc;
 import com.codejune.jdbc.oracle.OracleTable;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.table.SqlTable;
-import com.codejune.jdbc.util.SqlBuilder;
 import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,57 +78,6 @@ public final class AccessDatabaseTable implements SqlTable {
         }
     }
 
-    /**
-     * 查询
-     *
-     * @param query query
-     * @param isCase 是否区分大小写
-     *
-     * @return QueryResult
-     * */
-    public QueryResult<Map<String, Object>> query(Query query, boolean isCase) {
-        if (query == null) {
-            query = new Query();
-        }
-        QueryResult<Map<String, Object>> result = new QueryResult<>();
-        result.setData(queryData(query, isCase));
-        if (query.getCount() == null || query.getCount()) {
-            result.setCount(count(query.getFilter(), isCase));
-        } else {
-            result.setCount(ObjectUtil.transform(result.getData().size(), Long.class));
-        }
-        return result;
-    }
-
-    /**
-     * 统计
-     *
-     * @param filter filter
-     * @param isCase 是否区分大小写
-     *
-     * @return 数量
-     * */
-    public long count(Filter filter, boolean isCase) {
-        return Long.parseLong(accessDatabaseDatabase.accessDatabaseJdbc.query(
-                new SqlBuilder(tableName, isCase ? AccessDatabaseJdbc.class : OracleJdbc.class).parseCountSql(filter)
-        ).get(0).get("C").toString());
-    }
-
-    /**
-     * 获取数据
-     *
-     * @param query query
-     * @param isCase 是否区分大小写
-     *
-     * @return 数量
-     * */
-    public List<Map<String, Object>> queryData(Query query, boolean isCase) {
-        return accessDatabaseDatabase.accessDatabaseJdbc.query(
-                new SqlBuilder(tableName, isCase ? AccessDatabaseJdbc.class : OracleJdbc.class).parseQueryDataSql(query),
-                ArrayUtil.asList("R")
-        );
-    }
-
     @Override
     public List<Column> getColumns() {
         List<Column> result = new ArrayList<>();
@@ -198,12 +143,12 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public long count(Filter filter) {
-        return count(filter, true);
+        return oracleTable.count(filter);
     }
 
     @Override
     public List<Map<String, Object>> queryData(Query query) {
-        return queryData(query, true);
+        return oracleTable.queryData(query);
     }
 
 }

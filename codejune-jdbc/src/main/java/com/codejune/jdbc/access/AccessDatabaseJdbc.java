@@ -38,19 +38,6 @@ public class AccessDatabaseJdbc extends SqlJdbc {
         this(new java.io.File(parent, path));
     }
 
-    @Override
-    public final void close() {
-        super.close();
-        try {
-            if (this.database != null) {
-                this.database.close();
-                this.database = null;
-            }
-        } catch (IOException e) {
-            throw new BaseException(e.getMessage());
-        }
-    }
-
     final void reload(boolean isReloadConnection) {
         if (isReloadConnection) {
             this.close();
@@ -104,7 +91,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
     private static Connection getConnection(java.io.File file) {
         create(file);
         try {
-            return DriverManager.getConnection("jdbc:ucanaccess://" + file.getAbsolutePath() + ";immediatelyReleaseResources=true");
+            return DriverManager.getConnection("jdbc:ucanaccess://" + file.getAbsolutePath() + ";immediatelyReleaseResources=true;ignoreCase=false");
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
@@ -128,6 +115,19 @@ public class AccessDatabaseJdbc extends SqlJdbc {
     @Override
     public final AccessDatabaseDatabase getDefaultDatabase() {
         return new AccessDatabaseDatabase(this);
+    }
+
+    @Override
+    public final void close() {
+        super.close();
+        try {
+            if (this.database != null) {
+                this.database.close();
+                this.database = null;
+            }
+        } catch (IOException e) {
+            throw new BaseException(e.getMessage());
+        }
     }
 
 }

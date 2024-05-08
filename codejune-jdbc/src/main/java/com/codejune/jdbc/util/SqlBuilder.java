@@ -179,11 +179,7 @@ public final class SqlBuilder {
                     if (value == null) {
                         result = key + " IS " + valueHandler(null);
                     } else {
-                        if (jdbcType == AccessDatabaseJdbc.class && value instanceof String) {
-                            result = "(" + key + " IS NOT NULL) AND StrComp(" + key + ", " + valueHandler(value) + ", 0) = 0";
-                        } else {
-                            result = key + " = " + valueHandler(value);
-                        }
+                        result = key + " = " + valueHandler(value);
                     }
                 }
                 case NOT_EQUALS -> {
