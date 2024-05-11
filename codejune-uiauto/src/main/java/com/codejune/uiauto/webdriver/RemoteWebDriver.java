@@ -3,7 +3,7 @@ package com.codejune.uiauto.webdriver;
 import com.codejune.common.BaseException;
 import com.codejune.uiauto.DriverType;
 import org.openqa.selenium.WebDriver;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * RemoteWebDriver
@@ -22,7 +22,7 @@ public final class RemoteWebDriver extends BaseWebDriver {
 
     private static WebDriver webDriver(String url, DriverType driverType, boolean isShow) {
         try {
-            return new org.openqa.selenium.remote.RemoteWebDriver(new URL(url), driverType.getMutableCapabilities(isShow));
+            return new org.openqa.selenium.remote.RemoteWebDriver(URI.create(url).toURL(), driverType.getMutableCapabilities(isShow));
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
