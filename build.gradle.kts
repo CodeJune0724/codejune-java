@@ -7,7 +7,7 @@ plugins {
 subprojects {
     group = "com.codejune"
 
-    version = "1.8.156-beta"
+    version = "1.9.0"
 
     apply {
         plugin("java")
@@ -49,7 +49,7 @@ subprojects {
         }
         repositories {
             maven {
-                setUrl("https://packages.aliyun.com/maven/repository/2137025-release-ae6xsV")
+                setUrl("https://packages.aliyun.com/613c3cec03e1c17d57a76d2b/maven/codejune")
                 credentials {
                     username = "613c3bc8a300e314f854bfd4"
                     password = "HNsb9RanXzmR"
