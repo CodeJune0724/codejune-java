@@ -182,10 +182,10 @@ public final class Filter implements Builder {
                     Object compare;
                     if (or.size() == 1) {
                         connector = Expression.Connector.OR;
-                        compare = or.get(0);
+                        compare = or.getFirst();
                     } else {
                         connector = Expression.Connector.AND;
-                        compare = and.get(0);
+                        compare = and.getFirst();
                     }
                     result.add(new Expression(connector, ObjectUtil.transform(compare, Compare.class)));
                 } else {
@@ -195,7 +195,7 @@ public final class Filter implements Builder {
                             continue;
                         }
                         if (orExpressionList.size() == 1) {
-                            result.add(new Expression(Expression.Connector.OR, orExpressionList.get(0).getCompare()));
+                            result.add(new Expression(Expression.Connector.OR, orExpressionList.getFirst().getCompare()));
                         } else {
                             Group group = new Group();
                             group.setExpressionList(orExpressionList);
@@ -208,7 +208,7 @@ public final class Filter implements Builder {
                             continue;
                         }
                         if (andExpressionList.size() == 1) {
-                            result.add(new Expression(Expression.Connector.AND, andExpressionList.get(0).getCompare()));
+                            result.add(new Expression(Expression.Connector.AND, andExpressionList.getFirst().getCompare()));
                         } else {
                             Group group = new Group();
                             group.setExpressionList(andExpressionList);

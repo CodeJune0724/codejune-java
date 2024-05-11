@@ -79,7 +79,7 @@ public final class HttpResponseResult<T> implements Builder {
     public Header getHeader(String key) {
         List<Header> headerList = getHeaderList(key);
         if (ObjectUtil.isEmpty(headerList)) {
-            return headerList.get(0);
+            return headerList.getFirst();
         }
         return null;
     }

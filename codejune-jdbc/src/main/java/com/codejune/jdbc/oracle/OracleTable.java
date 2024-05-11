@@ -169,7 +169,7 @@ public final class OracleTable implements SqlTable {
     public long count(Filter filter) {
         return Long.parseLong(oracleDatabase.oracleJdbc.query(
                 new SqlBuilder(tableName, OracleJdbc.class).parseCountSql(filter)
-        ).get(0).get("C").toString());
+        ).getFirst().get("C").toString());
     }
 
     @Override

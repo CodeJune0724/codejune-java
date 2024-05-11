@@ -54,7 +54,7 @@ public final class MysqlTable implements SqlTable {
     public long count(Filter filter) {
         return Long.parseLong(mysqlDatabase.mysqlJdbc.query(
                 new SqlBuilder(tableName, MysqlJdbc.class).parseCountSql(filter)
-        ).get(0).get("C").toString());
+        ).getFirst().get("C").toString());
     }
 
     @Override

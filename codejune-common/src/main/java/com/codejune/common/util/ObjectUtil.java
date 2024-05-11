@@ -77,14 +77,17 @@ public final class ObjectUtil {
      * @return 是否为空
      * */
     public static boolean isEmpty(Object object) {
-        if (object == null) {
-            return true;
-        }
-        if (object instanceof Optional) {
-            return ((Optional<?>) object).isEmpty();
-        }
-        if (object instanceof CharSequence) {
-            return ((CharSequence) object).isEmpty();
+        switch (object) {
+            case null -> {
+                return true;
+            }
+            case Optional<?> optional -> {
+                return optional.isEmpty();
+            }
+            case CharSequence charSequence -> {
+                return charSequence.isEmpty();
+            }
+            default -> {}
         }
         if (object.getClass().isArray()) {
             return Array.getLength(object) == 0;
@@ -155,7 +158,7 @@ public final class ObjectUtil {
             for (Field field : classInfo.getFields()) {
                 Object setData;
                 if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                    setData = Data.transformList(o2Map.get(field.getName()), field.getType(), field.getGenericClass().get(0).getOriginClass(), false);
+                    setData = Data.transformList(o2Map.get(field.getName()), field.getType(), field.getGenericClass().getFirst().getOriginClass(), false);
                 } else {
                     setData = transform(o2Map.get(field.getName()), field.getType(), false);
                 }

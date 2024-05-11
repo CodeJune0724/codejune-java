@@ -7,7 +7,6 @@ import com.codejune.common.util.DateUtil;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.StringUtil;
 import com.codejune.jdbc.Query;
-import com.codejune.jdbc.access.AccessDatabaseJdbc;
 import com.codejune.jdbc.mysql.MysqlJdbc;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.filter.Compare;
@@ -262,20 +261,24 @@ public final class SqlBuilder {
 
     @SuppressWarnings("unchecked")
     private String valueHandler(Object value) {
-        if (value == null) {
-            return "NULL";
-        }
-        if (value instanceof Date) {
-            if (jdbcType == MysqlJdbc.class) {
-                return "'" + DateUtil.format((Date) value, DateUtil.DEFAULT_DATE_FORMAT) + "'";
+        switch (value) {
+            case null -> {
+                return "NULL";
             }
-            return "TO_DATE('" + DateUtil.format((Date) value, DateUtil.DEFAULT_DATE_FORMAT) + "', 'yyyy-mm-dd hh24:mi:ss')";
-        }
-        if (value instanceof Number) {
-            return ObjectUtil.toString(value);
-        }
-        if (value instanceof Function<?,?>) {
-            return ObjectUtil.toString(((Function<Object, Object>) value).apply(value));
+            case Date date -> {
+                if (jdbcType == MysqlJdbc.class) {
+                    return "'" + DateUtil.format((Date) value, DateUtil.DEFAULT_DATE_FORMAT) + "'";
+                }
+                return "TO_DATE('" + DateUtil.format(date, DateUtil.DEFAULT_DATE_FORMAT) + "', 'yyyy-mm-dd hh24:mi:ss')";
+            }
+            case Number number -> {
+                return ObjectUtil.toString(number);
+            }
+            case Function<?, ?> function -> {
+                return ObjectUtil.toString(((Function<Object, Object>) function).apply(value));
+            }
+            default -> {
+            }
         }
         String result = ObjectUtil.toString(value);
         if (result == null) {

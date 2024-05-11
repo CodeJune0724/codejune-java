@@ -28,19 +28,18 @@ public final class ClassInfo {
 
     public ClassInfo(Type type) {
         this.type = type;
-        if (type instanceof Class) {
-            this.aClass = (Class<?>) type;
-        } else if (type instanceof ParameterizedType) {
-            this.aClass = (Class<?>) ((ParameterizedType) type).getRawType();
-        } else if (type instanceof WildcardType wildcardType) {
-            Type[] lowerBounds = wildcardType.getLowerBounds();
-            if (lowerBounds.length != 0) {
-                aClass = (Class<?>) lowerBounds[0];
-            } else {
-                aClass = (Class<?>) wildcardType.getUpperBounds()[0];
+        switch (type) {
+            case Class<?> typeOfClass -> this.aClass = typeOfClass;
+            case ParameterizedType parameterizedType -> this.aClass = (Class<?>) parameterizedType.getRawType();
+            case WildcardType wildcardType -> {
+                Type[] lowerBounds = wildcardType.getLowerBounds();
+                if (lowerBounds.length != 0) {
+                    aClass = (Class<?>) lowerBounds[0];
+                } else {
+                    aClass = (Class<?>) wildcardType.getUpperBounds()[0];
+                }
             }
-        } else {
-            throw new BaseException("class未配置");
+            case null, default -> throw new BaseException("class未配置");
         }
     }
 

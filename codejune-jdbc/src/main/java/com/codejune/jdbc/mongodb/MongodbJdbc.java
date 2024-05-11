@@ -64,7 +64,7 @@ public class MongodbJdbc implements Jdbc {
         if (databases.isEmpty()) {
             throw new BaseException("mongoCredential is null");
         } else {
-            return getDatabase(databases.get(0).getName());
+            return getDatabase(databases.getFirst().getName());
         }
     }
 

@@ -26,13 +26,15 @@ public final class LocalShell implements Shell {
         InputStream inputStream = null;
         InputStream errorStream = null;
         try {
+            ProcessBuilder processBuilder = new ProcessBuilder();
             if (SystemOS.getCurrentSystemOS() == SystemOS.WINDOWS) {
-                process = Runtime.getRuntime().exec("cmd.exe /c " + command);
+                processBuilder.command("cmd.exe /c " + command);
             } else if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
-                process = Runtime.getRuntime().exec(command);
+                processBuilder.command(command);
             } else {
                 throw new BaseException("系统不支持");
             }
+            process = processBuilder.start();
             inputStream = process.getInputStream();
             TextInputStreamReader successTextInputStreamReader = new TextInputStreamReader(inputStream);
             successTextInputStreamReader.setListener(listener);

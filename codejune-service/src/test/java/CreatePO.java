@@ -24,7 +24,7 @@ public final class CreatePO {
         if (basePOClass == null) {
             return;
         }
-        Class<?> idClass = basePOClass.getGenericClass().get(0).getOriginClass();
+        Class<?> idClass = basePOClass.getGenericClass().getFirst().getOriginClass();
         createService(idClass);
         createController(idClass);
         createUiPO(idClass);

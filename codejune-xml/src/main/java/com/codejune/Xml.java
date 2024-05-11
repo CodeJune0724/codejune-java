@@ -77,11 +77,7 @@ public final class Xml {
      * */
     public Element setRootElement(String rootElementName) {
         Element rootElement = getRootElement();
-        if (rootElement == null) {
-            this.document.setRootElement(new BaseElement(rootElementName));
-        } else {
-            rootElement.setName(rootElementName);
-        }
+        rootElement.setName(rootElementName);
         return getRootElement();
     }
 

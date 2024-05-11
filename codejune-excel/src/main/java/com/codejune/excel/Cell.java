@@ -89,16 +89,12 @@ public final class Cell {
      * @param value 值
      * */
     public void setValue(Object value) {
-        if (value == null) {
-            this.cell.setCellValue("");
-        } else if (value instanceof Date date) {
-            this.cell.setCellValue(date);
-        } else if (value instanceof Double d) {
-            this.cell.setCellValue(d);
-        } else if (value instanceof Boolean b) {
-            this.cell.setCellValue(b);
-        } else {
-            this.cell.setCellValue(ObjectUtil.toString(value));
+        switch (value) {
+            case null -> this.cell.setCellValue("");
+            case Date date -> this.cell.setCellValue(date);
+            case Double d -> this.cell.setCellValue(d);
+            case Boolean b -> this.cell.setCellValue(b);
+            default -> this.cell.setCellValue(ObjectUtil.toString(value));
         }
     }
 

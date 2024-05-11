@@ -97,18 +97,20 @@ public final class Data {
         }
         if (tClassClassInfo.isInstanceof(Date.class)) {
             Date objectOfDate = null;
-            if (object instanceof Date) {
-                objectOfDate = (Date) object;
-            } else if (object instanceof Number) {
-                objectOfDate = new Date((Long) transform(object, Long.class, clone, builder));
-            } else if (object instanceof LocalDateTime localDateTime) {
-                return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-            } else {
-                for (String item : DateUtil.COMPATIBLE_DATES) {
-                    try {
-                        objectOfDate = DateUtil.parse(objectS, item);
-                        break;
-                    } catch (Exception ignored) {}
+            switch (object) {
+                case Date date -> objectOfDate = date;
+                case Number number -> objectOfDate = new Date((Long) transform(number, Long.class, clone, builder));
+                case LocalDateTime localDateTime -> {
+                    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+                }
+                default -> {
+                    for (String item : DateUtil.COMPATIBLE_DATES) {
+                        try {
+                            objectOfDate = DateUtil.parse(objectS, item);
+                            break;
+                        } catch (Exception ignored) {
+                        }
+                    }
                 }
             }
             if (objectOfDate == null) {
@@ -180,7 +182,7 @@ public final class Data {
                 if (key.equals(field.getName())) {
                     Object value;
                     if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                        value = transformList(entry.getValue(), field.getType(), field.getGenericClass().get(0).getOriginClass(), builder);
+                        value = transformList(entry.getValue(), field.getType(), field.getGenericClass().getFirst().getOriginClass(), builder);
                     } else {
                         value = transform(entry.getValue(), field.getType(), clone, builder);
                     }

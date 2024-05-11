@@ -72,7 +72,7 @@ public class MysqlJdbc extends SqlJdbc {
         if (ObjectUtil.isEmpty(query)) {
             throw new BaseException("not query database");
         }
-        return getDatabase(MapUtil.get(query.get(0), "database()", String.class));
+        return getDatabase(MapUtil.get(query.getFirst(), "database()", String.class));
     }
 
 }

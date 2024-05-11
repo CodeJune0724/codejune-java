@@ -64,7 +64,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
         if (query.getCount() == 0) {
             throw new BaseException("id not found");
         }
-        return query.getData().get(0);
+        return query.getData().getFirst();
     }
 
     /**
@@ -171,7 +171,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
             if (unique && !ObjectUtil.isEmpty(o)) {
                 QueryResult<T> query = query(Query.and(Compare.equals(fieldName, o)));
                 if (query.getCount() != 0) {
-                    String id = ObjectUtil.toString(query.getData().get(0).getId());
+                    String id = ObjectUtil.toString(query.getData().getFirst().getId());
                     if (StringUtil.isEmpty(id)) {
                         throw new BaseException("检查数据库数据存在id为空");
                     }

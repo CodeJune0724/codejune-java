@@ -107,7 +107,7 @@ public abstract class Database {
         if (list.size() != 1) {
             throw new Error("查询出错");
         }
-        Map<String, Object> map = list.get(0);
+        Map<String, Object> map = list.getFirst();
         ColumnToFieldHandler columnToFieldHandler = new ColumnToFieldHandler(tClass);
         return ObjectUtil.transform(MapUtil.keyHandler(map, columnToFieldHandler::handler), tClass);
     }

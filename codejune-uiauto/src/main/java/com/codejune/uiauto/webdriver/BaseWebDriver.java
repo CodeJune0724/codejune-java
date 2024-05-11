@@ -40,7 +40,7 @@ public abstract class BaseWebDriver implements com.codejune.uiauto.WebDriver {
 
     @Override
     public WebElement findElement(Selector selector, long millisecond) {
-        return findElements(selector, millisecond).get(0);
+        return findElements(selector, millisecond).getFirst();
     }
 
     @Override

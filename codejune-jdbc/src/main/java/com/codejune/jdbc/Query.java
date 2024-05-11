@@ -178,6 +178,9 @@ public class Query implements Builder {
     @Override
     public void build(Object object) {
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);
+        if (map == null) {
+            return;
+        }
         Object sort = MapUtil.get(map, "sort", Object.class);
         if (sort instanceof Map<?,?> sortMap) {
             List<Sort> list = new ArrayList<>();
@@ -189,9 +192,7 @@ public class Query implements Builder {
             }
             map.put("sort", list);
         }
-        if (map != null) {
-            map.put("sort", ArrayUtil.parse(MapUtil.get(map, "sort", List.class), Sort.class));
-        }
+        map.put("sort", ArrayUtil.parse(MapUtil.get(map, "sort", List.class), Sort.class));
         Object field = MapUtil.get(map, "field", Object.class);
         if (field instanceof Map<?,?> fieldMap) {
             List<Field> list = new ArrayList<>();
