@@ -69,7 +69,7 @@ public final class LinuxClientShell implements Closeable {
             } catch (Exception e) {
                 throw new BaseException(e);
             }
-            new Thread(() -> {
+            Thread.ofVirtual().start(() -> {
                 try (InputStream inputStream = this.channel.getInputStream()) {
                     TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
                     textInputStreamReader.setListener(this.listener);
@@ -77,7 +77,7 @@ public final class LinuxClientShell implements Closeable {
                 } catch (Exception e) {
                     throw new BaseException(e);
                 }
-            }).start();
+            });
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.outputStream);
             outputStreamWriter.write("\n".getBytes());
         }

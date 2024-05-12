@@ -19,18 +19,16 @@ public abstract class Progress {
             throw new BaseException("size is < 0");
         }
         this.total = total;
-        Thread thread = new Thread(() -> {
+        Thread.ofVirtual().start(() -> {
             while (true) {
-                listen(Progress.this);
+                listen();
                 ThreadUtil.sleep(listenInterval);
                 if (current >= total) {
-                    listen(Progress.this);
+                    listen();
                     break;
                 }
             }
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     public Progress(long size) {
@@ -47,10 +45,8 @@ public abstract class Progress {
 
     /**
      * 监听
-     *
-     * @param progress progress
      * */
-    public abstract void listen(Progress progress);
+    public abstract void listen();
 
     /**
      * 推进进度

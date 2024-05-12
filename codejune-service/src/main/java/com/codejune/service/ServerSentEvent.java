@@ -8,11 +8,25 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
  *
  * @author ZJ
  * */
-public final class ServerSentEvent extends SseEmitter {
+public abstract class ServerSentEvent extends SseEmitter {
 
     public ServerSentEvent() {
         super(-1L);
+        Thread.ofVirtual().start(() -> {
+            try {
+                this.execute();
+            } catch (Throwable e) {
+                this.sendError(e.getMessage());
+            } finally {
+                this.close();
+            }
+        });
     }
+
+    /**
+     * 执行操作
+     * */
+    public abstract void execute();
 
     /**
      * 监听关闭
@@ -29,7 +43,7 @@ public final class ServerSentEvent extends SseEmitter {
      * @param type type
      * @param message message
      * */
-    public void send(String type, Object message) {
+    public final void send(String type, Object message) {
         try {
             this.send(SseEmitter.event().name(type).data(Json.toString(message)));
         } catch (Exception ignored) {}
@@ -40,14 +54,14 @@ public final class ServerSentEvent extends SseEmitter {
      *
      * @param message message
      * */
-    public void sendError(Object message) {
+    public final void sendError(Object message) {
         this.send("$error", message);
     }
 
     /**
      * 关闭
      * */
-    public void close() {
+    public final void close() {
         try {
             this.complete();
         } catch (Exception ignored) {}
