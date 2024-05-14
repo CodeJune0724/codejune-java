@@ -19,6 +19,12 @@ public abstract class FastThreadExecutor<T> {
 
     private final long timeout;
 
+    /**
+     * FastThreadExecutor
+     *
+     * @param threadNum 线程数
+     * @param timeout 超时时间
+     * */
     public FastThreadExecutor(int threadNum, long timeout) {
         if (threadNum <= 0) {
             throw new BaseException("threadNum <= 0");
@@ -26,12 +32,19 @@ public abstract class FastThreadExecutor<T> {
         this.threadNum = threadNum;
         this.threadExecutor = null;
         this.timeout = timeout;
+        execute();
     }
 
     public FastThreadExecutor(int threadNum) {
         this(threadNum, -1);
     }
 
+    /**
+     * FastThreadExecutor
+     *
+     * @param threadExecutor 线程执行器
+     * @param timeout 超时时间
+     * */
     public FastThreadExecutor(ThreadExecutor threadExecutor, long timeout) {
         if (threadExecutor == null) {
             throw new BaseException("threadExecutor is null");
@@ -39,11 +52,19 @@ public abstract class FastThreadExecutor<T> {
         this.threadNum = 0;
         this.threadExecutor = threadExecutor;
         this.timeout = timeout;
+        execute();
     }
 
     public FastThreadExecutor(ThreadExecutor threadExecutor) {
         this(threadExecutor, -1);
     }
+
+    /**
+     * 获取数据
+     *
+     * @return Collection
+     * */
+    public abstract Collection<T> getData();
 
     /**
      * 数据处理方法
@@ -52,13 +73,9 @@ public abstract class FastThreadExecutor<T> {
      * */
     public abstract void handler(T t);
 
-    /**
-     * 开始执行
-     *
-     * @param collection 数据
-     * */
-    public final void run(Collection<T> collection) {
-        if (ObjectUtil.isEmpty(collection)) {
+    private void execute() {
+        Collection<T> data = getData();
+        if (ObjectUtil.isEmpty(data)) {
             return;
         }
         ThreadExecutor threadExecutor;
@@ -68,8 +85,8 @@ public abstract class FastThreadExecutor<T> {
             threadExecutor = new ThreadExecutor(this.threadNum);
         }
         try {
-            threadExecutor.startAwait(collection.size());
-            for (T t : collection) {
+            threadExecutor.startAwait(data.size());
+            for (T t : data) {
                 threadExecutor.run(() -> handler(t));
             }
             List<Throwable> await = threadExecutor.await(timeout);

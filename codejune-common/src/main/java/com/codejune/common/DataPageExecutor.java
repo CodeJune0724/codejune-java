@@ -10,13 +10,26 @@ import java.util.List;
  * */
 public abstract class DataPageExecutor<T> {
 
-    private final int size;
-
-    private final long count;
-
-    public DataPageExecutor(int size, long count) {
-        this.size = size;
-        this.count = count;
+    public DataPageExecutor(int size1, long count) {
+        for (int page = 1; ; page++) {
+            int currentSize;
+            if (count > 0) {
+                currentSize = (int) count - ((page - 1) * size1);
+                if (currentSize <= 0) {
+                    break;
+                }
+                if (currentSize >= size1) {
+                    currentSize = size1;
+                }
+            } else {
+                currentSize = size1;
+            }
+            List<T> data = query(page, currentSize);
+            if (count <= 0 && ObjectUtil.isEmpty(data)) {
+                break;
+            }
+            handler(data);
+        }
     }
 
     public DataPageExecutor(int size) {
@@ -43,30 +56,5 @@ public abstract class DataPageExecutor<T> {
      * @param data 数据
      * */
     public abstract void handler(List<T> data);
-
-    /**
-     * 执行
-     * */
-    public final void run() {
-        for (int page = 1; ; page++) {
-            int size;
-            if (count > 0) {
-                size = (int) count - ((page - 1) * this.size);
-                if (size <= 0) {
-                    break;
-                }
-                if (size >= this.size) {
-                    size = this.size;
-                }
-            } else {
-                size = this.size;
-            }
-            List<T> data = query(page, size);
-            if (count <= 0 && ObjectUtil.isEmpty(data)) {
-                break;
-            }
-            handler(data);
-        }
-    }
 
 }
