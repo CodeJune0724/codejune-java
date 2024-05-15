@@ -46,7 +46,9 @@ public final class ThreadUtil {
      * */
     public static void close(ThreadPoolExecutor threadPoolExecutor) {
         if (threadPoolExecutor != null) {
-            threadPoolExecutor.shutdown();
+            try {
+                threadPoolExecutor.shutdown();
+            } catch (Throwable ignored) {}
         }
     }
 
