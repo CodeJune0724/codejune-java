@@ -21,10 +21,10 @@ public abstract class Progress {
         this.total = total;
         Thread.ofVirtual().start(() -> {
             while (true) {
-                listen();
+                listen(this);
                 ThreadUtil.sleep(listenInterval);
                 if (current >= total) {
-                    listen();
+                    listen(this);
                     break;
                 }
             }
@@ -45,8 +45,10 @@ public abstract class Progress {
 
     /**
      * 监听
+     *
+     * @param progress this
      * */
-    public abstract void listen();
+    public abstract void listen(Progress progress);
 
     /**
      * 推进进度
