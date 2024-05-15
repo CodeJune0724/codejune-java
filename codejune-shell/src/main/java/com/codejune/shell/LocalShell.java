@@ -30,7 +30,7 @@ public final class LocalShell implements Shell {
             if (SystemOS.getCurrentSystemOS() == SystemOS.WINDOWS) {
                 processBuilder.command("cmd.exe /c " + command);
             } else if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
-                processBuilder.command(command);
+                processBuilder.command("/bin/bash", "-c", command);
             } else {
                 throw new BaseException("系统不支持");
             }
