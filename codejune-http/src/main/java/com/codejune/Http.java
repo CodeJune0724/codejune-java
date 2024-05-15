@@ -41,6 +41,8 @@ public final class Http {
 
     private Object body;
 
+    private int timeout = -1;
+
     {
         addHeader("accept", "*/*");
         addHeader("connection", "Keep-Alive");
@@ -67,6 +69,30 @@ public final class Http {
 
     public List<Header> getHeaderList() {
         return headerList;
+    }
+
+    public ContentType getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.contentType = contentType;
+        String key = "Content-type";
+        if (this.contentType == null) {
+            headerList.removeIf(header -> key.equals(header.getKey()));
+        } else {
+            if (contentType != ContentType.FORM_DATA) {
+                addHeader(key, contentType.getContentType());
+            }
+        }
+    }
+
+    public Object getBody() {
+        return body;
+    }
+
+    public void setBody(Object body) {
+        this.body = body;
     }
 
     /**
@@ -97,28 +123,13 @@ public final class Http {
         getHeaderList().removeIf(header -> key.equals(header.getKey()));
     }
 
-    public ContentType getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(ContentType contentType) {
-        this.contentType = contentType;
-        String key = "Content-type";
-        if (this.contentType == null) {
-            headerList.removeIf(header -> key.equals(header.getKey()));
-        } else {
-            if (contentType != ContentType.FORM_DATA) {
-                addHeader(key, contentType.getContentType());
-            }
-        }
-    }
-
-    public Object getBody() {
-        return body;
-    }
-
-    public void setBody(Object body) {
-        this.body = body;
+    /**
+     * 设置超时时间
+     *
+     * @param timeout timeout
+     * */
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     /**
@@ -137,7 +148,7 @@ public final class Http {
                 }
             };
             httpEntityEnclosingRequestBase.setURI(URI.create(url));
-            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().build());
+            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().setConnectTimeout(this.timeout).setSocketTimeout(this.timeout).setConnectionRequestTimeout(this.timeout).build());
             for (Header header : headerList) {
                 httpEntityEnclosingRequestBase.setHeader(header.getKey(), header.getValue());
             }
