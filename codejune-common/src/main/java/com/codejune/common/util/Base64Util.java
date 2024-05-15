@@ -50,6 +50,9 @@ public final class Base64Util {
      * @return base64编码
      * */
     public static byte[] decodeToByte(String data) {
+        if (StringUtil.isEmpty(data)) {
+            return null;
+        }
         return Base64.getDecoder().decode(data);
     }
 
