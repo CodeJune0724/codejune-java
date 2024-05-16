@@ -99,7 +99,12 @@ public final class ArrayUtil {
         if (action == null) {
             action = param -> null;
         }
-        Collection<RETURN> result = (Collection<RETURN>) ObjectUtil.newInstance(collection.getClass());
+        Collection<RETURN> result;
+        try {
+            result = (Collection<RETURN>) ObjectUtil.newInstance(collection.getClass());
+        } catch (Exception e) {
+            result = new ArrayList<>();
+        }
         for (PARAM item : collection) {
             RETURN then = action.apply(item);
             if (then == null) {
@@ -143,7 +148,11 @@ public final class ArrayUtil {
         }
         List<RETURN> result;
         if (collection instanceof List<?>) {
-            result = (List<RETURN>) ObjectUtil.newInstance(collection.getClass());
+            try {
+                result = (List<RETURN>) ObjectUtil.newInstance(collection.getClass());
+            } catch (Exception e) {
+                result = new ArrayList<>();
+            }
         } else {
             result = new ArrayList<>();
         }
@@ -190,7 +199,11 @@ public final class ArrayUtil {
         }
         Set<RETURN> result;
         if (collection instanceof Set<?>) {
-            result = (Set<RETURN>) ObjectUtil.newInstance(collection.getClass());
+            try {
+                result = (Set<RETURN>) ObjectUtil.newInstance(collection.getClass());
+            } catch (Exception e) {
+                result = new HashSet<>();
+            }
         } else {
             result = new HashSet<>();
         }
@@ -275,7 +288,7 @@ public final class ArrayUtil {
         if (ts == null) {
             return null;
         }
-        return Arrays.asList(ts);
+        return new ArrayList<>(Arrays.asList(ts));
     }
 
     /**
