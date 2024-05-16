@@ -158,7 +158,7 @@ public final class ObjectUtil {
             for (Field field : classInfo.getFields()) {
                 Object setData;
                 if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                    setData = Data.transformList(o2Map.get(field.getName()), field.getType(), field.getGenericClass().getFirst().getOriginClass(), false);
+                    setData = Data.transformCollection(o2Map.get(field.getName()), field.getType(), field.getGenericClass().getFirst().getOriginClass(), false);
                 } else {
                     setData = transform(o2Map.get(field.getName()), field.getType(), false);
                 }

@@ -8,7 +8,7 @@ import com.codejune.common.util.ThreadUtil;
  *
  * @author ZJ
  * */
-public abstract class Progress {
+public abstract class Progress implements Closeable {
 
     private long current = 0;
 
@@ -35,11 +35,11 @@ public abstract class Progress {
         this(size, 1000);
     }
 
-    public long getTotal() {
+    public final long getTotal() {
         return total;
     }
 
-    public long getCurrent() {
+    public final long getCurrent() {
         return current;
     }
 
@@ -86,6 +86,11 @@ public abstract class Progress {
             return totalSizeDouble;
         }
         return ObjectUtil.transform(String.format("%.2f", (currentSizeDouble / totalSizeDouble) * 100), Double.class);
+    }
+
+    @Override
+    public final void close() {
+        this.countDown(this.getTotal());
     }
 
 }

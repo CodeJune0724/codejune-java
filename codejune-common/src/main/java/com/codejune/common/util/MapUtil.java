@@ -15,28 +15,28 @@ public final class MapUtil {
      * 转成Map
      *
      * @param object object
-     * @param tClass tClass
-     * @param eClass eClass
-     * @param <T> T
-     * @param <E> E
+     * @param kClass kClass
+     * @param vClass vClass
+     * @param <K> K
+     * @param <V> V
      *
      * @return Map
      * */
     @SuppressWarnings("unchecked")
-    public static <T, E> Map<T, E> parse(Object object, Class<T> tClass, Class<E> eClass) {
+    public static <K, V> Map<K, V> parse(Object object, Class<K> kClass, Class<V> vClass) {
         Map<?, ?> map = parse(object);
-        if (map == null || tClass == null || eClass == null) {
+        if (map == null || kClass == null || vClass == null) {
             return null;
         }
-        Map<T, E> result;
+        Map<K, V> result;
         try {
-            result = map.getClass().getDeclaredConstructor().newInstance();
+            result = ObjectUtil.newInstance(map.getClass());
         } catch (Exception e) {
             result = new LinkedHashMap<>();
         }
         Set<?> keySet = map.keySet();
         for (Object key : keySet) {
-            result.put(ObjectUtil.transform(key, tClass), ObjectUtil.transform(map.get(key), eClass));
+            result.put(ObjectUtil.transform(key, kClass), ObjectUtil.transform(map.get(key), vClass));
         }
         return result;
     }
@@ -84,6 +84,112 @@ public final class MapUtil {
     }
 
     /**
+     * 获取map
+     *
+     * @param map map
+     * @param key key
+     * @param kClass kClass
+     * @param vClass vClass
+     * @param <K> K
+     * @param <V> V
+     *
+     * @return Map
+     * */
+    public static <K, V> Map<K, V> getMap(Map<?, ?> map, Object key, Class<K> kClass, Class<V> vClass) {
+        return parse(get(map, key, Map.class), kClass, vClass);
+    }
+
+    /**
+     * 获取collection
+     *
+     * @param map map
+     * @param key key
+     * @param vClass vClass
+     * @param <V> V
+     *
+     * @return Collection
+     * */
+    public static <V> Collection<V> getCollection(Map<?, ?> map, Object key, Class<V> vClass) {
+        return ArrayUtil.parse(get(map, key, Collection.class), vClass);
+    }
+
+    /**
+     * 获取Collection<Map<K, V>>
+     *
+     * @param map map
+     * @param key key
+     * @param kClass kClass
+     * @param vClass vClass
+     * @param <K> K
+     * @param <V> V
+     *
+     * @return Collection<Map<K, V>>
+     * */
+    public static <K, V> Collection<Map<K, V>> getCollectionMap(Map<?, ?> map, Object key, Class<K> kClass, Class<V> vClass) {
+        return ArrayUtil.parseMap(get(map, key, Collection.class), kClass, vClass);
+    }
+
+    /**
+     * 获取list
+     *
+     * @param map map
+     * @param key key
+     * @param vClass vClass
+     * @param <V> V
+     *
+     * @return List
+     * */
+    public static <V> List<V> getList(Map<?, ?> map, Object key, Class<V> vClass) {
+        return ArrayUtil.parseList(get(map, key, Collection.class), vClass);
+    }
+
+    /**
+     * 获取List<Map<K, V>>
+     *
+     * @param map map
+     * @param key key
+     * @param kClass kClass
+     * @param vClass vClass
+     * @param <K> K
+     * @param <V> V
+     *
+     * @return List<Map<K, V>>
+     * */
+    public static <K, V> List<Map<K, V>> getListMap(Map<?, ?> map, Object key, Class<K> kClass, Class<V> vClass) {
+        return ArrayUtil.parseListMap(get(map, key, Collection.class), kClass, vClass);
+    }
+
+    /**
+     * 获取set
+     *
+     * @param map map
+     * @param key key
+     * @param vClass vClass
+     * @param <V> V
+     *
+     * @return Set
+     * */
+    public static <V> Set<V> getSet(Map<?, ?> map, Object key, Class<V> vClass) {
+        return ArrayUtil.parseSet(get(map, key, Collection.class), vClass);
+    }
+
+    /**
+     * 获取Set<Map<K, V>>
+     *
+     * @param map map
+     * @param key key
+     * @param kClass kClass
+     * @param vClass vClass
+     * @param <K> K
+     * @param <V> V
+     *
+     * @return Set<Map<K, V>>
+     * */
+    public static <K, V> Set<Map<K, V>> getSetMap(Map<?, ?> map, Object key, Class<K> kClass, Class<V> vClass) {
+        return ArrayUtil.parseSetMap(get(map, key, Collection.class), kClass, vClass);
+    }
+
+    /**
      * key处理
      *
      * @param map map
@@ -116,24 +222,26 @@ public final class MapUtil {
     /**
      * 生成map
      *
-     * @param kClass kClass
-     * @param vClass vClass
+     * @param result result
+     * @param entryList entryList
      * @param <K> K
      * @param <V> V
-     * @param entryList entryList
      *
      * @return map
      * */
-    public static <K, V> Map<K, V> asMap(Class<K> kClass, Class<V> vClass, Map.Entry<?, ?>... entryList) {
+    @SafeVarargs
+    public static <K, V> Map<K, V> asMap(Map<K, V> result, Map.Entry<K, V>... entryList) {
         if (entryList == null) {
             return null;
         }
-        Map<K, V> result = new HashMap<>();
-        for (Map.Entry<?, ?> entry : entryList) {
+        if (result == null) {
+            result = new LinkedHashMap<>();
+        }
+        for (Map.Entry<K, V> entry : entryList) {
             if (entry.getKey() == null) {
                 continue;
             }
-            result.put(ObjectUtil.transform(entry.getKey(), kClass), ObjectUtil.transform(entry.getValue(), vClass));
+            result.put(entry.getKey(), entry.getValue());
         }
         return result;
     }
@@ -149,17 +257,7 @@ public final class MapUtil {
      * */
     @SafeVarargs
     public static <K, V> Map<K, V> asMap(Map.Entry<K, V>... entryList) {
-        if (entryList == null) {
-            return null;
-        }
-        Map<K, V> result = new HashMap<>();
-        for (Map.Entry<K, V> entry : entryList) {
-            if (entry.getKey() == null) {
-                continue;
-            }
-            result.put(entry.getKey(), entry.getValue());
-        }
-        return result;
+        return asMap(null, entryList);
     }
 
 }

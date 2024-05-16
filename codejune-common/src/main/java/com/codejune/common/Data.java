@@ -93,7 +93,7 @@ public final class Data {
             return Boolean.valueOf(objectS);
         }
         if (tClassClassInfo.isInstanceof(Collection.class)) {
-            return transformList(object, tClass, Object.class, builder);
+            return transformCollection(object, tClass, Object.class, builder);
         }
         if (tClassClassInfo.isInstanceof(Date.class)) {
             Date objectOfDate = null;
@@ -182,7 +182,7 @@ public final class Data {
                 if (key.equals(field.getName())) {
                     Object value;
                     if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                        value = transformList(entry.getValue(), field.getType(), field.getGenericClass().getFirst().getOriginClass(), builder);
+                        value = transformCollection(entry.getValue(), field.getType(), field.getGenericClass().getFirst().getOriginClass(), builder);
                     } else {
                         value = transform(entry.getValue(), field.getType(), clone, builder);
                     }
@@ -241,7 +241,7 @@ public final class Data {
      * @return Collection<?>
      * */
     @SuppressWarnings("unchecked")
-    public static Collection<?> transformList(Object object, Class<?> tClass, Class<?> genericClass, boolean builder) {
+    public static Collection<?> transformCollection(Object object, Class<?> tClass, Class<?> genericClass, boolean builder) {
         if (object == null) {
             return null;
         }
@@ -279,8 +279,8 @@ public final class Data {
      *
      * @return Collection<?>
      * */
-    public static Collection<?> transformList(Object object, Class<?> tClass, Class<?> genericClass) {
-        return transformList(object, tClass, genericClass, true);
+    public static Collection<?> transformCollection(Object object, Class<?> tClass, Class<?> genericClass) {
+        return transformCollection(object, tClass, genericClass, true);
     }
 
     /**

@@ -126,7 +126,7 @@ public final class HttpResponseResult<T> implements Builder {
     public <E> HttpResponseResult<E> parse(Class<E> tClass) {
         HttpResponseResult<E> result = new HttpResponseResult<>();
         result.build(this);
-        result.setBody(Json.parse(this.getBody(), tClass));
+        result.setBody(Json.transform(this.getBody(), tClass));
         return result;
     }
 

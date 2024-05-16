@@ -75,7 +75,7 @@ public final class Http {
         return contentType;
     }
 
-    public void setContentType(ContentType contentType) {
+    public Http setContentType(ContentType contentType) {
         this.contentType = contentType;
         String key = "Content-type";
         if (this.contentType == null) {
@@ -85,14 +85,16 @@ public final class Http {
                 addHeader(key, contentType.getContentType());
             }
         }
+        return this;
     }
 
     public Object getBody() {
         return body;
     }
 
-    public void setBody(Object body) {
+    public Http setBody(Object body) {
         this.body = body;
+        return this;
     }
 
     /**
@@ -100,36 +102,30 @@ public final class Http {
      *
      * @param key 键
      * @param value 值
+     *
+     * @return this
      * */
-    public void addHeader(String key, String value) {
+    public Http addHeader(String key, String value) {
         if (StringUtil.isEmpty(key)) {
-            return;
+            return this;
         }
         if (key.equalsIgnoreCase("content-length")) {
-            return;
+            return this;
         }
         this.headerList.add(new Header(key, value));
-    }
-
-    /**
-     * 删除请求头
-     *
-     * @param key key
-     * */
-    public void deleteHeader(String key) {
-        if (StringUtil.isEmpty(key)) {
-            return;
-        }
-        getHeaderList().removeIf(header -> key.equals(header.getKey()));
+        return this;
     }
 
     /**
      * 设置超时时间
      *
      * @param timeout timeout
+     *
+     * @return this
      * */
-    public void setTimeout(int timeout) {
+    public Http setTimeout(int timeout) {
         this.timeout = timeout;
+        return this;
     }
 
     /**
