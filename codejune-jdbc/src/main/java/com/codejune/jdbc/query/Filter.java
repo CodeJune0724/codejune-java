@@ -139,11 +139,11 @@ public final class Filter implements Builder {
                 if (map == null) {
                     return new ArrayList<>();
                 }
-                List<Object> or = ArrayUtil.parse(MapUtil.get(map, "$or", List.class), Object.class);
+                List<Object> or = ArrayUtil.parseList(MapUtil.get(map, "$or", List.class), Object.class);
                 if (or == null) {
                     or = new ArrayList<>();
                 }
-                List<Object> and = ArrayUtil.parse(MapUtil.get(map, "$and", List.class), Object.class);
+                List<Object> and = ArrayUtil.parseList(MapUtil.get(map, "$and", List.class), Object.class);
                 if (and == null) {
                     and = new ArrayList<>();
                 }

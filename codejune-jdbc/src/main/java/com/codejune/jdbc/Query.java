@@ -161,7 +161,7 @@ public class Query implements Builder {
         if (action == null) {
             return this;
         }
-        getFilter().getConfig().setCleanNullExclude(ArrayUtil.parse(getFilter().getConfig().getCleanNullExclude(), action));
+        getFilter().getConfig().setCleanNullExclude(ArrayUtil.parseList(getFilter().getConfig().getCleanNullExclude(), action));
         getFilter().compareHandler(item -> {
             item.setKey(action.apply(item.getKey()));
             return item;
@@ -228,8 +228,8 @@ public class Query implements Builder {
         this.setSize(MapUtil.get(map, "size", Integer.class));
         this.setCount(MapUtil.get(map, "count", Boolean.class));
         this.setFilter(MapUtil.get(map, "filter", Filter.class));
-        this.setSort(ArrayUtil.parse(MapUtil.get(map, "sort", List.class), Sort.class));
-        this.setField(ArrayUtil.parse(MapUtil.get(map, "field", List.class), Field.class));
+        this.setSort(ArrayUtil.parseList(MapUtil.get(map, "sort", List.class), Sort.class));
+        this.setField(ArrayUtil.parseList(MapUtil.get(map, "field", List.class), Field.class));
     }
 
     /**
