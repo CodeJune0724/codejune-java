@@ -8,7 +8,9 @@ import com.codejune.common.io.reader.TextInputStreamReader;
 import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.StringUtil;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * WindowsShell
@@ -35,16 +37,21 @@ public final class LocalShell implements Shell {
                 throw new BaseException("系统不支持");
             }
             process = processBuilder.start();
+            Function<InputStream, String> readFunction = (inputStreamData) -> {
+                AtomicReference<String> result = new AtomicReference<>();
+                TextInputStreamReader successTextInputStreamReader = new TextInputStreamReader(inputStreamData);
+                successTextInputStreamReader.read(data -> {
+                    if (listener != null) {
+                        listener.accept(data);
+                    }
+                    result.set(result.get() + data);
+                });
+                return result.get();
+            };
             inputStream = process.getInputStream();
-            TextInputStreamReader successTextInputStreamReader = new TextInputStreamReader(inputStream);
-            successTextInputStreamReader.setListener(listener);
-            String success = successTextInputStreamReader.getData();
-
+            String success = readFunction.apply(inputStream);
             errorStream = process.getErrorStream();
-            TextInputStreamReader errorTextInputStreamReader = new TextInputStreamReader(errorStream);
-            errorTextInputStreamReader.setListener(listener);
-            String error = errorTextInputStreamReader.getData();
-
+            String error = readFunction.apply(errorStream);
             int i = process.waitFor();
             if (i == 0) {
                 return ResponseResult.returnTrue(i, null, success);

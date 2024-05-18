@@ -5,11 +5,13 @@ import com.codejune.common.BaseException;
 import com.codejune.common.Closeable;
 import com.codejune.common.ResponseResult;
 import com.codejune.common.io.reader.TextInputStreamReader;
+import com.codejune.common.util.StringUtil;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -39,6 +41,9 @@ public final class LinuxShell implements Shell, Closeable {
 
     @Override
     public ResponseResult command(String command, Consumer<String> listener) {
+        if (StringUtil.isEmpty(command)) {
+            return null;
+        }
         ChannelExec channelExec = null;
         try {
             channelExec = (ChannelExec) session.openChannel("exec");
@@ -46,14 +51,23 @@ public final class LinuxShell implements Shell, Closeable {
             channelExec.connect();
             InputStream inputStream = channelExec.getInputStream();
             InputStream errStream = channelExec.getErrStream();
-            String result = "";
+            AtomicReference<String> result = new AtomicReference<>();
+            result.set("");
             TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-            textInputStreamReader.setListener(listener);
-            result = result + textInputStreamReader.getData();
+            textInputStreamReader.read(data -> {
+                if (listener != null) {
+                    listener.accept(data);
+                }
+                result.set(result.get() + data);
+            });
             TextInputStreamReader errorTextInputStreamReader = new TextInputStreamReader(errStream);
-            errorTextInputStreamReader.setListener(listener);
-            result = result + errorTextInputStreamReader.getData();
-            return ResponseResult.returnTrue(channelExec.getExitStatus(), null, result);
+            errorTextInputStreamReader.read(data -> {
+                if (listener != null) {
+                    listener.accept(data);
+                }
+                result.set(result.get() + data);
+            });
+            return ResponseResult.returnTrue(channelExec.getExitStatus(), null, result.get());
         }
         catch (Exception e) {
             throw new BaseException(e);

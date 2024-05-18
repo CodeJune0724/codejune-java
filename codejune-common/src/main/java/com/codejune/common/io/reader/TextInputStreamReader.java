@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 /**
  * 文本输入流读取器
@@ -31,19 +32,18 @@ public final class TextInputStreamReader extends Reader<String> {
         this.charset = charset;
     }
 
-    @Override
-    public void read() {
-        read(null);
-    }
-
     /**
      * 读取
      *
      * @param range 读取范围
+     * @param listener listener
      * */
-    public void read(Range range) {
+    public void read(Range range, Consumer<String> listener) {
         if (range == null) {
             range = new Range(0L, null);
+        }
+        if (listener == null) {
+            listener = s -> {};
         }
         Long length = range.getEnd() == null ? null : range.getEnd() - range.getStart();
         if (length != null && length == 0) {
@@ -82,12 +82,13 @@ public final class TextInputStreamReader extends Reader<String> {
     public String getData() {
         StringBuilder result = new StringBuilder();
         TextInputStreamReader textInputStreamReader = new TextInputStreamReader(this.inputStream);
-        textInputStreamReader.setListener(data -> {
-            result.append(data).append("\n");
-            TextInputStreamReader.this.listener.accept(data);
-        });
-        textInputStreamReader.read();
+        textInputStreamReader.read(data -> result.append(data).append("\n"));
         return ObjectUtil.toString(ObjectUtil.subString(result.toString(), result.length() - 1));
+    }
+
+    @Override
+    public void read(Consumer<String> listener) {
+        read(null, listener);
     }
 
 }

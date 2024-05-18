@@ -4,6 +4,7 @@ import com.codejune.common.BaseException;
 import com.codejune.common.io.Reader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.function.Consumer;
 
 /**
  * 输入流读取器
@@ -17,7 +18,10 @@ public class InputStreamReader extends Reader<ByteBuffer> {
     }
 
     @Override
-    public final void read() {
+    public final void read(Consumer<ByteBuffer> listener) {
+        if (listener == null) {
+            listener = byteBuffer -> {};
+        }
         try {
             byte[] bytes = new byte[this.size];
             int size = this.inputStream.read(bytes, 0, this.size);

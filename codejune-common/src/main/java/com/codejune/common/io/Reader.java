@@ -15,8 +15,6 @@ public abstract class Reader<T> {
 
     protected int size = 1024;
 
-    protected Consumer<T> listener = data -> {};
-
     protected Reader(InputStream inputStream) {
         if (inputStream == null) {
             throw new BaseException("inputStream is null");
@@ -31,17 +29,12 @@ public abstract class Reader<T> {
         this.size = size;
     }
 
-    public final void setListener(Consumer<T> listener) {
-        if (listener == null) {
-            return;
-        }
-        this.listener = listener;
-    }
-
     /**
      * 读取
+     *
+     * @param listener listener
      * */
-    public abstract void read();
+    public abstract void read(Consumer<T> listener);
 
     /**
      * 获取大小

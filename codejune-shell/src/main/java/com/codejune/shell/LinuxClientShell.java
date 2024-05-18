@@ -72,8 +72,7 @@ public final class LinuxClientShell implements Closeable {
             Thread.ofVirtual().start(() -> {
                 try (InputStream inputStream = this.channel.getInputStream()) {
                     TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-                    textInputStreamReader.setListener(this.listener);
-                    textInputStreamReader.read();
+                    textInputStreamReader.read(this.listener);
                 } catch (Exception e) {
                     throw new BaseException(e);
                 }

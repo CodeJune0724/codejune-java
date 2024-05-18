@@ -7,6 +7,7 @@ import com.codejune.common.util.IOUtil;
 import com.codejune.common.util.ObjectUtil;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.function.Consumer;
 
 /**
  * 文件读取器
@@ -22,19 +23,18 @@ public final class FileReader extends InputStreamReader implements Closeable {
         this.file = file;
     }
 
-    @Override
-    public void close() {
-        IOUtil.close(inputStream);
-    }
-
     /**
      * 读取
      *
      * @param range 读取范围
+     * @param listener listener
      * */
-    public void read(Range range) {
+    public void read(Range range, Consumer<ByteBuffer> listener) {
         if (range == null) {
             range = new Range(0L, null);
+        }
+        if (listener == null) {
+            listener = byteBuffer -> {};
         }
         Long length = range.getEnd() == null ? null : range.getEnd() - range.getStart();
         if (length != null && length == 0) {
@@ -61,6 +61,11 @@ public final class FileReader extends InputStreamReader implements Closeable {
         } finally {
             IOUtil.close(randomAccessFile);
         }
+    }
+
+    @Override
+    public void close() {
+        IOUtil.close(inputStream);
     }
 
 }

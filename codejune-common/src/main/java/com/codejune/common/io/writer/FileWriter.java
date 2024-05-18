@@ -43,14 +43,13 @@ public final class FileWriter {
         try (final RandomAccessFile randomAccessFile = new RandomAccessFile(this.file, "rw")) {
             randomAccessFile.seek(position);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            inputStreamReader.setListener(data -> {
+            inputStreamReader.read((data -> {
                 try {
                     randomAccessFile.write(data.array(), 0, data.limit());
                 } catch (Exception e) {
                     throw new BaseException(e);
                 }
-            });
-            inputStreamReader.read();
+            }));
         } catch (Exception e) {
             throw new BaseException(e);
         }
