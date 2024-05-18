@@ -24,23 +24,31 @@ public final class ClassInfo {
 
     private final Type type;
 
-    private final Class<?> aClass;
+    private final Class<?> rawClass;
 
     public ClassInfo(Type type) {
         this.type = type;
         switch (type) {
-            case Class<?> typeOfClass -> this.aClass = typeOfClass;
-            case ParameterizedType parameterizedType -> this.aClass = (Class<?>) parameterizedType.getRawType();
+            case Class<?> typeOfClass -> this.rawClass = typeOfClass;
+            case ParameterizedType parameterizedType -> this.rawClass = (Class<?>) parameterizedType.getRawType();
             case WildcardType wildcardType -> {
                 Type[] lowerBounds = wildcardType.getLowerBounds();
                 if (lowerBounds.length != 0) {
-                    aClass = (Class<?>) lowerBounds[0];
+                    rawClass = (Class<?>) lowerBounds[0];
                 } else {
-                    aClass = (Class<?>) wildcardType.getUpperBounds()[0];
+                    rawClass = (Class<?>) wildcardType.getUpperBounds()[0];
                 }
             }
             case null, default -> throw new BaseException("class未配置");
         }
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public Class<?> getRawClass() {
+        return rawClass;
     }
 
     /**
@@ -49,16 +57,7 @@ public final class ClassInfo {
      * @return 名称
      * */
     public String getName() {
-        return this.aClass.getName();
-    }
-
-    /**
-     * 获取原始类
-     *
-     * @return 原始类
-     * */
-    public Class<?> getOriginClass() {
-        return this.aClass;
+        return this.rawClass.getName();
     }
 
     /**
@@ -102,11 +101,11 @@ public final class ClassInfo {
      * */
     public List<ClassInfo> getSuperClass() {
         List<ClassInfo> result = new ArrayList<>();
-        Type superclass = aClass.getGenericSuperclass();
+        Type superclass = rawClass.getGenericSuperclass();
         if (superclass != null) {
             result.add(new ClassInfo(superclass));
         }
-        Type[] genericInterfaces = aClass.getGenericInterfaces();
+        Type[] genericInterfaces = rawClass.getGenericInterfaces();
         for (Type type : genericInterfaces) {
             result.add(new ClassInfo(type));
         }
@@ -125,7 +124,7 @@ public final class ClassInfo {
             return null;
         }
         for (ClassInfo classInfo : this.getSuperClass()) {
-            if (classInfo.getOriginClass() == aClass) {
+            if (classInfo.getRawClass() == aClass) {
                 return classInfo;
             }
             ClassInfo superClass = classInfo.getSuperClass(aClass);
@@ -143,7 +142,7 @@ public final class ClassInfo {
      * */
     public List<Field> getFields() {
         List<Field> result = new ArrayList<>();
-        List<java.lang.reflect.Field> fieldList = new ArrayList<>(Arrays.asList(this.aClass.getDeclaredFields()));
+        List<java.lang.reflect.Field> fieldList = new ArrayList<>(Arrays.asList(this.rawClass.getDeclaredFields()));
         List<ClassInfo> superClass = getSuperClass();
         for (ClassInfo classInfo : superClass) {
             result.addAll(classInfo.getFields());
@@ -181,7 +180,7 @@ public final class ClassInfo {
      * */
     public List<Method> getMethods() {
         List<Method> result = new ArrayList<>();
-        List<java.lang.reflect.Method> methodList = new ArrayList<>(Arrays.asList(this.aClass.getMethods()));
+        List<java.lang.reflect.Method> methodList = new ArrayList<>(Arrays.asList(this.rawClass.getMethods()));
         List<ClassInfo> superClass = getSuperClass();
         for (ClassInfo classInfo : superClass) {
             result.addAll(classInfo.getMethods());
@@ -225,7 +224,7 @@ public final class ClassInfo {
         }
         Method result;
         try {
-            result = new Method(aClass.getMethod("get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1)));
+            result = new Method(rawClass.getMethod("get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1)));
         } catch (Exception e) {
             result = null;
         }
@@ -233,7 +232,7 @@ public final class ClassInfo {
             return result;
         }
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(aClass);
+            BeanInfo beanInfo = Introspector.getBeanInfo(rawClass);
             for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
                 if (propertyDescriptor.getName().equals(fieldName)) {
                     java.lang.reflect.Method readMethod = propertyDescriptor.getReadMethod();
@@ -266,7 +265,7 @@ public final class ClassInfo {
         }
         Method result;
         try {
-            result = new Method(aClass.getMethod("set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1), field.getType()));
+            result = new Method(rawClass.getMethod("set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1), field.getType()));
         } catch (Exception e) {
             result = null;
         }
@@ -274,7 +273,7 @@ public final class ClassInfo {
             return result;
         }
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(aClass);
+            BeanInfo beanInfo = Introspector.getBeanInfo(rawClass);
             for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
                 if (propertyDescriptor.getName().equals(fieldName)) {
                     java.lang.reflect.Method writeMethod = propertyDescriptor.getWriteMethod();
@@ -301,7 +300,7 @@ public final class ClassInfo {
         if (annotationClass == null) {
             return false;
         }
-        return this.aClass.isAnnotationPresent(annotationClass);
+        return this.rawClass.isAnnotationPresent(annotationClass);
     }
 
     /**
@@ -313,7 +312,7 @@ public final class ClassInfo {
      * @return 注解
      * */
     public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        return this.aClass.getAnnotation(annotationClass);
+        return this.rawClass.getAnnotation(annotationClass);
     }
 
     /**
@@ -327,7 +326,7 @@ public final class ClassInfo {
         if (a == null || a == Object.class) {
             return false;
         }
-        return a.isAssignableFrom(aClass);
+        return a.isAssignableFrom(rawClass);
     }
 
     /**
@@ -341,8 +340,8 @@ public final class ClassInfo {
         if (type == null) {
             return false;
         }
-        Class<?> a = new ClassInfo(type).getOriginClass();
-        return a == aClass;
+        Class<?> a = new ClassInfo(type).getRawClass();
+        return a == rawClass;
     }
 
 }

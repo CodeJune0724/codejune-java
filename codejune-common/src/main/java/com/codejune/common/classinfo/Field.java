@@ -78,11 +78,11 @@ public final class Field {
             List<ClassInfo> genericClass = getGenericClass();
             Object setData;
             if (classInfo.equals(List.class) && !genericClass.isEmpty()) {
-                setData = ArrayUtil.parse(ObjectUtil.transform(data, List.class), genericClass.getFirst().getOriginClass());
+                setData = ArrayUtil.parse(ObjectUtil.transform(data, List.class), genericClass.getFirst().getRawClass());
             } else if (classInfo.equals(Map.class) && genericClass.size() >= 2) {
-                setData = MapUtil.parse(data, genericClass.getFirst().getOriginClass(), genericClass.get(1).getOriginClass());
+                setData = MapUtil.parse(data, genericClass.getFirst().getRawClass(), genericClass.get(1).getRawClass());
             } else {
-                setData = Data.transform(data, classInfo.getOriginClass());
+                setData = Data.transform(data, classInfo.getRawClass());
             }
             this.field.set(object, setData);
         } catch (Exception e) {

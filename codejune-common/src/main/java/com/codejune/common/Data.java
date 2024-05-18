@@ -182,7 +182,7 @@ public final class Data {
                 if (key.equals(field.getName())) {
                     Object value;
                     if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                        value = transformCollection(entry.getValue(), field.getType(), field.getGenericClass().getFirst().getOriginClass(), builder);
+                        value = transformCollection(entry.getValue(), field.getType(), field.getGenericClass().getFirst().getRawClass(), builder);
                     } else {
                         value = transform(entry.getValue(), field.getType(), clone, builder);
                     }
