@@ -172,6 +172,14 @@ public final class Json implements Builder {
         }
     }
 
+    @Override
+    public String toString() {
+        if (isJson(this.data)) {
+            return toString(this.data);
+        }
+        return ObjectUtil.toString(this.data);
+    }
+
     /**
      * 转成json字符串
      *
@@ -220,7 +228,7 @@ public final class Json implements Builder {
      *
      * @return 是否是json格式
      * */
-    public static boolean isJson(String data) {
+    public static boolean isJson(Object data) {
         if (!StringUtil.isEmpty(data)) {
             try {
                 Json.transform(data, Map.class);

@@ -3,13 +3,16 @@ package com.codejune.http;
 import com.codejune.Json;
 import com.codejune.common.BaseException;
 import com.codejune.common.Builder;
+import com.codejune.common.ClassInfo;
 import com.codejune.common.util.ObjectUtil;
 import com.codejune.common.util.RegexUtil;
 import com.codejune.common.util.StringUtil;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * HttpResponseResult
@@ -124,9 +127,17 @@ public final class HttpResponseResult<T> implements Builder {
      * @param <E> T
      * */
     public <E> HttpResponseResult<E> parse(Class<E> tClass) {
+        if (tClass == null) {
+            throw new BaseException("class is null");
+        }
         HttpResponseResult<E> result = new HttpResponseResult<>();
         result.build(this);
-        result.setBody(Json.transform(this.getBody(), tClass));
+        ClassInfo classInfo = new ClassInfo(tClass);
+        if (classInfo.isInstanceof(Map.class) || classInfo.isInstanceof(Collection.class)) {
+            result.setBody(Json.transform(this.getBody(), tClass));
+        } else {
+            result.setBody(ObjectUtil.transform(this.body, tClass));
+        }
         return result;
     }
 
