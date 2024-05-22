@@ -108,8 +108,7 @@ public final class Data {
                         try {
                             objectOfDate = DateUtil.parse(objectS, item);
                             break;
-                        } catch (Exception ignored) {
-                        }
+                        } catch (Exception ignored) {}
                     }
                 }
             }
