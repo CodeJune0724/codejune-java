@@ -3,6 +3,8 @@ package com.codejune.service;
 import com.codejune.Jdbc;
 import com.codejune.common.BaseException;
 import com.codejune.Pool;
+import com.codejune.common.Buffer;
+import com.codejune.common.Closeable;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
 import com.codejune.common.util.MapUtil;
@@ -15,6 +17,7 @@ import com.codejune.service.handler.FieldToColumnHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -22,98 +25,94 @@ import java.util.function.Function;
  *
  * @author ZJ
  * */
-public abstract class Database {
+public class Database {
 
-    private final Pool<Jdbc> pool;
+    private final Function<?, Object> getJdbc;
+
+    private final Consumer<Object> closeJdbc;
 
     private final String databaseName;
 
-    private final Function<?, Jdbc> getJdbcFunction;
+    private final Buffer<Class<?>, ColumnToFieldHandler> columnToFieldHandlerBuffer = new Buffer<>() {
+        @Override
+        public ColumnToFieldHandler set(Class<?> aClass) {
+            return new ColumnToFieldHandler(aClass);
+        }
+    };
 
-    public Database(Pool<Jdbc> pool, String databaseName) {
-        this.pool = pool;
+    private final Buffer<Class<?>, FieldToColumnHandler> fieldToColumnHandlerBuffer = new Buffer<>() {
+        @Override
+        public FieldToColumnHandler set(Class<?> aClass) {
+            return new FieldToColumnHandler(aClass);
+        }
+    };
+
+    public Database(Function<?, Jdbc> getJdbc, String databaseName) {
+        this.getJdbc = (Function<Object, Object>) o -> getJdbc.apply(null);
+        this.closeJdbc = o -> {
+            if (o instanceof Jdbc jdbc) {
+                Closeable.closeNoError(jdbc);
+            }
+        };
         this.databaseName = databaseName;
-        this.getJdbcFunction = null;
+    }
+
+    public Database(Function<?, Jdbc> getJdbc) {
+        this(getJdbc, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Database(Pool<Jdbc> pool, String databaseName) {
+        this.getJdbc = (Function<Object, Object>) o -> pool.get();
+        this.closeJdbc = o -> {
+            if (o instanceof Pool.Source<?> source) {
+                pool.returnObject((Pool.Source<Jdbc>) source);
+            }
+        };
+        this.databaseName = databaseName;
     }
 
     public Database(Pool<Jdbc> pool) {
         this(pool, null);
     }
 
-    public Database(Function<?, Jdbc> getJdbcFunction, String databaseName) {
-        this.pool = null;
-        this.databaseName = databaseName;
-        this.getJdbcFunction = getJdbcFunction;
-    }
-
-    public Database(Function<?, Jdbc> getJdbcFunction) {
-        this(getJdbcFunction, null);
-    }
-
     /**
      * 获取表
      *
-     * @param <T> 泛型
      * @param basePOClass basePOClass
+     * @param <T> 泛型
      *
      * @return Table
      * */
-    public synchronized final <T extends BasePO<ID>, ID> Table<T, ID> getTable(Class<T> basePOClass) {
-        Connection connection;
-        if (pool != null) {
-            Pool.Source<Jdbc> jdbcSource = pool.get();
-            connection = new Connection(jdbcSource.getSource()) {
-                @Override
-                public void close() {
-                    pool.returnObject(jdbcSource);
-                }
-            };
-        } else if (this.getJdbcFunction != null) {
-            Jdbc then = this.getJdbcFunction.apply(null);
-            connection = new Connection(then) {
-                @Override
-                public void close() {
-                    then.close();
-                }
-            };
-        } else {
-            throw new BaseException("数据库异常");
-        }
-        try {
-            return new Table<>(this, connection, basePOClass);
-        } catch (Exception e) {
-            connection.close();
-            throw new BaseException(e);
-        }
+    public final <T extends BasePO<ID>, ID> Table<T, ID> getTable(Class<T> basePOClass) {
+        return new Table<>(this, basePOClass);
     }
 
     /**
      * 保存后查询
      *
      * @param jdbc jdbc
-     * @param tableName 表名
+     * @param table table
      * @param id id
-     * @param tClass tClass
      * @param <T> T
      * @param <ID> id
      *
      * @return T
      * */
-    public <T extends BasePO<ID>, ID> T saveQuery(Jdbc jdbc, String tableName, ID id, Class<T> tClass) {
-        List<Map<String, Object>> list = jdbc.getDefaultDatabase().getTable(tableName).query(Query.and(Compare.equals(BasePO.getIdField().getName(), id))).getData();
-        if (list.isEmpty()) {
+    public <T extends BasePO<ID>, ID> T saveQuery(Jdbc jdbc, Table<T, ID> table, ID id) {
+        List<T> data = table.query(Query.and(Compare.equals(BasePO.getIdField().getName(), id))).getData();
+        if (ObjectUtil.isEmpty(data)) {
             return null;
         }
-        if (list.size() != 1) {
-            throw new Error("查询出错");
+        if (data.size() != 1) {
+            throw new BaseException("查询出错");
         }
-        Map<String, Object> map = list.getFirst();
-        ColumnToFieldHandler columnToFieldHandler = new ColumnToFieldHandler(tClass);
-        return ObjectUtil.transform(MapUtil.keyHandler(map, columnToFieldHandler::handler), tClass);
+        return data.getFirst();
     }
 
     /**
      * 获取下一个id的值
+     *
      * @param jdbc jdbc
      * @param table table
      * @param <T> 泛型
@@ -134,41 +133,22 @@ public abstract class Database {
 
         private final Database database;
 
-        private final Connection connection;
-
         private final Class<T> basePOClass;
-
-        private final FieldToColumnHandler fieldToColumnHandler;
-
-        private final ColumnToFieldHandler columnToFieldHandler;
 
         private final String tableName;
 
-        private Table(Database database, Connection connection, Class<T> basePOClass) {
+        private Table(Database database, Class<T> basePOClass) {
             this.database = database;
-            this.connection = connection;
             this.basePOClass = basePOClass;
-            this.fieldToColumnHandler = new FieldToColumnHandler(basePOClass);
-            this.columnToFieldHandler = new ColumnToFieldHandler(basePOClass);
             this.tableName = BasePO.getTableName(basePOClass);
         }
 
-        /**
-         * 获取表名
-         *
-         * @return 表名
-         * */
         public String getTableName() {
-            return this.tableName;
+            return tableName;
         }
 
-        /**
-         * 获取basePOClass
-         *
-         * @return basePOClass
-         * */
         public Class<T> getBasePOClass() {
-            return this.basePOClass;
+            return basePOClass;
         }
 
         /**
@@ -179,15 +159,14 @@ public abstract class Database {
          * @return QueryResult
          * */
         public QueryResult<T> query(Query query) {
-            try {
-                if (query == null) {
-                    query = new Query();
+            return execute(jdbc -> {
+                if (query != null) {
+                    FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
+                    query.keyHandler(fieldToColumnHandler::handler);
                 }
-                query.keyHandler(fieldToColumnHandler::handler);
-                return getTable().query(query).parse(map -> MapUtil.keyHandler(map, columnToFieldHandler::handler)).parse(basePOClass);
-            } finally {
-                this.connection.close();
-            }
+                ColumnToFieldHandler columnToFieldHandler = database.columnToFieldHandlerBuffer.get(basePOClass);
+                return getTable(jdbc).query(query).parse(map -> MapUtil.keyHandler(map, columnToFieldHandler::handler)).parse(basePOClass);
+            });
         }
 
         /**
@@ -200,37 +179,32 @@ public abstract class Database {
         }
 
         /**
-         * 保存
+         * count
          *
-         * @param t t
-         * @param close 是否关闭连接
+         * @param filter filter
          *
-         * @return T
+         * @return count
          * */
-        private T save(T t, boolean close) {
-            try {
-                if (t == null) {
-                    t = this.basePOClass.getConstructor().newInstance();
+        public long count(Filter filter) {
+            return execute(jdbc -> {
+                if (filter != null) {
+                    FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
+                    filter.compareHandler(compare -> {
+                        compare.setKey(fieldToColumnHandler.handler(compare.getKey()));
+                        return compare;
+                    });
                 }
-                com.codejune.jdbc.Table table = getTable();
-                boolean isId = t.getId() != null;
-                if (!isId) {
-                    t.setId(database.getNextId(this.connection.getJdbc(), this));
-                }
-                Map<String, Object> map = MapUtil.keyHandler(MapUtil.parse(t, String.class, Object.class), fieldToColumnHandler::handler);
-                if (isId) {
-                    table.update(map, new Filter().and(Compare.equals("ID", t.getId())));
-                } else {
-                    table.insert(map);
-                }
-                return this.database.saveQuery(this.connection.getJdbc(), this.getTableName(), t.getId(), this.getBasePOClass());
-            } catch (Exception e) {
-                throw new BaseException(e);
-            } finally {
-                if (close) {
-                    this.connection.close();
-                }
-            }
+                return getTable(jdbc).count(filter);
+            });
+        }
+
+        /**
+         * count
+         *
+         * @return count
+         * */
+        public long count() {
+            return count(null);
         }
 
         /**
@@ -241,7 +215,26 @@ public abstract class Database {
          * @return T
          * */
         public T save(T t) {
-            return this.save(t, true);
+            return execute(jdbc -> {
+                T saveT;
+                if (t == null) {
+                    saveT = ObjectUtil.newInstance(basePOClass);
+                } else {
+                    saveT = t;
+                }
+                boolean id = saveT.getId() != null;
+                if (!id) {
+                    saveT.setId(database.getNextId(jdbc, Table.this));
+                }
+                FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
+                Map<String, Object> data = MapUtil.keyHandler(MapUtil.parse(saveT, String.class, Object.class), fieldToColumnHandler::handler);
+                if (id) {
+                    getTable(jdbc).update(data, new Filter().and(Compare.equals("ID", saveT.getId())));
+                } else {
+                    getTable(jdbc).insert(data);
+                }
+                return database.saveQuery(jdbc, Table.this, saveT.getId());
+            });
         }
 
         /**
@@ -252,18 +245,14 @@ public abstract class Database {
          * @return List
          * */
         public List<T> save(List<T> tList) {
-            try {
-                ArrayList<T> result = new ArrayList<>();
-                if (ObjectUtil.isEmpty(tList)) {
-                    return result;
-                }
-                for (T t : tList) {
-                    result.add(this.save(t, false));
-                }
+            ArrayList<T> result = new ArrayList<>();
+            if (ObjectUtil.isEmpty(tList)) {
                 return result;
-            } finally {
-                this.connection.close();
             }
+            for (T t : tList) {
+                result.add(this.save(t));
+            }
+            return result;
         }
 
         /**
@@ -275,11 +264,10 @@ public abstract class Database {
             if (id == null) {
                 return;
             }
-            try {
-                getTable().delete(new Filter().and(Compare.equals("ID", id)));
-            } finally {
-                this.connection.close();
-            }
+            execute(jdbc -> {
+                getTable(jdbc).delete(new Filter().and(Compare.equals("ID", id)));
+                return null;
+            });
         }
 
         /**
@@ -301,43 +289,36 @@ public abstract class Database {
          * 删除
          * */
         public void delete() {
+            execute(jdbc -> {
+                getTable(jdbc).delete();
+                return null;
+            });
+        }
+
+        private <RESULT> RESULT execute(Function<Jdbc, RESULT> function) {
+            Object object = database.getJdbc.apply(null);
             try {
-                getTable().delete();
+                if (object instanceof Jdbc jdbc) {
+                    return function.apply(jdbc);
+                } else if (object instanceof Pool.Source<?> source) {
+                    return function.apply((Jdbc) source.getSource());
+                } else {
+                    throw new BaseException("database.getJdbc not analysis");
+                }
             } finally {
-                this.connection.close();
+                database.closeJdbc.accept(object);
             }
         }
 
-        private com.codejune.jdbc.Table getTable() {
+        private com.codejune.jdbc.Table getTable(Jdbc jdbc) {
             com.codejune.jdbc.Database jdbcDatabase;
-            if (StringUtil.isEmpty(this.database.databaseName)) {
-                jdbcDatabase = this.connection.getJdbc().getDefaultDatabase();
+            if (StringUtil.isEmpty(database.databaseName)) {
+                jdbcDatabase = jdbc.getDefaultDatabase();
             } else {
-                jdbcDatabase = this.connection.getJdbc().getDatabase(this.database.databaseName);
+                jdbcDatabase = jdbc.getDatabase(database.databaseName);
             }
             return jdbcDatabase.getTable(tableName);
         }
-
-    }
-
-    /**
-     * 单个连接资源
-     *
-     * @author ZJ
-     * */
-    private static abstract class Connection {
-
-        private final Jdbc jdbc;
-
-        public Connection(Jdbc source) {
-            this.jdbc = source;
-        }
-
-        public Jdbc getJdbc() {
-            return jdbc;
-        }
-
-        public abstract void close();
 
     }
 

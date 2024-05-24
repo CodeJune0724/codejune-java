@@ -50,6 +50,26 @@ public abstract class POService<T extends BasePO<ID>, ID> {
     }
 
     /**
+     * count
+     *
+     * @param filter filter
+     *
+     * @return count
+     * */
+    public final long count(Filter filter) {
+        return getTable().count(filter);
+    }
+
+    /**
+     * count
+     *
+     * @return count
+     * */
+    public final long count() {
+        return getTable().count();
+    }
+
+    /**
      * 通过id查询
      *
      * @param id id
@@ -232,16 +252,13 @@ public abstract class POService<T extends BasePO<ID>, ID> {
         delete(query().getData());
     }
 
-    private Database.Table<T, ID> getTable() {
-        Database database = getDatabase();
-        if (database == null) {
-            throw new BaseException("database is null");
-        }
-        Class<T> poClass = getPOClass();
-        if (poClass == null) {
-            throw new BaseException("poClass is null");
-        }
-        return database.getTable(poClass);
+    /**
+     * 获取表
+     *
+     * @return Database.Table
+     * */
+    public final Database.Table<T, ID> getTable() {
+        return getDatabase().getTable(getPOClass());
     }
 
 }

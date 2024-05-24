@@ -13,4 +13,15 @@ public interface Closeable extends AutoCloseable {
     @Override
     void close();
 
+    /**
+     * 无异常关闭
+     *
+     * @param closeable closeable
+     * */
+    static void closeNoError(Closeable closeable) {
+        try {
+            closeable.close();
+        } catch (Throwable ignored) {}
+    }
+
 }
