@@ -241,7 +241,6 @@ public final class Http {
             result.build(httpResponseResult);
             result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
         });
-        System.out.println(result.getBody());
         if (ObjectUtil.equals(true, resend.apply(result))) {
             return send();
         }
