@@ -23,6 +23,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * http组件
@@ -35,13 +36,15 @@ public final class Http {
 
     private final Type type;
 
-    private final List<Header> headerList = new ArrayList<>();
-
     private ContentType contentType;
+
+    private final List<Header> headerList = new ArrayList<>();
 
     private Object body;
 
     private int timeout = -1;
+
+    private Function<HttpResponseResult<String>, Boolean> resend = stringHttpResponseResult -> false;
 
     {
         addHeader("accept", "*/*");
@@ -125,6 +128,21 @@ public final class Http {
      * */
     public Http setTimeout(int timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    /**
+     * 设置重连补偿
+     *
+     * @param resend resend
+     *
+     * @return this
+     * */
+    public Http resend(Function<HttpResponseResult<String>, Boolean> resend) {
+        if (resend == null) {
+            return this;
+        }
+        this.resend = resend;
         return this;
     }
 
@@ -223,6 +241,9 @@ public final class Http {
             result.build(httpResponseResult);
             result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
         });
+        if (ObjectUtil.equals(true, resend.apply(result))) {
+            return send();
+        }
         return result;
     }
 
