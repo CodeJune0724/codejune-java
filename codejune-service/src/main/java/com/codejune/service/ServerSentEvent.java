@@ -45,7 +45,7 @@ public abstract class ServerSentEvent extends SseEmitter {
      * */
     public final void send(String type, Object message) {
         try {
-            this.send(SseEmitter.event().name(type).data(Json.toString(message)));
+            this.send(SseEmitter.event().name(type).data(message == null ? "" : Json.toString(message)));
         } catch (Exception ignored) {}
     }
 
