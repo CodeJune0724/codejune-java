@@ -46,6 +46,8 @@ public final class Http {
 
     private Function<HttpResponseResult<String>, Boolean> resend = stringHttpResponseResult -> false;
 
+    private boolean timeoutResend = false;
+
     {
         addHeader("accept", "*/*");
         addHeader("connection", "Keep-Alive");
@@ -147,6 +149,18 @@ public final class Http {
     }
 
     /**
+     * 连接失败自动重连
+     *
+     * @param timeoutResend timeoutResend
+     *
+     * @return this
+     * */
+    public Http setTimeoutResend(boolean timeoutResend) {
+        this.timeoutResend = timeoutResend;
+        return this;
+    }
+
+    /**
      * 发送
      *
      * @param listener listener
@@ -221,7 +235,11 @@ public final class Http {
                 listener.accept(httpResponseResult);
             }
         } catch (Exception e) {
-            throw new BaseException(e.getMessage());
+            if (this.timeoutResend) {
+                send(listener);
+            } else {
+                throw new BaseException(e.getMessage());
+            }
         } finally {
             IOUtil.close(httpResponseResult.getBody());
             try {
