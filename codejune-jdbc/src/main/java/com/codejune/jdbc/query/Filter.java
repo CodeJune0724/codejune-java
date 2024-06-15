@@ -1,9 +1,9 @@
 package com.codejune.jdbc.query;
 
-import com.codejune.common.Builder;
-import com.codejune.common.util.ArrayUtil;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.core.Builder;
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.ObjectUtil;
 import com.codejune.jdbc.query.filter.Compare;
 import com.codejune.jdbc.query.filter.Config;
 import com.codejune.jdbc.query.filter.Expression;

@@ -1,6 +1,6 @@
 rootProject.name = "codejune-java"
 
-include(":codejune-common")
+include(":codejune-core")
 include(":codejune-excel")
 include(":codejune-ftp")
 include(":codejune-http")

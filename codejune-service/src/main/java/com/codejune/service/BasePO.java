@@ -1,8 +1,8 @@
 package com.codejune.service;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.ClassInfo;
-import com.codejune.common.classinfo.Field;
+import com.codejune.core.BaseException;
+import com.codejune.core.ClassInfo;
+import com.codejune.core.classinfo.Field;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;

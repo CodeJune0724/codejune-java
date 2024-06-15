@@ -1,6 +1,6 @@
 package com.codejune.jdbc.mysql;
 
-import com.codejune.common.util.ArrayUtil;
+import com.codejune.core.util.ArrayUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.oracle.OracleJdbc;

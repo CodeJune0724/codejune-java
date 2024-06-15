@@ -1,12 +1,12 @@
 package com.codejune.http;
 
 import com.codejune.Json;
-import com.codejune.common.BaseException;
-import com.codejune.common.Builder;
-import com.codejune.common.ClassInfo;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.RegexUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.Builder;
+import com.codejune.core.ClassInfo;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.RegexUtil;
+import com.codejune.core.util.StringUtil;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

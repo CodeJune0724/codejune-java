@@ -1,15 +1,15 @@
 package com.codejune.service;
 
 import com.codejune.Jdbc;
-import com.codejune.common.BaseException;
+import com.codejune.core.BaseException;
 import com.codejune.Pool;
-import com.codejune.common.Buffer;
-import com.codejune.common.Closeable;
+import com.codejune.core.Buffer;
+import com.codejune.core.Closeable;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.filter.Compare;
 import com.codejune.service.handler.ColumnToFieldHandler;
@@ -27,9 +27,9 @@ import java.util.function.Function;
  * */
 public class Database {
 
-    private final Function<?, Object> getJdbc;
+    private final Function<?, Jdbc> getJdbc;
 
-    private final Consumer<Object> closeJdbc;
+    private final Consumer<Jdbc> closeJdbc;
 
     private final String databaseName;
 
@@ -48,12 +48,8 @@ public class Database {
     };
 
     public Database(Function<?, Jdbc> getJdbc, String databaseName) {
-        this.getJdbc = (Function<Object, Object>) o -> getJdbc.apply(null);
-        this.closeJdbc = o -> {
-            if (o instanceof Jdbc jdbc) {
-                Closeable.closeNoError(jdbc);
-            }
-        };
+        this.getJdbc = getJdbc;
+        this.closeJdbc = Closeable::closeNoError;
         this.databaseName = databaseName;
     }
 
@@ -61,14 +57,9 @@ public class Database {
         this(getJdbc, null);
     }
 
-    @SuppressWarnings("unchecked")
     public Database(Pool<Jdbc> pool, String databaseName) {
-        this.getJdbc = (Function<Object, Object>) o -> pool.get();
-        this.closeJdbc = o -> {
-            if (o instanceof Pool.Source<?> source) {
-                pool.returnObject((Pool.Source<Jdbc>) source);
-            }
-        };
+        this.getJdbc = o -> pool.get();
+        this.closeJdbc = pool::returnObject;
         this.databaseName = databaseName;
     }
 
@@ -296,17 +287,11 @@ public class Database {
         }
 
         private <RESULT> RESULT execute(Function<Jdbc, RESULT> function) {
-            Object object = database.getJdbc.apply(null);
+            Jdbc jdbc = database.getJdbc.apply(null);
             try {
-                if (object instanceof Jdbc jdbc) {
-                    return function.apply(jdbc);
-                } else if (object instanceof Pool.Source<?> source) {
-                    return function.apply((Jdbc) source.getSource());
-                } else {
-                    throw new BaseException("database.getJdbc not analysis");
-                }
+                return function.apply(jdbc);
             } finally {
-                database.closeJdbc.accept(object);
+                database.closeJdbc.accept(jdbc);
             }
         }
 

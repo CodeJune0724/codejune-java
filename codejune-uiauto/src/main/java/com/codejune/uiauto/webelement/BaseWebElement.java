@@ -1,6 +1,6 @@
 package com.codejune.uiauto.webelement;
 
-import com.codejune.common.BaseException;
+import com.codejune.core.BaseException;
 import com.codejune.uiauto.WebElement;
 import com.codejune.uiauto.WebDriver;
 import org.openqa.selenium.*;

@@ -1,6 +1,6 @@
 package com.codejune.jdbc;
 
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.util.StringUtil;
 import java.util.List;
 
 /**

@@ -1,11 +1,11 @@
 package com.codejune.jdbc;
 
-import com.codejune.common.Builder;
-import com.codejune.common.Data;
-import com.codejune.common.util.ArrayUtil;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.Builder;
+import com.codejune.core.Data;
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.query.Field;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.Sort;

@@ -2,7 +2,7 @@ package com.codejune.jdbc.table;
 
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Table;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.util.StringUtil;
 import java.util.List;
 
 public interface SqlTable extends Table {

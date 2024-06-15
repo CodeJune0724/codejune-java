@@ -1,6 +1,6 @@
 package com.codejune;
 
-import com.codejune.common.ResponseResult;
+import com.codejune.core.ResponseResult;
 import java.util.function.Consumer;
 
 /**

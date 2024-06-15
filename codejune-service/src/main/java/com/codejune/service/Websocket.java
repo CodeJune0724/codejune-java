@@ -1,8 +1,8 @@
 package com.codejune.service;
 
 import com.codejune.Json;
-import com.codejune.common.ResponseResult;
-import com.codejune.common.BaseException;
+import com.codejune.core.ResponseResult;
+import com.codejune.core.BaseException;
 import jakarta.websocket.*;
 import java.nio.ByteBuffer;
 

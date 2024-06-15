@@ -1,6 +1,6 @@
 package com.codejune.ftp.os;
 
-import com.codejune.common.os.FileInfo;
+import com.codejune.core.os.FileInfo;
 
 /**
  * ftp下的文件夹

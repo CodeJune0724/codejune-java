@@ -1,6 +1,6 @@
 package com.codejune.uiauto;
 
-import com.codejune.common.BaseException;
+import com.codejune.core.BaseException;
 import com.codejune.uiauto.webelement.BaseWebElement;
 import org.openqa.selenium.By;
 import java.util.ArrayList;

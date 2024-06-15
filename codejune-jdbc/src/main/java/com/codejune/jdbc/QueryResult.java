@@ -1,7 +1,7 @@
 package com.codejune.jdbc;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;

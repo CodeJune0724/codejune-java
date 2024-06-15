@@ -1,8 +1,8 @@
 package com.codejune;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.util.*;
+import com.codejune.core.BaseException;
+import com.codejune.core.io.reader.TextInputStreamReader;
+import com.codejune.core.util.*;
 import com.codejune.http.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;

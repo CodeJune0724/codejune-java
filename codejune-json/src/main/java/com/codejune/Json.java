@@ -2,12 +2,12 @@ package com.codejune;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import com.codejune.common.BaseException;
-import com.codejune.common.Builder;
-import com.codejune.common.util.ArrayUtil;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.Builder;
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.StringUtil;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

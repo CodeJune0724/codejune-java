@@ -1,6 +1,6 @@
 package com.codejune.jdbc.query.filter;
 
-import com.codejune.common.BaseException;
+import com.codejune.core.BaseException;
 
 /**
  * 表达式

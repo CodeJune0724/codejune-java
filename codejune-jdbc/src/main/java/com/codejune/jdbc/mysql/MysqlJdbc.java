@@ -1,9 +1,9 @@
 package com.codejune.jdbc.mysql;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.SqlJdbc;
 import com.codejune.jdbc.oracle.OracleJdbc;
 import java.sql.Connection;

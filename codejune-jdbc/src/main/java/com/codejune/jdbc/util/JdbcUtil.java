@@ -1,12 +1,12 @@
 package com.codejune.jdbc.util;
 
 import com.codejune.Jdbc;
-import com.codejune.common.ClassInfo;
-import com.codejune.common.classinfo.Field;
-import com.codejune.common.BaseException;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.ClassInfo;
+import com.codejune.core.classinfo.Field;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.QueryResult;
 import jakarta.persistence.Column;

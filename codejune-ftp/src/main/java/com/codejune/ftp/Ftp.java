@@ -1,9 +1,9 @@
 package com.codejune.ftp;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.os.FileInfo;
-import com.codejune.common.util.IOUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.os.FileInfo;
+import com.codejune.core.util.IOUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.ftp.os.File;
 import com.codejune.ftp.os.Folder;
 import org.apache.commons.net.ftp.FTPClient;

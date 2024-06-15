@@ -1,9 +1,9 @@
 package com.codejune.excelreader;
 
 import com.codejune.Xml;
-import com.codejune.common.BaseException;
-import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.util.*;
+import com.codejune.core.BaseException;
+import com.codejune.core.io.reader.TextInputStreamReader;
+import com.codejune.core.util.*;
 import com.codejune.excel.Image;
 import com.codejune.xml.Element;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
@@ -131,7 +131,7 @@ public final class Sheet {
         if (StringUtil.isEmpty(this.tempPath)) {
             throw new BaseException("tempPath is null");
         }
-        com.codejune.common.os.File copFile = new com.codejune.common.os.File(this.file).copy(this.tempPath);
+        com.codejune.core.os.File copFile = new com.codejune.core.os.File(this.file).copy(this.tempPath);
         File zipFile = new File(copFile.getPath() + ".zip");
         FileUtil.delete(zipFile);
         copFile.rename(zipFile.getName());
@@ -179,7 +179,7 @@ public final class Sheet {
                 continue;
             }
             try (InputStream inputStream = IOUtil.getInputStream(imageFile)) {
-                consumer.accept(new Image(rowIndex, cellIndex, new com.codejune.common.os.File(imageFile).getSuffix(), inputStream));
+                consumer.accept(new Image(rowIndex, cellIndex, new com.codejune.core.os.File(imageFile).getSuffix(), inputStream));
             } catch (Exception e) {
                 throw new BaseException(e);
             }

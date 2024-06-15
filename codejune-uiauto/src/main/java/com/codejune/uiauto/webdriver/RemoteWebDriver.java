@@ -1,6 +1,6 @@
 package com.codejune.uiauto.webdriver;
 
-import com.codejune.common.BaseException;
+import com.codejune.core.BaseException;
 import com.codejune.uiauto.DriverType;
 import org.openqa.selenium.WebDriver;
 import java.net.URI;

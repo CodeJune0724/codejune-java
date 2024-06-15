@@ -1,6 +1,6 @@
 package com.codejune.jdbc.query;
 
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.core.util.ObjectUtil;
 import java.util.function.Function;
 
 /**

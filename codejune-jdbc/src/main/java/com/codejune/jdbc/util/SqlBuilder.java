@@ -1,11 +1,11 @@
 package com.codejune.jdbc.util;
 
 import com.codejune.Jdbc;
-import com.codejune.common.BaseException;
-import com.codejune.common.util.ArrayUtil;
-import com.codejune.common.util.DateUtil;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.DateUtil;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.mysql.MysqlJdbc;
 import com.codejune.jdbc.query.Filter;

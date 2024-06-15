@@ -1,5 +1,5 @@
 dependencies {
-    api(project(":codejune-common"))
+    api(project(":codejune-core"))
     compileOnly("net.sf.ucanaccess:ucanaccess:5.0.1")
     compileOnly("org.mongodb:mongodb-driver-sync:5.1.0")
     compileOnly("org.springframework.boot:spring-boot-starter-data-jpa:3.3.0")

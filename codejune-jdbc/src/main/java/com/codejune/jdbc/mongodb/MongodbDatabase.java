@@ -1,7 +1,7 @@
 package com.codejune.jdbc.mongodb;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.Database;
 import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;

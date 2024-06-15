@@ -1,9 +1,9 @@
 package com.codejune.jdbc.query.filter;
 
-import com.codejune.common.Builder;
-import com.codejune.common.BaseException;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.core.Builder;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.ObjectUtil;
 import java.util.HashMap;
 import java.util.Map;
 

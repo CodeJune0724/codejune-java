@@ -1,18 +1,17 @@
 package com.codejune;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.io.writer.OutputStreamWriter;
-import com.codejune.common.os.File;
-import com.codejune.common.util.FileUtil;
-import com.codejune.common.util.IOUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.io.writer.OutputStreamWriter;
+import com.codejune.core.os.File;
+import com.codejune.core.util.FileUtil;
+import com.codejune.core.util.IOUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.xml.Element;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
-import org.dom4j.tree.BaseElement;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;

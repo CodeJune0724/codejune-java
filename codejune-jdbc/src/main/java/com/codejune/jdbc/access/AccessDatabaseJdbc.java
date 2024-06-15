@@ -1,7 +1,7 @@
 package com.codejune.jdbc.access;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.os.File;
+import com.codejune.core.BaseException;
+import com.codejune.core.os.File;
 import com.codejune.jdbc.oracle.OracleJdbc;
 import com.healthmarketscience.jackcess.*;
 import com.codejune.jdbc.SqlJdbc;

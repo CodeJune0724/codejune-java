@@ -1,6 +1,6 @@
 package com.codejune.jdbc;
 
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.core.util.ObjectUtil;
 import com.codejune.jdbc.query.Filter;
 import java.util.ArrayList;
 import java.util.List;

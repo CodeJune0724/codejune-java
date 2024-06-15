@@ -1,9 +1,9 @@
 package com.codejune;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.Closeable;
-import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.util.*;
+import com.codejune.core.BaseException;
+import com.codejune.core.Closeable;
+import com.codejune.core.io.reader.TextInputStreamReader;
+import com.codejune.core.util.*;
 import com.codejune.excelreader.Sheet;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
@@ -58,7 +58,7 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
     public ExcelReader(InputStream inputStream) {
         this(((Function<Object, File>) o -> {
             File result = new File(System.getProperty("java.io.tmpdir"), "ExcelReader-" + DateUtil.format(new Date(), "yyyyMMddHHmmss") + ".xlsx");
-            new com.codejune.common.os.File(result).write(inputStream);
+            new com.codejune.core.os.File(result).write(inputStream);
             return result;
         }).apply(null));
     }

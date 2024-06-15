@@ -1,9 +1,9 @@
 package com.codejune.shell;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.Closeable;
-import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.io.writer.OutputStreamWriter;
+import com.codejune.core.BaseException;
+import com.codejune.core.Closeable;
+import com.codejune.core.io.reader.TextInputStreamReader;
+import com.codejune.core.io.writer.OutputStreamWriter;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;

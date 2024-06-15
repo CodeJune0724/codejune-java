@@ -1,6 +1,6 @@
 package com.codejune.jdbc.mongodb;
 
-import com.codejune.common.util.MapUtil;
+import com.codejune.core.util.MapUtil;
 import com.codejune.jdbc.*;
 import com.codejune.jdbc.query.Field;
 import com.codejune.jdbc.query.Filter;
@@ -14,9 +14,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import com.codejune.common.BaseException;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.RegexUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.RegexUtil;
 import org.bson.Document;
 import java.util.*;
 import java.util.function.Function;

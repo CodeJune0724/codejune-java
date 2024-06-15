@@ -1,9 +1,9 @@
 package com.codejune.service.handler;
 
-import com.codejune.common.ClassInfo;
-import com.codejune.common.Data;
-import com.codejune.common.classinfo.Field;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.ClassInfo;
+import com.codejune.core.Data;
+import com.codejune.core.classinfo.Field;
+import com.codejune.core.util.StringUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import java.util.HashMap;

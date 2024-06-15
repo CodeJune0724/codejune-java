@@ -1,9 +1,9 @@
 package com.codejune.jdbc.oracle;
 
-import com.codejune.common.BaseException;
+import com.codejune.core.BaseException;
 import com.codejune.jdbc.*;
-import com.codejune.common.util.MapUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.StringUtil;
 import java.sql.*;
 import java.util.*;
 

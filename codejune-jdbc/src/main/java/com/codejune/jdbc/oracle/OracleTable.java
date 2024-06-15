@@ -1,11 +1,11 @@
 package com.codejune.jdbc.oracle;
 
 import com.codejune.Jdbc;
-import com.codejune.common.Data;
-import com.codejune.common.BaseException;
-import com.codejune.common.util.ArrayUtil;
-import com.codejune.common.util.ObjectUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.Data;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.query.Filter;

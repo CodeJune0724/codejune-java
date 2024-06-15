@@ -1,8 +1,8 @@
 package com.codejune.xml;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.util.ArrayUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.StringUtil;
 import org.dom4j.Attribute;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Node;

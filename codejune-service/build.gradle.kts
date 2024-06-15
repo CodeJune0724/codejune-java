@@ -1,5 +1,5 @@
 dependencies {
-    api(project(":codejune-common"))
+    api(project(":codejune-core"))
     api(project(":codejune-jdbc"))
     api(project(":codejune-pool"))
     api(project(":codejune-json"))

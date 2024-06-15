@@ -1,8 +1,8 @@
 package com.codejune;
 
-import com.codejune.common.Closeable;
-import com.codejune.common.os.FileInfo;
-import com.codejune.common.util.ArrayUtil;
+import com.codejune.core.Closeable;
+import com.codejune.core.os.FileInfo;
+import com.codejune.core.util.ArrayUtil;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Consumer;

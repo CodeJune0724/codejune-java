@@ -1,7 +1,8 @@
 package com.codejune;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.Closeable;
+import com.codejune.core.BaseException;
+import com.codejune.core.Closeable;
+import com.codejune.pool.Config;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -16,28 +17,59 @@ import java.time.Duration;
  * */
 public abstract class Pool<T> implements Closeable {
 
-    private final GenericObjectPool<Source<T>> genericObjectPool;
+    private final GenericObjectPool<T> genericObjectPool;
 
-    private final int size;
-
-    public Pool(int size) {
-        Pool<T> pool = this;
-        BasePooledObjectFactory<Source<T>> basePooledObjectFactory = new BasePooledObjectFactory<>() {
+    public Pool(Config config) {
+        if (config == null) {
+            config = new Config();
+        }
+        BasePooledObjectFactory<T> basePooledObjectFactory = new BasePooledObjectFactory<>() {
             @Override
-            public Source<T> create() {
-                return new Source<>(pool.create());
+            public T create() {
+                return Pool.this.create();
             }
             @Override
-            public PooledObject<Source<T>> wrap(Source<T> obj) {
+            public PooledObject<T> wrap(T obj) {
                 return new DefaultPooledObject<>(obj);
             }
+            @Override
+            public boolean validateObject(PooledObject<T> pooledObject) {
+                T object = pooledObject.getObject();
+                boolean result = false;
+                try {
+                    result = Pool.this.check(object);
+                } catch (Throwable ignored) {}
+                if (object instanceof Closeable closeable) {
+                    Closeable.closeNoError(closeable);
+                }
+                return result;
+            }
+            @Override
+            public void destroyObject(PooledObject<T> pooledObject) {
+                T object = pooledObject.getObject();
+                if (object instanceof Closeable closeable) {
+                    Closeable.closeNoError(closeable);
+                }
+                try {
+                    super.destroyObject(pooledObject);
+                } catch (Exception e) {
+                    throw new BaseException(e);
+                }
+            }
         };
-        GenericObjectPoolConfig<Source<T>> genericObjectPoolConfig = new GenericObjectPoolConfig<>();
-        genericObjectPoolConfig.setMaxTotal(size);
-        genericObjectPoolConfig.setMaxIdle(size);
-        genericObjectPoolConfig.setMaxWait(Duration.ofMinutes(1));
+        GenericObjectPoolConfig<T> genericObjectPoolConfig = new GenericObjectPoolConfig<>();
+        genericObjectPoolConfig.setMaxTotal(config.getSize());
+        genericObjectPoolConfig.setMaxIdle(config.getMaxIdle() < 0 ? config.getSize() : config.getMaxIdle());
+        genericObjectPoolConfig.setMinIdle(Math.max(config.getMinIdle(), 0));
+        genericObjectPoolConfig.setMaxWait(config.getMaxWait());
+        Duration whileCheckTime = config.getWhileCheckTime();
+        genericObjectPoolConfig.setTestWhileIdle(whileCheckTime != null && whileCheckTime.toMillis() > 0);
+        genericObjectPoolConfig.setTimeBetweenEvictionRuns(whileCheckTime);
         this.genericObjectPool = new GenericObjectPool<>(basePooledObjectFactory, genericObjectPoolConfig);
-        this.size = size;
+    }
+
+    public Pool(int size) {
+        this(new Config().setSize(size));
     }
 
     /**
@@ -61,25 +93,12 @@ public abstract class Pool<T> implements Closeable {
     /**
      * 获取
      *
-     * @return Source<T>
+     * @return T
      * */
-    public final Source<T> get() {
-        Source<T> source = null;
+    public final T get() {
         try {
-            source = genericObjectPool.borrowObject();
-            T result = source.getSource();
-            if (!check(result)) {
-                if (result instanceof Closeable closeable) {
-                    try {
-                        closeable.close();
-                    } catch (Throwable ignored) {}
-                }
-                result = create();
-            }
-            source.setSource(result);
-            return source;
-        } catch (Throwable e) {
-            returnObject(source);
+            return genericObjectPool.borrowObject();
+        } catch (Exception e) {
             throw new BaseException(e);
         }
     }
@@ -87,13 +106,13 @@ public abstract class Pool<T> implements Closeable {
     /**
      * 收回
      *
-     * @param source source
+     * @param t t
      * */
-    public final void returnObject(Source<T> source) {
-        if (source == null) {
+    public final void returnObject(T t) {
+        if (t == null) {
             return;
         }
-        genericObjectPool.returnObject(source);
+        genericObjectPool.returnObject(t);
     }
 
     /**
@@ -102,7 +121,7 @@ public abstract class Pool<T> implements Closeable {
      * @return 大小
      * */
     public final int getSize() {
-        return this.size;
+        return this.genericObjectPool.getMaxTotal();
     }
 
     /**
@@ -125,33 +144,7 @@ public abstract class Pool<T> implements Closeable {
 
     @Override
     public void close() {
-        for (int i = 0; i < size; i++) {
-            if (this.get().getSource() instanceof Closeable closeable) {
-                try {
-                    closeable.close();
-                } catch (Exception ignored) {}
-            }
-        }
-        this.genericObjectPool.clear();
         this.genericObjectPool.close();
-    }
-
-    public static final class Source<T> {
-
-        private T source;
-
-        private Source(T source) {
-            this.source = source;
-        }
-
-        public T getSource() {
-            return source;
-        }
-
-        public void setSource(T source) {
-            this.source = source;
-        }
-
     }
 
 }

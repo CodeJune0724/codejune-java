@@ -1,8 +1,8 @@
 package com.codejune.jdbc;
 
 import com.codejune.Jdbc;
-import com.codejune.common.BaseException;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.StringUtil;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

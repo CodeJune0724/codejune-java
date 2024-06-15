@@ -1,12 +1,12 @@
 package com.codejune.shell;
 
 import com.codejune.Shell;
-import com.codejune.common.ResponseResult;
-import com.codejune.common.BaseException;
-import com.codejune.common.SystemOS;
-import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.util.IOUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.ResponseResult;
+import com.codejune.core.BaseException;
+import com.codejune.core.SystemOS;
+import com.codejune.core.io.reader.TextInputStreamReader;
+import com.codejune.core.util.IOUtil;
+import com.codejune.core.util.StringUtil;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;

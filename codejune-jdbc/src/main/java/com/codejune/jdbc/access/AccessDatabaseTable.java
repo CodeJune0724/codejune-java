@@ -1,7 +1,7 @@
 package com.codejune.jdbc.access;
 
-import com.codejune.common.BaseException;
-import com.codejune.common.util.ObjectUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.util.ObjectUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.oracle.OracleTable;

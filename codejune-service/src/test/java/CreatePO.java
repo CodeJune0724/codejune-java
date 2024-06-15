@@ -1,8 +1,8 @@
-import com.codejune.common.BaseException;
-import com.codejune.common.ClassInfo;
-import com.codejune.common.os.File;
-import com.codejune.common.util.ArrayUtil;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.ClassInfo;
+import com.codejune.core.os.File;
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.service.BasePO;
 import jakarta.persistence.Column;
 import java.util.Date;

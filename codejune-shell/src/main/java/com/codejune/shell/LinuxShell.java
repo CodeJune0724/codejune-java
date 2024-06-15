@@ -1,11 +1,11 @@
 package com.codejune.shell;
 
 import com.codejune.Shell;
-import com.codejune.common.BaseException;
-import com.codejune.common.Closeable;
-import com.codejune.common.ResponseResult;
-import com.codejune.common.io.reader.TextInputStreamReader;
-import com.codejune.common.util.StringUtil;
+import com.codejune.core.BaseException;
+import com.codejune.core.Closeable;
+import com.codejune.core.ResponseResult;
+import com.codejune.core.io.reader.TextInputStreamReader;
+import com.codejune.core.util.StringUtil;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;

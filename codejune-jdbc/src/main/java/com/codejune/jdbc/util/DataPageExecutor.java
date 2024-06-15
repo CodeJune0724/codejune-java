@@ -1,6 +1,6 @@
 package com.codejune.jdbc.util;
 
-import com.codejune.common.BaseException;
+import com.codejune.core.BaseException;
 import com.codejune.jdbc.Query;
 import com.codejune.jdbc.Table;
 import com.codejune.jdbc.query.Filter;
@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public abstract class DataPageExecutor extends com.codejune.common.DataPageExecutor<Map<String, Object>> {
+public abstract class DataPageExecutor extends com.codejune.core.DataPageExecutor<Map<String, Object>> {
 
     private final Table table;
 
