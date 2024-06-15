@@ -5,17 +5,18 @@ import com.codejune.core.ClassInfo;
 import com.codejune.Pool;
 import com.codejune.core.util.PackageUtil;
 import com.codejune.jdbc.access.AccessDatabaseJdbc;
+import com.codejune.pool.Config;
 import com.codejune.service.BasePO;
 import com.codejune.service.Database;
 import jakarta.persistence.Column;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.JDBCType;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 
 /**
  * AccessDatabase
@@ -25,22 +26,24 @@ import java.util.function.Function;
 public class AccessDatabase extends Database {
 
     @SuppressWarnings("unchecked")
-    public AccessDatabase(File databaseFile, String packageName, Class<?> tCLass, Function<AccessDatabaseJdbc, Boolean> check) {
-        super(new Pool<>(10) {
+    public AccessDatabase(File databaseFile, Class<? extends BasePO<?>> basePOClass) {
+        super(new Pool<>(new Config().setSize(10).setWhileCheckTime(Duration.ofSeconds(30))) {
             @Override
             public Jdbc create() {
                 return new AccessDatabaseJdbc(databaseFile);
             }
             @Override
             public boolean check(Jdbc jdbc) {
-                if (check == null) {
+                try {
+                    ((AccessDatabaseJdbc) jdbc).getDefaultDatabase().getTable(BasePO.getTableName(basePOClass)).count();
                     return true;
+                } catch (Exception e) {
+                    return false;
                 }
-                return check.apply((AccessDatabaseJdbc) jdbc);
             }
         });
-        List<Class<?>> scan = PackageUtil.scan(packageName, tCLass);
-        for (Class<?> c : scan) {
+
+        for (Class<?> c : PackageUtil.scan(basePOClass.getPackage().getName(), basePOClass)) {
             if (c.toString().startsWith("class") && new ClassInfo(c).isInstanceof(BasePO.class)) {
                 Class<? extends BasePO<?>> basePoC = (Class<? extends BasePO<?>>) c;
                 String tableName = BasePO.getTableName(basePoC);
@@ -76,10 +79,6 @@ public class AccessDatabase extends Database {
                 }
             }
         }
-    }
-
-    public AccessDatabase(File databaseFile, String packageName, Class<?> tCLass) {
-        this(databaseFile, packageName, tCLass, null);
     }
 
     @Override

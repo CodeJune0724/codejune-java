@@ -19,11 +19,12 @@ public abstract class Buffer<KEY, VALUE> {
      *
      * @return value
      * */
-    public synchronized final VALUE get(KEY key) {
+    public final VALUE get(KEY key) {
         VALUE result = map.get(key);
         if (result == null) {
-            result = set(key);
-            map.put(key, result);
+            if (autoSet()) {
+                result = set(key);
+            }
         }
         return result;
     }
@@ -35,6 +36,28 @@ public abstract class Buffer<KEY, VALUE> {
      *
      * @return value
      * */
-    public abstract VALUE set(KEY key);
+    public final VALUE set(KEY key) {
+        VALUE result = generateValue(key);
+        map.put(key, result);
+        return result;
+    }
+
+    /**
+     * 生成值
+     *
+     * @param key key
+     *
+     * @return VALUE
+     * */
+    public abstract VALUE generateValue(KEY key);
+
+    /**
+     * 自动设置值
+     *
+     * @return 是否自动设置值
+     * */
+    public boolean autoSet() {
+        return true;
+    }
 
 }

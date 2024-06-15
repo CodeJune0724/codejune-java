@@ -35,14 +35,14 @@ public class Database {
 
     private final Buffer<Class<?>, ColumnToFieldHandler> columnToFieldHandlerBuffer = new Buffer<>() {
         @Override
-        public ColumnToFieldHandler set(Class<?> aClass) {
+        public ColumnToFieldHandler generateValue(Class<?> aClass) {
             return new ColumnToFieldHandler(aClass);
         }
     };
 
     private final Buffer<Class<?>, FieldToColumnHandler> fieldToColumnHandlerBuffer = new Buffer<>() {
         @Override
-        public FieldToColumnHandler set(Class<?> aClass) {
+        public FieldToColumnHandler generateValue(Class<?> aClass) {
             return new FieldToColumnHandler(aClass);
         }
     };
@@ -116,6 +116,27 @@ public class Database {
     }
 
     /**
+     * 执行
+     *
+     * @param function function
+     * */
+    public void execute(Consumer<Jdbc> function) {
+        execute(jdbc -> {
+            function.accept(jdbc);
+            return null;
+        });
+    }
+
+    private <RESULT> RESULT execute(Function<Jdbc, RESULT> function) {
+        Jdbc jdbc = getJdbc.apply(null);
+        try {
+            return function.apply(jdbc);
+        } finally {
+            closeJdbc.accept(jdbc);
+        }
+    }
+
+    /**
      * 表
      *
      * @author ZJ
@@ -150,7 +171,7 @@ public class Database {
          * @return QueryResult
          * */
         public QueryResult<T> query(Query query) {
-            return execute(jdbc -> {
+            return database.execute(jdbc -> {
                 if (query != null) {
                     FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
                     query.keyHandler(fieldToColumnHandler::handler);
@@ -177,7 +198,7 @@ public class Database {
          * @return count
          * */
         public long count(Filter filter) {
-            return execute(jdbc -> {
+            return database.execute(jdbc -> {
                 if (filter != null) {
                     FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
                     filter.compareHandler(compare -> {
@@ -206,7 +227,7 @@ public class Database {
          * @return T
          * */
         public T save(T t) {
-            return execute(jdbc -> {
+            return database.execute(jdbc -> {
                 T saveT;
                 if (t == null) {
                     saveT = ObjectUtil.newInstance(basePOClass);
@@ -255,7 +276,7 @@ public class Database {
             if (id == null) {
                 return;
             }
-            execute(jdbc -> {
+            database.execute(jdbc -> {
                 getTable(jdbc).delete(new Filter().and(Compare.equals("ID", id)));
                 return null;
             });
@@ -280,19 +301,10 @@ public class Database {
          * 删除
          * */
         public void delete() {
-            execute(jdbc -> {
+            database.execute(jdbc -> {
                 getTable(jdbc).delete();
                 return null;
             });
-        }
-
-        private <RESULT> RESULT execute(Function<Jdbc, RESULT> function) {
-            Jdbc jdbc = database.getJdbc.apply(null);
-            try {
-                return function.apply(jdbc);
-            } finally {
-                database.closeJdbc.accept(jdbc);
-            }
         }
 
         private com.codejune.jdbc.Table getTable(Jdbc jdbc) {
