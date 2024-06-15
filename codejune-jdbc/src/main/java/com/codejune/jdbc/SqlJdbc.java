@@ -19,13 +19,23 @@ public abstract class SqlJdbc implements Jdbc {
     private Connection connection;
 
     public SqlJdbc(Connection connection) {
-        this.setConnection(connection);
+        this.connection = connection;
     }
 
+    /**
+     * 获取Connection
+     *
+     * @return Connection
+     * */
     public Connection getConnection() {
         return connection;
     }
 
+    /**
+     * 设置Connection
+     *
+     * @param connection connection
+     * */
     public void setConnection(Connection connection) {
         this.close();
         this.connection = connection;
@@ -99,17 +109,47 @@ public abstract class SqlJdbc implements Jdbc {
         return query(sql, null);
     }
 
-    @Override
-    public void close() {
-        if (this.connection == null) {
-            return;
-        }
+    /**
+     * setAutoCommit
+     *
+     * @param autoCommit autoCommit
+     * */
+    public final void setAutoCommit(boolean autoCommit) {
         try {
-            this.connection.close();
-            this.connection = null;
+            this.connection.setAutoCommit(autoCommit);
+
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
+    }
+
+    /**
+     * 提交
+     * */
+    public final void commit() {
+        try {
+            this.connection.commit();
+        } catch (Exception e) {
+            throw new BaseException(e.getMessage());
+        }
+    }
+
+    /**
+     * 回滚
+     * */
+    public final void rollback() {
+        try {
+            this.connection.rollback();
+        } catch (Exception e) {
+            throw new BaseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            this.connection.close();
+        } catch (Exception ignored) {}
     }
 
 }

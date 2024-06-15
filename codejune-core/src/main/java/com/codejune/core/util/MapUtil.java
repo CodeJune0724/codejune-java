@@ -195,17 +195,18 @@ public final class MapUtil {
      * @param map map
      * @param action action
      * @param <KEY> KEY
+     * @param <VALUE> VALUE
      *
      * @return map
      * */
     @SuppressWarnings("unchecked")
-    public static <KEY> Map<KEY, Object> keyHandler(Map<KEY, Object> map, Function<KEY, KEY> action) {
+    public static <KEY, VALUE> Map<KEY, VALUE> keyHandler(Map<KEY, VALUE> map, Function<KEY, KEY> action) {
         if (ObjectUtil.isEmpty(map) || action == null) {
             return map;
         }
-        Map<KEY, Object> result;
+        Map<KEY, VALUE> result;
         try {
-            result = map.getClass().getDeclaredConstructor().newInstance();
+            result = ObjectUtil.newInstance(map.getClass());
         } catch (Exception e) {
             throw new BaseException(e);
         }
@@ -215,6 +216,33 @@ public final class MapUtil {
                 continue;
             }
             result.put(newKey, map.get(key));
+        }
+        return result;
+    }
+
+    /**
+     * value处理
+     *
+     * @param map map
+     * @param action action
+     * @param <KEY> KEY
+     * @param <VALUE> VALUE
+     *
+     * @return map
+     * */
+    @SuppressWarnings("unchecked")
+    public static <KEY, VALUE> Map<KEY, VALUE> valueHandler(Map<KEY, VALUE> map, Function<VALUE, VALUE> action) {
+        if (ObjectUtil.isEmpty(map) || action == null) {
+            return map;
+        }
+        Map<KEY, VALUE> result;
+        try {
+            result = ObjectUtil.newInstance(map.getClass());
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+        for (KEY key : map.keySet()) {
+            result.put(key, action.apply(map.get(key)));
         }
         return result;
     }
