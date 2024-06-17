@@ -111,7 +111,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
             }
         }
         try {
-            return DriverManager.getConnection("jdbc:ucanaccess://" + file.getAbsolutePath() + ";immediatelyReleaseResources=true;ignoreCase=false");
+            return DriverManager.getConnection("jdbc:ucanaccess://" + file.getAbsolutePath() + ";ignoreCase=false");
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
