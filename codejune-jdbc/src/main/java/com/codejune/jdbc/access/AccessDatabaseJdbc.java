@@ -68,6 +68,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
 
     final void reload(boolean reloadConnection) {
         if (reloadConnection) {
+            this.close();
             setConnection(getConnection(file));
         }
         try {
@@ -111,7 +112,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
             }
         }
         try {
-            return DriverManager.getConnection("jdbc:ucanaccess://" + file.getAbsolutePath() + ";ignoreCase=false");
+            return DriverManager.getConnection("jdbc:ucanaccess://" + file.getAbsolutePath() + ";ignoreCase=false;immediatelyReleaseResources=true;");
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
