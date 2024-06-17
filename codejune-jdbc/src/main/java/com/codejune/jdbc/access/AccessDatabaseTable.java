@@ -50,7 +50,11 @@ public final class AccessDatabaseTable implements SqlTable {
                 for (Column column : columnList) {
                     boolean columnExist = false;
                     for (Column originColumn : columns) {
-                        if (originColumn.getName().equals(column.getName()) && originColumn.getType() == column.getType()) {
+                        JDBCType originType = originColumn.getType();
+                        if (originType == JDBCType.TIMESTAMP) {
+                            originType = JDBCType.DATE;
+                        }
+                        if (originColumn.getName().equals(column.getName()) && originType == column.getType()) {
                             columnExist = true;
                             break;
                         }
