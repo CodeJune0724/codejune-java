@@ -38,9 +38,10 @@ public abstract class Pool<T> implements Closeable {
                 boolean result = false;
                 try {
                     result = Pool.this.check(object);
-                } catch (Throwable ignored) {}
-                if (object instanceof Closeable closeable) {
-                    Closeable.closeNoError(closeable);
+                } catch (Throwable e) {
+                    if (object instanceof Closeable closeable) {
+                        Closeable.closeNoError(closeable);
+                    }
                 }
                 return result;
             }

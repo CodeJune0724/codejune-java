@@ -7,7 +7,7 @@ plugins {
 subprojects {
     group = "com.codejune"
 
-    version = "1.10.2"
+    version = "1.10.4"
 
     apply {
         plugin("java")
