@@ -5,7 +5,6 @@ import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.database.SqlDatabase;
-import com.codejune.jdbc.oracle.OracleDatabase;
 import com.healthmarketscience.jackcess.ColumnBuilder;
 import com.healthmarketscience.jackcess.TableBuilder;
 import java.sql.JDBCType;
@@ -21,11 +20,8 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
 
     final AccessDatabaseJdbc accessDatabaseJdbc;
 
-    final OracleDatabase oracleDatabase;
-
     public AccessDatabaseDatabase(AccessDatabaseJdbc accessDatabaseJdbc) {
         this.accessDatabaseJdbc = accessDatabaseJdbc;
-        this.oracleDatabase = accessDatabaseJdbc.oracleJdbc.getDatabase("");
     }
 
     @Override
@@ -59,7 +55,7 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
 
     @Override
     public void deleteTable(String tableName) {
-        oracleDatabase.deleteTable(tableName);
+        accessDatabaseJdbc.oracleJdbc.getDefaultDatabase().deleteTable(tableName);
         accessDatabaseJdbc.reload(true);
     }
 

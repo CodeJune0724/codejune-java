@@ -23,14 +23,9 @@ public final class AccessDatabaseTable implements SqlTable {
 
     private final String tableName;
 
-    private final OracleTable oracleTable;
-
-    private static final Object OBJECT = new Object();
-
     AccessDatabaseTable(AccessDatabaseDatabase accessDatabaseDatabase, String tableName) {
         this.accessDatabaseDatabase = accessDatabaseDatabase;
         this.tableName = tableName;
-        this.oracleTable = accessDatabaseDatabase.oracleDatabase.getTable(tableName);
     }
 
     /**
@@ -114,12 +109,12 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public String getRemark() {
-        return oracleTable.getRemark();
+        return getOracleTable().getRemark();
     }
 
     @Override
     public void rename(String newTableName) {
-        oracleTable.rename(newTableName);
+        getOracleTable().rename(newTableName);
         accessDatabaseDatabase.accessDatabaseJdbc.reload(true);
     }
 
@@ -130,29 +125,31 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public long insert(List<Map<String, Object>> data) {
-        synchronized (OBJECT) {
-            return oracleTable.insert(data);
-        }
+        return getOracleTable().insert(data);
     }
 
     @Override
     public long delete(Filter filter) {
-        return oracleTable.delete(filter);
+        return getOracleTable().delete(filter);
     }
 
     @Override
     public long update(Map<String, Object> setData, Filter filter) {
-        return oracleTable.update(setData, filter);
+        return getOracleTable().update(setData, filter);
     }
 
     @Override
     public long count(Filter filter) {
-        return oracleTable.count(filter);
+        return getOracleTable().count(filter);
     }
 
     @Override
     public List<Map<String, Object>> queryData(Query query) {
-        return oracleTable.queryData(query);
+        return getOracleTable().queryData(query);
+    }
+
+    private OracleTable getOracleTable() {
+        return accessDatabaseDatabase.accessDatabaseJdbc.oracleJdbc.getDefaultDatabase().getTable(tableName);
     }
 
 }
