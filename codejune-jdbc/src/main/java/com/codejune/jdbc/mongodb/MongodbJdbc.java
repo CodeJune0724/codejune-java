@@ -18,6 +18,8 @@ public class MongodbJdbc implements Jdbc {
 
     final MongoClient mongoClient;
 
+    private String defaultDatabase = null;
+
     public MongodbJdbc(String host, int port, String database, String username, String password) {
         MongoCredential mongoCredential = MongoCredential.createScramSha256Credential(username, database, password.toCharArray());
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(List.of(new ServerAddress(host, port)))).credential(mongoCredential).build();
@@ -60,12 +62,14 @@ public class MongodbJdbc implements Jdbc {
 
     @Override
     public final MongodbDatabase getDefaultDatabase() {
-        List<MongodbDatabase> databases = getDatabases();
-        if (databases.isEmpty()) {
-            throw new BaseException("mongoCredential is null");
-        } else {
-            return getDatabase(databases.getFirst().getName());
+        if (StringUtil.isEmpty(this.defaultDatabase)) {
+            List<MongodbDatabase> databases = getDatabases();
+            if (databases.isEmpty()) {
+                throw new BaseException("mongoCredential is null");
+            }
+            this.defaultDatabase = databases.getFirst().getName();
         }
+        return getDatabase(this.defaultDatabase);
     }
 
 }

@@ -19,6 +19,8 @@ public class MysqlJdbc extends SqlJdbc {
 
     final OracleJdbc oracleJdbc;
 
+    private String defaultDatabase = null;
+
     public MysqlJdbc(Connection connection) {
         super(connection);
         this.oracleJdbc = new OracleJdbc(connection);
@@ -63,16 +65,20 @@ public class MysqlJdbc extends SqlJdbc {
             throw new BaseException("databaseName is null");
         }
         execute("USE " + databaseName);
+        this.defaultDatabase = databaseName;
         return getDatabase(databaseName);
     }
 
     @Override
     public final MysqlDatabase getDefaultDatabase() {
-        List<Map<String, Object>> query = oracleJdbc.query("SELECT database()");
-        if (ObjectUtil.isEmpty(query)) {
-            throw new BaseException("not query database");
+        if (StringUtil.isEmpty(this.defaultDatabase)) {
+            List<Map<String, Object>> query = oracleJdbc.query("SELECT database()");
+            if (ObjectUtil.isEmpty(query)) {
+                throw new BaseException("not query database");
+            }
+            this.defaultDatabase = MapUtil.get(query.getFirst(), "database()", String.class);
         }
-        return getDatabase(MapUtil.get(query.getFirst(), "database()", String.class));
+        return getDatabase(this.defaultDatabase);
     }
 
 }

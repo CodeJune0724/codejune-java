@@ -14,12 +14,12 @@ import java.util.*;
  * */
 public class OracleJdbc extends SqlJdbc {
 
-    private final String username;
+    private String defaultDatabase;
 
     public OracleJdbc(Connection connection) {
         super(connection);
         try {
-            this.username = getConnection().getMetaData().getUserName();
+            this.defaultDatabase = getConnection().getMetaData().getUserName();
         } catch (Exception e) {
             throw new BaseException(e);
         }
@@ -50,19 +50,6 @@ public class OracleJdbc extends SqlJdbc {
         return MapUtil.get(query.getFirst(), "ID", Long.class);
     }
 
-    private static Connection getConnection(String host, int port, String sid, String username, String password) {
-        try {
-            String url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + sid;
-            Properties properties = new Properties();
-            properties.put("user", username);
-            properties.put("password", password);
-            properties.put("remarksReporting", "true");
-            return DriverManager.getConnection(url, properties);
-        } catch (Exception e) {
-            throw new BaseException(e.getMessage());
-        }
-    }
-
     @Override
     public final OracleDatabase getDatabase(String databaseName) {
         if (databaseName == null) {
@@ -87,12 +74,26 @@ public class OracleJdbc extends SqlJdbc {
             throw new BaseException("databaseName is null");
         }
         execute("ALTER SESSION SET CURRENT_SCHEMA = " + databaseName);
+        this.defaultDatabase = databaseName;
         return getDatabase(databaseName);
     }
 
     @Override
     public final OracleDatabase getDefaultDatabase() {
-        return getDatabase(username);
+        return getDatabase(this.defaultDatabase);
+    }
+
+    private static Connection getConnection(String host, int port, String sid, String username, String password) {
+        try {
+            String url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + sid;
+            Properties properties = new Properties();
+            properties.put("user", username);
+            properties.put("password", password);
+            properties.put("remarksReporting", "true");
+            return DriverManager.getConnection(url, properties);
+        } catch (Exception e) {
+            throw new BaseException(e.getMessage());
+        }
     }
 
 }
