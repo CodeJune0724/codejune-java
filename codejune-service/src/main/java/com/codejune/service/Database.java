@@ -201,7 +201,7 @@ public class Database {
             return database.execute(jdbc -> {
                 if (filter != null) {
                     FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
-                    filter.compareHandler(compare -> {
+                    filter.expressionHandler(compare -> {
                         compare.setKey(fieldToColumnHandler.handler(compare.getKey()));
                         return compare;
                     });

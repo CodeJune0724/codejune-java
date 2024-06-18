@@ -1,6 +1,7 @@
 package com.codejune.jdbc.query.filter;
 
 import com.codejune.core.BaseException;
+import com.codejune.jdbc.query.Filter;
 
 /**
  * 表达式
@@ -9,72 +10,62 @@ import com.codejune.core.BaseException;
  * */
 public final class Expression {
 
-    private Connector connector;
+    private final Connector connector;
 
-    private Compare compare;
+    private final Object expression;
 
-    private Group group;
-
-    public Expression(Connector connector, Group group) {
-        this(connector, group, null);
-    }
-
-    public Expression(Connector connector, Compare compare) {
-        this(connector, null, compare);
-    }
-
-    private Expression(Connector connector, Group group, Compare compare) {
-        if (connector == null) {
-            throw new BaseException("connector is null");
-        }
-        if ((group == null && compare == null) || (group != null && compare != null)) {
-            throw new BaseException("group && compare error");
+    public Expression(Connector connector, Object expression) {
+        if (!(expression instanceof Filter) && !(expression instanceof Compare)) {
+            throw new BaseException("expression error");
         }
         this.connector = connector;
-        this.group = group;
-        this.compare = compare;
+        this.expression = expression;
     }
 
     public Connector getConnector() {
         return connector;
     }
 
-    public void setConnector(Connector connector) {
-        this.connector = connector;
-    }
-
-    public Compare getCompare() {
-        return compare;
-    }
-
-    public void setCompare(Compare compare) {
-        this.compare = compare;
-    }
-
-    public Group getGroup() {
-        return group;
-    }
-
-    public void setGroup(Group group) {
-        this.group = group;
+    /**
+     * 是否是filter
+     *
+     * @return boolean
+     * */
+    public boolean isFilter() {
+        return this.expression instanceof Filter;
     }
 
     /**
-     * isCompare
+     * 是否是Compare
      *
-     * @return isCompare
+     * @return boolean
      * */
     public boolean isCompare() {
-        return this.getCompare() != null;
+        return this.expression instanceof Compare;
     }
 
     /**
-     * isGroup
+     * 获取filter
      *
-     * @return isGroup
+     * @return Filter
      * */
-    public boolean isGroup() {
-        return this.getGroup() != null;
+    public Filter getFilter() {
+        if (this.isFilter()) {
+            return (Filter) this.expression;
+        }
+        throw new BaseException("not filter");
+    }
+
+    /**
+     * 获取Compare
+     *
+     * @return Compare
+     * */
+    public Compare getCompare() {
+        if (this.isCompare()) {
+            return (Compare) this.expression;
+        }
+        throw new BaseException("not compare");
     }
 
     public enum Connector {

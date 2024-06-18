@@ -11,7 +11,6 @@ import com.codejune.jdbc.mysql.MysqlJdbc;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.filter.Compare;
 import com.codejune.jdbc.query.filter.Expression;
-import com.codejune.jdbc.query.filter.Group;
 import java.util.*;
 import java.util.function.Function;
 
@@ -231,14 +230,11 @@ public final class SqlBuilder {
                         if (!StringUtil.isEmpty(compareActionResult)) {
                             endString = "(" + compareActionResult + ")";
                         }
-                    }
-                    if (expression.isGroup()) {
-                        Group group = expression.getGroup();
-                        if (group != null) {
-                            String expressionListResult = this.apply(group.getExpressionList());
-                            if (!StringUtil.isEmpty(expressionListResult)) {
-                                endString = "(" + expressionListResult + ")";
-                            }
+                    } else if (expression.isFilter()) {
+                        Filter filter = expression.getFilter();
+                        String expressionListResult = this.apply(filter.getExpression());
+                        if (!StringUtil.isEmpty(expressionListResult)) {
+                            endString = "(" + expressionListResult + ")";
                         }
                     }
                     if (!StringUtil.isEmpty(endString)) {
@@ -251,7 +247,7 @@ public final class SqlBuilder {
                 return result;
             }
         };
-        String expressionListResult = expressionListActon.apply(filter.getExpressionList());
+        String expressionListResult = expressionListActon.apply(filter.getExpression());
         if (StringUtil.isEmpty(expressionListResult)) {
             return "WHERE 1 = 1";
         } else {

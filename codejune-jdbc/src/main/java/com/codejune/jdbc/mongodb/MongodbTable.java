@@ -252,13 +252,13 @@ public final class MongodbTable implements Table {
                         if (connector == Expression.Connector.OR) {
                             or.add(compareActionResult);
                         }
-                    }
-                    if (expression.isGroup()) {
+                    } else if (expression.isFilter()) {
+                        Filter filter = expression.getFilter();
                         if (connector == Expression.Connector.AND) {
-                            and.add(this.apply(expression.getGroup().getExpressionList()));
+                            and.add(this.apply(filter.getExpression()));
                         }
                         if (connector == Expression.Connector.OR) {
-                            or.add(this.apply(expression.getGroup().getExpressionList()));
+                            or.add(this.apply(filter.getExpression()));
                         }
                     }
                 }
@@ -271,7 +271,7 @@ public final class MongodbTable implements Table {
                 return result;
             }
         };
-        return expressionListAction.apply(filter.getExpressionList());
+        return expressionListAction.apply(filter.getExpression());
     }
 
 }

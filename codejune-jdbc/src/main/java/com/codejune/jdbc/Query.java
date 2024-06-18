@@ -162,7 +162,7 @@ public class Query implements Builder {
             return this;
         }
         getFilter().getConfig().setCleanNullExclude(ArrayUtil.parseList(getFilter().getConfig().getCleanNullExclude(), action));
-        getFilter().compareHandler(item -> {
+        getFilter().expressionHandler(item -> {
             item.setKey(action.apply(item.getKey()));
             return item;
         });
@@ -241,8 +241,10 @@ public class Query implements Builder {
      * */
     public static Query and(Compare ...compare) {
         Filter filter = new Filter();
-        for (Compare item : compare) {
-            filter.and(item);
+        if (compare != null) {
+            for (Compare item : compare) {
+                filter.and(item);
+            }
         }
         return new Query().setFilter(filter);
     }

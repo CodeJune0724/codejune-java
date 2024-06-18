@@ -7,11 +7,8 @@ import com.codejune.core.util.ObjectUtil;
 import com.codejune.jdbc.query.filter.Compare;
 import com.codejune.jdbc.query.filter.Config;
 import com.codejune.jdbc.query.filter.Expression;
-import com.codejune.jdbc.query.filter.Group;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -21,14 +18,26 @@ import java.util.function.Function;
  * */
 public final class Filter implements Builder {
 
-    private final List<Expression> expressionList = new ArrayList<>();
+    private Config config = null;
 
-    private Config config = new Config();
+    private List<Expression> expression = new ArrayList<>();
 
-    public List<Expression> getExpressionList() {
+    public Config getConfig() {
+        if (this.config == null) {
+            this.config = new Config();
+        }
+        return this.config;
+    }
+
+    public Filter setConfig(Config config) {
+        this.config = config;
+        return this;
+    }
+
+    public List<Expression> getExpression() {
         boolean cleanNull = config.getCleanNull() != null && config.getCleanNull();
         List<String> cleanNullExclude = config.getCleanNullExclude();
-        return compareHandlerAction(this.expressionList, compare -> {
+        return expressionHandler(this.expression, compare -> {
             if (compare == null) {
                 return null;
             }
@@ -41,87 +50,81 @@ public final class Filter implements Builder {
         });
     }
 
-    public Config getConfig() {
-        return config;
-    }
-
-    public Filter setConfig(Config config) {
-        if (config == null) {
-            return this;
-        }
-        this.config = config;
-        return this;
-    }
-
     /**
      * and
      *
-     * @param group 一组表达式
-     *
-     * @return this
-     * */
-    public Filter and(Group group) {
-        this.expressionList.add(new Expression(Expression.Connector.AND, group));
-        return this;
-    }
-
-    /**
-     * and
-     *
-     * @param compare 比较
+     * @param compare compare
      *
      * @return this
      * */
     public Filter and(Compare compare) {
-        this.expressionList.add(new Expression(Expression.Connector.AND, compare));
+        if (compare == null) {
+            return this;
+        }
+        this.expression.add(new Expression(Expression.Connector.AND, compare));
         return this;
     }
 
     /**
-     * or
+     * and
      *
-     * @param group 一组表达式
+     * @param consumer consumer
      *
      * @return this
      * */
-    public Filter or(Group group) {
-        this.expressionList.add(new Expression(Expression.Connector.OR, group));
+    public Filter and(Consumer<Filter> consumer) {
+        if (consumer == null) {
+            return this;
+        }
+        Filter filter = new Filter();
+        consumer.accept(filter);
+        this.expression.add(new Expression(Expression.Connector.AND, filter));
         return this;
     }
 
     /**
      * or
      *
-     * @param compare 比较
+     * @param compare compare
      *
      * @return this
      * */
     public Filter or(Compare compare) {
-        this.expressionList.add(new Expression(Expression.Connector.OR, compare));
+        if (compare == null) {
+            return this;
+        }
+        this.expression.add(new Expression(Expression.Connector.OR, compare));
         return this;
     }
 
     /**
-     * Compare处理
+     * or
+     *
+     * @param consumer consumer
+     *
+     * @return this
+     * */
+    public Filter or(Consumer<Filter> consumer) {
+        if (consumer == null) {
+            return this;
+        }
+        Filter filter = new Filter();
+        consumer.accept(filter);
+        this.expression.add(new Expression(Expression.Connector.OR, filter));
+        return this;
+    }
+
+    /**
+     * expressionHandler
      *
      * @param action action
      *
      * @return this
      * */
-    public Filter compareHandler(Function<Compare, Compare> action) {
-        List<Expression> newExpressionList = compareHandlerAction(this.expressionList, action);
-        this.expressionList.clear();
-        this.expressionList.addAll(newExpressionList);
-        return this;
-    }
-
-    /**
-     * 添加表达式
-     *
-     * @param expressionList expressionList
-     * */
-    public Filter addExpression(List<Expression> expressionList) {
-        this.expressionList.addAll(expressionList);
+    public Filter expressionHandler(Function<Compare, Compare> action) {
+        List<Expression> newExpressionList = expressionHandler(this.expression, action);
+        this.expression.clear();
+        this.expression.addAll(newExpressionList);
         return this;
     }
 
@@ -131,45 +134,38 @@ public final class Filter implements Builder {
         if (map == null) {
             return;
         }
-        this.expressionList.clear();
-        ObjectUtil.assignment(this.getConfig(), map.remove("$config"));
-        Function<Map<?, ?>, List<Expression>> expressionAction = new Function<>() {
+        this.setConfig(MapUtil.get(map, "$config", Config.class));
+        map.remove("$config");
+        Function<Map<?, ?>, List<Expression>> transformExpression = new Function<>() {
             @Override
             public List<Expression> apply(Map<?, ?> map) {
                 if (map == null) {
                     return new ArrayList<>();
                 }
-                List<Object> or = ArrayUtil.parseList(MapUtil.get(map, "$or", List.class), Object.class);
+                List<Map<String, Object>> or = ArrayUtil.parseListMap(MapUtil.get(map, "$or", List.class), String.class, Object.class);
+                map.remove("$or");
                 if (or == null) {
                     or = new ArrayList<>();
                 }
-                List<Object> and = ArrayUtil.parseList(MapUtil.get(map, "$and", List.class), Object.class);
+                List<Map<String, Object>> and = ArrayUtil.parseListMap(MapUtil.get(map, "$and", List.class), String.class, Object.class);
+                map.remove("$and");
                 if (and == null) {
                     and = new ArrayList<>();
                 }
                 for (Object key : map.keySet()) {
-                    if ("$or".equals(key) || "$and".equals(key)) {
-                        continue;
-                    }
                     Object value = map.get(key);
-                    if (value instanceof Map<?, ?> valueMap) {
-                        for (Object valueMapKey : valueMap.keySet()) {
-                            and.add(new HashMap<>() {
-                                {
-                                    put(key, new HashMap<>() {
-                                        {
-                                            put(valueMapKey, valueMap.get(valueMapKey));
-                                        }
-                                    });
-                                }
-                            });
+                    if (value instanceof Map<?, ?> valueOfMap) {
+                        for (Object valueMapKey : valueOfMap.keySet()) {
+                            and.add(MapUtil.asMap(
+                                    new AbstractMap.SimpleEntry<>(ObjectUtil.toString(key), MapUtil.asMap(
+                                            new AbstractMap.SimpleEntry<>(valueMapKey, valueOfMap.get(valueMapKey))
+                                    ))
+                            ));
                         }
                     } else {
-                        and.add(new HashMap<>() {
-                            {
-                                put(ObjectUtil.toString(key), value);
-                            }
-                        });
+                        and.add(MapUtil.asMap(
+                                new AbstractMap.SimpleEntry<>(ObjectUtil.toString(key), value)
+                        ));
                     }
                 }
                 int count = or.size() + and.size();
@@ -197,9 +193,9 @@ public final class Filter implements Builder {
                         if (orExpressionList.size() == 1) {
                             result.add(new Expression(Expression.Connector.OR, orExpressionList.getFirst().getCompare()));
                         } else {
-                            Group group = new Group();
-                            group.setExpressionList(orExpressionList);
-                            result.add(new Expression(Expression.Connector.OR, group));
+                            Filter filter = new Filter();
+                            filter.expression = orExpressionList;
+                            result.add(new Expression(Expression.Connector.OR, filter));
                         }
                     }
                     for (Object item : and) {
@@ -210,44 +206,43 @@ public final class Filter implements Builder {
                         if (andExpressionList.size() == 1) {
                             result.add(new Expression(Expression.Connector.AND, andExpressionList.getFirst().getCompare()));
                         } else {
-                            Group group = new Group();
-                            group.setExpressionList(andExpressionList);
-                            result.add(new Expression(Expression.Connector.AND, group));
+                            Filter filter = new Filter();
+                            filter.expression = andExpressionList;
+                            result.add(new Expression(Expression.Connector.AND, filter));
                         }
                     }
                 }
                 return result;
             }
         };
-        this.expressionList.addAll(expressionAction.apply(map));
+        this.expression.clear();
+        this.expression.addAll(transformExpression.apply(map));
     }
 
-    private static List<Expression> compareHandlerAction(List<Expression> expressionList, Function<Compare, Compare> action) {
-        Function<List<Expression>, List<Expression>> function = new Function<>() {
-            @Override
-            public List<Expression> apply(List<Expression> expressionsList) {
-                List<Expression> result = new ArrayList<>();
-                for (Expression expression : expressionsList) {
-                    if (expression.isCompare()) {
-                        Compare compare = action.apply(expression.getCompare());
-                        if (compare != null) {
-                            result.add(expression);
-                        }
-                    }
-                    if (expression.isGroup()) {
-                        Group group = expression.getGroup();
-                        List<Expression> newGroupExpressionList = this.apply(group.getExpressionList());
-                        if (!ObjectUtil.isEmpty(newGroupExpressionList)) {
-                            group.getExpressionList().clear();
-                            group.getExpressionList().addAll(newGroupExpressionList);
-                            result.add(expression);
-                        }
-                    }
+    private static List<Expression> expressionHandler(List<Expression> expression, Function<Compare, Compare> action) {
+        if (ObjectUtil.isEmpty(expression) || action == null) {
+            return expression;
+        }
+        List<Expression> result = new ArrayList<>();
+        for (Expression item : expression) {
+            if (item.isCompare()) {
+                Compare compare = action.apply(item.getCompare());
+                if (compare == null) {
+                    continue;
                 }
-                return result;
+                result.add(new Expression(item.getConnector(), compare));
+            } else if (item.isFilter()) {
+                Filter filter = item.getFilter();
+                List<Expression> newExpression = expressionHandler(filter.expression, action);
+                if (ObjectUtil.isEmpty(newExpression)) {
+                    continue;
+                }
+                Filter newFilter = new Filter();
+                newFilter.expression = newExpression;
+                result.add(new Expression(item.getConnector(), newFilter));
             }
-        };
-        return function.apply(expressionList);
+        }
+        return result;
     }
 
 }
