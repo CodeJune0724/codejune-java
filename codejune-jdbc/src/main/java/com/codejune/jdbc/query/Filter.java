@@ -35,6 +35,7 @@ public final class Filter implements Builder {
     }
 
     public List<Expression> getExpression() {
+        Config config = this.getConfig();
         boolean cleanNull = config.getCleanNull() != null && config.getCleanNull();
         List<String> cleanNullExclude = config.getCleanNullExclude();
         return expressionHandler(this.expression, compare -> {
