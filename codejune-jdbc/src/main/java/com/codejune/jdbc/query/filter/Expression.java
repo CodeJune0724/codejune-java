@@ -14,6 +14,11 @@ public final class Expression {
 
     private final Object expression;
 
+    public Expression() {
+        this.connector = Connector.AND;
+        this.expression = null;
+    }
+
     public Expression(Connector connector, Object expression) {
         if (!(expression instanceof Filter) && !(expression instanceof Compare)) {
             throw new BaseException("expression error");
