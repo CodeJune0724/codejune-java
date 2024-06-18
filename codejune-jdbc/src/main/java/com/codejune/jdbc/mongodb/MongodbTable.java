@@ -240,12 +240,9 @@ public final class MongodbTable implements Table {
                         if (ObjectUtil.isEmpty(compareActionResult)) {
                             continue;
                         }
-                        Map<String, Object> finalCompareActionResult = compareActionResult;
-                        compareActionResult = new HashMap<>() {
-                            {
-                                put(compare.getKey(), finalCompareActionResult);
-                            }
-                        };
+                        compareActionResult = MapUtil.asMap(
+                                new AbstractMap.SimpleEntry<>(compare.getKey(), compareActionResult)
+                        );
                         if (connector == Expression.Connector.AND) {
                             and.add(compareActionResult);
                         }

@@ -129,6 +129,19 @@ public final class Filter implements Builder {
         return this;
     }
 
+    /**
+     * merge
+     *
+     * @param filter filter
+     * */
+    public Filter merge(Filter filter) {
+        if (filter == null) {
+            return this;
+        }
+        this.expression.addAll(filter.getExpression());
+        return this;
+    }
+
     @Override
     public void build(Object object) {
         Map<String, Object> map = MapUtil.parse(object, String.class, Object.class);

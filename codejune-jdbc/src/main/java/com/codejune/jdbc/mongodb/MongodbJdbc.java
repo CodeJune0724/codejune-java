@@ -1,6 +1,7 @@
 package com.codejune.jdbc.mongodb;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.StringUtil;
 import com.mongodb.*;
 import com.codejune.Jdbc;
@@ -22,12 +23,12 @@ public class MongodbJdbc implements Jdbc {
 
     public MongodbJdbc(String host, int port, String database, String username, String password) {
         MongoCredential mongoCredential = MongoCredential.createScramSha256Credential(username, database, password.toCharArray());
-        MongoClientSettings mongoClientSettings = MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(List.of(new ServerAddress(host, port)))).credential(mongoCredential).build();
+        MongoClientSettings mongoClientSettings = MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(ArrayUtil.asList(new ServerAddress(host, port)))).credential(mongoCredential).build();
         this.mongoClient = MongoClients.create(mongoClientSettings);
     }
 
     public MongodbJdbc(String host, int port) {
-        MongoClientSettings mongoClientSettings = MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(List.of(new ServerAddress(host, port)))).build();
+        MongoClientSettings mongoClientSettings = MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(ArrayUtil.asList(new ServerAddress(host, port)))).build();
         this.mongoClient = MongoClients.create(mongoClientSettings);
     }
 
