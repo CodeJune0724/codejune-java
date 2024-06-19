@@ -158,7 +158,7 @@ public final class Data {
                             }
                         }
                     }
-                    objectOfMap.put(field.getName(), transform(value, field.getType(), clone, builder));
+                    objectOfMap.put(field.getName(), transform(value, value == null ? field.getType() : value.getClass(), clone, builder));
                 }
             }
             for (String key : objectOfMap.keySet()) {
@@ -181,9 +181,11 @@ public final class Data {
                 if (key.equals(field.getName())) {
                     Object value;
                     if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                        value = transformCollection(entry.getValue(), field.getType(), field.getGenericClass().getFirst().getRawClass(), builder);
+                        Object entryValue = entry.getValue();
+                        value = transformCollection(entryValue, entryValue == null ? field.getType() : entryValue.getClass(), field.getGenericClass().getFirst().getRawClass(), builder);
                     } else {
-                        value = transform(entry.getValue(), field.getType(), clone, builder);
+                        Object entryValue = entry.getValue();
+                        value = transform(entryValue, entryValue == null ? field.getType() : entryValue.getClass(), clone, builder);
                     }
                     boolean isExecuteMethod = false;
                     if (!clone) {

@@ -208,7 +208,7 @@ public final class ObjectUtil {
                         Class<?> parameterType = parameterTypes[i];
                         Object value;
                         if (parameterType == Object.class) {
-                            value = null;
+                            value = new Object();
                         } else {
                             value = newInstance(parameterType);
                         }

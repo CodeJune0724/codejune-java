@@ -14,17 +14,14 @@ public final class Expression {
 
     private final Object expression;
 
-    public Expression() {
-        this.connector = Connector.AND;
-        this.expression = null;
+    public Expression(Connector connector, Filter filter) {
+        this.connector = connector;
+        this.expression = filter;
     }
 
-    public Expression(Connector connector, Object expression) {
-        if (!(expression instanceof Filter) && !(expression instanceof Compare)) {
-            throw new BaseException("expression error");
-        }
+    public Expression(Connector connector, Compare compare) {
         this.connector = connector;
-        this.expression = expression;
+        this.expression = compare;
     }
 
     public Connector getConnector() {

@@ -23,6 +23,8 @@ public final class AccessDatabaseTable implements SqlTable {
 
     private final String tableName;
 
+    private static final Object LOCK = new Object();
+
     AccessDatabaseTable(AccessDatabaseDatabase accessDatabaseDatabase, String tableName) {
         this.accessDatabaseDatabase = accessDatabaseDatabase;
         this.tableName = tableName;
@@ -125,7 +127,9 @@ public final class AccessDatabaseTable implements SqlTable {
 
     @Override
     public long insert(List<Map<String, Object>> data) {
-        return getOracleTable().insert(data);
+        synchronized (LOCK) {
+            return getOracleTable().insert(data);
+        }
     }
 
     @Override
