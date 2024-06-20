@@ -56,7 +56,7 @@ public final class JdbcUtil {
         }
         Map<String, String> fieldToColumnMap = new HashMap<>();
         Map<String, String> columnToFieldMap = new HashMap<>();
-        for (Field field : new ClassInfo(tClass).getFields()) {
+        for (Field field : new ClassInfo(tClass).getField()) {
             String fieldName = field.getName();
             String columnName;
             if (field.isAnnotation(Id.class)) {

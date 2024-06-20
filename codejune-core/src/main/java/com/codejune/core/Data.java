@@ -146,7 +146,7 @@ public final class Data {
             } else {
                 objectOfMap = new LinkedHashMap<>();
                 ClassInfo classInfo = new ClassInfo(object.getClass());
-                for (Field field : classInfo.getFields()) {
+                for (Field field : classInfo.getField()) {
                     Object value = field.getData(object);
                     if (!clone) {
                         Method method = classInfo.getGetMethod(field.getName());
@@ -172,7 +172,7 @@ public final class Data {
             builderExe.build(object);
             return builderExe;
         }
-        List<Field> fields = tClassClassInfo.getFields();
+        List<Field> fields = tClassClassInfo.getField();
         for (Map.Entry<?, ?> entry : ((Map<?, ?>) transform(object, Map.class, clone, builder)).entrySet()) {
             Object key = entry.getKey();
             if (StringUtil.isEmpty(key)) {

@@ -48,6 +48,8 @@ public final class Http {
 
     private boolean timeoutResend = false;
 
+    private int timeoutResendNumber = 10;
+
     {
         addHeader("accept", "*/*");
         addHeader("connection", "Keep-Alive");
@@ -235,7 +237,8 @@ public final class Http {
                 listener.accept(httpResponseResult);
             }
         } catch (Exception e) {
-            if (this.timeoutResend) {
+            if (this.timeoutResend && this.timeoutResendNumber > 0) {
+                this.timeoutResendNumber = this.timeoutResendNumber - 1;
                 send(listener);
             } else {
                 throw new BaseException(e.getMessage());

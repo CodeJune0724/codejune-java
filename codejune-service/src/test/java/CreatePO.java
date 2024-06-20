@@ -96,7 +96,7 @@ public final class CreatePO {
                 .write("import BasePO from \"./BasePO\";\r\n" +
                         "\r\n" +
                         "export default class " + BASE_PO_CLASS.getName() + " extends BasePO<" + getTsType(idClass) + "> {\r\n" +
-                        "\r\n" + ArrayUtil.toString(new ClassInfo(BASE_PO_CLASS).getFields(), field -> {
+                        "\r\n" + ArrayUtil.toString(new ClassInfo(BASE_PO_CLASS).getField(), field -> {
                             if (!field.isAnnotation(Column.class)) {
                                 return null;
                             }

@@ -155,7 +155,7 @@ public final class ObjectUtil {
             o1Map.replaceAll((k, v) -> o2Map.get(k));
         } else if (Data.isObject(o1.getClass())) {
             ClassInfo classInfo = new ClassInfo(o1.getClass());
-            for (Field field : classInfo.getFields()) {
+            for (Field field : classInfo.getField()) {
                 Object setData;
                 if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
                     setData = Data.transformCollection(o2Map.get(field.getName()), field.getType(), field.getGenericClass().getFirst().getRawClass(), false);

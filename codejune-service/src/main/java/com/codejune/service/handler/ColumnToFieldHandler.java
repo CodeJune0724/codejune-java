@@ -23,7 +23,7 @@ public final class ColumnToFieldHandler {
         if (!Data.isObject(c)) {
             return;
         }
-        List<Field> fields = new ClassInfo(c).getFields();
+        List<Field> fields = new ClassInfo(c).getField();
         for (Field field : fields) {
             String key = field.getName();
             String newKey;

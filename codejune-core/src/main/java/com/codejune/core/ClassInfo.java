@@ -140,12 +140,12 @@ public final class ClassInfo {
      *
      * @return 所有字段
      * */
-    public List<Field> getFields() {
+    public List<Field> getField() {
         List<Field> result = new ArrayList<>();
         List<java.lang.reflect.Field> fieldList = new ArrayList<>(Arrays.asList(this.rawClass.getDeclaredFields()));
         List<ClassInfo> superClass = getSuperClass();
         for (ClassInfo classInfo : superClass) {
-            result.addAll(classInfo.getFields());
+            result.addAll(classInfo.getField());
         }
         for (java.lang.reflect.Field field : fieldList) {
             result.add(new Field(field));
@@ -161,7 +161,7 @@ public final class ClassInfo {
      * @return 字段
      * */
     public Field getField(String fieldName) {
-        List<Field> fieldList = getFields();
+        List<Field> fieldList = this.getField();
         if (ObjectUtil.isEmpty(fieldList) || StringUtil.isEmpty(fieldName)) {
             return null;
         }
@@ -178,12 +178,12 @@ public final class ClassInfo {
      *
      * @return 所有方法
      * */
-    public List<Method> getMethods() {
+    public List<Method> getMethod() {
         List<Method> result = new ArrayList<>();
         List<java.lang.reflect.Method> methodList = new ArrayList<>(Arrays.asList(this.rawClass.getMethods()));
         List<ClassInfo> superClass = getSuperClass();
         for (ClassInfo classInfo : superClass) {
-            result.addAll(classInfo.getMethods());
+            result.addAll(classInfo.getMethod());
         }
         for (java.lang.reflect.Method method : methodList) {
             result.add(new Method(method));
@@ -199,7 +199,7 @@ public final class ClassInfo {
      * @return 方法
      * */
     public Method getMethod(String methodName) {
-        List<Method> methodList = getMethods();
+        List<Method> methodList = this.getMethod();
         if (ObjectUtil.isEmpty(methodList) || StringUtil.isEmpty(methodName)) {
             return null;
         }

@@ -33,7 +33,7 @@ public abstract class BasePO<ID> {
      * @return Id字段
      * */
     public static java.lang.reflect.Field getIdField() {
-        List<Field> allFields = new ClassInfo(BasePO.class).getFields();
+        List<Field> allFields = new ClassInfo(BasePO.class).getField();
         for (Field field : allFields) {
             if (field.getOriginField().isAnnotationPresent(Id.class)) {
                 return field.getOriginField();
@@ -54,7 +54,7 @@ public abstract class BasePO<ID> {
             throw new BaseException("c is null");
         }
         List<java.lang.reflect.Field> result = new ArrayList<>();
-        List<Field> allFields = new ClassInfo(c).getFields();
+        List<Field> allFields = new ClassInfo(c).getField();
         for (Field field : allFields) {
             if (field.getOriginField().isAnnotationPresent(Column.class)) {
                 result.add(field.getOriginField());
