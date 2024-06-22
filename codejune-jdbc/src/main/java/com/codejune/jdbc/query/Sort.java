@@ -15,6 +15,10 @@ public final class Sort implements Cloneable {
 
     private OderBy orderBy = OderBy.ASC;
 
+    public Sort(Object field) {
+        this.setField(field);
+    }
+
     public String getField() {
         return field;
     }

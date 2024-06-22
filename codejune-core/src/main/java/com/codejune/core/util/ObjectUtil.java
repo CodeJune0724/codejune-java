@@ -116,37 +116,55 @@ public final class ObjectUtil {
      * 克隆
      *
      * @param t t
+     * @param strict 严谨模式
      * @param <T> T
      *
      * @return 克隆的新对象
      * */
     @SuppressWarnings("unchecked")
-    public static <T> T clone(T t) {
-        if (t == null) {
-            return null;
-        }
-        if (t instanceof Cloneable) {
-            Method method = new ClassInfo(t.getClass()).getMethod("clone");
-            if (method != null) {
-                return (T) method.execute(t);
+    public static <T> T clone(T t, boolean strict) {
+        switch (t) {
+            case null -> {
+                return null;
+            }
+            case Cloneable ignored -> {
+                Method method = new ClassInfo(t.getClass()).getMethod("clone");
+                if (method != null) {
+                    return (T) method.execute(t);
+                } else {
+                    throw new BaseException(t.getClass() + " not cloneable");
+                }
+            }
+            case Map<?, ?> map -> {
+                Map<Object, Object> result = (Map<Object, Object>) newInstance(t.getClass());
+                map.forEach((key, value) -> result.put(clone(key, false), clone(value, false)));
+                return (T) result;
+            }
+            case Collection<?> collection -> {
+                Collection<Object> result = (Collection<Object>) newInstance(t.getClass());
+                collection.forEach(item -> result.add(clone(item, false)));
+                return (T) result;
+            }
+            default -> {
+                if (strict) {
+                    throw new BaseException(t.getClass() + " not cloneable");
+                } else {
+                    return t;
+                }
             }
         }
-        throw new BaseException(t.getClass() + " not cloneable");
     }
 
     /**
-     * 是否能克隆
+     * 克隆
      *
      * @param t t
      * @param <T> T
      *
-     * @return 是否能克隆
+     * @return 克隆的新对象
      * */
-    public static <T> boolean isClone(T t) {
-        if (t instanceof Cloneable) {
-            return new ClassInfo(t.getClass()).getMethod("clone") != null;
-        }
-        return false;
+    public static <T> T clone(T t) {
+        return clone(t, true);
     }
 
     /**

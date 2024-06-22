@@ -14,6 +14,10 @@ public final class Field implements Cloneable {
 
     private String alias;
 
+    public Field(String name) {
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }

@@ -94,7 +94,7 @@ public final class Compare implements Builder, Cloneable {
             Compare result = (Compare) super.clone();
             result.type = this.type;
             result.key = this.key;
-            result.value = ObjectUtil.isClone(this.value) ? ObjectUtil.clone(this.value) : this.value;
+            result.value = ObjectUtil.clone(this.value, false);
             return result;
         } catch (Exception e) {
             throw new BaseException(e);

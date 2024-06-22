@@ -76,9 +76,9 @@ public final class Expression implements Cloneable {
             Expression result = (Expression) super.clone();
             result.connector = this.connector;
             if (this.expression instanceof Filter filter) {
-                this.expression = filter.clone();
+                result.expression = filter.clone();
             } else if (this.expression instanceof Compare compare) {
-                this.expression = compare.clone();
+                result.expression = compare.clone();
             }
             return result;
         } catch (Exception e) {

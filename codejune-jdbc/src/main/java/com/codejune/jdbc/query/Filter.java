@@ -238,10 +238,10 @@ public final class Filter implements Builder, Cloneable {
     public Filter clone() {
         try {
             Filter result = (Filter) super.clone();
-            result.config = this.config == null ? null : this.config.clone();
+            result.config = ObjectUtil.clone(this.config);
             List<Expression> expression = new ArrayList<>();
             this.expression.forEach(expressionItem -> expression.add(expressionItem.clone()));
-            this.expression = expression;
+            result.expression = expression;
             return result;
         } catch (Exception e) {
             throw new BaseException(e);

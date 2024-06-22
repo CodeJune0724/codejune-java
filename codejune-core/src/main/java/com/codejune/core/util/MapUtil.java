@@ -48,7 +48,7 @@ public final class MapUtil {
      *
      * @return Map
      * */
-    public static Map<?,?> parse(Object object) {
+    public static Map<?, ?> parse(Object object) {
         return ObjectUtil.transform(object, Map.class);
     }
 

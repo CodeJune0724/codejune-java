@@ -123,7 +123,7 @@ public class Query implements Builder, Cloneable {
         if (orderBy == null) {
             orderBy = Sort.OderBy.ASC;
         }
-        this.getSort().add(new Sort().setField(field).setOrderBy(orderBy));
+        this.getSort().add(new Sort(field).setOrderBy(orderBy));
         return this;
     }
 
@@ -136,7 +136,7 @@ public class Query implements Builder, Cloneable {
      * @return this
      * */
     public Query addField(String name, String alias) {
-        this.getField().add(new Field().setName(name).setAlias(alias));
+        this.getField().add(new Field(name).setAlias(alias));
         return this;
     }
 
@@ -186,8 +186,7 @@ public class Query implements Builder, Cloneable {
         if (sort instanceof Map<?,?> sortMap) {
             List<Sort> list = new ArrayList<>();
             for (Object key : sortMap.keySet()) {
-                Sort sortItem = new Sort();
-                sortItem.setField(key);
+                Sort sortItem = new Sort(key);
                 sortItem.setOrderBy(MapUtil.get(sortMap, Data.toString(key), Sort.OderBy.class));
                 list.add(sortItem);
             }
@@ -198,8 +197,7 @@ public class Query implements Builder, Cloneable {
         if (field instanceof Map<?,?> fieldMap) {
             List<Field> list = new ArrayList<>();
             for (Object key : fieldMap.keySet()) {
-                Field fieldItem = new Field();
-                fieldItem.setName(ObjectUtil.toString(key));
+                Field fieldItem = new Field(ObjectUtil.toString(key));
                 fieldItem.setAlias(MapUtil.get(fieldMap, Data.toString(key), String.class));
                 list.add(fieldItem);
             }
@@ -221,7 +219,7 @@ public class Query implements Builder, Cloneable {
                     name = MapUtil.get(itemMap, "name", String.class);
                     alias = MapUtil.get(itemMap, "alias", String.class);
                 }
-                newFieldList.add(new Field().setName(name).setAlias(alias));
+                newFieldList.add(new Field(name).setAlias(alias));
             }
             map.put("field", newFieldList);
         }
@@ -240,13 +238,13 @@ public class Query implements Builder, Cloneable {
             result.page = this.page;
             result.size = this.size;
             result.count = this.count;
-            result.filter = this.filter == null ? null : this.filter.clone();
+            result.filter = ObjectUtil.clone(this.filter);
             if (this.sort != null) {
                 List<Sort> sort = new ArrayList<>();
                 this.sort.forEach(sortItem -> sort.add(sortItem.clone()));
                 result.sort = sort;
             }
-            if (this.filter != null) {
+            if (this.field != null) {
                 List<Field> field = new ArrayList<>();
                 this.field.forEach(fieldItem -> field.add(fieldItem.clone()));
                 result.field = field;
