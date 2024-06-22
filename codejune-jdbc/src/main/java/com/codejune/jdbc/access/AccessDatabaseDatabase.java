@@ -38,7 +38,7 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
     }
 
     @Override
-    public List<AccessDatabaseTable> getTables() {
+    public List<AccessDatabaseTable> getTable() {
         try {
             List<AccessDatabaseTable> result = new ArrayList<>();
             for (String tableName : this.accessDatabaseJdbc.database.getTableNames()) {

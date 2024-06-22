@@ -42,7 +42,7 @@ public final class MongodbDatabase implements Database {
     }
 
     @Override
-    public List<MongodbTable> getTables() {
+    public List<MongodbTable> getTable() {
         List<MongodbTable> result = new ArrayList<>();
         for (String collection: mongoDatabase.listCollectionNames()) {
             result.add(getTable(collection));

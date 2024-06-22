@@ -59,7 +59,7 @@ public class OracleJdbc extends SqlJdbc {
     }
 
     @Override
-    public final List<OracleDatabase> getDatabases() {
+    public final List<OracleDatabase> getDatabase() {
         List<OracleDatabase> result = new ArrayList<>();
         List<Map<String, Object>> users = query("SELECT * FROM ALL_USERS");
         for (Map<String, Object> map : users) {

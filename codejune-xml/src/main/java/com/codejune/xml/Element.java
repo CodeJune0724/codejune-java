@@ -46,7 +46,7 @@ public final class Element implements Iterable<Element> {
      * @return Element
      * */
     public Element getElement(int index) {
-        List<Element> elementList = this.getElementList();
+        List<Element> elementList = this.getElements();
         if (index >= elementList.size()) {
             return null;
         }
@@ -58,7 +58,7 @@ public final class Element implements Iterable<Element> {
      *
      * @return List
      * */
-    public List<Element> getElementList() {
+    public List<Element> getElements() {
         List<Element> result = new ArrayList<>();
         for (org.dom4j.Element element : this.element.elements()) {
             result.add(new Element(element));
@@ -73,7 +73,7 @@ public final class Element implements Iterable<Element> {
      *
      * @return List
      * */
-    public List<Element> getElementList(String name) {
+    public List<Element> getElements(String name) {
         List<Element> result = new ArrayList<>();
         if (StringUtil.isEmpty(name)) {
             return result;
@@ -257,7 +257,7 @@ public final class Element implements Iterable<Element> {
 
     @Override
     public Iterator<Element> iterator() {
-        List<Element> elementList = getElementList();
+        List<Element> elementList = this.getElements();
         final int[] i = {0};
         return new Iterator<>() {
             @Override

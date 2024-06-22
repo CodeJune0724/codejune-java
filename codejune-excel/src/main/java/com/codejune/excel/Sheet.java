@@ -72,6 +72,15 @@ public final class Sheet implements Iterable<Row> {
     }
 
     /**
+     * 获取下一行
+     *
+     * @return 下一行
+     * */
+    public Row getNextRow() {
+        return this.getRow(this.getRowSize());
+    }
+
+    /**
      * 获取所有行号
      *
      * @return 最后的行号

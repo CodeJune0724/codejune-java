@@ -181,7 +181,7 @@ public final class Data {
                     Object value;
                     if (new ClassInfo(type).isInstanceof(Collection.class)) {
                         Object entryValue = entry.getValue();
-                        value = transformCollection(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), field.getGenericClass().getFirst().getRawClass(), builder);
+                        value = transformCollection(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), field.getGenericClass().getFirst().getJavaClass(), builder);
                     } else {
                         Object entryValue = entry.getValue();
                         value = transform(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), builder);

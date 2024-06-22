@@ -34,56 +34,63 @@ public class Column {
         return name;
     }
 
-    public void setName(String name) {
+    public Column setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getRemark() {
         return remark;
     }
 
-    public void setRemark(String remark) {
+    public Column setRemark(String remark) {
         this.remark = remark;
+        return this;
     }
 
     public JDBCType getType() {
         return type;
     }
 
-    public void setType(JDBCType type) {
+    public Column setType(JDBCType type) {
         this.type = type;
+        return this;
     }
 
     public int getLength() {
         return length;
     }
 
-    public void setLength(int length) {
+    public Column setLength(int length) {
         this.length = length;
+        return this;
     }
 
     public boolean isPrimaryKey() {
         return primaryKey;
     }
 
-    public void setPrimaryKey(boolean primaryKey) {
+    public Column setPrimaryKey(boolean primaryKey) {
         this.primaryKey = primaryKey;
+        return this;
     }
 
     public boolean isNullable() {
         return nullable;
     }
 
-    public void setNullable(boolean nullable) {
+    public Column setNullable(boolean nullable) {
         this.nullable = nullable;
+        return this;
     }
 
     public boolean isAutoincrement() {
         return autoincrement;
     }
 
-    public void setAutoincrement(boolean autoincrement) {
+    public Column setAutoincrement(boolean autoincrement) {
         this.autoincrement = autoincrement;
+        return this;
     }
 
 }

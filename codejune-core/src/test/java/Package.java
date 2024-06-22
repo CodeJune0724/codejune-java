@@ -14,10 +14,10 @@ public final class Package {
         new Folder(DIR);
         for (String module : MODULE_LIST) {
             Folder folder = new Folder(System.getProperty("user.dir") + "/codejune-" + module + "/src/main/java/com/codejune");
-            for (Folder item : folder.getFolderList()) {
+            for (Folder item : folder.getFolder()) {
                 item.copy(DIR);
             }
-            for (File item : folder.getFileList()) {
+            for (File item : folder.getFile()) {
                 item.copy(DIR);
             }
         }
@@ -25,10 +25,10 @@ public final class Package {
     }
 
     private static void setPackage(Folder folder) {
-        for (Folder item : folder.getFolderList()) {
+        for (Folder item : folder.getFolder()) {
             setPackage(item);
         }
-        for (File file : folder.getFileList()) {
+        for (File file : folder.getFile()) {
             file.write(file.getData().replaceAll("com\\.codejune", PACKAGE));
         }
     }

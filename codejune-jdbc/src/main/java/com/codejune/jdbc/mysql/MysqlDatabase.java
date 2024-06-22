@@ -44,9 +44,9 @@ public final class MysqlDatabase implements SqlDatabase {
     }
 
     @Override
-    public List<MysqlTable> getTables() {
+    public List<MysqlTable> getTable() {
         List<MysqlTable> result = new ArrayList<>();
-        for (OracleTable item : oracleDatabase.getTables()) {
+        for (OracleTable item : this.oracleDatabase.getTable()) {
             result.add(getTable(item.getName()));
         }
         return result;

@@ -3,6 +3,7 @@ package com.codejune.core;
 import com.codejune.core.util.ObjectUtil;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 快速多线程处理
@@ -19,12 +20,6 @@ public abstract class FastThreadExecutor<T> {
 
     private final long timeout;
 
-    /**
-     * FastThreadExecutor
-     *
-     * @param threadNum 线程数
-     * @param timeout 超时时间
-     * */
     public FastThreadExecutor(int threadNum, long timeout) {
         if (threadNum <= 0) {
             throw new BaseException("threadNum <= 0");
@@ -39,24 +34,18 @@ public abstract class FastThreadExecutor<T> {
         this(threadNum, -1);
     }
 
-    /**
-     * FastThreadExecutor
-     *
-     * @param threadExecutor 线程执行器
-     * @param timeout 超时时间
-     * */
-    public FastThreadExecutor(ThreadExecutor threadExecutor, long timeout) {
-        if (threadExecutor == null) {
-            throw new BaseException("threadExecutor is null");
+    public FastThreadExecutor(ThreadPoolExecutor threadPoolExecutor, long timeout) {
+        if (threadPoolExecutor == null) {
+            throw new BaseException("threadPoolExecutor is null");
         }
         this.threadNum = 0;
-        this.threadExecutor = threadExecutor;
+        this.threadExecutor = new ThreadExecutor(threadPoolExecutor);
         this.timeout = timeout;
         execute();
     }
 
-    public FastThreadExecutor(ThreadExecutor threadExecutor) {
-        this(threadExecutor, -1);
+    public FastThreadExecutor(ThreadPoolExecutor threadPoolExecutor) {
+        this(threadPoolExecutor, -1);
     }
 
     /**

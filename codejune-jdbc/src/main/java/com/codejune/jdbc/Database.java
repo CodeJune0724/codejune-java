@@ -31,7 +31,7 @@ public interface Database {
      *
      * @return List<? extends Table>
      * */
-    List<? extends Table> getTables();
+    List<? extends Table> getTable();
 
     /**
      * 表是否存在
@@ -44,7 +44,7 @@ public interface Database {
         if (StringUtil.isEmpty(tableName)) {
             return false;
         }
-        List<? extends Table> tables = getTables();
+        List<? extends Table> tables = this.getTable();
         for (Table table : tables) {
             if (tableName.equals(table.getName())) {
                 return true;

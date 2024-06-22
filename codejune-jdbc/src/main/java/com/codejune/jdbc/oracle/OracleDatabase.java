@@ -41,7 +41,7 @@ public final class OracleDatabase implements SqlDatabase {
     }
 
     @Override
-    public List<OracleTable> getTables() {
+    public List<OracleTable> getTable() {
         List<OracleTable> result = new ArrayList<>();
         DatabaseMetaData metaData;
         try {

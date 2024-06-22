@@ -51,7 +51,7 @@ public class MysqlJdbc extends SqlJdbc {
     }
 
     @Override
-    public final List<MysqlDatabase> getDatabases() {
+    public final List<MysqlDatabase> getDatabase() {
         List<MysqlDatabase> result = new ArrayList<>();
         for (Map<String, Object> item : query("SHOW DATABASES")) {
             result.add(getDatabase(MapUtil.get(item, "Database", String.class)));

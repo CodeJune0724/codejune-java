@@ -35,8 +35,8 @@ public abstract class BasePO<ID> {
     public static java.lang.reflect.Field getIdField() {
         List<Field> allFields = new ClassInfo(BasePO.class).getField();
         for (Field field : allFields) {
-            if (field.getOriginField().isAnnotationPresent(Id.class)) {
-                return field.getOriginField();
+            if (field.getJavaField().isAnnotationPresent(Id.class)) {
+                return field.getJavaField();
             }
         }
         throw new Error("ID未配置");
@@ -56,8 +56,8 @@ public abstract class BasePO<ID> {
         List<java.lang.reflect.Field> result = new ArrayList<>();
         List<Field> allFields = new ClassInfo(c).getField();
         for (Field field : allFields) {
-            if (field.getOriginField().isAnnotationPresent(Column.class)) {
-                result.add(field.getOriginField());
+            if (field.getJavaField().isAnnotationPresent(Column.class)) {
+                result.add(field.getJavaField());
             }
         }
         return result;

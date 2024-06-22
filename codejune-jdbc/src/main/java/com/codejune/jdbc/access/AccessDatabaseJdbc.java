@@ -43,7 +43,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
     }
 
     @Override
-    public final List<AccessDatabaseDatabase> getDatabases() {
+    public final List<AccessDatabaseDatabase> getDatabase() {
         throw new BaseException("AccessDatabaseJdbc is not found database");
     }
 

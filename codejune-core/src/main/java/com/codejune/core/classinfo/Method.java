@@ -31,7 +31,7 @@ public final class Method {
      *
      * @return 原始方法
      * */
-    public java.lang.reflect.Method getOriginMethod() {
+    public java.lang.reflect.Method getJavaMethod() {
         return this.method;
     }
 

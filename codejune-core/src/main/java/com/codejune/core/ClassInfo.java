@@ -47,7 +47,7 @@ public final class ClassInfo {
         return type;
     }
 
-    public Class<?> getRawClass() {
+    public Class<?> getJavaClass() {
         return rawClass;
     }
 
@@ -124,7 +124,7 @@ public final class ClassInfo {
             return null;
         }
         for (ClassInfo classInfo : this.getSuperClass()) {
-            if (classInfo.getRawClass() == aClass) {
+            if (classInfo.getJavaClass() == aClass) {
                 return classInfo;
             }
             ClassInfo superClass = classInfo.getSuperClass(aClass);
@@ -340,7 +340,7 @@ public final class ClassInfo {
         if (type == null) {
             return false;
         }
-        Class<?> a = new ClassInfo(type).getRawClass();
+        Class<?> a = new ClassInfo(type).getJavaClass();
         return a == rawClass;
     }
 

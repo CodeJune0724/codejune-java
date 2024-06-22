@@ -137,8 +137,8 @@ public final class Sheet {
         copFile.rename(zipFile.getName());
         ZipUtil.unzip(new File(zipFile.getPath()), this.tempPath);
         Xml xml = new Xml(new File(this.tempPath, "xl/drawings/drawing" + (this.index + 1) + ".xml"));
-        List<Element> relationshipList = new Xml(new File(this.tempPath, "xl/drawings/_rels/drawing" + (this.index + 1) + ".xml.rels")).getRootElement().getElementList();
-        for (Element twoCellAnchor : xml.getRootElement().getElementList()) {
+        List<Element> relationshipList = new Xml(new File(this.tempPath, "xl/drawings/_rels/drawing" + (this.index + 1) + ".xml.rels")).getRootElement().getElements();
+        for (Element twoCellAnchor : xml.getRootElement().getElements()) {
             Element from = twoCellAnchor.getElement("from");
             if (from == null) {
                 continue;

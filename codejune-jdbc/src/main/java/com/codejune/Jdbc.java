@@ -25,7 +25,7 @@ public interface Jdbc extends Closeable {
      *
      * @return List<Database>
      * */
-    List<? extends Database> getDatabases();
+    List<? extends Database> getDatabase();
 
     /**
      * 切换数据库

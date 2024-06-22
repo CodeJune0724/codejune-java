@@ -66,7 +66,7 @@ public final class Folder implements FileInfo {
      *
      * @return 所有文件夹
      * */
-    public List<Folder> getFolderList() {
+    public List<Folder> getFolder() {
         List<Folder> result = new ArrayList<>();
         java.io.File file = new java.io.File(this.path);
         java.io.File[] files = file.listFiles();
@@ -86,7 +86,7 @@ public final class Folder implements FileInfo {
      *
      * @return 所有文件
      * */
-    public List<File> getFileList() {
+    public List<File> getFile() {
         List<File> result = new ArrayList<>();
         java.io.File file = new java.io.File(this.path);
         java.io.File[] files = file.listFiles();
@@ -108,8 +108,8 @@ public final class Folder implements FileInfo {
      * */
     public List<FileInfo> getChildren() {
         List<FileInfo> result = new ArrayList<>();
-        result.addAll(getFolderList());
-        result.addAll(getFileList());
+        result.addAll(this.getFolder());
+        result.addAll(this.getFile());
         return result;
     }
 
@@ -117,10 +117,10 @@ public final class Folder implements FileInfo {
      * 删除
      * */
     public void delete() {
-        for (File file : getFileList()) {
+        for (File file : this.getFile()) {
             file.delete();
         }
-        for (Folder folder : getFolderList()) {
+        for (Folder folder : this.getFolder()) {
             folder.delete();
         }
         if (!new java.io.File(this.path).delete()) {
@@ -153,10 +153,10 @@ public final class Folder implements FileInfo {
             newName = getName();
         }
         Folder result = new Folder(new java.io.File(copyPath, newName).getAbsolutePath());
-        for (File file : getFileList()) {
+        for (File file : this.getFile()) {
             file.copy(result.getPath());
         }
-        for (Folder folder : getFolderList()) {
+        for (Folder folder : this.getFolder()) {
             folder.copy(result.getPath());
         }
         return result;

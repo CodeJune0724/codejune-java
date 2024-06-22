@@ -1,6 +1,7 @@
 package com.codejune.service;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.ClassInfo;
 import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.Query;
@@ -15,6 +16,22 @@ import java.util.List;
 
 public abstract class POService<T extends BasePO<ID>, ID> {
 
+    private final Class<T> poClass;
+
+    @SuppressWarnings("unchecked")
+    public POService() {
+        List<ClassInfo> superClassList = new ClassInfo(this.getClass()).getSuperClass();
+        if (ObjectUtil.isEmpty(superClassList)) {
+            throw new BaseException("superClass is null");
+        }
+        ClassInfo superClass = superClassList.getFirst();
+        List<ClassInfo> genericClassList = superClass.getGenericClass();
+        if (ObjectUtil.isEmpty(genericClassList)) {
+            throw new BaseException("genericClass is null");
+        }
+        this.poClass = (Class<T>) genericClassList.getFirst().getJavaClass();
+    }
+
     /**
      * 获取数据库
      *
@@ -27,7 +44,9 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return POClass
      * */
-    public abstract Class<T> getPOClass();
+    public final Class<T> getPOClass() {
+        return this.poClass;
+    }
 
     /**
      * 查询
@@ -164,7 +183,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
         if (t == null) {
             throw new BaseException("参数缺失");
         }
-        for (Field field : BasePO.getColumnFields(getPOClass())) {
+        for (Field field : BasePO.getColumnFields(poClass)) {
             Column column = field.getAnnotation(Column.class);
             String fieldName = field.getName();
             Object o;
@@ -258,7 +277,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      * @return Database.Table
      * */
     public final Database.Table<T, ID> getTable() {
-        return getDatabase().getTable(getPOClass());
+        return getDatabase().getTable(this.poClass);
     }
 
 }

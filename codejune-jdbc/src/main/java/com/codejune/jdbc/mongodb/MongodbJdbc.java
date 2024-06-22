@@ -48,7 +48,7 @@ public class MongodbJdbc implements Jdbc {
     }
 
     @Override
-    public final List<MongodbDatabase> getDatabases() {
+    public final List<MongodbDatabase> getDatabase() {
         List<MongodbDatabase> result = new ArrayList<>();
         for (String item : mongoClient.listDatabaseNames()) {
             result.add(getDatabase(item));
@@ -64,7 +64,7 @@ public class MongodbJdbc implements Jdbc {
     @Override
     public final MongodbDatabase getDefaultDatabase() {
         if (StringUtil.isEmpty(this.defaultDatabase)) {
-            List<MongodbDatabase> databases = getDatabases();
+            List<MongodbDatabase> databases = this.getDatabase();
             if (databases.isEmpty()) {
                 throw new BaseException("mongoCredential is null");
             }

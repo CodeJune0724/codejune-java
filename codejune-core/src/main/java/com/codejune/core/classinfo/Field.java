@@ -41,7 +41,7 @@ public final class Field {
      *
      * @return 原始字段
      * */
-    public java.lang.reflect.Field getOriginField() {
+    public java.lang.reflect.Field getJavaField() {
         return this.field;
     }
 
@@ -78,11 +78,11 @@ public final class Field {
             List<ClassInfo> genericClass = getGenericClass();
             Object setData;
             if (classInfo.equals(List.class) && !genericClass.isEmpty()) {
-                setData = ArrayUtil.parse(ObjectUtil.transform(data, List.class), genericClass.getFirst().getRawClass());
+                setData = ArrayUtil.parse(ObjectUtil.transform(data, List.class), genericClass.getFirst().getJavaClass());
             } else if (classInfo.equals(Map.class) && genericClass.size() >= 2) {
-                setData = MapUtil.parse(data, genericClass.getFirst().getRawClass(), genericClass.get(1).getRawClass());
+                setData = MapUtil.parse(data, genericClass.getFirst().getJavaClass(), genericClass.get(1).getJavaClass());
             } else {
-                setData = Data.transform(data, classInfo.getRawClass());
+                setData = Data.transform(data, classInfo.getJavaClass());
             }
             this.field.set(object, setData);
         } catch (Exception e) {

@@ -21,10 +21,10 @@ public abstract class Progress implements Closeable {
         this.total = total;
         Thread.ofVirtual().start(() -> {
             while (true) {
-                listen(this);
+                listen();
                 ThreadUtil.sleep(listenInterval);
                 if (current >= total) {
-                    listen(this);
+                    listen();
                     break;
                 }
             }
@@ -45,10 +45,8 @@ public abstract class Progress implements Closeable {
 
     /**
      * 监听
-     *
-     * @param progress this
      * */
-    public abstract void listen(Progress progress);
+    public abstract void listen();
 
     /**
      * 推进进度
