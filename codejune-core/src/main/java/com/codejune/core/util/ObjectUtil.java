@@ -28,7 +28,7 @@ public final class ObjectUtil {
      * */
     @SuppressWarnings("unchecked")
     public static <T> T transform(Object object, Class<T> tClass, boolean builder) {
-        return (T) Data.transform(object, tClass, false, builder);
+        return (T) Data.transform(object, tClass, builder);
     }
 
     /**
@@ -125,11 +125,28 @@ public final class ObjectUtil {
         if (t == null) {
             return null;
         }
-        try {
-            return (T) Data.transform(t, t.getClass(), true);
-        } catch (Exception e) {
-            throw new BaseException(e);
+        if (t instanceof Cloneable) {
+            Method method = new ClassInfo(t.getClass()).getMethod("clone");
+            if (method != null) {
+                return (T) method.execute(t);
+            }
         }
+        throw new BaseException(t.getClass() + " not cloneable");
+    }
+
+    /**
+     * 是否能克隆
+     *
+     * @param t t
+     * @param <T> T
+     *
+     * @return 是否能克隆
+     * */
+    public static <T> boolean isClone(T t) {
+        if (t instanceof Cloneable) {
+            return new ClassInfo(t.getClass()).getMethod("clone") != null;
+        }
+        return false;
     }
 
     /**

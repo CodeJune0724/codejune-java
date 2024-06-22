@@ -1,5 +1,7 @@
 package com.codejune.jdbc.query.filter;
 
+import com.codejune.core.BaseException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,7 +9,7 @@ import java.util.List;
  *
  * @author ZJ
  * */
-public final class Config {
+public final class Config implements Cloneable {
 
     private Boolean cleanNull;
 
@@ -29,6 +31,18 @@ public final class Config {
     public Config setCleanNullExclude(List<String> cleanNullExclude) {
         this.cleanNullExclude = cleanNullExclude;
         return this;
+    }
+
+    @Override
+    public Config clone() {
+        try {
+            Config result = (Config) super.clone();
+            result.setCleanNull(this.cleanNull);
+            result.setCleanNullExclude(new ArrayList<>(this.cleanNullExclude));
+            return result;
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
     }
 
 }

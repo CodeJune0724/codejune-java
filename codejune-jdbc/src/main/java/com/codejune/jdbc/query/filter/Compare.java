@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public final class Compare implements Builder {
+public final class Compare implements Builder, Cloneable {
 
     private Type type;
 
@@ -85,6 +85,19 @@ public final class Compare implements Builder {
             this.key = key;
             this.value = setValue;
             break;
+        }
+    }
+
+    @Override
+    public Compare clone() {
+        try {
+            Compare result = (Compare) super.clone();
+            result.type = this.type;
+            result.key = this.key;
+            result.value = ObjectUtil.isClone(this.value) ? ObjectUtil.clone(this.value) : this.value;
+            return result;
+        } catch (Exception e) {
+            throw new BaseException(e);
         }
     }
 

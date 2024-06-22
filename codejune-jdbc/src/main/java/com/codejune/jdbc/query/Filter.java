@@ -1,5 +1,6 @@
 package com.codejune.jdbc.query;
 
+import com.codejune.core.BaseException;
 import com.codejune.core.Builder;
 import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.MapUtil;
@@ -16,7 +17,7 @@ import java.util.function.Function;
  *
  * @author ZJ
  * */
-public final class Filter implements Builder {
+public final class Filter implements Builder, Cloneable {
 
     private Config config = null;
 
@@ -231,6 +232,20 @@ public final class Filter implements Builder {
         };
         this.expression.clear();
         this.expression.addAll(transformExpression.apply(map));
+    }
+
+    @Override
+    public Filter clone() {
+        try {
+            Filter result = (Filter) super.clone();
+            result.config = this.config == null ? null : this.config.clone();
+            List<Expression> expression = new ArrayList<>();
+            this.expression.forEach(expressionItem -> expression.add(expressionItem.clone()));
+            this.expression = expression;
+            return result;
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
     }
 
     private static List<Expression> expressionHandler(List<Expression> expression, Function<Compare, Compare> action) {

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * 基础数据库
@@ -27,7 +28,7 @@ import java.util.function.Function;
  * */
 public class Database {
 
-    private final Function<?, Jdbc> getJdbc;
+    private final Supplier<Jdbc> getJdbc;
 
     private final Consumer<Jdbc> closeJdbc;
 
@@ -47,18 +48,18 @@ public class Database {
         }
     };
 
-    public Database(Function<?, Jdbc> getJdbc, String databaseName) {
+    public Database(Supplier<Jdbc> getJdbc, String databaseName) {
         this.getJdbc = getJdbc;
         this.closeJdbc = Closeable::closeNoError;
         this.databaseName = databaseName;
     }
 
-    public Database(Function<?, Jdbc> getJdbc) {
+    public Database(Supplier<Jdbc> getJdbc) {
         this(getJdbc, null);
     }
 
     public Database(Pool<Jdbc> pool, String databaseName) {
-        this.getJdbc = o -> pool.get();
+        this.getJdbc = pool::get;
         this.closeJdbc = pool::returnObject;
         this.databaseName = databaseName;
     }
@@ -128,7 +129,7 @@ public class Database {
     }
 
     private <RESULT> RESULT execute(Function<Jdbc, RESULT> function) {
-        Jdbc jdbc = getJdbc.apply(null);
+        Jdbc jdbc = this.getJdbc.get();
         try {
             return function.apply(jdbc);
         } finally {

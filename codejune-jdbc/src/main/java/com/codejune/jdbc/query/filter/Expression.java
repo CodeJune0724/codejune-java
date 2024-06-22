@@ -8,11 +8,11 @@ import com.codejune.jdbc.query.Filter;
  *
  * @author ZJ
  * */
-public final class Expression {
+public final class Expression implements Cloneable {
 
-    private final Connector connector;
+    private Connector connector;
 
-    private final Object expression;
+    private Object expression;
 
     public Expression(Connector connector, Filter filter) {
         this.connector = connector;
@@ -70,6 +70,27 @@ public final class Expression {
         throw new BaseException("not compare");
     }
 
+    @Override
+    public Expression clone() {
+        try {
+            Expression result = (Expression) super.clone();
+            result.connector = this.connector;
+            if (this.expression instanceof Filter filter) {
+                this.expression = filter.clone();
+            } else if (this.expression instanceof Compare compare) {
+                this.expression = compare.clone();
+            }
+            return result;
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+    }
+
+    /**
+     * Connector
+     *
+     * @author ZJ
+     * */
     public enum Connector {
 
         AND,

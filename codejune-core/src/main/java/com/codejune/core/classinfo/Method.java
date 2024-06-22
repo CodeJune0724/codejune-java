@@ -1,5 +1,6 @@
 package com.codejune.core.classinfo;
 
+import com.codejune.core.BaseException;
 import java.lang.annotation.Annotation;
 
 /**
@@ -13,6 +14,7 @@ public final class Method {
 
     public Method(java.lang.reflect.Method method) {
         this.method = method;
+        this.method.setAccessible(true);
     }
 
     /**
@@ -45,7 +47,7 @@ public final class Method {
         try {
             return this.method.invoke(object, data);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

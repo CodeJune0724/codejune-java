@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * 读excel
@@ -56,11 +56,11 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
     }
 
     public ExcelReader(InputStream inputStream) {
-        this(((Function<Object, File>) o -> {
+        this(((Supplier<File>) () -> {
             File result = new File(System.getProperty("java.io.tmpdir"), "ExcelReader-" + DateUtil.format(new Date(), "yyyyMMddHHmmss") + ".xlsx");
             new com.codejune.core.os.File(result).write(inputStream);
             return result;
-        }).apply(null));
+        }).get());
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.codejune.jdbc.query;
 
+import com.codejune.core.BaseException;
 import com.codejune.core.util.ObjectUtil;
 import java.util.function.Function;
 
@@ -8,7 +9,7 @@ import java.util.function.Function;
  *
  * @author ZJ
  * */
-public final class Sort {
+public final class Sort implements Cloneable {
 
     private String field;
 
@@ -44,6 +45,18 @@ public final class Sort {
             return;
         }
         this.setField(action.apply(this.field));
+    }
+
+    @Override
+    public Sort clone() {
+        try {
+            Sort result = (Sort) super.clone();
+            result.field = this.field;
+            result.orderBy = this.orderBy;
+            return result;
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
     }
 
     /**

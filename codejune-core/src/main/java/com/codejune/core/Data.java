@@ -22,13 +22,12 @@ public final class Data {
      *
      * @param object object
      * @param tClass class
-     * @param clone 是否是克隆
      * @param builder 是否自动builder
      *
      * @return Object
      * */
     @SuppressWarnings("unchecked")
-    public static Object transform(Object object, Class<?> tClass, boolean clone, boolean builder) {
+    public static Object transform(Object object, Class<?> tClass, boolean builder) {
         if (tClass == null || object == null) {
             return null;
         }
@@ -36,7 +35,7 @@ public final class Data {
             return object;
         }
         ClassInfo objectClassInfo = new ClassInfo(object.getClass());
-        if (!clone && (object.getClass() == tClass || objectClassInfo.isInstanceof(tClass))) {
+        if (object.getClass() == tClass || objectClassInfo.isInstanceof(tClass)) {
             return object;
         }
         ClassInfo tClassClassInfo = new ClassInfo(tClass);
@@ -99,7 +98,7 @@ public final class Data {
             Date objectOfDate = null;
             switch (object) {
                 case Date date -> objectOfDate = date;
-                case Number number -> objectOfDate = new Date((Long) transform(number, Long.class, clone, builder));
+                case Number number -> objectOfDate = new Date((Long) transform(number, Long.class, builder));
                 case LocalDateTime localDateTime -> {
                     return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
                 }
@@ -148,18 +147,16 @@ public final class Data {
                 ClassInfo classInfo = new ClassInfo(object.getClass());
                 for (Field field : classInfo.getField()) {
                     Object value = field.getData(object);
-                    if (!clone) {
-                        Method method = classInfo.getGetMethod(field.getName());
-                        if (method != null) {
-                            try {
-                                value = method.execute(object);
-                            } catch (Exception e) {
-                                value = null;
-                            }
+                    Method method = classInfo.getGetMethod(field.getName());
+                    if (method != null) {
+                        try {
+                            value = method.execute(object);
+                        } catch (Exception e) {
+                            value = null;
                         }
                     }
                     Class<?> type = field.getType();
-                    objectOfMap.put(field.getName(), transform(value, type != Object.class ? type : value == null ? type : value.getClass(), clone, builder));
+                    objectOfMap.put(field.getName(), transform(value, type != Object.class ? type : value == null ? type : value.getClass(), builder));
                 }
             }
             for (String key : objectOfMap.keySet()) {
@@ -168,12 +165,12 @@ public final class Data {
             return result;
         }
         Object result = ObjectUtil.newInstance(tClass);
-        if (!clone && builder && (result instanceof Builder builderExe)) {
+        if (builder && (result instanceof Builder builderExe)) {
             builderExe.build(object);
             return builderExe;
         }
         List<Field> fields = tClassClassInfo.getField();
-        for (Map.Entry<?, ?> entry : ((Map<?, ?>) transform(object, Map.class, clone, builder)).entrySet()) {
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) transform(object, Map.class, builder)).entrySet()) {
             Object key = entry.getKey();
             if (StringUtil.isEmpty(key)) {
                 continue;
@@ -187,17 +184,15 @@ public final class Data {
                         value = transformCollection(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), field.getGenericClass().getFirst().getRawClass(), builder);
                     } else {
                         Object entryValue = entry.getValue();
-                        value = transform(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), clone, builder);
+                        value = transform(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), builder);
                     }
                     boolean isExecuteMethod = false;
-                    if (!clone) {
-                        Method method = tClassClassInfo.getSetMethod(field.getName());
-                        if (method != null) {
-                            isExecuteMethod = true;
-                            try {
-                                method.execute(result, value);
-                            } catch (Exception ignored) {}
-                        }
+                    Method method = tClassClassInfo.getSetMethod(field.getName());
+                    if (method != null) {
+                        isExecuteMethod = true;
+                        try {
+                            method.execute(result, value);
+                        } catch (Exception ignored) {}
                     }
                     if (!isExecuteMethod) {
                         field.setData(result, value);
@@ -213,24 +208,11 @@ public final class Data {
      *
      * @param object object
      * @param tClass class
-     * @param clone 是否是克隆
-     *
-     * @return Object
-     * */
-    public static Object transform(Object object, Class<?> tClass, boolean clone) {
-        return transform(object, tClass, clone, true);
-    }
-
-    /**
-     * 数据转换
-     *
-     * @param object object
-     * @param tClass class
      *
      * @return Object
      * */
     public static Object transform(Object object, Class<?> tClass) {
-        return transform(object, tClass, false);
+        return transform(object, tClass, true);
     }
 
     /**
@@ -267,7 +249,7 @@ public final class Data {
         }
         if (object instanceof Collection<?> collection) {
             for (Object item : collection) {
-                result.add(transform(item, genericClass, true, builder));
+                result.add(transform(item, genericClass, builder));
             }
         }
         return result;

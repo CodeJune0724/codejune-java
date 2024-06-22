@@ -1,5 +1,6 @@
 package com.codejune.jdbc.query;
 
+import com.codejune.core.BaseException;
 import java.util.function.Function;
 
 /**
@@ -7,7 +8,7 @@ import java.util.function.Function;
  *
  * @author ZJ
  * */
-public final class Field {
+public final class Field implements Cloneable {
 
     private String name;
 
@@ -41,6 +42,18 @@ public final class Field {
             return;
         }
         this.setName(action.apply(this.name));
+    }
+
+    @Override
+    public Field clone() {
+        try {
+            Field result = (Field) super.clone();
+            result.name = this.name;
+            result.alias = this.alias;
+            return result;
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
     }
 
 }

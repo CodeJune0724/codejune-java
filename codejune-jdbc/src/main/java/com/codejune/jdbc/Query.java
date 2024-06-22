@@ -1,5 +1,6 @@
 package com.codejune.jdbc;
 
+import com.codejune.core.BaseException;
 import com.codejune.core.Builder;
 import com.codejune.core.Data;
 import com.codejune.core.util.ArrayUtil;
@@ -18,7 +19,7 @@ import java.util.function.Function;
  *
  * @author ZJ
  * */
-public class Query implements Builder {
+public class Query implements Builder, Cloneable {
 
     private Integer page;
 
@@ -230,6 +231,30 @@ public class Query implements Builder {
         this.setFilter(MapUtil.get(map, "filter", Filter.class));
         this.setSort(ArrayUtil.parseList(MapUtil.get(map, "sort", List.class), Sort.class));
         this.setField(ArrayUtil.parseList(MapUtil.get(map, "field", List.class), Field.class));
+    }
+
+    @Override
+    public Query clone() {
+        try {
+            Query result = (Query) super.clone();
+            result.page = this.page;
+            result.size = this.size;
+            result.count = this.count;
+            result.filter = this.filter == null ? null : this.filter.clone();
+            if (this.sort != null) {
+                List<Sort> sort = new ArrayList<>();
+                this.sort.forEach(sortItem -> sort.add(sortItem.clone()));
+                result.sort = sort;
+            }
+            if (this.filter != null) {
+                List<Field> field = new ArrayList<>();
+                this.field.forEach(fieldItem -> field.add(fieldItem.clone()));
+                result.field = field;
+            }
+            return result;
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
     }
 
     /**
