@@ -149,12 +149,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
         for (T t : tList) {
             beforeSave(t);
         }
-        filter.and(Compare.notIn("id", ArrayUtil.parse(tList, t -> {
-            if (t == null) {
-                return null;
-            }
-            return t.getId();
-        })));
+        filter.and(Compare.notIn("id", ArrayUtil.parse(tList, BasePO::getId)));
         delete(query(new Query().setFilter(filter)).getData());
         List<T> result = getTable().save(tList);
         for (T t : result) {

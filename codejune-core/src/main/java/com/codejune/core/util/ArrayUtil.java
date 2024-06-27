@@ -2,6 +2,7 @@ package com.codejune.core.util;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * ArrayUtil
@@ -82,6 +83,35 @@ public final class ArrayUtil {
     }
 
     /**
+     * 过滤
+     *
+     * @param collection collection
+     * @param predicate predicate
+     * @param <COLLECTION> COLLECTION
+     * @param <T> T
+     *
+     * @return Collection
+     * */
+    @SuppressWarnings("unchecked")
+    public static <COLLECTION extends Collection<T>, T> COLLECTION filter(COLLECTION collection, Predicate<T> predicate) {
+        if (collection == null || predicate == null) {
+            return collection;
+        }
+        Collection<T> result;
+        try {
+            result = (Collection<T>) ObjectUtil.newInstance(collection.getClass());
+        } catch (Exception e) {
+            result = new ArrayList<>();
+        }
+        for (T item : collection) {
+            if (predicate.test(item)) {
+                result.add(item);
+            }
+        }
+        return (COLLECTION) result;
+    }
+
+    /**
      * 转换
      *
      * @param collection collection
@@ -106,11 +136,7 @@ public final class ArrayUtil {
             result = new ArrayList<>();
         }
         for (PARAM item : collection) {
-            RETURN then = action.apply(item);
-            if (then == null) {
-                continue;
-            }
-            result.add(then);
+            result.add(action.apply(item));
         }
         return result;
     }
@@ -157,11 +183,7 @@ public final class ArrayUtil {
             result = new ArrayList<>();
         }
         for (PARAM item : collection) {
-            RETURN then = action.apply(item);
-            if (then == null) {
-                continue;
-            }
-            result.add(then);
+            result.add(action.apply(item));
         }
         return result;
     }
@@ -208,11 +230,7 @@ public final class ArrayUtil {
             result = new HashSet<>();
         }
         for (PARAM item : collection) {
-            RETURN then = action.apply(item);
-            if (then == null) {
-                continue;
-            }
-            result.add(then);
+            result.add(action.apply(item));
         }
         return result;
     }
