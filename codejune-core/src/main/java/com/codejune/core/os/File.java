@@ -4,10 +4,10 @@ import com.codejune.core.BaseException;
 import com.codejune.core.io.reader.TextInputStreamReader;
 import com.codejune.core.io.writer.OutputStreamWriter;
 import com.codejune.core.util.IOUtil;
+import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import java.io.*;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 文件
@@ -58,11 +58,8 @@ public final class File implements FileInfo {
     }
 
     @Override
-    public Date getUpdateTime() {
-        Calendar calendar = Calendar.getInstance();
-        long time = this.file.lastModified();
-        calendar.setTimeInMillis(time);
-        return calendar.getTime();
+    public LocalDateTime getUpdateTime() {
+        return ObjectUtil.parse(this.file.lastModified(), LocalDateTime.class);
     }
 
     @Override

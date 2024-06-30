@@ -42,15 +42,12 @@ public final class AccessDatabaseTable implements SqlTable {
         try {
             com.healthmarketscience.jackcess.Table table = accessDatabaseDatabase.accessDatabaseJdbc.database.getTable(tableName);
             if (table != null) {
-                List<Column> columns = getColumns();
+                List<Column> columns = this.getColumn();
                 boolean exist = true;
                 for (Column column : columnList) {
                     boolean columnExist = false;
                     for (Column originColumn : columns) {
                         JDBCType originType = originColumn.getType();
-                        if (originType == JDBCType.TIMESTAMP) {
-                            originType = JDBCType.DATE;
-                        }
                         if (originColumn.getName().equals(column.getName()) && originType == column.getType()) {
                             columnExist = true;
                             break;
@@ -80,7 +77,7 @@ public final class AccessDatabaseTable implements SqlTable {
     }
 
     @Override
-    public List<Column> getColumns() {
+    public List<Column> getColumn() {
         List<Column> result = new ArrayList<>();
         List<? extends com.healthmarketscience.jackcess.Column> columns;
         try {

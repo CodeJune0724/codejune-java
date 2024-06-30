@@ -66,8 +66,8 @@ public final class MysqlTable implements SqlTable {
     }
 
     @Override
-    public List<Column> getColumns() {
-        return oracleTable.getColumns();
+    public List<Column> getColumn() {
+        return this.oracleTable.getColumn();
     }
 
     @Override

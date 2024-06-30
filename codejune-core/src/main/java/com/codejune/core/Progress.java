@@ -78,12 +78,12 @@ public abstract class Progress implements Closeable {
      * @return 百分比
      * */
     public final Double getPercentage() {
-        Double currentSizeDouble = ObjectUtil.transform(current, Double.class);
-        Double totalSizeDouble = ObjectUtil.transform(total, Double.class);
+        Double currentSizeDouble = ObjectUtil.parse(current, Double.class);
+        Double totalSizeDouble = ObjectUtil.parse(total, Double.class);
         if (totalSizeDouble == 0) {
             return totalSizeDouble;
         }
-        return ObjectUtil.transform(String.format("%.2f", (currentSizeDouble / totalSizeDouble) * 100), Double.class);
+        return ObjectUtil.parse(String.format("%.2f", (currentSizeDouble / totalSizeDouble) * 100), Double.class);
     }
 
     @Override

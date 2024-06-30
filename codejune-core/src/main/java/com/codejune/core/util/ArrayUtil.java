@@ -151,101 +151,61 @@ public final class ArrayUtil {
      * @return Collection
      * */
     public static <T> Collection<T> parse(Collection<?> collection, Class<T> tClass) {
-        return parse(collection, o -> ObjectUtil.transform(o, tClass));
+        return parse(collection, o -> ObjectUtil.parse(o, tClass));
     }
 
     /**
-     * 转换成list
+     * 转换成List
      *
-     * @param collection collection
+     * @param list list
      * @param action action
      * @param <PARAM> 参数类型
      * @param <RETURN> 返回类型
      *
-     * @return list
+     * @return List
      * */
-    @SuppressWarnings("unchecked")
-    public static <PARAM, RETURN> List<RETURN> parseList(Collection<PARAM> collection, Function<PARAM, RETURN> action) {
-        if (collection == null) {
-            return null;
-        }
-        if (action == null) {
-            action = param -> null;
-        }
-        List<RETURN> result;
-        if (collection instanceof List<?>) {
-            try {
-                result = (List<RETURN>) ObjectUtil.newInstance(collection.getClass());
-            } catch (Exception e) {
-                result = new ArrayList<>();
-            }
-        } else {
-            result = new ArrayList<>();
-        }
-        for (PARAM item : collection) {
-            result.add(action.apply(item));
-        }
-        return result;
+    public static <PARAM, RETURN> List<RETURN> parseList(List<PARAM> list, Function<PARAM, RETURN> action) {
+        return (List<RETURN>) parse(list, action);
     }
 
     /**
-     * 转换成list
+     * 转换成List
      *
-     * @param collection collection
+     * @param list list
      * @param tClass tClass
      * @param <T> T
      *
      * @return List
      * */
-    public static <T> List<T> parseList(Collection<?> collection, Class<T> tClass) {
-        return parseList(collection, o -> ObjectUtil.transform(o, tClass));
+    public static <T> List<T> parseList(List<?> list, Class<T> tClass) {
+        return parseList(list, o -> ObjectUtil.parse(o, tClass));
     }
 
     /**
-     * 转换成set
+     * 转换成Set
      *
-     * @param collection collection
+     * @param set set
      * @param action action
      * @param <PARAM> 参数类型
      * @param <RETURN> 返回类型
      *
-     * @return Set
+     * @return Collection
      * */
-    @SuppressWarnings("unchecked")
-    public static <PARAM, RETURN> Set<RETURN> parseSet(Collection<PARAM> collection, Function<PARAM, RETURN> action) {
-        if (collection == null) {
-            return null;
-        }
-        if (action == null) {
-            action = param -> null;
-        }
-        Set<RETURN> result;
-        if (collection instanceof Set<?>) {
-            try {
-                result = (Set<RETURN>) ObjectUtil.newInstance(collection.getClass());
-            } catch (Exception e) {
-                result = new HashSet<>();
-            }
-        } else {
-            result = new HashSet<>();
-        }
-        for (PARAM item : collection) {
-            result.add(action.apply(item));
-        }
-        return result;
+    public static <PARAM, RETURN> Set<RETURN> parseSet(Set<PARAM> set, Function<PARAM, RETURN> action) {
+        return (Set<RETURN>) parse(set, action);
     }
 
     /**
-     * 转换成set
+     * 转换成Set
      *
-     * @param collection collection
+     * @param set set
      * @param tClass tClass
      * @param <T> T
      *
-     * @return Set
+     * @return List
      * */
-    public static <T> Set<T> parseSet(Collection<?> collection, Class<T> tClass) {
-        return parseSet(collection, o -> ObjectUtil.transform(o, tClass));
+    public static <T> Set<T> parseSet(Set<?> set, Class<T> tClass) {
+        return parseSet(set, o -> ObjectUtil.parse(o, tClass));
     }
 
     /**
@@ -266,7 +226,7 @@ public final class ArrayUtil {
     /**
      * 转换成List<Map<K, V>>
      *
-     * @param collection collection
+     * @param list list
      * @param kClass kClass
      * @param vClass vClass
      * @param <K> K
@@ -274,14 +234,14 @@ public final class ArrayUtil {
      *
      * @return List<Map<K, V>>
      * */
-    public static <K, V> List<Map<K, V>> parseListMap(Collection<?> collection, Class<K> kClass, Class<V> vClass) {
-        return parseList(collection, o -> MapUtil.parse(o, kClass, vClass));
+    public static <K, V> List<Map<K, V>> parseListMap(List<?> list, Class<K> kClass, Class<V> vClass) {
+        return parseList(list, o -> MapUtil.parse(o, kClass, vClass));
     }
 
     /**
      * 转换成Set<Map<K, V>>
      *
-     * @param collection collection
+     * @param set set
      * @param kClass kClass
      * @param vClass vClass
      * @param <K> K
@@ -289,8 +249,8 @@ public final class ArrayUtil {
      *
      * @return Set<Map<K, V>>
      * */
-    public static <K, V> Set<Map<K, V>> parseSetMap(Collection<?> collection, Class<K> kClass, Class<V> vClass) {
-        return parseSet(collection, o -> MapUtil.parse(o, kClass, vClass));
+    public static <K, V> Set<Map<K, V>> parseSetMap(Set<?> set, Class<K> kClass, Class<V> vClass) {
+        return parseSet(set, o -> MapUtil.parse(o, kClass, vClass));
     }
 
     /**
@@ -411,7 +371,7 @@ public final class ArrayUtil {
         if (ObjectUtil.isEmpty(list) || index >= list.size()) {
             return null;
         }
-        return ObjectUtil.transform(list.get(index), tClass);
+        return ObjectUtil.parse(list.get(index), tClass);
     }
 
     /**
@@ -444,96 +404,6 @@ public final class ArrayUtil {
      * */
     public static <K, V> Map<K, V> getMap(List<?> list, int index, Class<K> kClass, Class<V> vClass) {
         return MapUtil.parse(get(list, index, Map.class), kClass, vClass);
-    }
-
-    /**
-     * 获取collection
-     *
-     * @param list list
-     * @param index index
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return Collection
-     * */
-    public static <V> Collection<V> getCollection(List<?> list, int index, Class<V> vClass) {
-        return parse(get(list, index, Collection.class), vClass);
-    }
-
-    /**
-     * 获取Collection<Map<K, V>>
-     *
-     * @param list list
-     * @param index index
-     * @param kClass kClass
-     * @param vClass vClass
-     * @param <K> K
-     * @param <V> V
-     *
-     * @return Collection<Map<K, V>>
-     * */
-    public static <K, V> Collection<Map<K, V>> getCollectionMap(List<?> list, int index, Class<K> kClass, Class<V> vClass) {
-        return parseMap(get(list, index, Collection.class), kClass, vClass);
-    }
-
-    /**
-     * 获取list
-     *
-     * @param list list
-     * @param index index
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return List
-     * */
-    public static <V> List<V> getList(List<?> list, int index, Class<V> vClass) {
-        return parseList(get(list, index, Collection.class), vClass);
-    }
-
-    /**
-     * 获取List<Map<K, V>>
-     *
-     * @param list list
-     * @param index index
-     * @param kClass kClass
-     * @param vClass vClass
-     * @param <K> K
-     * @param <V> V
-     *
-     * @return List<Map<K, V>>
-     * */
-    public static <K, V> List<Map<K, V>> getListMap(List<?> list, int index, Class<K> kClass, Class<V> vClass) {
-        return parseListMap(get(list, index, Collection.class), kClass, vClass);
-    }
-
-    /**
-     * 获取set
-     *
-     * @param list list
-     * @param index index
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return Set
-     * */
-    public static <V> Set<V> getSet(List<?> list, int index, Class<V> vClass) {
-        return parseSet(get(list, index, Collection.class), vClass);
-    }
-
-    /**
-     * 获取Set<Map<K, V>>
-     *
-     * @param list list
-     * @param index index
-     * @param kClass kClass
-     * @param vClass vClass
-     * @param <K> K
-     * @param <V> V
-     *
-     * @return Set<Map<K, V>>
-     * */
-    public static <K, V> Set<Map<K, V>> getSetMap(List<?> list, int index, Class<K> kClass, Class<V> vClass) {
-        return parseSetMap(get(list, index, Collection.class), kClass, vClass);
     }
 
 }

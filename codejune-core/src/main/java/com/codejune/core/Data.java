@@ -6,8 +6,8 @@ import com.codejune.core.util.DateUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -27,7 +27,7 @@ public final class Data {
      * @return Object
      * */
     @SuppressWarnings("unchecked")
-    public static Object transform(Object object, Class<?> tClass, boolean builder) {
+    public static Object parse(Object object, Class<?> tClass, boolean builder) {
         if (tClass == null || object == null) {
             return null;
         }
@@ -92,20 +92,19 @@ public final class Data {
             return Boolean.valueOf(objectS);
         }
         if (tClassClassInfo.isInstanceof(Collection.class)) {
-            return transformCollection(object, tClass, Object.class, builder);
+            return parseCollection(object, tClass, Object.class, builder);
         }
         if (tClassClassInfo.isInstanceof(Date.class)) {
             Date objectOfDate = null;
             switch (object) {
                 case Date date -> objectOfDate = date;
-                case Number number -> objectOfDate = new Date((Long) transform(number, Long.class, builder));
-                case LocalDateTime localDateTime -> {
-                    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-                }
+                case Number number -> objectOfDate = new Date((Long) parse(number, Long.class, builder));
+                case LocalDateTime localDateTime -> objectOfDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+                case LocalDate localDate -> objectOfDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 default -> {
-                    for (String item : DateUtil.COMPATIBLE_DATES) {
+                    for (String item : DateUtil.COMPATIBLE_DATE_LIST) {
                         try {
-                            objectOfDate = DateUtil.parse(objectS, item);
+                            objectOfDate = new SimpleDateFormat(item).parse(objectS);
                             break;
                         } catch (Exception ignored) {}
                     }
@@ -117,6 +116,87 @@ public final class Data {
             Date result = (Date) ObjectUtil.newInstance(tClass);
             result.setTime(objectOfDate.getTime());
             return result;
+        }
+        if (tClass == LocalDateTime.class) {
+            switch (object) {
+                case Date date -> {
+                    return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                }
+                case Number number -> {
+                    return LocalDateTime.ofInstant(Instant.ofEpochMilli((Long) parse(number, Long.class)), ZoneId.systemDefault());
+                }
+                case LocalDate localDate -> {
+                    return localDate.atStartOfDay(ZoneId.systemDefault());
+                }
+                case String string -> {
+                    LocalDateTime result = null;
+                    for (String item : DateUtil.COMPATIBLE_DATE_LIST) {
+                        try {
+                            result = DateUtil.parse(string, item, LocalDateTime.class);
+                            break;
+                        } catch (Exception ignored) {}
+                    }
+                    if (result == null) {
+                        throw new BaseException(string + "转日期失败");
+                    }
+                    return result;
+                }
+                default -> throw new BaseException(objectS + "转日期失败");
+            }
+        }
+        if (tClass == LocalDate.class) {
+            switch (object) {
+                case Date date -> {
+                    return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                }
+                case Number number -> {
+                    return LocalDate.ofInstant(Instant.ofEpochMilli((Long) parse(number, Long.class)), ZoneId.systemDefault());
+                }
+                case LocalDateTime localDateTime -> {
+                    return LocalDate.ofInstant(localDateTime.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+                }
+                case String string -> {
+                    LocalDate result = null;
+                    for (String item : DateUtil.COMPATIBLE_DATE_LIST) {
+                        try {
+                            result = DateUtil.parse(string,item, LocalDate.class);
+                            break;
+                        } catch (Exception ignored) {}
+                    }
+                    if (result == null) {
+                        throw new BaseException(string + "转日期失败");
+                    }
+                    return result;
+                }
+                default -> throw new BaseException(objectS + "转日期失败");
+            }
+        }
+        if (tClass == LocalTime.class) {
+            switch (object) {
+                case Date date -> {
+                    return LocalTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                }
+                case Number number -> {
+                    return LocalTime.ofInstant(Instant.ofEpochMilli((Long) parse(number, Long.class)), ZoneId.systemDefault());
+                }
+                case LocalDateTime localDateTime -> {
+                    return localDateTime.toLocalTime();
+                }
+                case String string -> {
+                    LocalTime result = null;
+                    for (String item : DateUtil.COMPATIBLE_DATE_LIST) {
+                        try {
+                            result = DateUtil.parse(string, item, LocalTime.class);
+                            break;
+                        } catch (Exception ignored) {}
+                    }
+                    if (result == null) {
+                        throw new BaseException(string + "转日期失败");
+                    }
+                    return result;
+                }
+                default -> throw new BaseException(objectS + "转日期失败");
+            }
         }
         if (tClass.isEnum()) {
             for (Object item : tClass.getEnumConstants()) {
@@ -156,7 +236,7 @@ public final class Data {
                         }
                     }
                     Class<?> type = field.getType();
-                    objectOfMap.put(field.getName(), transform(value, type != Object.class ? type : value == null ? type : value.getClass(), builder));
+                    objectOfMap.put(field.getName(), parse(value, type != Object.class ? type : value == null ? type : value.getClass(), builder));
                 }
             }
             for (String key : objectOfMap.keySet()) {
@@ -170,7 +250,7 @@ public final class Data {
             return builderExe;
         }
         List<Field> fields = tClassClassInfo.getField();
-        for (Map.Entry<?, ?> entry : ((Map<?, ?>) transform(object, Map.class, builder)).entrySet()) {
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) parse(object, Map.class, builder)).entrySet()) {
             Object key = entry.getKey();
             if (StringUtil.isEmpty(key)) {
                 continue;
@@ -181,10 +261,10 @@ public final class Data {
                     Object value;
                     if (new ClassInfo(type).isInstanceof(Collection.class)) {
                         Object entryValue = entry.getValue();
-                        value = transformCollection(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), field.getGenericClass().getFirst().getJavaClass(), builder);
+                        value = parseCollection(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), field.getGenericClass().getFirst().getJavaClass(), builder);
                     } else {
                         Object entryValue = entry.getValue();
-                        value = transform(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), builder);
+                        value = parse(entryValue, type != Object.class ? type : entryValue == null ? type : entryValue.getClass(), builder);
                     }
                     boolean isExecuteMethod = false;
                     Method method = tClassClassInfo.getSetMethod(field.getName());
@@ -211,8 +291,8 @@ public final class Data {
      *
      * @return Object
      * */
-    public static Object transform(Object object, Class<?> tClass) {
-        return transform(object, tClass, true);
+    public static Object parse(Object object, Class<?> tClass) {
+        return parse(object, tClass, true);
     }
 
     /**
@@ -226,7 +306,7 @@ public final class Data {
      * @return Collection<?>
      * */
     @SuppressWarnings("unchecked")
-    public static Collection<?> transformCollection(Object object, Class<?> tClass, Class<?> genericClass, boolean builder) {
+    public static Collection<?> parseCollection(Object object, Class<?> tClass, Class<?> genericClass, boolean builder) {
         if (object == null) {
             return null;
         }
@@ -249,7 +329,7 @@ public final class Data {
         }
         if (object instanceof Collection<?> collection) {
             for (Object item : collection) {
-                result.add(transform(item, genericClass, builder));
+                result.add(parse(item, genericClass, builder));
             }
         }
         return result;
@@ -264,8 +344,8 @@ public final class Data {
      *
      * @return Collection<?>
      * */
-    public static Collection<?> transformCollection(Object object, Class<?> tClass, Class<?> genericClass) {
-        return transformCollection(object, tClass, genericClass, true);
+    public static Collection<?> parseCollection(Object object, Class<?> tClass, Class<?> genericClass) {
+        return parseCollection(object, tClass, genericClass, true);
     }
 
     /**

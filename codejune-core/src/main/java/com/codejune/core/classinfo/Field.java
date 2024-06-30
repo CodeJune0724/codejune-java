@@ -1,7 +1,6 @@
 package com.codejune.core.classinfo;
 
 import com.codejune.core.ClassInfo;
-import com.codejune.core.Data;
 import com.codejune.core.BaseException;
 import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.MapUtil;
@@ -78,11 +77,11 @@ public final class Field {
             List<ClassInfo> genericClass = getGenericClass();
             Object setData;
             if (classInfo.equals(List.class) && !genericClass.isEmpty()) {
-                setData = ArrayUtil.parse(ObjectUtil.transform(data, List.class), genericClass.getFirst().getJavaClass());
+                setData = ArrayUtil.parse(ObjectUtil.parse(data, List.class), genericClass.getFirst().getJavaClass());
             } else if (classInfo.equals(Map.class) && genericClass.size() >= 2) {
                 setData = MapUtil.parse(data, genericClass.getFirst().getJavaClass(), genericClass.get(1).getJavaClass());
             } else {
-                setData = Data.transform(data, classInfo.getJavaClass());
+                setData = ObjectUtil.parse(data, classInfo.getJavaClass());
             }
             this.field.set(object, setData);
         } catch (Exception e) {

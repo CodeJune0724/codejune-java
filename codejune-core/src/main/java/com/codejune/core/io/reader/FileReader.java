@@ -41,7 +41,7 @@ public final class FileReader extends InputStreamReader implements Closeable {
             return;
         }
         if (length != null) {
-            this.setSize(ObjectUtil.transform(length, int.class));
+            this.setSize(ObjectUtil.parse(length, int.class));
         }
         RandomAccessFile randomAccessFile = null;
         try {

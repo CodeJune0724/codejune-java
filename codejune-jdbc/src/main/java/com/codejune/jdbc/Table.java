@@ -106,7 +106,7 @@ public interface Table {
         if (query.getCount() == null || query.getCount()) {
             result.setCount(count(query.getFilter()));
         } else {
-            result.setCount(ObjectUtil.transform(result.getData().size(), Long.class));
+            result.setCount(ObjectUtil.parse(result.getData().size(), Long.class));
         }
         return result;
     }

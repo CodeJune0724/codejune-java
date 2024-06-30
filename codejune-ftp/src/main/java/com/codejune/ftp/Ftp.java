@@ -3,14 +3,15 @@ package com.codejune.ftp;
 import com.codejune.core.BaseException;
 import com.codejune.core.os.FileInfo;
 import com.codejune.core.util.IOUtil;
+import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.ftp.os.File;
 import com.codejune.ftp.os.Folder;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -167,7 +168,7 @@ public final class Ftp extends com.codejune.Ftp {
                 boolean isFile = !file.isDirectory();
                 String name = file.getName();
                 String filePath = path + "/" + file.getName();
-                Date updateTime = file.getTimestamp().getTime();
+                LocalDateTime updateTime = ObjectUtil.parse(file.getTimestamp().getTime(), LocalDateTime.class);
                 if (".".equals(name) || "..".equals(name)) {
                     continue;
                 }
@@ -194,7 +195,7 @@ public final class Ftp extends com.codejune.Ftp {
                         }
 
                         @Override
-                        public Date getUpdateTime() {
+                        public LocalDateTime getUpdateTime() {
                             return updateTime;
                         }
 
@@ -216,7 +217,7 @@ public final class Ftp extends com.codejune.Ftp {
                         }
 
                         @Override
-                        public Date getUpdateTime() {
+                        public LocalDateTime getUpdateTime() {
                             return updateTime;
                         }
 

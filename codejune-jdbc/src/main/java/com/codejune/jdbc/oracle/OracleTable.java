@@ -1,7 +1,6 @@
 package com.codejune.jdbc.oracle;
 
 import com.codejune.Jdbc;
-import com.codejune.core.Data;
 import com.codejune.core.BaseException;
 import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.ObjectUtil;
@@ -33,7 +32,7 @@ public final class OracleTable implements SqlTable {
     }
 
     @Override
-    public List<Column> getColumns() {
+    public List<Column> getColumn() {
         List<Column> result = new ArrayList<>();
         DatabaseMetaData databaseMetaData;
         try {
@@ -109,7 +108,7 @@ public final class OracleTable implements SqlTable {
         if (ObjectUtil.isEmpty(data)) {
             return 0;
         }
-        List<Column> allColumn = getColumns();
+        List<Column> allColumn = this.getColumn();
         if (ObjectUtil.isEmpty(allColumn)) {
             return 0;
         }
@@ -129,7 +128,11 @@ public final class OracleTable implements SqlTable {
                     if (filedData == null) {
                         preparedStatement.setNull(index, column.getType().getVendorTypeNumber());
                     } else if (column.getType() == JDBCType.TIMESTAMP) {
-                        preparedStatement.setTimestamp(index, new Timestamp(((Date) Data.transform(filedData, Date.class)).getTime()));
+                        preparedStatement.setTimestamp(index, new Timestamp(ObjectUtil.parse(filedData, Date.class).getTime()));
+                    } else if (column.getType() == JDBCType.DATE) {
+                        preparedStatement.setDate(index, new java.sql.Date(ObjectUtil.parse(filedData, Date.class).getTime()));
+                    } else if (column.getType() == JDBCType.TIME) {
+                        preparedStatement.setTime(index, new Time(ObjectUtil.parse(filedData, Date.class).getTime()));
                     } else {
                         preparedStatement.setObject(index, filedData);
                     }
@@ -184,7 +187,7 @@ public final class OracleTable implements SqlTable {
         if (ObjectUtil.isEmpty(setData)) {
             return 0;
         }
-        List<Column> allColumn = getColumns();
+        List<Column> allColumn = this.getColumn();
         if (ObjectUtil.isEmpty(allColumn)) {
             return 0;
         }
@@ -208,7 +211,11 @@ public final class OracleTable implements SqlTable {
                 if (data == null) {
                     preparedStatement.setNull(index, column.getType().getVendorTypeNumber());
                 } else if (column.getType() == JDBCType.TIMESTAMP) {
-                    preparedStatement.setTimestamp(index, new Timestamp(((Date) Data.transform(data, Date.class)).getTime()));
+                    preparedStatement.setTimestamp(index, new Timestamp(ObjectUtil.parse(data, Date.class).getTime()));
+                } else if (column.getType() == JDBCType.DATE) {
+                    preparedStatement.setDate(index, new java.sql.Date(ObjectUtil.parse(data, Date.class).getTime()));
+                } else if (column.getType() == JDBCType.TIME) {
+                    preparedStatement.setTime(index, new Time(ObjectUtil.parse(data, Date.class).getTime()));
                 } else {
                     preparedStatement.setObject(index, data);
                 }

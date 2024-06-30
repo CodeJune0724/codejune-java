@@ -80,7 +80,7 @@ public final class Cell {
      * @return 值
      * */
     public <T> T getValue(Class<T> tClass) {
-        return ObjectUtil.transform(this.getValue(), tClass);
+        return ObjectUtil.parse(this.getValue(), tClass);
     }
 
     /**

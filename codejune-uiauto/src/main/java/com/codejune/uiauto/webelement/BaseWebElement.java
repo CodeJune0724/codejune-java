@@ -5,7 +5,6 @@ import com.codejune.uiauto.WebElement;
 import com.codejune.uiauto.WebDriver;
 import org.openqa.selenium.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,9 +32,9 @@ public final class BaseWebElement implements WebElement {
             baseClick();
             return;
         }
-        long startTime = new Date().getTime() + 10000L;
+        long startTime = System.currentTimeMillis() + 10000L;
         while (true) {
-            long nowTime = new Date().getTime();
+            long nowTime = System.currentTimeMillis();
             if (startTime < nowTime) {
                 throw new BaseException("元素点击超时");
             }
@@ -56,9 +55,9 @@ public final class BaseWebElement implements WebElement {
         if (value == null) {
             value = "";
         }
-        long time = new Date().getTime();
+        long time = System.currentTimeMillis();
         while (true) {
-            long nowTime = new Date().getTime();
+            long nowTime = System.currentTimeMillis();
             if (nowTime - time > 10000) {
                 throw new BaseException("元素输入超时");
             }

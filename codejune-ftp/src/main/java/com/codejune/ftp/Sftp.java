@@ -1,10 +1,10 @@
 package com.codejune.ftp;
 
 import com.codejune.core.os.FileInfo;
+import com.codejune.core.util.DateUtil;
 import com.codejune.ftp.os.File;
 import com.codejune.ftp.os.Folder;
 import com.codejune.core.BaseException;
-import com.codejune.core.util.DateUtil;
 import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.StringUtil;
 import com.jcraft.jsch.ChannelSftp;
@@ -13,6 +13,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -191,7 +192,7 @@ public final class Sftp extends com.codejune.Ftp {
                     continue;
                 }
                 String filePath = path + "/" + name;
-                Date updateTime = DateUtil.parse(sftpATTRS.getMtimeString(), "EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+                LocalDateTime updateTime = DateUtil.parse(sftpATTRS.getMtimeString(), "EEE MMM dd HH:mm:ss zzz yyyy", LocalDateTime.class);
                 FileInfo fileInfo;
                 if (isFile) {
                     fileInfo = new File() {
@@ -215,7 +216,7 @@ public final class Sftp extends com.codejune.Ftp {
                         }
 
                         @Override
-                        public Date getUpdateTime() {
+                        public LocalDateTime getUpdateTime() {
                             return updateTime;
                         }
 
@@ -237,7 +238,7 @@ public final class Sftp extends com.codejune.Ftp {
                         }
 
                         @Override
-                        public Date getUpdateTime() {
+                        public LocalDateTime getUpdateTime() {
                             return updateTime;
                         }
 

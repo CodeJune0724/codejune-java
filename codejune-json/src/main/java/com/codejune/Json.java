@@ -41,7 +41,7 @@ public final class Json implements Builder {
         return switch (this.data) {
             case Map<?, ?> map -> Json.parse(MapUtil.get(map, key, Object.class));
             case Collection<?> collection ->
-                    Json.parse(ArrayUtil.get(ArrayUtil.parseList(collection, Object.class), ObjectUtil.transform(key, Integer.class)));
+                    Json.parse(ArrayUtil.get(ObjectUtil.parse(collection, List.class), ObjectUtil.parse(key, Integer.class), Object.class));
             case null, default -> new Json();
         };
     }
@@ -56,7 +56,7 @@ public final class Json implements Builder {
      * @return V
      * */
     public <V> V get(Object key, Class<V> vClass) {
-        return ObjectUtil.transform(get(key).data, vClass);
+        return ObjectUtil.parse(get(key).data, vClass);
     }
 
 
@@ -76,19 +76,6 @@ public final class Json implements Builder {
     }
 
     /**
-     * 获取collection
-     *
-     * @param key key
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return Collection
-     * */
-    public <V> Collection<V> getCollection(Object key, Class<V> vClass) {
-        return ArrayUtil.parse(get(key, Collection.class), vClass);
-    }
-
-    /**
      * 获取Collection<Map<K, V>>
      *
      * @param key key
@@ -104,19 +91,6 @@ public final class Json implements Builder {
     }
 
     /**
-     * 获取list
-     *
-     * @param key key
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return List
-     * */
-    public <V> List<V> getList(Object key, Class<V> vClass) {
-        return ArrayUtil.parseList(get(key, Collection.class), vClass);
-    }
-
-    /**
      * 获取List<Map<K, V>>
      *
      * @param key key
@@ -128,20 +102,7 @@ public final class Json implements Builder {
      * @return List<Map<K, V>>
      * */
     public <K, V> List<Map<K, V>> getListMap(Object key, Class<K> kClass, Class<V> vClass) {
-        return ArrayUtil.parseListMap(get(key, Collection.class), kClass, vClass);
-    }
-
-    /**
-     * 获取set
-     *
-     * @param key key
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return Set
-     * */
-    public <V> Set<V> getSet(Object key, Class<V> vClass) {
-        return ArrayUtil.parseSet(get(key, Collection.class), vClass);
+        return ArrayUtil.parseListMap(get(key, List.class), kClass, vClass);
     }
 
     /**
@@ -156,7 +117,7 @@ public final class Json implements Builder {
      * @return Set<Map<K, V>>
      * */
     public <K, V> Set<Map<K, V>> getSetMap(Object key, Class<K> kClass, Class<V> vClass) {
-        return ArrayUtil.parseSetMap(get(key, Collection.class), kClass, vClass);
+        return ArrayUtil.parseSetMap(get(key, Set.class), kClass, vClass);
     }
 
     @Override

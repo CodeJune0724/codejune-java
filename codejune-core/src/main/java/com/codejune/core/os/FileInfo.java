@@ -1,6 +1,6 @@
 package com.codejune.core.os;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 文件信息
@@ -28,7 +28,7 @@ public interface FileInfo {
      *
      * @return 更新时间
      * */
-    Date getUpdateTime();
+    LocalDateTime getUpdateTime();
 
     /**
      * 文件大小

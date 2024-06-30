@@ -27,8 +27,8 @@ public final class ObjectUtil {
      * @return T
      * */
     @SuppressWarnings("unchecked")
-    public static <T> T transform(Object object, Class<T> tClass, boolean builder) {
-        return (T) Data.transform(object, tClass, builder);
+    public static <T> T parse(Object object, Class<T> tClass, boolean builder) {
+        return (T) Data.parse(object, tClass, builder);
     }
 
     /**
@@ -40,8 +40,8 @@ public final class ObjectUtil {
      *
      * @return T
      * */
-    public static <T> T transform(Object object, Class<T> tClass) {
-        return transform(object, tClass, true);
+    public static <T> T parse(Object object, Class<T> tClass) {
+        return parse(object, tClass, true);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class ObjectUtil {
         if (aClass == String.class || aClass == Double.class || aClass == Integer.class || aClass == Long.class) {
             String data = toString(object);
             if (data != null && data.length() > length) {
-                return ObjectUtil.transform(data.substring(0, length), object.getClass());
+                return ObjectUtil.parse(data.substring(0, length), object.getClass());
             }
         }
         return object;
@@ -184,7 +184,7 @@ public final class ObjectUtil {
         if (!(o2 instanceof Map<?,?>) && !Data.isObject(o2.getClass())) {
             return o1;
         }
-        Map<?, ?> o2Map = transform(o2, Map.class);
+        Map<?, ?> o2Map = parse(o2, Map.class);
         if (o1 instanceof Map) {
             Map<Object, Object> o1Map = (Map<Object, Object>) o1;
             o1Map.replaceAll((k, v) -> o2Map.get(k));
@@ -193,9 +193,9 @@ public final class ObjectUtil {
             for (Field field : classInfo.getField()) {
                 Object setData;
                 if (new ClassInfo(field.getType()).isInstanceof(Collection.class)) {
-                    setData = Data.transformCollection(o2Map.get(field.getName()), field.getType(), field.getGenericClass().getFirst().getJavaClass(), false);
+                    setData = Data.parseCollection(o2Map.get(field.getName()), field.getType(), field.getGenericClass().getFirst().getJavaClass(), false);
                 } else {
-                    setData = transform(o2Map.get(field.getName()), field.getType(), false);
+                    setData = parse(o2Map.get(field.getName()), field.getType(), false);
                 }
                 Method setMethod = classInfo.getSetMethod(field.getName());
                 if (setMethod != null) {

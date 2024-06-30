@@ -13,6 +13,9 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.JDBCType;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,7 +69,13 @@ public class AccessDatabase extends Database {
                     } else if (classInfo.isInstanceof(String.class)) {
                         jdbcType = JDBCType.LONGVARCHAR;
                     } else if (classInfo.isInstanceof(Date.class)) {
-                        jdbcType = JDBCType.DATE;
+                        jdbcType = JDBCType.TIMESTAMP;
+                    } else if (classInfo.isInstanceof(LocalDateTime.class)) {
+                        jdbcType = JDBCType.TIMESTAMP;
+                    } else if (classInfo.isInstanceof(LocalDate.class)) {
+                        jdbcType = JDBCType.TIMESTAMP;
+                    } else if (classInfo.isInstanceof(LocalTime.class)) {
+                        jdbcType = JDBCType.TIMESTAMP;
                     } else {
                         throw new Error("sqlType未配置");
                     }

@@ -12,7 +12,7 @@ import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.StylesTable;
 import java.io.File;
 import java.io.InputStream;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
@@ -57,7 +57,7 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
 
     public ExcelReader(InputStream inputStream) {
         this(((Supplier<File>) () -> {
-            File result = new File(System.getProperty("java.io.tmpdir"), "ExcelReader-" + DateUtil.format(new Date(), "yyyyMMddHHmmss") + ".xlsx");
+            File result = new File(System.getProperty("java.io.tmpdir"), "ExcelReader-" + DateUtil.format(LocalDateTime.now(), "yyyyMMddHHmmss") + ".xlsx");
             new com.codejune.core.os.File(result).write(inputStream);
             return result;
         }).get());
@@ -91,7 +91,7 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
                 return null;
             }
             String sheetId = RegexUtil.find("<sheet name=\"" + sheetName + "\" sheetId=\"(.*?)\"", sheetList, 1);
-            return getSheet(ObjectUtil.transform(sheetId, Integer.class) - 1);
+            return getSheet(ObjectUtil.parse(sheetId, Integer.class) - 1);
         } catch (Exception e) {
             throw new BaseException(e);
         }

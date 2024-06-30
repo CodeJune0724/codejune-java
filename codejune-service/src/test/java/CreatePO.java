@@ -5,6 +5,9 @@ import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.service.BasePO;
 import jakarta.persistence.Column;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 
 public final class CreatePO {
@@ -116,6 +119,12 @@ public final class CreatePO {
                                     value = "false";
                                 } else if (classInfo.isInstanceof(Date.class)) {
                                     value = "\"\"";
+                                } else if (classInfo.isInstanceof(LocalDateTime.class)) {
+                                    value = "\"\"";
+                                } else if (classInfo.isInstanceof(LocalDate.class)) {
+                                    value = "\"\"";
+                                } else if (classInfo.isInstanceof(LocalTime.class)) {
+                                    value = "\"\"";
                                 } else {
                                     throw new BaseException("classInfo未配置");
                                 }
@@ -167,6 +176,12 @@ public final class CreatePO {
         } else if (classInfo.isInstanceof(Boolean.class)) {
             return "boolean";
         } else if (classInfo.isInstanceof(Date.class)) {
+            return "string";
+        } else if (classInfo.isInstanceof(LocalDateTime.class)) {
+            return "string";
+        } else if (classInfo.isInstanceof(LocalDate.class)) {
+            return "string";
+        } else if (classInfo.isInstanceof(LocalTime.class)) {
             return "string";
         } else {
             throw new BaseException("aClass未配置");

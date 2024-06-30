@@ -47,7 +47,7 @@ public final class SqlBuilder {
         if (object == null) {
             return null;
         }
-        Map<?, ?> map = ObjectUtil.transform(object, Map.class);
+        Map<?, ?> map = ObjectUtil.parse(object, Map.class);
         String sql = "INSERT INTO " + tableName + "(";
         Set<?> keySet = map.keySet();
         for (Object key : keySet) {

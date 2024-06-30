@@ -2,7 +2,6 @@ package com.codejune.jdbc.query;
 
 import com.codejune.core.BaseException;
 import com.codejune.core.Builder;
-import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.MapUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.jdbc.query.filter.Compare;
@@ -157,12 +156,12 @@ public final class Filter implements Builder, Cloneable {
                 if (map == null) {
                     return new ArrayList<>();
                 }
-                List<Map<String, Object>> or = ArrayUtil.parseListMap(MapUtil.get(map, "$or", List.class), String.class, Object.class);
+                List<Map<String, Object>> or = MapUtil.getListMap(map, "$or", String.class, Object.class);
                 map.remove("$or");
                 if (or == null) {
                     or = new ArrayList<>();
                 }
-                List<Map<String, Object>> and = ArrayUtil.parseListMap(MapUtil.get(map, "$and", List.class), String.class, Object.class);
+                List<Map<String, Object>> and = MapUtil.getListMap(map, "$and", String.class, Object.class);
                 map.remove("$and");
                 if (and == null) {
                     and = new ArrayList<>();
@@ -198,7 +197,7 @@ public final class Filter implements Builder, Cloneable {
                         connector = Expression.Connector.AND;
                         compare = and.getFirst();
                     }
-                    result.add(new Expression(connector, ObjectUtil.transform(compare, Compare.class)));
+                    result.add(new Expression(connector, ObjectUtil.parse(compare, Compare.class)));
                 } else {
                     for (Object item : or) {
                         List<Expression> orExpressionList = this.apply(MapUtil.parse(item));

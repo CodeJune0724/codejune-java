@@ -151,8 +151,8 @@ public final class Sheet {
             if (col == null) {
                 continue;
             }
-            int rowIndex = ObjectUtil.transform(row.getText(), Integer.class);
-            int cellIndex = ObjectUtil.transform(col.getText(), Integer.class);
+            int rowIndex = ObjectUtil.parse(row.getText(), Integer.class);
+            int cellIndex = ObjectUtil.parse(col.getText(), Integer.class);
             Element pic = twoCellAnchor.getElement("pic");
             if (pic == null) {
                 continue;

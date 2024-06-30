@@ -2,7 +2,6 @@ package com.codejune;
 
 import com.codejune.core.Closeable;
 import com.codejune.core.os.FileInfo;
-import com.codejune.core.util.ArrayUtil;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Consumer;
@@ -88,18 +87,7 @@ public abstract class Ftp implements Closeable {
      * @return List
      * */
     public final List<FileInfo> ls(String path) {
-        List<FileInfo> result = baseLs(path);
-        int size = result.size();
-        for (int i = 0; i < size; i++) {
-            for (int j = i + 1; j < size; j++) {
-                FileInfo fileInfoI = result.get(i);
-                FileInfo fileInfoJ = result.get(j);
-                if (fileInfoI.getUpdateTime().getTime() < fileInfoJ.getUpdateTime().getTime()) {
-                    ArrayUtil.move(result, j, i);
-                }
-            }
-        }
-        return result;
+        return baseLs(path);
     }
 
     /**

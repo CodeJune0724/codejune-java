@@ -12,7 +12,7 @@ public interface SqlTable extends Table {
      *
      * @return 所有字段
      * */
-    List<Column> getColumns();
+    List<Column> getColumn();
 
     /**
      * 获取字段
@@ -22,7 +22,7 @@ public interface SqlTable extends Table {
      * @return 类型
      * */
     default Column getColumn(String columnName) {
-        List<Column> columns = this.getColumns();
+        List<Column> columns = this.getColumn();
         if (columns == null || StringUtil.isEmpty(columnName)) {
             return null;
         }

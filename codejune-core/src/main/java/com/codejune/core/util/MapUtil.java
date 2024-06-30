@@ -36,7 +36,7 @@ public final class MapUtil {
         }
         Set<?> keySet = map.keySet();
         for (Object key : keySet) {
-            result.put(ObjectUtil.transform(key, kClass), ObjectUtil.transform(map.get(key), vClass));
+            result.put(ObjectUtil.parse(key, kClass), ObjectUtil.parse(map.get(key), vClass));
         }
         return result;
     }
@@ -49,7 +49,7 @@ public final class MapUtil {
      * @return Map
      * */
     public static Map<?, ?> parse(Object object) {
-        return ObjectUtil.transform(object, Map.class);
+        return ObjectUtil.parse(object, Map.class);
     }
 
     /**
@@ -61,8 +61,8 @@ public final class MapUtil {
      *
      * @return T
      * */
-    public static <T> T transform(Map<?, ?> map, Class<T> tClass) {
-        return ObjectUtil.transform(map, tClass);
+    public static <T> T parse(Map<?, ?> map, Class<T> tClass) {
+        return ObjectUtil.parse(map, tClass);
     }
 
     /**
@@ -80,7 +80,7 @@ public final class MapUtil {
             return null;
         }
         Object o = map.get(key);
-        return ObjectUtil.transform(o, tClass);
+        return ObjectUtil.parse(o, tClass);
     }
 
     /**
@@ -100,20 +100,6 @@ public final class MapUtil {
     }
 
     /**
-     * 获取collection
-     *
-     * @param map map
-     * @param key key
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return Collection
-     * */
-    public static <V> Collection<V> getCollection(Map<?, ?> map, Object key, Class<V> vClass) {
-        return ArrayUtil.parse(get(map, key, Collection.class), vClass);
-    }
-
-    /**
      * 获取Collection<Map<K, V>>
      *
      * @param map map
@@ -130,20 +116,6 @@ public final class MapUtil {
     }
 
     /**
-     * 获取list
-     *
-     * @param map map
-     * @param key key
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return List
-     * */
-    public static <V> List<V> getList(Map<?, ?> map, Object key, Class<V> vClass) {
-        return ArrayUtil.parseList(get(map, key, Collection.class), vClass);
-    }
-
-    /**
      * 获取List<Map<K, V>>
      *
      * @param map map
@@ -156,21 +128,7 @@ public final class MapUtil {
      * @return List<Map<K, V>>
      * */
     public static <K, V> List<Map<K, V>> getListMap(Map<?, ?> map, Object key, Class<K> kClass, Class<V> vClass) {
-        return ArrayUtil.parseListMap(get(map, key, Collection.class), kClass, vClass);
-    }
-
-    /**
-     * 获取set
-     *
-     * @param map map
-     * @param key key
-     * @param vClass vClass
-     * @param <V> V
-     *
-     * @return Set
-     * */
-    public static <V> Set<V> getSet(Map<?, ?> map, Object key, Class<V> vClass) {
-        return ArrayUtil.parseSet(get(map, key, Collection.class), vClass);
+        return ArrayUtil.parseListMap(get(map, key, List.class), kClass, vClass);
     }
 
     /**
@@ -186,7 +144,7 @@ public final class MapUtil {
      * @return Set<Map<K, V>>
      * */
     public static <K, V> Set<Map<K, V>> getSetMap(Map<?, ?> map, Object key, Class<K> kClass, Class<V> vClass) {
-        return ArrayUtil.parseSetMap(get(map, key, Collection.class), kClass, vClass);
+        return ArrayUtil.parseSetMap(get(map, key, Set.class), kClass, vClass);
     }
 
     /**

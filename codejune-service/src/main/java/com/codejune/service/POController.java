@@ -30,7 +30,7 @@ public abstract class POController<T extends BasePO<ID>, ID> {
         if (requestBody != null) {
             requestBody.put("id", null);
         }
-        return ResponseResult.returnTrue(getService().save(ObjectUtil.transform(requestBody, getService().getPOClass())));
+        return ResponseResult.returnTrue(getService().save(ObjectUtil.parse(requestBody, getService().getPOClass())));
     }
 
     @PostMapping("saveList")
@@ -65,12 +65,12 @@ public abstract class POController<T extends BasePO<ID>, ID> {
         if (requestBody != null) {
             requestBody.put("id", id);
         }
-        return ResponseResult.returnTrue(getService().save(ObjectUtil.transform(requestBody, getService().getPOClass())));
+        return ResponseResult.returnTrue(getService().save(ObjectUtil.parse(requestBody, getService().getPOClass())));
     }
 
     @PostMapping("query")
     public ResponseResult query(@RequestBody(required = false) Map<String, Object> requestBody) {
-        return ResponseResult.returnTrue(getService().query(ObjectUtil.transform(requestBody, Query.class)));
+        return ResponseResult.returnTrue(getService().query(ObjectUtil.parse(requestBody, Query.class)));
     }
 
     @GetMapping("{id}")

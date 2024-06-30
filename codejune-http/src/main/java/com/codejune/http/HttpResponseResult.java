@@ -136,14 +136,14 @@ public final class HttpResponseResult<T> implements Builder {
         if (classInfo.isInstanceof(Map.class) || classInfo.isInstanceof(Collection.class)) {
             result.setBody(Json.transform(this.getBody(), tClass));
         } else {
-            result.setBody(ObjectUtil.transform(this.body, tClass));
+            result.setBody(ObjectUtil.parse(this.body, tClass));
         }
         return result;
     }
 
     @Override
     public void build(Object object) {
-        ObjectUtil.assignment(this, ObjectUtil.transform(object, HttpResponseResult.class));
+        ObjectUtil.assignment(this, ObjectUtil.parse(object, HttpResponseResult.class));
     }
 
 }

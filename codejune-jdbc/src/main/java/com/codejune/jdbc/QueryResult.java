@@ -49,7 +49,7 @@ public final class QueryResult<T> {
         result.setCount(this.count);
         List<E> newData = new ArrayList<>();
         for (T t : this.data) {
-            newData.add(ObjectUtil.transform(t, eClass));
+            newData.add(ObjectUtil.parse(t, eClass));
         }
         result.setData(newData);
         return result;

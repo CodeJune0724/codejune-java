@@ -1,10 +1,10 @@
 package com.codejune.core.os;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,11 +45,8 @@ public final class Folder implements FileInfo {
     }
 
     @Override
-    public Date getUpdateTime() {
-        Calendar calendar = Calendar.getInstance();
-        long time = new java.io.File(path).lastModified();
-        calendar.setTimeInMillis(time);
-        return calendar.getTime();
+    public LocalDateTime getUpdateTime() {
+        return ObjectUtil.parse(new java.io.File(path).lastModified(), LocalDateTime.class);
     }
 
     @Override
