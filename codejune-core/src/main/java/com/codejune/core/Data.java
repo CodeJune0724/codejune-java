@@ -153,7 +153,7 @@ public final class Data {
                     return LocalDate.ofInstant(Instant.ofEpochMilli((Long) parse(number, Long.class)), ZoneId.systemDefault());
                 }
                 case LocalDateTime localDateTime -> {
-                    return LocalDate.ofInstant(localDateTime.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+                    return localDateTime.toLocalDate();
                 }
                 case String string -> {
                     LocalDate result = null;
