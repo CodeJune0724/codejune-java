@@ -123,10 +123,10 @@ public final class Json implements Builder {
     @Override
     public void build(Object object) {
         try {
-            this.data = Json.transform(object, Map.class);
+            this.data = Json.parse(object, Map.class);
         } catch (Throwable e) {
             try {
-                this.data = Json.transform(object, Collection.class);
+                this.data = Json.parse(object, Collection.class);
             } catch (Throwable e1) {
                 this.data = object;
             }
@@ -171,7 +171,7 @@ public final class Json implements Builder {
      *
      * @return T
      * */
-    public static <T> T transform(Object data, Class<T> tClass) {
+    public static <T> T parse(Object data, Class<T> tClass) {
         if (data == null) {
             return  null;
         }
@@ -192,11 +192,11 @@ public final class Json implements Builder {
     public static boolean isJson(Object data) {
         if (!StringUtil.isEmpty(data)) {
             try {
-                Json.transform(data, Map.class);
+                Json.parse(data, Map.class);
                 return true;
             } catch (Exception e) {
                 try {
-                    Json.transform(data, List.class);
+                    Json.parse(data, List.class);
                     return true;
                 } catch (Exception ignored) {}
             }

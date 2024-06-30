@@ -134,7 +134,7 @@ public final class HttpResponseResult<T> implements Builder {
         result.build(this);
         ClassInfo classInfo = new ClassInfo(tClass);
         if (classInfo.isInstanceof(Map.class) || classInfo.isInstanceof(Collection.class)) {
-            result.setBody(Json.transform(this.getBody(), tClass));
+            result.setBody(Json.parse(this.getBody(), tClass));
         } else {
             result.setBody(ObjectUtil.parse(this.body, tClass));
         }
