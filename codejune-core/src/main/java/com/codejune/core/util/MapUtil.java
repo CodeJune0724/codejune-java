@@ -100,6 +100,48 @@ public final class MapUtil {
     }
 
     /**
+     * 获取Collection
+     *
+     * @param map map
+     * @param key key
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return Collection
+     * */
+    public static <T> Collection<T> getCollection(Map<?, ?> map, Object key, Class<T> tClass) {
+        return ArrayUtil.parse(get(map, key, Collection.class), tClass);
+    }
+
+    /**
+     * 获取List
+     *
+     * @param map map
+     * @param key key
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return List
+     * */
+    public static <T> List<T> getList(Map<?, ?> map, Object key, Class<T> tClass) {
+        return ArrayUtil.parseList(get(map, key, List.class), tClass);
+    }
+
+    /**
+     * 获取Set
+     *
+     * @param map map
+     * @param key key
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return Set
+     * */
+    public static <T> Set<T> getSet(Map<?, ?> map, Object key, Class<T> tClass) {
+        return ArrayUtil.parseSet(get(map, key, Set.class), tClass);
+    }
+
+    /**
      * 获取Collection<Map<K, V>>
      *
      * @param map map
