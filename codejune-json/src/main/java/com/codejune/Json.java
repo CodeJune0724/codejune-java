@@ -76,6 +76,45 @@ public final class Json implements Builder {
     }
 
     /**
+     * 获取Collection
+     *
+     * @param key key
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return Collection
+     * */
+    public <T> Collection<T> getCollection(Object key, Class<T> tClass) {
+        return ArrayUtil.parse(this.get(key, Collection.class), tClass);
+    }
+
+    /**
+     * 获取List
+     *
+     * @param key key
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return List
+     * */
+    public <T> List<T> getList(Object key, Class<T> tClass) {
+        return ArrayUtil.parseList(this.get(key, List.class), tClass);
+    }
+
+    /**
+     * 获取Set
+     *
+     * @param key key
+     * @param tClass tClass
+     * @param <T> T
+     *
+     * @return Set
+     * */
+    public <T> Set<T> getSet(Object key, Class<T> tClass) {
+        return ArrayUtil.parseSet(this.get(key, Set.class), tClass);
+    }
+
+    /**
      * 获取Collection<Map<K, V>>
      *
      * @param key key
