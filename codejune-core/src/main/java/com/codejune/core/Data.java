@@ -307,7 +307,7 @@ public final class Data {
      * */
     @SuppressWarnings("unchecked")
     public static Collection<?> parseCollection(Object object, Class<?> tClass, Class<?> genericClass, boolean builder) {
-        if (object == null) {
+        if (!(object instanceof Collection<?>)) {
             return null;
         }
         if (genericClass == null) {
