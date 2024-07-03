@@ -14,7 +14,7 @@ public abstract class Reader<T> {
 
     protected final InputStream inputStream;
 
-    protected int size = 1024;
+    private int readSize = 1024;
 
     protected Reader(InputStream inputStream) {
         if (inputStream == null) {
@@ -23,11 +23,15 @@ public abstract class Reader<T> {
         this.inputStream = inputStream;
     }
 
-    public final void setSize(int size) {
-        if (size <= 0) {
+    public int getReadSize() {
+        return readSize;
+    }
+
+    public final void setReadSize(int readSize) {
+        if (readSize <= 0) {
             return;
         }
-        this.size = size;
+        this.readSize = readSize;
     }
 
     /**

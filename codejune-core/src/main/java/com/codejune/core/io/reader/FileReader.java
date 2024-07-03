@@ -41,13 +41,13 @@ public final class FileReader extends InputStreamReader implements Closeable {
             return;
         }
         if (length != null) {
-            this.setSize(ObjectUtil.parse(length, int.class));
+            this.setReadSize(ObjectUtil.parse(length, int.class));
         }
         RandomAccessFile randomAccessFile = null;
         try {
             randomAccessFile = new RandomAccessFile(this.file, "r");
             randomAccessFile.seek(range.getStart());
-            byte[] bytes = new byte[this.size];
+            byte[] bytes = new byte[this.getReadSize()];
             int size = randomAccessFile.read(bytes);
             while (size != -1) {
                 listener.accept(ByteBuffer.wrap(bytes, 0, size));

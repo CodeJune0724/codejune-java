@@ -2,9 +2,9 @@ package com.codejune.core.io.reader;
 
 import com.codejune.core.BaseException;
 import com.codejune.core.io.Reader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -24,11 +24,11 @@ public class InputStreamReader extends Reader<ByteBuffer> {
             listener = byteBuffer -> {};
         }
         try {
-            byte[] bytes = new byte[this.size];
-            int size = this.inputStream.read(bytes, 0, this.size);
+            byte[] bytes = new byte[this.getReadSize()];
+            int size = this.inputStream.read(bytes, 0, this.getReadSize());
             while (size != -1) {
                 listener.accept(ByteBuffer.wrap(bytes, 0, size));
-                size = this.inputStream.read(bytes, 0, this.size);
+                size = this.inputStream.read(bytes, 0, this.getReadSize());
             }
         } catch (Exception e) {
             throw new BaseException(e);
@@ -41,14 +41,15 @@ public class InputStreamReader extends Reader<ByteBuffer> {
      * @return byte[]
      * */
     public final byte[] getByte() {
-        byte[] result = new byte[this.getSize()];
-        AtomicInteger index = new AtomicInteger(0);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         this.read(byteBuffer -> {
-            byte[] aByte = Reader.getByte(byteBuffer);
-            System.arraycopy(aByte, 0, result, index.get(), aByte.length);
-            index.set(index.get() + aByte.length);
+            try {
+                byteArrayOutputStream.write(Reader.getByte(byteBuffer));
+            } catch (Exception e) {
+                throw new BaseException(e);
+            }
         });
-        return result;
+        return byteArrayOutputStream.toByteArray();
     }
 
 }

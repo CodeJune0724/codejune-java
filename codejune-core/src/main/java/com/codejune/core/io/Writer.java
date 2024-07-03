@@ -58,7 +58,7 @@ public class Writer {
             return;
         }
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        inputStreamReader.setSize(size);
+        inputStreamReader.setReadSize(size);
         inputStreamReader.read(Writer.this::write);
     }
 
