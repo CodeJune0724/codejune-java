@@ -1,6 +1,7 @@
 package com.codejune.service;
 
 import com.codejune.Json;
+import com.codejune.core.BaseException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
@@ -16,7 +17,9 @@ public abstract class ServerSentEvent extends SseEmitter {
             try {
                 this.execute();
             } catch (Throwable e) {
-                this.sendError(e.getMessage());
+                try {
+                    this.sendError(e.getMessage());
+                } catch (Exception ignored) {}
             } finally {
                 this.close();
             }
@@ -46,7 +49,9 @@ public abstract class ServerSentEvent extends SseEmitter {
     public final void send(String type, Object message) {
         try {
             this.send(SseEmitter.event().name(type).data(message == null ? "" : Json.toString(message)));
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
     }
 
     /**
@@ -65,6 +70,20 @@ public abstract class ServerSentEvent extends SseEmitter {
         try {
             this.complete();
         } catch (Exception ignored) {}
+    }
+
+    /**
+     * 发送
+     *
+     * @param serverSentEvent serverSentEvent
+     * @param type type
+     * @param message message
+     * */
+    public static void send(ServerSentEvent serverSentEvent, String type, Object message) {
+        if (serverSentEvent == null) {
+            return;
+        }
+        serverSentEvent.send(type, message);
     }
 
 }
