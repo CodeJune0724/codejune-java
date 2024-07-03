@@ -12,7 +12,7 @@ import java.util.Date;
 
 public final class CreatePO {
 
-    private static final Class<? extends BasePO<?>> BASE_PO_CLASS = ComplexPO.class;
+    private static final Class<? extends BasePO<?>> BASE_PO_CLASS = null;
 
     private static final String PACKAGE = "com.eputil";
 

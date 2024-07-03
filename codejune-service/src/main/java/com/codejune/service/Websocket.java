@@ -48,7 +48,13 @@ public class Websocket {
      * @param throwable throwable
      * */
     @OnError
-    public void onError(Throwable throwable) {}
+    public final void onError(Throwable throwable) {
+        try {
+            this.sendError(throwable == null ? null : throwable.getMessage());
+        } finally {
+            this.close();
+        }
+    }
 
     /**
      * 发送
