@@ -12,11 +12,11 @@ import java.util.Date;
 
 public final class CreatePO {
 
-    private static final Class<? extends BasePO<?>> BASE_PO_CLASS = null;
+    private static final Class<? extends BasePO<?>> BASE_PO_CLASS = ComplexPO.class;
 
-    private static final String PACKAGE = "com.hytmanage";
+    private static final String PACKAGE = "com.eputil";
 
-    private static final String OUT_PATH = "C:\\application\\project\\hyt_manage";
+    private static final String OUT_PATH = "C:\\application\\project\\ep-util";
 
     public static void main(String[] args) {
         if (BASE_PO_CLASS == null || StringUtil.isEmpty(PACKAGE) || StringUtil.isEmpty(OUT_PATH)) {
@@ -54,11 +54,6 @@ public final class CreatePO {
                         "        return " + PACKAGE + ".Database.getInstance();\r\n" +
                         "    }\r\n" +
                         "\r\n" +
-                        "    @Override\r\n" +
-                        "    public Class<" + BASE_PO_CLASS.getSimpleName() + "> getPOClass() {\r\n" +
-                        "        return " + BASE_PO_CLASS.getSimpleName() + ".class;\r\n" +
-                        "    }\r\n" +
-                        "    \r\n" +
                         "}");
     }
 

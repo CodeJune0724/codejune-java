@@ -1,5 +1,7 @@
 package com.codejune.core.util;
 
+import java.util.function.Function;
+
 /**
  * StringUtil
  *
@@ -86,6 +88,24 @@ public final class StringUtil {
             }
         }
         return result.toString();
+    }
+
+    /**
+     * parse
+     *
+     * @param value value
+     * @param stringFunction stringFunction
+     *
+     * @return String
+     * */
+    public static String parse(String value, Function<String, String> stringFunction) {
+        if (value == null) {
+            return null;
+        }
+        if (stringFunction == null) {
+            return value;
+        }
+        return stringFunction.apply(value);
     }
 
 }
