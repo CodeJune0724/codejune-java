@@ -2,6 +2,7 @@ package com.codejune.core.io;
 
 import com.codejune.core.BaseException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
 /**
@@ -32,9 +33,9 @@ public abstract class Reader<T> {
     /**
      * 读取
      *
-     * @param listener listener
+     * @param consumer consumer
      * */
-    public abstract void read(Consumer<T> listener);
+    public abstract void read(Consumer<T> consumer);
 
     /**
      * 获取大小
@@ -47,6 +48,23 @@ public abstract class Reader<T> {
         } catch (Exception e) {
             throw new BaseException(e);
         }
+    }
+
+    /**
+     * 获取byte[]
+     *
+     * @param byteBuffer byteBuffer
+     *
+     * @return byte[]
+     * */
+    public static byte[] getByte(ByteBuffer byteBuffer) {
+        if (byteBuffer == null) {
+            return null;
+        }
+        int length = byteBuffer.remaining();
+        byte[] result = new byte[length];
+        byteBuffer.get(result, byteBuffer.position(), length);
+        return result;
     }
 
 }

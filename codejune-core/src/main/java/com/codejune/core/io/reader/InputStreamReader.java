@@ -4,6 +4,7 @@ import com.codejune.core.BaseException;
 import com.codejune.core.io.Reader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -32,6 +33,22 @@ public class InputStreamReader extends Reader<ByteBuffer> {
         } catch (Exception e) {
             throw new BaseException(e);
         }
+    }
+
+    /**
+     * 获取byte[]
+     *
+     * @return byte[]
+     * */
+    public final byte[] getByte() {
+        byte[] result = new byte[this.getSize()];
+        AtomicInteger index = new AtomicInteger(0);
+        this.read(byteBuffer -> {
+            byte[] aByte = Reader.getByte(byteBuffer);
+            System.arraycopy(aByte, 0, result, index.get(), aByte.length);
+            index.set(index.get() + aByte.length);
+        });
+        return result;
     }
 
 }
