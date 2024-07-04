@@ -9,13 +9,14 @@ import jakarta.persistence.Id;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * FieldToColumnKeyHandler
  *
  * @author ZJ
  * */
-public final class FieldToColumnHandler {
+public final class FieldToColumnHandler implements Function<String, String> {
 
     private final Map<String, String> newKeyMap = new HashMap<>();
 
@@ -38,10 +39,11 @@ public final class FieldToColumnHandler {
         }
     }
 
-    public String handler(String key) {
+    @Override
+    public String apply(String key) {
         String result = this.newKeyMap.get(key);
         if (StringUtil.isEmpty(result)) {
-            return null;
+            return key;
         }
         return result;
     }

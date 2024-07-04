@@ -174,11 +174,9 @@ public class Database {
         public QueryResult<T> query(Query query) {
             return database.execute(jdbc -> {
                 if (query != null) {
-                    FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
-                    query.keyHandler(fieldToColumnHandler::handler);
+                    query.keyHandler(database.fieldToColumnHandlerBuffer.get(basePOClass));
                 }
-                ColumnToFieldHandler columnToFieldHandler = database.columnToFieldHandlerBuffer.get(basePOClass);
-                return getTable(jdbc).query(query).parse(map -> MapUtil.keyHandler(map, columnToFieldHandler::handler)).parse(basePOClass);
+                return getTable(jdbc).query(query).parse(map -> MapUtil.keyHandler(map, database.columnToFieldHandlerBuffer.get(basePOClass))).parse(basePOClass);
             });
         }
 
@@ -203,7 +201,7 @@ public class Database {
                 if (filter != null) {
                     FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
                     filter.expressionHandler(compare -> {
-                        compare.setKey(fieldToColumnHandler.handler(compare.getKey()));
+                        compare.setKey(fieldToColumnHandler.apply(compare.getKey()));
                         return compare;
                     });
                 }
@@ -239,8 +237,7 @@ public class Database {
                 if (!id) {
                     saveT.setId(database.getNextId(jdbc, Table.this));
                 }
-                FieldToColumnHandler fieldToColumnHandler = database.fieldToColumnHandlerBuffer.get(basePOClass);
-                Map<String, Object> data = MapUtil.keyHandler(MapUtil.parse(saveT, String.class, Object.class), fieldToColumnHandler::handler);
+                Map<String, Object> data = MapUtil.keyHandler(MapUtil.parse(saveT, String.class, Object.class), database.fieldToColumnHandlerBuffer.get(basePOClass));
                 if (id) {
                     getTable(jdbc).update(data, new Filter().and(Compare.equals("ID", saveT.getId())));
                 } else {
