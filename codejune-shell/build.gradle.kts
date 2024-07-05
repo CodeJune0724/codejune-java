@@ -1,4 +1,4 @@
 dependencies {
     api(project(":codejune-core"))
-    api("com.github.mwiede:jsch:0.2.17")
+    api("com.github.mwiede:jsch:0.2.18")
 }

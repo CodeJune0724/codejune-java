@@ -99,9 +99,6 @@ public final class StringUtil {
      * @return String
      * */
     public static String parse(String value, Function<String, String> stringFunction) {
-        if (value == null) {
-            return null;
-        }
         if (stringFunction == null) {
             return value;
         }

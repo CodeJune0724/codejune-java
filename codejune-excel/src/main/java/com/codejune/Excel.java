@@ -154,9 +154,6 @@ public final class Excel implements Closeable, Iterable<Sheet> {
         try {
             this.workbook.write(outputStream);
             outputStream.flush();
-            if (this.workbook instanceof SXSSFWorkbook sxssfWorkbook) {
-                sxssfWorkbook.dispose();
-            }
         } catch (Exception e) {
             throw new BaseException(e);
         }
