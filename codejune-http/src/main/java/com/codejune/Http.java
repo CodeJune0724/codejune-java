@@ -268,4 +268,22 @@ public final class Http {
         return result;
     }
 
+    /**
+     * 发送json格式
+     *
+     * @param url url
+     * @param type type
+     * @param body body
+     *
+     * @return Json
+     * */
+    public static Json sendByJson(String url, Type type, Object body) {
+        return new Http(url, type)
+                .setContentType(ContentType.APPLICATION_JSON)
+                .setBody(body)
+                .send()
+                .parse(Json.class)
+                .getBody();
+    }
+
 }
