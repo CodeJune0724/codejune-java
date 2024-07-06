@@ -38,6 +38,9 @@ public final class Json implements Builder {
      * @return Json
      * */
     public Json get(Object key) {
+        if ("$".equals(key)) {
+            return this;
+        }
         return switch (this.data) {
             case Map<?, ?> map -> Json.parse(MapUtil.get(map, key, Object.class));
             case Collection<?> collection ->
