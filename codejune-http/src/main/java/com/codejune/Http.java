@@ -36,13 +36,10 @@ public final class Http {
 
     private int timeoutResendNumber = 10;
 
-    {
-        addHeader("accept", "*/*");
-        addHeader("connection", "Keep-Alive");
-    }
-
     public Http(String url, Type type) {
         this.config = new Config(url, type);
+        this.addHeader("accept", "*/*");
+        this.addHeader("connection", "Keep-Alive");
     }
 
     public Config getConfig() {
