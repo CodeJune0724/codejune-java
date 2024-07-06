@@ -32,21 +32,7 @@ import java.util.function.Function;
  */
 public final class Http {
 
-    private final String url;
-
-    private final Type type;
-
-    private ContentType contentType;
-
-    private final List<Header> headerList = new ArrayList<>();
-
-    private Object body;
-
-    private int timeout = -1;
-
-    private Function<HttpResponseResult<String>, Boolean> resend = stringHttpResponseResult -> false;
-
-    private boolean timeoutResend = false;
+    private Config config;
 
     private int timeoutResendNumber = 10;
 
@@ -56,37 +42,25 @@ public final class Http {
     }
 
     public Http(String url, Type type) {
-        if (StringUtil.isEmpty(url)) {
-            throw new BaseException("url is null");
-        }
-        if (type == null) {
-            throw new BaseException("type is null");
-        }
-        this.url = url;
-        this.type = type;
+        this.config = new Config(url, type);
     }
 
-    public String getUrl() {
-        return url;
+    public Config getConfig() {
+        return this.config;
     }
 
-    public Type getType() {
-        return type;
-    }
-
-    public List<Header> getHeaderList() {
-        return headerList;
-    }
-
-    public ContentType getContentType() {
-        return contentType;
-    }
-
+    /**
+     * 设置ContentType
+     *
+     * @param contentType contentType
+     *
+     * @return this
+     * */
     public Http setContentType(ContentType contentType) {
-        this.contentType = contentType;
+        this.config.setContentType(contentType);
         String key = "Content-type";
-        if (this.contentType == null) {
-            headerList.removeIf(header -> key.equals(header.getKey()));
+        if (this.config.getContentType() == null) {
+            this.config.getHeader().removeIf(header -> key.equals(header.getKey()));
         } else {
             if (contentType != ContentType.FORM_DATA) {
                 addHeader(key, contentType.getContentType());
@@ -95,12 +69,15 @@ public final class Http {
         return this;
     }
 
-    public Object getBody() {
-        return body;
-    }
-
+    /**
+     * 设置body
+     *
+     * @param body body
+     *
+     * @return this
+     * */
     public Http setBody(Object body) {
-        this.body = body;
+        this.config.setBody(body);
         return this;
     }
 
@@ -113,13 +90,7 @@ public final class Http {
      * @return this
      * */
     public Http addHeader(String key, String value) {
-        if (StringUtil.isEmpty(key)) {
-            return this;
-        }
-        if (key.equalsIgnoreCase("content-length")) {
-            return this;
-        }
-        this.headerList.add(new Header(key, value));
+        this.config.addHeader(key, value);
         return this;
     }
 
@@ -131,7 +102,7 @@ public final class Http {
      * @return this
      * */
     public Http setTimeout(int timeout) {
-        this.timeout = timeout;
+        this.config.setTimeout(timeout);
         return this;
     }
 
@@ -142,11 +113,8 @@ public final class Http {
      *
      * @return this
      * */
-    public Http resend(Function<HttpResponseResult<String>, Boolean> resend) {
-        if (resend == null) {
-            return this;
-        }
-        this.resend = resend;
+    public Http setResend(Function<HttpResponseResult<String>, Boolean> resend) {
+        this.config.setResend(resend);
         return this;
     }
 
@@ -158,7 +126,7 @@ public final class Http {
      * @return this
      * */
     public Http setTimeoutResend(boolean timeoutResend) {
-        this.timeoutResend = timeoutResend;
+        this.config.setTimeoutResend(timeoutResend);
         return this;
     }
 
@@ -168,6 +136,10 @@ public final class Http {
      * @param listener listener
      * */
     public void send(Consumer<HttpResponseResult<InputStream>> listener) {
+        Type type = this.config.getType();
+        if (type == null) {
+            throw new BaseException("type is null");
+        }
         HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
         HttpEntity httpEntity = null;
         try (CloseableHttpClient closeableHttpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(new SSLContextBuilder().loadTrustMaterial(null, (chain, authType) -> true).build(), NoopHostnameVerifier.INSTANCE)).build()) {
@@ -177,11 +149,14 @@ public final class Http {
                     return type.name();
                 }
             };
-            httpEntityEnclosingRequestBase.setURI(URI.create(url));
-            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().setConnectTimeout(this.timeout).setSocketTimeout(this.timeout).setConnectionRequestTimeout(this.timeout).build());
-            for (Header header : headerList) {
+            httpEntityEnclosingRequestBase.setURI(URI.create(Http.this.config.getUrl()));
+            int timeout = this.config.getTimeout();
+            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).setConnectionRequestTimeout(timeout).build());
+            for (Header header : this.config.getHeader()) {
                 httpEntityEnclosingRequestBase.setHeader(header.getKey(), header.getValue());
             }
+            Object body = this.config.getBody();
+            ContentType contentType = this.config.getContentType();
             if (body != null) {
                 if (contentType == ContentType.APPLICATION_JSON) {
                     httpEntity = new StringEntity(Json.toString(body), "UTF-8");
@@ -209,14 +184,14 @@ public final class Http {
                         if (stringObjectMap == null) {
                             stringObjectMap = new HashMap<>();
                         }
-                        String body = ArrayUtil.toString(stringObjectMap.keySet(), key -> {
+                        String bodyString = ArrayUtil.toString(stringObjectMap.keySet(), key -> {
                             Object value = map.get(key);
                             if (value == null) {
                                 return null;
                             }
                             return key + "=" + ObjectUtil.toString(value);
                         }, "&");
-                        httpEntity = new StringEntity(body == null ? "" : body, "UTF-8");
+                        httpEntity = new StringEntity(bodyString == null ? "" : bodyString, "UTF-8");
                     } else {
                         httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
                     }
@@ -237,7 +212,7 @@ public final class Http {
                 listener.accept(httpResponseResult);
             }
         } catch (Exception e) {
-            if (this.timeoutResend && this.timeoutResendNumber > 0) {
+            if (this.config.isTimeoutResend() && this.timeoutResendNumber > 0) {
                 this.timeoutResendNumber = this.timeoutResendNumber - 1;
                 send(listener);
             } else {
@@ -262,7 +237,8 @@ public final class Http {
             result.build(httpResponseResult);
             result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
         });
-        if (ObjectUtil.equals(true, resend.apply(result))) {
+        Function<HttpResponseResult<String>, Boolean> resend = this.config.getResend();
+        if (resend != null && ObjectUtil.equals(true, resend.apply(result))) {
             return send();
         }
         return result;
@@ -271,19 +247,18 @@ public final class Http {
     /**
      * 发送json格式
      *
-     * @param url url
-     * @param type type
-     * @param body body
+     * @param config config
      *
      * @return Json
      * */
-    public static Json sendByJson(String url, Type type, Object body) {
-        return new Http(url, type)
-                .setContentType(ContentType.APPLICATION_JSON)
-                .setBody(body)
-                .send()
-                .parse(Json.class)
-                .getBody();
+    public static Json sendByJson(Config config) {
+        if (config == null) {
+            throw new BaseException("config is null");
+        }
+        Http http = new Http(config.getUrl(), config.getType());
+        http.config = config;
+        http.setContentType(ContentType.APPLICATION_JSON);
+        return http.send().parse(Json.class).getBody();
     }
 
 }
