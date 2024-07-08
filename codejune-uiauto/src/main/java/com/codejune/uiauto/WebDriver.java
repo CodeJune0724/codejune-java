@@ -1,6 +1,7 @@
 package com.codejune.uiauto;
 
 import com.codejune.core.Closeable;
+import com.codejune.uiauto.http.Cookie;
 import java.util.List;
 
 /**
@@ -155,5 +156,12 @@ public interface WebDriver extends Closeable {
      * @param px 滚动距离
      * */
     void scrollDown(int px);
+
+    /**
+     * 获取cookie
+     *
+     * @return ist<Cookie>
+     * */
+    List<Cookie> getCookie();
 
 }

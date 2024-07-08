@@ -4,10 +4,10 @@ import com.codejune.core.BaseException;
 import com.codejune.uiauto.Alert;
 import com.codejune.uiauto.WebElement;
 import com.codejune.uiauto.Selector;
+import com.codejune.uiauto.http.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * AbstractWebDriver
@@ -16,7 +16,7 @@ import java.util.List;
  * */
 public abstract class BaseWebDriver implements com.codejune.uiauto.WebDriver {
 
-    private org.openqa.selenium.WebDriver seleniumWebDriver;
+    protected org.openqa.selenium.WebDriver seleniumWebDriver;
 
     protected BaseWebDriver(org.openqa.selenium.WebDriver webDriver) {
         this.seleniumWebDriver = webDriver;
@@ -25,7 +25,7 @@ public abstract class BaseWebDriver implements com.codejune.uiauto.WebDriver {
 
     @Override
     public final org.openqa.selenium.WebDriver getSeleniumWebDriver() {
-        return seleniumWebDriver;
+        return this.seleniumWebDriver;
     }
 
     @Override
@@ -152,6 +152,25 @@ public abstract class BaseWebDriver implements com.codejune.uiauto.WebDriver {
     @Override
     public void scrollDown(int px) {
         executeScript("window.scrollBy(0, " + px + ")");
+    }
+
+    @Override
+    public List<Cookie> getCookie() {
+        List<Cookie> result = new ArrayList<>();
+        Set<org.openqa.selenium.Cookie> cookieList = this.seleniumWebDriver.manage().getCookies();
+        for (org.openqa.selenium.Cookie item : cookieList) {
+            result.add(new Cookie(
+                    item.getName(),
+                    item.getValue(),
+                    item.getDomain(),
+                    item.getPath(),
+                    item.getExpiry(),
+                    item.isSecure(),
+                    item.isHttpOnly(),
+                    item.getSameSite()
+            ));
+        }
+        return result;
     }
 
     private List<WebElement> findElements(Selector selector, long millisecond, long startTime) {

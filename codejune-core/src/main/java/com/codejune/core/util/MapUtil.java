@@ -66,6 +66,27 @@ public final class MapUtil {
     }
 
     /**
+     * parse
+     *
+     * @param param param
+     * @param function function
+     * @param <PARAM> PARAM
+     * @param <KEY> KEY
+     * @param <VALUE> VALUE
+     *
+     * @return Map
+     * */
+    public static <PARAM, KEY, VALUE> Map<KEY, VALUE> parse(PARAM param, Function<PARAM, Map<KEY, VALUE>> function) {
+        if (param == null) {
+            return null;
+        }
+        if (function == null) {
+            throw new BaseException("parse function is null");
+        }
+        return function.apply(param);
+    }
+
+    /**
      * 获取值
      *
      * @param <T> T

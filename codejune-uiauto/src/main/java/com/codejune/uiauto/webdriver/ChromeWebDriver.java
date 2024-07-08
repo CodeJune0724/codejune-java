@@ -1,6 +1,7 @@
 package com.codejune.uiauto.webdriver;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.util.MapUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.uiauto.DriverType;
 import com.codejune.uiauto.http.HttpRequest;
@@ -25,6 +26,8 @@ import java.util.function.BiConsumer;
 public final class ChromeWebDriver extends BaseWebDriver {
 
     private final Map<String, HttpRequest> requestIdMap = new HashMap<>();
+
+    private final Map<String, HttpResponse> httpResponseMap = new HashMap<>();
 
     public ChromeWebDriver(File webDriverFile, boolean isShow) {
         super(getWebDriver(webDriverFile, isShow));
@@ -68,21 +71,31 @@ public final class ChromeWebDriver extends BaseWebDriver {
         if (consumer == null) {
             return;
         }
-        DevTools devTools = ((ChromeDriver) this.getSeleniumWebDriver()).getDevTools();
+        DevTools devTools = ((ChromeDriver) this.seleniumWebDriver).getDevTools();
         devTools.createSession();
         devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
         devTools.addListener(Network.requestWillBeSent(), requestWillBeSent -> {
             synchronized (requestIdMap) {
                 Request request = requestWillBeSent.getRequest();
-                HttpRequest httpRequest = new HttpRequest();
-                httpRequest.setUrl(request.getUrl());
-                httpRequest.setType(request.getMethod());
-                httpRequest.setHeader(new LinkedHashMap<>());
-                for (Map.Entry<String, Object> entry : request.getHeaders().entrySet()) {
-                    httpRequest.getHeader().put(entry.getKey(), ObjectUtil.toString(entry.getValue()));
+                HttpRequest httpRequest = new HttpRequest(
+                        request.getUrl(),
+                        request.getMethod(),
+                        MapUtil.parse(request.getHeaders(), header -> {
+                            Map<String, String> result = new LinkedHashMap<>();
+                            for (Map.Entry<String, Object> entry : header.entrySet()) {
+                                result.put(entry.getKey(), ObjectUtil.toString(entry.getValue()));
+                            }
+                            return result;
+                        }),
+                        request.getPostData().orElse(null)
+                );
+                String requestId = requestWillBeSent.getRequestId().toString();
+                requestIdMap.put(requestId, httpRequest);
+                HttpResponse httpResponse = httpResponseMap.get(requestId);
+                if (httpResponse != null) {
+                    consumer.accept(httpRequest, httpResponse);
+                    httpResponseMap.remove(requestId);
                 }
-                httpRequest.setBody(request.getPostData().orElse(null));
-                requestIdMap.put(requestWillBeSent.getRequestId().toString(), httpRequest);
             }
         });
         devTools.addListener(Network.responseReceived(), responseReceived -> {
@@ -90,14 +103,22 @@ public final class ChromeWebDriver extends BaseWebDriver {
                 RequestId requestId = responseReceived.getRequestId();
                 HttpRequest httpRequest = requestIdMap.get(requestId.toString());
                 Response response = responseReceived.getResponse();
-                HttpResponse httpResponse = new HttpResponse();
-                httpResponse.setStatus(response.getStatus());
-                httpResponse.setHeader(new LinkedHashMap<>());
-                for (Map.Entry<String, Object> entry : response.getHeaders().entrySet()) {
-                    httpResponse.getHeader().put(entry.getKey(), ObjectUtil.toString(entry.getValue()));
+                HttpResponse httpResponse = new HttpResponse(
+                        response.getStatus(),
+                        MapUtil.parse(response.getHeaders(), header -> {
+                            Map<String, String> result = new LinkedHashMap<>();
+                            for (Map.Entry<String, Object> entry : header.entrySet()) {
+                                result.put(entry.getKey(), ObjectUtil.toString(entry.getValue()));
+                            }
+                            return result;
+                        }),
+                        devTools.send(Network.getResponseBody(requestId)).getBody()
+                );
+                if (httpRequest == null) {
+                    httpResponseMap.put(requestId.toString(), httpResponse);
+                } else {
+                    consumer.accept(httpRequest, httpResponse);
                 }
-                httpResponse.setBody(devTools.send(Network.getResponseBody(requestId)).getBody());
-                consumer.accept(httpRequest, httpResponse);
             }
         });
     }

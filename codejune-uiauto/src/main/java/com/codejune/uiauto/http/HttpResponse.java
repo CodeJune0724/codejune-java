@@ -9,34 +9,28 @@ import java.util.Map;
  * */
 public final class HttpResponse {
 
-    private int status;
+    private final int status;
 
-    private Map<String, String> header;
+    private final Map<String, String> header;
 
-    private String body;
+    private final String body;
+
+    public HttpResponse(int status, Map<String, String> header, String body) {
+        this.status = status;
+        this.header = header;
+        this.body = body;
+    }
 
     public int getStatus() {
         return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
     }
 
     public Map<String, String> getHeader() {
         return header;
     }
 
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
-    }
-
     public String getBody() {
         return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
     }
 
 }

@@ -9,44 +9,35 @@ import java.util.Map;
  * */
 public final class HttpRequest {
 
-    private String url;
+    private final String url;
 
-    private String type;
+    private final String type;
 
-    private Map<String, String> header;
+    private final Map<String, String> header;
 
-    private String body;
+    private final String body;
+
+    public HttpRequest(String url, String type, Map<String, String> header, String body) {
+        this.url = url;
+        this.type = type;
+        this.header = header;
+        this.body = body;
+    }
 
     public String getUrl() {
         return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public Map<String, String> getHeader() {
         return header;
     }
 
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
-    }
-
     public String getBody() {
         return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
     }
 
 }
