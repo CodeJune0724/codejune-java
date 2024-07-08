@@ -138,7 +138,7 @@ public interface WebDriver extends Closeable {
      *
      * @return 是否存在
      * */
-    boolean isExist(Selector selector, long millisecond);
+    boolean exist(Selector selector, long millisecond);
 
     /**
      * 元素是否存在
@@ -147,7 +147,7 @@ public interface WebDriver extends Closeable {
      *
      * @return 是否存在
      * */
-    boolean isExist(Selector selector);
+    boolean exist(Selector selector);
 
     /**
      * 滚动下拉条

@@ -135,7 +135,7 @@ public abstract class BaseWebDriver implements com.codejune.uiauto.WebDriver {
     }
 
     @Override
-    public boolean isExist(Selector selector, long millisecond) {
+    public boolean exist(Selector selector, long millisecond) {
         try {
             findElement(selector, millisecond);
             return true;
@@ -145,8 +145,8 @@ public abstract class BaseWebDriver implements com.codejune.uiauto.WebDriver {
     }
 
     @Override
-    public boolean isExist(Selector selector) {
-        return isExist(selector, 10000);
+    public boolean exist(Selector selector) {
+        return this.exist(selector, 10000);
     }
 
     @Override
