@@ -43,7 +43,7 @@ public final class FieldToColumnHandler implements Function<String, String> {
     public String apply(String key) {
         String result = this.newKeyMap.get(key);
         if (StringUtil.isEmpty(result)) {
-            return key;
+            return null;
         }
         return result;
     }
