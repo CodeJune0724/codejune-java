@@ -8,6 +8,7 @@ import com.codejune.core.BaseException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * ObjectUtil
@@ -42,6 +43,22 @@ public final class ObjectUtil {
      * */
     public static <T> T parse(Object object, Class<T> tClass) {
         return parse(object, tClass, true);
+    }
+
+    /**
+     * 转成指定的类
+     *
+     * @param object object
+     * @param function function
+     * @param <T> T
+     *
+     * @return T
+     * */
+    public static <T> T parse(Object object, Function<Object, T> function) {
+        if (function == null) {
+            throw new BaseException("function is null");
+        }
+        return function.apply(object);
     }
 
     /**
