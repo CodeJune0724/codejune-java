@@ -119,6 +119,9 @@ public final class Data {
         }
         if (tClass == LocalDateTime.class) {
             switch (object) {
+                case java.sql.Date date -> {
+                    return parse(date.toLocalDate(), LocalDateTime.class, builder);
+                }
                 case Date date -> {
                     return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
                 }
@@ -126,7 +129,7 @@ public final class Data {
                     return LocalDateTime.ofInstant(Instant.ofEpochMilli((Long) parse(number, Long.class)), ZoneId.systemDefault());
                 }
                 case LocalDate localDate -> {
-                    return localDate.atStartOfDay(ZoneId.systemDefault());
+                    return localDate.atStartOfDay(ZoneId.systemDefault()).toLocalDateTime();
                 }
                 case String string -> {
                     LocalDateTime result = null;
@@ -146,6 +149,9 @@ public final class Data {
         }
         if (tClass == LocalDate.class) {
             switch (object) {
+                case java.sql.Date date -> {
+                    return date.toLocalDate();
+                }
                 case Date date -> {
                     return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
                 }
