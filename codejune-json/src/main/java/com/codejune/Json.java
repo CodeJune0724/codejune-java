@@ -164,6 +164,10 @@ public final class Json implements Builder {
 
     @Override
     public void build(Object object) {
+        if (ObjectUtil.isEmpty(object)) {
+            this.data = object;
+            return;
+        }
         try {
             this.data = Json.parse(object, Map.class);
         } catch (Throwable e) {
@@ -215,7 +219,7 @@ public final class Json implements Builder {
      * */
     public static <T> T parse(Object data, Class<T> tClass) {
         if (data == null) {
-            return  null;
+            return null;
         }
         try {
             return JSON.parseObject(toString(data), tClass);
