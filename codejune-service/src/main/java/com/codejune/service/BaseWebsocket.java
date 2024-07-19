@@ -1,10 +1,13 @@
 package com.codejune.service;
 
 import com.codejune.Json;
-import com.codejune.core.ResponseResult;
 import com.codejune.core.BaseException;
+import com.codejune.core.util.MapUtil;
+import com.codejune.core.util.StringUtil;
 import jakarta.websocket.*;
 import java.nio.ByteBuffer;
+import java.util.AbstractMap;
+import java.util.Map;
 
 public class BaseWebsocket {
 
@@ -16,9 +19,15 @@ public class BaseWebsocket {
      * @param session session
      * */
     @OnOpen
-    public void onOpen(Session session) {
+    public final void onOpen(Session session) {
         this.session = session;
+        this.onOpen();
     }
+
+    /**
+     * onOpen
+     * */
+    public void onOpen() {}
 
     /**
      * onMessage
@@ -26,6 +35,21 @@ public class BaseWebsocket {
      * @param message message
      * */
     @OnMessage
+    public final void $onMessage(String message) {
+        this.onMessage(message);
+        Map<?, ?> messageMap = MapUtil.parse(message);
+        String type = MapUtil.get(messageMap, "type", String.class);
+        if (StringUtil.isEmpty(type)) {
+            return;
+        }
+        this.onMessage(type, MapUtil.get(messageMap, "data", String.class));
+    }
+
+    /**
+     * onMessage
+     *
+     * @param message message
+     * */
     public void onMessage(String message) {}
 
     /**
@@ -34,12 +58,36 @@ public class BaseWebsocket {
      * @param byteBuffer byteBuffer
      * */
     @OnMessage
+    public final void $onMessage(ByteBuffer byteBuffer) {
+        this.onMessage(byteBuffer);
+    }
+
+    /**
+     * onMessage
+     *
+     * @param byteBuffer byteBuffer
+     * */
     public void onMessage(ByteBuffer byteBuffer) {}
+
+    /**
+     * onMessage
+     *
+     * @param type type
+     * @param message message
+     * */
+    public void onMessage(String type, String message) {}
 
     /**
      * onClose
      * */
     @OnClose
+    public final void $onClose() {
+        this.onClose();
+    }
+
+    /**
+     * onClose
+     * */
     public void onClose() {}
 
     /**
@@ -50,7 +98,7 @@ public class BaseWebsocket {
     @OnError
     public final void onError(Throwable throwable) {
         try {
-            this.sendError(throwable == null ? null : throwable.getMessage());
+            this.send("$error", throwable == null ? null : throwable.getMessage());
         } finally {
             this.close();
         }
@@ -62,12 +110,12 @@ public class BaseWebsocket {
      * @param message message
      * */
     public final void send(Object message) {
-        if (session == null || !this.session.isOpen()) {
+        if (this.session == null || !this.session.isOpen()) {
             return;
         }
         synchronized (this) {
             try {
-                session.getBasicRemote().sendText(Json.toString(message));
+                this.session.getBasicRemote().sendText(Json.toString(message));
             } catch (Exception e) {
                 throw new BaseException(e);
             }
@@ -80,12 +128,12 @@ public class BaseWebsocket {
      * @param byteBuffer byteBuffer
      * */
     public final void send(ByteBuffer byteBuffer) {
-        if (session == null || !this.session.isOpen() || byteBuffer == null) {
+        if (this.session == null || !this.session.isOpen() || byteBuffer == null) {
             return;
         }
         synchronized (this) {
             try {
-                session.getBasicRemote().sendBinary(byteBuffer);
+                this.session.getBasicRemote().sendBinary(byteBuffer);
             } catch (Exception e) {
                 throw new BaseException(e);
             }
@@ -93,21 +141,19 @@ public class BaseWebsocket {
     }
 
     /**
-     * 发送成功
+     * 发送
      *
+     * @param type type
      * @param message message
      * */
-    public final void sendSuccess(Object message) {
-        send(Json.toString(ResponseResult.returnTrue(message)));
-    }
-
-    /**
-     * 发送失败
-     *
-     * @param message message
-     * */
-    public final void sendError(Object message) {
-        send(Json.toString(ResponseResult.returnFalse(null, message, null)));
+    public final void send(String type, Object message) {
+        if (StringUtil.isEmpty(type)) {
+            throw new BaseException("type is null");
+        }
+        this.send(MapUtil.asMap(
+                new AbstractMap.SimpleEntry<>("type", type),
+                new AbstractMap.SimpleEntry<>("data", message)
+        ));
     }
 
     /**
@@ -115,7 +161,7 @@ public class BaseWebsocket {
      * */
     public final void close() {
         try {
-            session.close();
+            this.session.close();
         } catch (Exception ignored) {}
     }
 
