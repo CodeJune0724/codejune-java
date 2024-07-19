@@ -6,7 +6,7 @@ import com.codejune.core.BaseException;
 import jakarta.websocket.*;
 import java.nio.ByteBuffer;
 
-public class Websocket {
+public class BaseWebsocket {
 
     private Session session;
 
