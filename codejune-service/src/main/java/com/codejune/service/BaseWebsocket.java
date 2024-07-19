@@ -37,7 +37,7 @@ public class BaseWebsocket {
     @OnMessage
     public final void $onMessage(String message) {
         this.onMessage(message);
-        Map<?, ?> messageMap = MapUtil.parse(message);
+        Map<?, ?> messageMap = Json.parse(message, Map.class);
         String type = MapUtil.get(messageMap, "type", String.class);
         if (StringUtil.isEmpty(type)) {
             return;
