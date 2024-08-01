@@ -1,4 +1,4 @@
 dependencies {
     api(project(":codejune-core"))
-    api("com.alibaba.fastjson2:fastjson2:2.0.51")
+    api("com.alibaba.fastjson2:fastjson2:2.0.52")
 }
