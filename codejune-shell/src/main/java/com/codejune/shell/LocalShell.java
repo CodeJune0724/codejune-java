@@ -30,7 +30,7 @@ public final class LocalShell implements Shell {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder();
             if (SystemOS.getCurrentSystemOS() == SystemOS.WINDOWS) {
-                processBuilder.command("cmd.exe /c " + command);
+                processBuilder.command("cmd.exe", "/c", command);
             } else if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
                 processBuilder.command("/bin/bash", "-c", command);
             } else {
