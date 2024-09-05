@@ -137,14 +137,15 @@ public final class Cell {
     /**
      * copy
      *
-     * @param rowIndex rowIndex
-     * @param cellIndex cellIndex
+     * @param cell cell
      * */
-    public void copy(int rowIndex, int cellIndex) {
-        Cell newCell = this.row.getSheet().getRow(rowIndex).getCell(cellIndex);
-        newCell.cell.setCellComment(this.cell.getCellComment());
-        newCell.setStyle(this.getStyle());
-        newCell.setValue(this.getValue());
+    public void copy(Cell cell) {
+        if (cell == null) {
+            return;
+        }
+        cell.cell.setCellComment(this.cell.getCellComment());
+        cell.setStyle(this.getStyle());
+        cell.setValue(this.getValue());
     }
 
     /**

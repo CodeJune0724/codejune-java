@@ -1,6 +1,5 @@
 package com.codejune.excel;
 
-import org.apache.poi.ss.usermodel.CellStyle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,24 +30,6 @@ public final class Row implements Iterable<Cell> {
     }
 
     /**
-     * 获取样式
-     *
-     * @return 样式
-     * */
-    public CellStyle getStyle() {
-        return this.row.getRowStyle();
-    }
-
-    /**
-     * 设置样式
-     *
-     * @param cellStyle 样式
-     * */
-    public void setStyle(CellStyle cellStyle) {
-        this.row.setRowStyle(cellStyle);
-    }
-
-    /**
      * 获取cell
      *
      * @param cellIndex cellIndex
@@ -75,7 +56,7 @@ public final class Row implements Iterable<Cell> {
             this.row.removeCell(cell);
         }
         for (int i = cellIndex + 1; i < cellSize; i++) {
-            this.getCell(i).copy(this.getIndex(), i - 1);
+            this.getCell(i).copy(this.getCell(i - 1));
         }
         org.apache.poi.ss.usermodel.Cell finallyCell = this.row.getCell(cellSize - 1);
         if (finallyCell != null) {
@@ -99,6 +80,21 @@ public final class Row implements Iterable<Cell> {
      * */
     public Sheet getSheet() {
         return this.sheet;
+    }
+
+    /**
+     * copy
+     *
+     * @param row row
+     * */
+    public void copy(Row row) {
+        if (row == null) {
+            return;
+        }
+        row.row.setRowStyle(this.row.getRowStyle());
+        for (Cell cell : this) {
+            cell.copy(row.getCell(cell.getIndex()));
+        }
     }
 
     @Override
