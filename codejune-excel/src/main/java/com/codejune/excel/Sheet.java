@@ -6,13 +6,13 @@ import com.codejune.core.io.reader.InputStreamReader;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -202,15 +202,36 @@ public final class Sheet implements Iterable<Row> {
      * @param cellRange cellRange
      * */
     public void addImage(InputStream inputStream, Range rowRange, Range cellRange) {
+//        try {
+//            BufferedImage bufferedImage = ImageIO.read(inputStream);
+//            int width = bufferedImage.getWidth();
+//            int height = bufferedImage.getHeight();
+//
+//
+//
+//
+//            float columnWidthInPixels = this.sheet.getColumnWidthInPixels(0);
+//            float columnWidthInPixels1 = this.sheet.getColumnWidthInPixels(1);
+//            System.out.println();
+//        } catch (Exception e) {
+//            throw new BaseException(e);
+//        }
+
+
+
         Drawing<?> drawingPatriarch = this.sheet.createDrawingPatriarch();
         int pictureIndex = this.sheet.getWorkbook().addPicture(new InputStreamReader(inputStream).getByte(), Workbook.PICTURE_TYPE_PNG);
         CreationHelper creationHelper = this.sheet.getWorkbook().getCreationHelper();
         ClientAnchor clientAnchor = creationHelper.createClientAnchor();
-        clientAnchor.setRow1(ObjectUtil.parse(rowRange.getStart(), int.class));
-        clientAnchor.setRow2(ObjectUtil.parse(rowRange.getEnd(), int.class));
-        clientAnchor.setCol1(ObjectUtil.parse(cellRange.getStart(), int.class));
-        clientAnchor.setCol2(ObjectUtil.parse(cellRange.getEnd(), int.class));
-        drawingPatriarch.createPicture(clientAnchor, pictureIndex);
+        clientAnchor.setRow1(ObjectUtil.parse(1, int.class));
+        clientAnchor.setCol1(ObjectUtil.parse(1, int.class));
+//        clientAnchor.setRow2(ObjectUtil.parse(4, int.class));
+//        clientAnchor.setCol2(ObjectUtil.parse(4, int.class));
+
+        clientAnchor.setDx1(500);
+
+        Picture picture = drawingPatriarch.createPicture(clientAnchor, pictureIndex);
+        picture.resize(0.5);
     }
 
     /**
