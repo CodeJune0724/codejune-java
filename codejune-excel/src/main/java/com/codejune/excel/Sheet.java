@@ -213,6 +213,13 @@ public final class Sheet implements Iterable<Row> {
         drawingPatriarch.createPicture(clientAnchor, pictureIndex);
     }
 
+    /**
+     * 删除sheet
+     * */
+    public void delete() {
+        this.sheet.getWorkbook().removeSheetAt(this.sheet.getWorkbook().getSheetIndex(this.getName()));
+    }
+
     @Override
     public Iterator<Row> iterator() {
         List<Row> rows = new ArrayList<>();

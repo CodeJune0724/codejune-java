@@ -92,18 +92,6 @@ public final class Excel implements Closeable, Iterable<Sheet> {
     }
 
     /**
-     * 删除sheet
-     *
-     * @param sheetName sheet名
-     * */
-    public void deleteSheet(String sheetName) {
-        if (this.workbook.getSheet(sheetName) == null) {
-            return;
-        }
-        this.workbook.removeSheetAt(this.workbook.getSheetIndex(sheetName));
-    }
-
-    /**
      * 获取sheet
      *
      * @param sheetName sheet名

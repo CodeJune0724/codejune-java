@@ -178,4 +178,13 @@ public final class Cell {
         }
     }
 
+    /**
+     * 获取样式
+     *
+     * @return 样式
+     * */
+    public CellStyle getStyle() {
+        return this.cell.getCellStyle();
+    }
+
 }
