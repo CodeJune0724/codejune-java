@@ -91,6 +91,7 @@ public final class Row implements Iterable<Cell> {
         if (row == null) {
             return;
         }
+        row.row.setHeight(this.row.getHeight());
         row.row.setRowStyle(this.row.getRowStyle());
         for (Cell cell : this) {
             cell.copy(row.getCell(cell.getIndex()));

@@ -1,12 +1,20 @@
 package com.codejune.excel;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.Range;
+import com.codejune.core.io.reader.InputStreamReader;
+import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -165,6 +173,44 @@ public final class Sheet implements Iterable<Row> {
             return;
         }
         this.sheet.addMergedRegion(new CellRangeAddress(startRowIndex, endRowIndex, startCellIndex, endCellIndex));
+    }
+
+    /**
+     * copy
+     *
+     * @return Sheet
+     * */
+    public Sheet copy() {
+        Sheet result = new Sheet(this.sheet.getWorkbook().createSheet());
+        for (int i = 0; i < this.sheet.getNumMergedRegions(); i++) {
+            result.sheet.addMergedRegion(this.sheet.getMergedRegion(i));
+        }
+        for (int i = 0; i <= this.getRowSize(); i++) {
+            result.sheet.setColumnWidth(i, this.sheet.getColumnWidth(i));
+        }
+        for (Row row : this) {
+            row.copy(result.getRow(row.getIndex()));
+        }
+        return result;
+    }
+
+    /**
+     * 添加图片
+     *
+     * @param inputStream inputStream
+     * @param rowRange rowRange
+     * @param cellRange cellRange
+     * */
+    public void addImage(InputStream inputStream, Range rowRange, Range cellRange) {
+        Drawing<?> drawingPatriarch = this.sheet.createDrawingPatriarch();
+        int pictureIndex = this.sheet.getWorkbook().addPicture(new InputStreamReader(inputStream).getByte(), Workbook.PICTURE_TYPE_PNG);
+        CreationHelper creationHelper = this.sheet.getWorkbook().getCreationHelper();
+        ClientAnchor clientAnchor = creationHelper.createClientAnchor();
+        clientAnchor.setRow1(ObjectUtil.parse(rowRange.getStart(), int.class));
+        clientAnchor.setRow2(ObjectUtil.parse(rowRange.getEnd(), int.class));
+        clientAnchor.setCol1(ObjectUtil.parse(cellRange.getStart(), int.class));
+        clientAnchor.setCol2(ObjectUtil.parse(cellRange.getEnd(), int.class));
+        drawingPatriarch.createPicture(clientAnchor, pictureIndex);
     }
 
     @Override

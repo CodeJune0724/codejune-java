@@ -108,24 +108,6 @@ public final class Cell {
     }
 
     /**
-     * 获取样式
-     *
-     * @return 样式
-     * */
-    public CellStyle getStyle() {
-        return this.cell.getCellStyle();
-    }
-
-    /**
-     * 设置样式
-     *
-     * @param cellStyle 样式
-     * */
-    public void setStyle(CellStyle cellStyle) {
-        this.cell.setCellStyle(cellStyle);
-    }
-
-    /**
      * 获取row
      *
      * @return row
@@ -143,9 +125,26 @@ public final class Cell {
         if (cell == null) {
             return;
         }
+        CellStyle cellStyle = this.cell.getRow().getSheet().getWorkbook().createCellStyle();
+        cellStyle.cloneStyleFrom(this.cell.getCellStyle());
+        cell.cell.setCellStyle(cellStyle);
         cell.cell.setCellComment(this.cell.getCellComment());
-        cell.setStyle(this.getStyle());
-        cell.setValue(this.getValue());
+        CellType cellType = this.cell.getCellType();
+        if (cellType == CellType.NUMERIC) {
+            if (DateUtil.isCellDateFormatted(this.cell)) {
+                cell.cell.setCellValue(this.cell.getDateCellValue());
+            } else {
+                cell.cell.setCellValue(this.cell.getNumericCellValue());
+            }
+        } else if (cellType == CellType.STRING) {
+            cell.cell.setCellValue(this.cell.getRichStringCellValue());
+        } else if (cellType == CellType.BOOLEAN) {
+            cell.cell.setCellValue(this.cell.getBooleanCellValue());
+        } else if (cellType == CellType.ERROR) {
+            cell.cell.setCellErrorValue(this.cell.getErrorCellValue());
+        } else if (cellType == CellType.FORMULA) {
+            cell.cell.setCellFormula(this.cell.getCellFormula());
+        }
     }
 
     /**
