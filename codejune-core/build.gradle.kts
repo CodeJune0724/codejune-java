@@ -1,3 +1,3 @@
 dependencies {
-    compileOnly("org.springframework.boot:spring-boot-starter-web:3.3.2")
+    compileOnly("org.springframework.boot:spring-boot-starter-web:3.3.3")
 }
