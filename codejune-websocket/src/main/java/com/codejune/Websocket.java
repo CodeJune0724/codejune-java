@@ -1,6 +1,7 @@
 package com.codejune;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.util.ObjectUtil;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import javax.net.ssl.SSLContext;
@@ -11,6 +12,8 @@ import java.net.Socket;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -25,6 +28,8 @@ public abstract class Websocket {
     private WebSocketClient webSocketClient;
 
     private CountDownLatch countDownLatch;
+
+    private List<Throwable> throwableList;
 
     public Websocket(String url) {
         this.url = url;
@@ -46,13 +51,6 @@ public abstract class Websocket {
      * onClose
      * */
     public abstract void onClose();
-
-    /**
-     * onError
-     *
-     * @param throwable throwable
-     * */
-    public abstract void onError(Throwable throwable);
 
     /**
      * 发送消息
@@ -81,6 +79,8 @@ public abstract class Websocket {
         if (this.isConnect()) {
             throw new BaseException("webSocket is connect");
         }
+        this.countDownLatch = new CountDownLatch(1);
+        this.throwableList = new ArrayList<>();
         URI uri;
         try {
             uri = new URI(this.url);
@@ -108,7 +108,8 @@ public abstract class Websocket {
             }
             @Override
             public void onError(Exception exception) {
-                Websocket.this.onError(exception);
+                Websocket.this.throwableList.add(exception);
+                Websocket.this.close();
             }
         };
         TrustManager[] trustManager = new TrustManager[] { new X509ExtendedTrustManager() {
@@ -136,25 +137,20 @@ public abstract class Websocket {
         } catch (Exception e) {
             throw new BaseException(e);
         }
-        this.webSocketClient.setSocketFactory(sslContext.getSocketFactory());
+        if (this.url.startsWith("wss://")) {
+            this.webSocketClient.setSocketFactory(sslContext.getSocketFactory());
+        }
         this.webSocketClient.connect();
-        this.countDownLatch = new CountDownLatch(1);
     }
 
     /**
      * 关闭
      * */
     public final void close() {
-        try {
-            if (this.webSocketClient == null) {
-                return;
-            }
-            this.webSocketClient.close();
-        } finally {
-            if (this.countDownLatch != null) {
-                this.countDownLatch.countDown();
-            }
+        if (this.webSocketClient == null) {
+            return;
         }
+        this.webSocketClient.close();
     }
 
     /**
@@ -168,6 +164,9 @@ public abstract class Websocket {
             this.countDownLatch.await();
         } catch (Exception e) {
             throw new BaseException(e);
+        }
+        if (!ObjectUtil.isEmpty(this.throwableList)) {
+            throw new BaseException(this.throwableList);
         }
     }
 
