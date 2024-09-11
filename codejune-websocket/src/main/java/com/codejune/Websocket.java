@@ -1,6 +1,7 @@
 package com.codejune;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.Closeable;
 import com.codejune.core.util.ObjectUtil;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -21,69 +22,19 @@ import java.util.concurrent.CountDownLatch;
  *
  * @author ZJ
  * */
-public abstract class Websocket {
+public abstract class Websocket implements Closeable {
 
-    private final String url;
+    private final WebSocketClient webSocketClient;
 
-    private WebSocketClient webSocketClient;
+    private final CountDownLatch countDownLatch;
 
-    private CountDownLatch countDownLatch;
-
-    private List<Throwable> throwableList;
+    private final List<Throwable> throwableList = new ArrayList<>();
 
     public Websocket(String url) {
-        this.url = url;
-    }
-
-    /**
-     * onOpen
-     * */
-    public abstract void onOpen();
-
-    /**
-     * onMessage
-     *
-     * @param message message
-     * */
-    public abstract void onMessage(String message);
-
-    /**
-     * onClose
-     * */
-    public abstract void onClose();
-
-    /**
-     * 发送消息
-     * */
-    public final void send(String message) {
-        if (!this.isConnect()) {
-            throw new BaseException("webSocket is not connect");
-        }
-        this.webSocketClient.send(message);
-    }
-
-    /**
-     * 发送消息
-     * */
-    public final void send(byte[] message) {
-        if (!this.isConnect()) {
-            throw new BaseException("webSocket is not connect");
-        }
-        this.webSocketClient.send(message);
-    }
-
-    /**
-     * 连接
-     * */
-    public final synchronized void connect() {
-        if (this.isConnect()) {
-            throw new BaseException("webSocket is connect");
-        }
         this.countDownLatch = new CountDownLatch(1);
-        this.throwableList = new ArrayList<>();
         URI uri;
         try {
-            uri = new URI(this.url);
+            uri = new URI(url);
         } catch (Exception e) {
             throw new BaseException(e);
         }
@@ -101,9 +52,7 @@ public abstract class Websocket {
                 try {
                     Websocket.this.onClose();
                 } finally {
-                    if (Websocket.this.countDownLatch != null) {
-                        Websocket.this.countDownLatch.countDown();
-                    }
+                    Websocket.this.countDownLatch.countDown();
                 }
             }
             @Override
@@ -137,20 +86,45 @@ public abstract class Websocket {
         } catch (Exception e) {
             throw new BaseException(e);
         }
-        if (this.url.startsWith("wss://")) {
+        if (url.startsWith("wss://")) {
             this.webSocketClient.setSocketFactory(sslContext.getSocketFactory());
         }
         this.webSocketClient.connect();
     }
 
     /**
-     * 关闭
+     * onOpen
      * */
-    public final void close() {
-        if (!this.isConnect()) {
-            return;
-        }
-        this.webSocketClient.close();
+    protected abstract void onOpen();
+
+    /**
+     * onMessage
+     *
+     * @param message message
+     * */
+    protected abstract void onMessage(String message);
+
+    /**
+     * onClose
+     * */
+    protected abstract void onClose();
+
+    /**
+     * 发送消息
+     *
+     * @param message message
+     * */
+    public final void send(String message) {
+        this.webSocketClient.send(message);
+    }
+
+    /**
+     * 发送消息
+     *
+     * @param message message
+     * */
+    public final void send(byte[] message) {
+        this.webSocketClient.send(message);
     }
 
     /**
@@ -170,8 +144,11 @@ public abstract class Websocket {
         }
     }
 
-    private boolean isConnect() {
-        return this.webSocketClient != null && this.webSocketClient.isOpen();
+    @Override
+    public final void close() {
+        try {
+            this.webSocketClient.close();
+        } catch (Exception ignored) {}
     }
 
 }
