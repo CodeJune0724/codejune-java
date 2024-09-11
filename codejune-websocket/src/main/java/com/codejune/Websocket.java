@@ -75,7 +75,7 @@ public abstract class Websocket {
     /**
      * 连接
      * */
-    public final void connect() {
+    public final synchronized void connect() {
         if (this.isConnect()) {
             throw new BaseException("webSocket is connect");
         }
@@ -147,7 +147,7 @@ public abstract class Websocket {
      * 关闭
      * */
     public final void close() {
-        if (this.webSocketClient == null) {
+        if (!this.isConnect()) {
             return;
         }
         this.webSocketClient.close();
