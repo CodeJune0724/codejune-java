@@ -1,14 +1,13 @@
 package com.codejune.shell;
 
 import com.codejune.core.BaseException;
-import com.codejune.core.Closeable;
-import com.codejune.core.io.reader.TextInputStreamReader;
-import com.codejune.core.io.writer.OutputStreamWriter;
+import com.codejune.core.util.ThreadUtil;
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.function.Consumer;
 
@@ -17,15 +16,11 @@ import java.util.function.Consumer;
  *
  * @author ZJ
  * */
-public final class LinuxClientShell implements Closeable {
+public final class LinuxClientShell {
 
     private final Session session;
 
-    private Channel channel;
-
-    private OutputStream outputStream;
-
-    private Consumer<String> listener = data -> {};
+    private final Channel channel;
 
     public LinuxClientShell(String host, int port, String username, String password) {
         try {
@@ -38,6 +33,70 @@ public final class LinuxClientShell implements Closeable {
             properties.put("StrictHostKeyChecking", "no");
             this.session.setConfig(properties);
             this.session.connect();
+
+
+            ChannelShell channel = (ChannelShell) this.session.openChannel("shell");
+            channel.setPty(true);
+            channel.connect();
+
+            new Thread(() -> {
+                try {
+                    InputStream inputStream = channel.getInputStream();
+                    while (true) {
+                        while (inputStream.available() > 0) {
+                            byte[] bytes = new byte[inputStream.available()];
+                            inputStream.read(bytes);
+                            System.out.print(new String(bytes, StandardCharsets.UTF_8));
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new BaseException(e);
+                }
+            }).start();
+
+            OutputStream outputStream = channel.getOutputStream();
+//            outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+//            outputStream.flush();
+//
+            ThreadUtil.sleep(1000);
+
+            for (String item : "ipconfig".split("")) {
+                outputStream.write((item).getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                ThreadUtil.sleep(1000);
+            }
+            outputStream.write("\b".getBytes(StandardCharsets.UTF_8));
+            ThreadUtil.sleep(1000);
+            outputStream.flush();
+
+            outputStream.write("\b".getBytes(StandardCharsets.UTF_8));
+            ThreadUtil.sleep(1000);
+            outputStream.flush();
+
+            outputStream.write("\b".getBytes(StandardCharsets.UTF_8));
+            ThreadUtil.sleep(1000);
+            outputStream.flush();
+
+
+//            outputStream.write("cd /\r".getBytes(StandardCharsets.UTF_8));
+//            outputStream.flush();
+//            ThreadUtil.sleep(1000);
+//
+//            outputStream.write("ll /\r".getBytes(StandardCharsets.UTF_8));
+//            outputStream.flush();
+//            ThreadUtil.sleep(1000);
+//
+//            outputStream.write("ls\n".getBytes(StandardCharsets.UTF_8));
+//            outputStream.flush();
+//            ThreadUtil.sleep(3000);
+//
+//            outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+//            outputStream.flush();
+//            ThreadUtil.sleep(500);
+
+//            outputStream.write("cd app\t\n".getBytes(StandardCharsets.UTF_8));
+//            outputStream.flush();
+//            ThreadUtil.sleep(500);
         }catch (Exception e) {
             throw new BaseException(host + ", 连接失败");
         }
@@ -54,42 +113,42 @@ public final class LinuxClientShell implements Closeable {
         }
         this.listener = listener;
     }
-
-    /**
-     * 发送
-     *
-     * @param command command
-     * */
-    public void send(String command) {
-        if (this.channel == null) {
-            try {
-                this.channel = this.session.openChannel("shell");
-                channel.connect();
-                this.outputStream = this.channel.getOutputStream();
-            } catch (Exception e) {
-                throw new BaseException(e);
-            }
-            Thread.ofVirtual().start(() -> {
-                try (InputStream inputStream = this.channel.getInputStream()) {
-                    TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-                    textInputStreamReader.read(this.listener);
-                } catch (Exception e) {
-                    throw new BaseException(e);
-                }
-            });
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.outputStream);
-            outputStreamWriter.write("\n".getBytes());
-        }
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.outputStream);
-        outputStreamWriter.write(command.getBytes());
-    }
+//
+//    /**
+//     * 发送
+//     *
+//     * @param command command
+//     * */
+//    public void send(String command) {
+//        if (this.channel == null) {
+//            try {
+//                this.channel = this.session.openChannel("shell");
+//                channel.connect();
+//                this.outputStream = this.channel.getOutputStream();
+//            } catch (Exception e) {
+//                throw new BaseException(e);
+//            }
+//            Thread.ofVirtual().start(() -> {
+//                try (InputStream inputStream = this.channel.getInputStream()) {
+//                    TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
+//                    textInputStreamReader.read(this.listener);
+//                } catch (Exception e) {
+//                    throw new BaseException(e);
+//                }
+//            });
+//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.outputStream);
+//            outputStreamWriter.write("\n".getBytes());
+//        }
+//        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.outputStream);
+//        outputStreamWriter.write(command.getBytes());
+//    }
 
     @Override
     public void close() {
         try {
-            if (this.channel != null) {
-                this.channel.disconnect();
-            }
+//            if (this.channel != null) {
+//                this.channel.disconnect();
+//            }
             if (this.session != null) {
                 this.session.disconnect();
             }
