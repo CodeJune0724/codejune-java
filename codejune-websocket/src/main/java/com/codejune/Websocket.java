@@ -30,7 +30,7 @@ public abstract class Websocket implements Closeable {
 
     private final List<Throwable> throwableList = new ArrayList<>();
 
-    public Websocket(String url) {
+    public Websocket(String url, boolean ignoreCert) {
         this.countDownLatch = new CountDownLatch(1);
         URI uri;
         try {
@@ -86,10 +86,14 @@ public abstract class Websocket implements Closeable {
         } catch (Exception e) {
             throw new BaseException(e);
         }
-        if (url.startsWith("wss://")) {
+        if (ignoreCert && url.startsWith("wss://")) {
             this.webSocketClient.setSocketFactory(sslContext.getSocketFactory());
         }
         this.webSocketClient.connect();
+    }
+
+    public Websocket(String url) {
+        this(url, false);
     }
 
     /**
