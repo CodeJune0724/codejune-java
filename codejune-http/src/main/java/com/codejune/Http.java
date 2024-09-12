@@ -12,15 +12,12 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -158,23 +155,23 @@ public final class Http {
                 if (contentType == ContentType.APPLICATION_JSON) {
                     httpEntity = new StringEntity(Json.toString(body), "UTF-8");
                 } else if (contentType == ContentType.FORM_DATA) {
-                    MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
-                    Map<String, Object> mapBody = MapUtil.parse(body, String.class, Object.class);
-                    if (mapBody != null) {
-                        for (String key : mapBody.keySet()) {
-                            Object value = mapBody.get(key);
-                            if (value == null) {
-                                continue;
-                            }
-                            if (value instanceof File) {
-                                FileBody fileBody = new FileBody((File) value);
-                                multipartEntityBuilder = multipartEntityBuilder.addPart(key, fileBody);
+                    FormData formData;
+                    if (body instanceof FormData bodyFormData) {
+                        formData = bodyFormData;
+                    } else {
+                        formData = ObjectUtil.parse(MapUtil.parse(body, String.class, Object.class), FormData.class);
+                    }
+                    if (formData != null) {
+                        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
+                        for (FormData.FormDataItem formDataItem : formData.getFormDataItem()) {
+                            if (formDataItem.getContentType() == ContentType.DEFAULT_BINARY) {
+                                multipartEntityBuilder.addBinaryBody(formDataItem.getName(), ObjectUtil.parse(formDataItem.getData(), InputStream.class), org.apache.http.entity.ContentType.DEFAULT_BINARY, formDataItem.getFileName());
                             } else {
-                                multipartEntityBuilder.addTextBody(key, ObjectUtil.toString(value), org.apache.http.entity.ContentType.create("text/plain", StandardCharsets.UTF_8));
+                                multipartEntityBuilder.addTextBody(formDataItem.getName(), ObjectUtil.toString(formDataItem.getData()));
                             }
                         }
+                        httpEntity = multipartEntityBuilder.build();
                     }
-                    httpEntity = multipartEntityBuilder.build();
                 } else if (contentType == ContentType.FORM_URLENCODED) {
                     if (body instanceof Map<?,?> map) {
                         Map<String, Object> stringObjectMap = MapUtil.parse(map, String.class, Object.class);

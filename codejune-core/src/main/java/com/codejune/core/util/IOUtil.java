@@ -103,6 +103,27 @@ public final class IOUtil {
     }
 
     /**
+     * 获取输入流
+     *
+     * @param data data
+     * */
+    public static InputStream getInputStream(String data) {
+        if (data == null) {
+            return null;
+        }
+        return getInputStream(data.getBytes());
+    }
+
+    /**
+     * 获取输入流
+     *
+     * @param data data
+     * */
+    public static InputStream getInputStream(byte[] data) {
+        return new ByteArrayInputStream(data);
+    }
+
+    /**
      * 获取输出流
      *
      * @param file file
