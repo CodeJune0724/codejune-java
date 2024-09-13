@@ -110,4 +110,25 @@ public final class ServletUtil {
         return result;
     }
 
+    /**
+     * 获取远程ip
+     *
+     * @param httpServletRequest httpServletRequest
+     *
+     * @return ip
+     * */
+    public static String getRemoteIp(HttpServletRequest httpServletRequest) {
+        if (httpServletRequest == null) {
+            return null;
+        }
+        String result = httpServletRequest.getHeader("X-Forwarded-For");
+        if (StringUtil.isEmpty(result)) {
+            result = httpServletRequest.getHeader("X-Real-IP");
+            if (StringUtil.isEmpty(result)) {
+                result = httpServletRequest.getRemoteAddr();
+            }
+        }
+        return result;
+    }
+
 }
