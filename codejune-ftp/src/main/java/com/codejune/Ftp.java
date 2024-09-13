@@ -86,7 +86,7 @@ public abstract class Ftp implements Closeable {
      *
      * @return List
      * */
-    public final List<FileInfo> ls(String path) {
+    public final List<FileInfo<InputStream>> ls(String path) {
         return baseLs(path);
     }
 
@@ -139,6 +139,6 @@ public abstract class Ftp implements Closeable {
      *
      * @return List
      * */
-    protected abstract List<FileInfo> baseLs(String path);
+    protected abstract List<FileInfo<InputStream>> baseLs(String path);
 
 }

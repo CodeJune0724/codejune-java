@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
  *
  * @author ZJ
  * */
-public interface FileInfo {
+public interface FileInfo<DATA> {
 
     /**
      * 获取文件名
@@ -36,5 +36,19 @@ public interface FileInfo {
      * @return 文件大小
      * */
     long getSize();
+
+    /**
+     * 获取数据
+     *
+     * @return DATA
+     * */
+    DATA getData();
+
+    /**
+     * 是否是文件
+     *
+     * @return 是否是文件
+     * */
+    boolean isFile();
 
 }

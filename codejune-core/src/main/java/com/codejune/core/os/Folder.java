@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author ZJ
  * */
-public final class Folder implements FileInfo {
+public final class Folder implements FileInfo<String> {
 
     private String path;
 
@@ -52,10 +52,20 @@ public final class Folder implements FileInfo {
     @Override
     public long getSize() {
         long result = 0;
-        for (FileInfo fileInfo :getChildren()) {
+        for (FileInfo<String> fileInfo :getChildren()) {
             result = result + fileInfo.getSize();
         }
         return result;
+    }
+
+    @Override
+    public String getData() {
+        return null;
+    }
+
+    @Override
+    public boolean isFile() {
+        return false;
     }
 
     /**
@@ -103,8 +113,8 @@ public final class Folder implements FileInfo {
      *
      * @return 子文件集合
      * */
-    public List<FileInfo> getChildren() {
-        List<FileInfo> result = new ArrayList<>();
+    public List<FileInfo<String>> getChildren() {
+        List<FileInfo<String>> result = new ArrayList<>();
         result.addAll(this.getFolder());
         result.addAll(this.getFile());
         return result;

@@ -5,8 +5,6 @@ import com.codejune.core.os.FileInfo;
 import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
-import com.codejune.ftp.os.File;
-import com.codejune.ftp.os.Folder;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import java.io.*;
@@ -115,7 +113,7 @@ public final class Ftp extends com.codejune.Ftp {
             if (isFile(path)) {
                 this.ftpClient.deleteFile(path);
             } else {
-                for (FileInfo fileInfo : this.ls(path)) {
+                for (FileInfo<InputStream> fileInfo : this.ls(path)) {
                     delete(fileInfo.getPath());
                 }
                 this.ftpClient.removeDirectory(path);
@@ -160,9 +158,9 @@ public final class Ftp extends com.codejune.Ftp {
     }
 
     @Override
-    protected List<FileInfo> baseLs(String path) {
+    protected List<FileInfo<InputStream>> baseLs(String path) {
         try {
-            List<FileInfo> result = new ArrayList<>();
+            List<FileInfo<InputStream>> result = new ArrayList<>();
             final FTPFile[] ftpFiles = this.ftpClient.listFiles(path);
             for (FTPFile file : ftpFiles) {
                 boolean isFile = !file.isDirectory();
@@ -172,16 +170,21 @@ public final class Ftp extends com.codejune.Ftp {
                 if (".".equals(name) || "..".equals(name)) {
                     continue;
                 }
-                FileInfo fileInfo;
+                FileInfo<InputStream> fileInfo;
                 if (isFile) {
-                    fileInfo = new File() {
+                    fileInfo = new FileInfo<>() {
                         @Override
-                        public InputStream getInputStream() {
+                        public InputStream getData() {
                             try {
                                 return ftpClient.retrieveFileStream(filePath);
                             } catch (Exception e) {
                                 throw new BaseException(e);
                             }
+                        }
+
+                        @Override
+                        public boolean isFile() {
+                            return true;
                         }
 
                         @Override
@@ -205,7 +208,7 @@ public final class Ftp extends com.codejune.Ftp {
                         }
                     };
                 } else {
-                    fileInfo = new Folder() {
+                    fileInfo = new FileInfo<>() {
                         @Override
                         public String getName() {
                             return name;
@@ -224,11 +227,21 @@ public final class Ftp extends com.codejune.Ftp {
                         @Override
                         public long getSize() {
                             long result = 0;
-                            List<FileInfo> fileInfoList = baseLs(this.getPath());
-                            for (FileInfo fileInfo : fileInfoList) {
+                            List<FileInfo<InputStream>> fileInfoList = Ftp.this.baseLs(this.getPath());
+                            for (FileInfo<InputStream> fileInfo : fileInfoList) {
                                 result = result + fileInfo.getSize();
                             }
                             return result;
+                        }
+
+                        @Override
+                        public InputStream getData() {
+                            return null;
+                        }
+
+                        @Override
+                        public boolean isFile() {
+                            return false;
                         }
                     };
                 }

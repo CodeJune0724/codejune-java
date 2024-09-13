@@ -2,8 +2,6 @@ package com.codejune.ftp;
 
 import com.codejune.core.os.FileInfo;
 import com.codejune.core.util.DateUtil;
-import com.codejune.ftp.os.File;
-import com.codejune.ftp.os.Folder;
 import com.codejune.core.BaseException;
 import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.StringUtil;
@@ -119,7 +117,7 @@ public final class Sftp extends com.codejune.Ftp {
             if (isFile(path)) {
                 this.channelSftp.rm(path);
             } else {
-                for (FileInfo fileInfo : this.ls(path)) {
+                for (FileInfo<InputStream> fileInfo : this.ls(path)) {
                     delete(fileInfo.getPath());
                 }
                 this.channelSftp.rmdir(path);
@@ -179,9 +177,9 @@ public final class Sftp extends com.codejune.Ftp {
     }
 
     @Override
-    protected List<FileInfo> baseLs(String path) {
+    protected List<FileInfo<InputStream>> baseLs(String path) {
         try {
-            List<FileInfo> result = new ArrayList<>();
+            List<FileInfo<InputStream>> result = new ArrayList<>();
             Vector<?> ls = this.channelSftp.ls(path);
             for (Object o : ls) {
                 ChannelSftp.LsEntry lsEntry = (ChannelSftp.LsEntry) o;
@@ -193,18 +191,9 @@ public final class Sftp extends com.codejune.Ftp {
                 }
                 String filePath = path + "/" + name;
                 LocalDateTime updateTime = DateUtil.parse(sftpATTRS.getMtimeString(), "EEE MMM dd HH:mm:ss zzz yyyy", LocalDateTime.class);
-                FileInfo fileInfo;
+                FileInfo<InputStream> fileInfo;
                 if (isFile) {
-                    fileInfo = new File() {
-                        @Override
-                        public InputStream getInputStream() {
-                            try {
-                                return channelSftp.get(filePath);
-                            } catch (Exception e) {
-                                throw new BaseException(e);
-                            }
-                        }
-
+                    fileInfo = new FileInfo<InputStream>() {
                         @Override
                         public String getName() {
                             return name;
@@ -224,9 +213,23 @@ public final class Sftp extends com.codejune.Ftp {
                         public long getSize() {
                             return sftpATTRS.getSize();
                         }
+
+                        @Override
+                        public InputStream getData() {
+                            try {
+                                return channelSftp.get(filePath);
+                            } catch (Exception e) {
+                                throw new BaseException(e);
+                            }
+                        }
+
+                        @Override
+                        public boolean isFile() {
+                            return true;
+                        }
                     };
                 } else {
-                    fileInfo = new Folder() {
+                    fileInfo = new FileInfo<>() {
                         @Override
                         public String getName() {
                             return name;
@@ -245,11 +248,21 @@ public final class Sftp extends com.codejune.Ftp {
                         @Override
                         public long getSize() {
                             long result = 0;
-                            List<FileInfo> fileInfoList = baseLs(this.getPath());
-                            for (FileInfo fileInfo : fileInfoList) {
+                            List<FileInfo<InputStream>> fileInfoList = baseLs(this.getPath());
+                            for (FileInfo<InputStream> fileInfo : fileInfoList) {
                                 result = result + fileInfo.getSize();
                             }
                             return result;
+                        }
+
+                        @Override
+                        public InputStream getData() {
+                            return null;
+                        }
+
+                        @Override
+                        public boolean isFile() {
+                            return false;
                         }
                     };
                 }

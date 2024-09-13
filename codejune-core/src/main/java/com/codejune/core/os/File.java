@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  *
  * @author ZJ
  * */
-public final class File implements FileInfo {
+public final class File implements FileInfo<String> {
 
     private java.io.File file;
 
@@ -68,6 +68,28 @@ public final class File implements FileInfo {
     }
 
     /**
+     * 获取数据
+     *
+     * @return 文件数据
+     * */
+    @Override
+    public String getData() {
+        InputStream inputStream = null;
+        try {
+            inputStream = IOUtil.getInputStream(file);
+            TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
+            return textInputStreamReader.getData();
+        } finally {
+            IOUtil.close(inputStream);
+        }
+    }
+
+    @Override
+    public boolean isFile() {
+        return true;
+    }
+
+    /**
      * 删除
      * */
     public void delete() {
@@ -83,22 +105,6 @@ public final class File implements FileInfo {
      * */
     public Folder parent() {
         return new Folder(this.file.getParentFile().getAbsolutePath());
-    }
-
-    /**
-     * 获取数据
-     *
-     * @return 文件数据
-     * */
-    public String getData() {
-        InputStream inputStream = null;
-        try {
-            inputStream = IOUtil.getInputStream(file);
-            TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-            return textInputStreamReader.getData();
-        } finally {
-            IOUtil.close(inputStream);
-        }
     }
 
     /**
