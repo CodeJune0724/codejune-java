@@ -40,7 +40,7 @@ public final class ThreadExecutor implements Closeable {
      *
      * @param runnable runnable
      * */
-    public void run(Runnable runnable) {
+    public void execute(Runnable runnable) {
         threadPoolExecutor.execute(() -> {
             try {
                 runnable.run();
@@ -53,7 +53,6 @@ public final class ThreadExecutor implements Closeable {
             }
         });
     }
-
 
     /**
      * 开启等待

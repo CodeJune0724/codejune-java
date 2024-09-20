@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  *
  * @author ZJ
  * */
-public abstract class FastThreadExecutor<T> {
+public abstract class TaskThreadExecutor<T> {
 
     private final int threadNum;
 
@@ -20,50 +20,38 @@ public abstract class FastThreadExecutor<T> {
 
     private final long timeout;
 
-    public FastThreadExecutor(int threadNum, long timeout) {
+    public TaskThreadExecutor(int threadNum, long timeout) {
         if (threadNum <= 0) {
             throw new BaseException("threadNum <= 0");
         }
         this.threadNum = threadNum;
         this.threadExecutor = null;
         this.timeout = timeout;
-        execute();
     }
 
-    public FastThreadExecutor(int threadNum) {
+    public TaskThreadExecutor(int threadNum) {
         this(threadNum, -1);
     }
 
-    public FastThreadExecutor(ThreadPoolExecutor threadPoolExecutor, long timeout) {
+    public TaskThreadExecutor(ThreadPoolExecutor threadPoolExecutor, long timeout) {
         if (threadPoolExecutor == null) {
             throw new BaseException("threadPoolExecutor is null");
         }
         this.threadNum = 0;
         this.threadExecutor = new ThreadExecutor(threadPoolExecutor);
         this.timeout = timeout;
-        execute();
     }
 
-    public FastThreadExecutor(ThreadPoolExecutor threadPoolExecutor) {
+    public TaskThreadExecutor(ThreadPoolExecutor threadPoolExecutor) {
         this(threadPoolExecutor, -1);
     }
 
     /**
-     * 获取数据
+     * 执行
      *
-     * @return Collection
+     * @param data data
      * */
-    public abstract Collection<T> getData();
-
-    /**
-     * 数据处理方法
-     *
-     * @param t 数据
-     * */
-    public abstract void handler(T t);
-
-    private void execute() {
-        Collection<T> data = getData();
+    public void execute(Collection<T> data) {
         if (ObjectUtil.isEmpty(data)) {
             return;
         }
@@ -76,7 +64,7 @@ public abstract class FastThreadExecutor<T> {
         try {
             threadExecutor.startAwait(data.size());
             for (T t : data) {
-                threadExecutor.run(() -> handler(t));
+                threadExecutor.execute(() -> handler(t));
             }
             List<Throwable> await = threadExecutor.await(timeout);
             if (!ObjectUtil.isEmpty(await)) {
@@ -86,5 +74,12 @@ public abstract class FastThreadExecutor<T> {
             threadExecutor.close();
         }
     }
+
+    /**
+     * 数据处理方法
+     *
+     * @param t 数据
+     * */
+    protected abstract void handler(T t);
 
 }
