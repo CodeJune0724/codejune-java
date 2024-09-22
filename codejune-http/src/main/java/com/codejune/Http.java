@@ -36,6 +36,9 @@ public final class Http {
     public Http(String url, Type type) {
         this.config = new Config(url, type);
         this.addHeader("accept", "*/*");
+        this.addHeader("accept-encoding", "gzip, deflate, br, zstd");
+        this.addHeader("accept-language", "zh-CN,zh;q=0.9,en;q=0.8");
+        this.addHeader("cache-control", "max-age=0");
         this.addHeader("connection", "Keep-Alive");
     }
 
