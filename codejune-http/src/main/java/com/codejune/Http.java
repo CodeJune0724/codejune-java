@@ -149,7 +149,7 @@ public final class Http {
             };
             httpEntityEnclosingRequestBase.setURI(URI.create(Http.this.config.getUrl()));
             int timeout = this.config.getTimeout();
-            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).setConnectionRequestTimeout(timeout).build());
+            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).setConnectionRequestTimeout(timeout).setRedirectsEnabled(false).build());
             for (Header header : this.config.getHeader()) {
                 httpEntityEnclosingRequestBase.setHeader(header.getKey(), header.getValue());
             }
