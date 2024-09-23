@@ -16,11 +16,14 @@ public interface Closeable extends AutoCloseable {
     /**
      * 无异常关闭
      *
-     * @param closeable closeable
+     * @param autoCloseable autoCloseable
      * */
-    static void closeNoError(Closeable closeable) {
+    static void closeNoError(AutoCloseable autoCloseable) {
+        if (autoCloseable == null) {
+            return;
+        }
         try {
-            closeable.close();
+            autoCloseable.close();
         } catch (Throwable ignored) {}
     }
 

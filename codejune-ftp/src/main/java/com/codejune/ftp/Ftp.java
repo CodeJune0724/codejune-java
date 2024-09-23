@@ -1,8 +1,8 @@
 package com.codejune.ftp;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.Closeable;
 import com.codejune.core.os.FileInfo;
-import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import org.apache.commons.net.ftp.FTPClient;
@@ -84,7 +84,7 @@ public final class Ftp extends com.codejune.Ftp {
             throw new BaseException(e.getMessage());
         } finally {
             if (isCloseInputStream) {
-                IOUtil.close(inputStream);
+                Closeable.closeNoError(inputStream);
             }
         }
     }

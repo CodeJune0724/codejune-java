@@ -137,7 +137,7 @@ public final class ExcelReader implements Closeable, Iterable<Sheet> {
                     } catch (Exception e) {
                         throw new BaseException(e);
                     } finally {
-                        IOUtil.close(inputStream);
+                        Closeable.closeNoError(inputStream);
                     }
                 }
             };

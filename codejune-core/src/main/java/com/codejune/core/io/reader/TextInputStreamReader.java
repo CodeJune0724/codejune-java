@@ -3,7 +3,6 @@ package com.codejune.core.io.reader;
 import com.codejune.core.BaseException;
 import com.codejune.core.Range;
 import com.codejune.core.io.Reader;
-import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.ObjectUtil;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -49,11 +48,10 @@ public final class TextInputStreamReader extends Reader<String> {
         if (length != null && length == 0) {
             return;
         }
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
-        try {
-            inputStreamReader = new InputStreamReader(inputStream, charset);
-            bufferedReader = new BufferedReader(inputStreamReader);
+        try (
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, charset);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
+        ) {
             String line = bufferedReader.readLine();
             int lineNum = 0;
             while (line != null) {
@@ -68,9 +66,6 @@ public final class TextInputStreamReader extends Reader<String> {
             }
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
-        } finally {
-            IOUtil.close(inputStreamReader);
-            IOUtil.close(bufferedReader);
         }
     }
 

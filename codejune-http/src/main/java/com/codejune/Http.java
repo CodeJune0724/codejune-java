@@ -1,6 +1,7 @@
 package com.codejune;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.Closeable;
 import com.codejune.core.io.reader.TextInputStreamReader;
 import com.codejune.core.util.*;
 import com.codejune.http.*;
@@ -216,7 +217,7 @@ public final class Http {
                 throw new BaseException(e.getMessage());
             }
         } finally {
-            IOUtil.close(httpResponseResult.getBody());
+            Closeable.closeNoError(httpResponseResult.getBody());
             try {
                 EntityUtils.consume(httpEntity);
             } catch (Exception ignored) {}

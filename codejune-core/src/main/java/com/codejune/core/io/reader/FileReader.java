@@ -43,9 +43,7 @@ public final class FileReader extends InputStreamReader implements Closeable {
         if (length != null) {
             this.setReadSize(ObjectUtil.parse(length, int.class));
         }
-        RandomAccessFile randomAccessFile = null;
-        try {
-            randomAccessFile = new RandomAccessFile(this.file, "r");
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(this.file, "r")) {
             randomAccessFile.seek(range.getStart());
             byte[] bytes = new byte[this.getReadSize()];
             int size = randomAccessFile.read(bytes);
@@ -58,14 +56,12 @@ public final class FileReader extends InputStreamReader implements Closeable {
             }
         } catch (Exception e) {
             throw new BaseException(e);
-        } finally {
-            IOUtil.close(randomAccessFile);
         }
     }
 
     @Override
     public void close() {
-        IOUtil.close(inputStream);
+        Closeable.closeNoError(this.inputStream);
     }
 
 }

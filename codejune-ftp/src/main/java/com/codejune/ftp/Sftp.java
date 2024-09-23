@@ -1,9 +1,9 @@
 package com.codejune.ftp;
 
+import com.codejune.core.Closeable;
 import com.codejune.core.os.FileInfo;
 import com.codejune.core.util.DateUtil;
 import com.codejune.core.BaseException;
-import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.StringUtil;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -88,7 +88,7 @@ public final class Sftp extends com.codejune.Ftp {
             throw new BaseException(e);
         } finally {
             if (isCloseInputStream) {
-                IOUtil.close(inputStream);
+                Closeable.closeNoError(inputStream);
             }
         }
     }

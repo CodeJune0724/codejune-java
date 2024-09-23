@@ -1,11 +1,11 @@
 package com.codejune.shell;
 
 import com.codejune.Shell;
+import com.codejune.core.Closeable;
 import com.codejune.core.ResponseResult;
 import com.codejune.core.BaseException;
 import com.codejune.core.SystemOS;
 import com.codejune.core.io.reader.TextInputStreamReader;
-import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.StringUtil;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
@@ -61,8 +61,8 @@ public final class LocalShell implements Shell {
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         } finally {
-            IOUtil.close(inputStream);
-            IOUtil.close(errorStream);
+            Closeable.closeNoError(inputStream);
+            Closeable.closeNoError(errorStream);
             if (process != null) {
                 process.destroy();
             }

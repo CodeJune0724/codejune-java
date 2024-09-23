@@ -71,15 +71,11 @@ public final class ServletUtil {
      * @return 请求体数据
      * */
     public static String getRequestBody(HttpServletRequest httpServletRequest) {
-        InputStream inputStream = null;
-        try {
-            inputStream = httpServletRequest.getInputStream();
+        try (InputStream inputStream = httpServletRequest.getInputStream()) {
             TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
             return textInputStreamReader.getData();
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
-        } finally {
-            IOUtil.close(inputStream);
         }
     }
 

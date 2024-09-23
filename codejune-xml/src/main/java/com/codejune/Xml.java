@@ -4,7 +4,6 @@ import com.codejune.core.BaseException;
 import com.codejune.core.io.writer.OutputStreamWriter;
 import com.codejune.core.os.File;
 import com.codejune.core.util.FileUtil;
-import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.xml.Element;
 import org.dom4j.Document;
@@ -30,14 +29,10 @@ public final class Xml {
             throw new BaseException("xml data is null");
         }
         SAXReader reader = new SAXReader();
-        ByteArrayInputStream byteArrayInputStream = null;
-        try {
-            byteArrayInputStream = new ByteArrayInputStream(data.getBytes());
-            document = reader.read(byteArrayInputStream);
+        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data.getBytes())) {
+            this.document = reader.read(byteArrayInputStream);
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
-        } finally {
-            IOUtil.close(byteArrayInputStream);
         }
     }
 

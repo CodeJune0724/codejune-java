@@ -1,6 +1,7 @@
 package com.codejune.core.util;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.io.reader.InputStreamReader;
 import java.io.*;
 import java.nio.file.Files;
 
@@ -10,76 +11,6 @@ import java.nio.file.Files;
  * @author ZJ
  * */
 public final class IOUtil {
-
-    /**
-     * 关闭inputStream
-     *
-     * @param inputStream inputStream
-     * */
-    public static void close(InputStream inputStream) {
-        if (inputStream == null) {
-            return;
-        }
-        try {
-            inputStream.close();
-        } catch (IOException ignored) {}
-    }
-
-    /**
-     * 关闭reader
-     *
-     * @param reader reader
-     * */
-    public static void close(Reader reader) {
-        if (reader == null) {
-            return;
-        }
-        try {
-            reader.close();
-        } catch (IOException ignored) {}
-    }
-
-    /**
-     * 关闭outputStream
-     *
-     * @param outputStream outputStream
-     * */
-    public static void close(OutputStream outputStream) {
-        if (outputStream == null) {
-            return;
-        }
-        try {
-            outputStream.close();
-        } catch (IOException ignored) {}
-    }
-
-    /**
-     * 关闭outputStream
-     *
-     * @param writer writer
-     * */
-    public static void close(Writer writer) {
-        if (writer == null) {
-            return;
-        }
-        try {
-            writer.close();
-        } catch (IOException ignored) {}
-    }
-
-    /**
-     * 关闭randomAccessFile
-     *
-     * @param randomAccessFile randomAccessFile
-     * */
-    public static void close(RandomAccessFile randomAccessFile) {
-        if (randomAccessFile == null) {
-            return;
-        }
-        try {
-            randomAccessFile.close();
-        } catch (IOException ignored) {}
-    }
 
     /**
      * 获取输入流
@@ -154,6 +85,17 @@ public final class IOUtil {
      * */
     public static OutputStream getOutputStream(java.io.File file) {
         return getOutputStream(file, false);
+    }
+
+    /**
+     * 获取byte[]
+     *
+     * @param inputStream inputStream
+     *
+     * @return byte[]
+     * */
+    public static byte[] getByte(InputStream inputStream) {
+        return new InputStreamReader(inputStream).getByte();
     }
 
 }

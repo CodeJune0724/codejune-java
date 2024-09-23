@@ -74,13 +74,11 @@ public final class File implements FileInfo<String> {
      * */
     @Override
     public String getData() {
-        InputStream inputStream = null;
-        try {
-            inputStream = IOUtil.getInputStream(file);
+        try (InputStream inputStream = IOUtil.getInputStream(this.file)) {
             TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
             return textInputStreamReader.getData();
-        } finally {
-            IOUtil.close(inputStream);
+        } catch (Exception e) {
+            throw new BaseException(e);
         }
     }
 
@@ -114,13 +112,11 @@ public final class File implements FileInfo<String> {
      * @param append 是否追加
      * */
     public void write(InputStream inputStream, boolean append) {
-        OutputStream outputStream = null;
-        try {
-            outputStream = IOUtil.getOutputStream(file, append);
+        try (OutputStream outputStream = IOUtil.getOutputStream(file, append)) {
             OutputStreamWriter writer = new OutputStreamWriter(outputStream);
             writer.write(inputStream);
-        } finally {
-            IOUtil.close(outputStream);
+        } catch (Exception e) {
+            throw new BaseException(e);
         }
     }
 
@@ -143,12 +139,10 @@ public final class File implements FileInfo<String> {
         if (StringUtil.isEmpty(data)) {
             return;
         }
-        InputStream inputStream = null;
-        try {
-            inputStream = new ByteArrayInputStream(data.getBytes());
+        try (InputStream inputStream = new ByteArrayInputStream(data.getBytes())) {
             write(inputStream, append);
-        } finally {
-            IOUtil.close(inputStream);
+        } catch (Exception e) {
+            throw new BaseException(e);
         }
     }
 
@@ -170,11 +164,10 @@ public final class File implements FileInfo<String> {
         if (bytes == null) {
             return;
         }
-        InputStream inputStream = new ByteArrayInputStream(bytes);
-        try {
+        try (InputStream inputStream = new ByteArrayInputStream(bytes);) {
             write(inputStream);
-        } finally {
-            IOUtil.close(inputStream);
+        } catch (Exception e) {
+            throw new BaseException(e);
         }
     }
 
@@ -199,12 +192,10 @@ public final class File implements FileInfo<String> {
             new File(copyFile).delete();
         }
         File result = new File(copyFile);
-        InputStream inputStream = null;
-        try {
-            inputStream = IOUtil.getInputStream(file);
+        try (InputStream inputStream = IOUtil.getInputStream(file)) {
             result.write(inputStream);
-        } finally {
-            IOUtil.close(inputStream);
+        } catch (Exception e) {
+            throw new BaseException(e);
         }
         return result;
     }
