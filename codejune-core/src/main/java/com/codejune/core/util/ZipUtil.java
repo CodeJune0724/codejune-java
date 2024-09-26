@@ -59,6 +59,40 @@ public final class ZipUtil {
         return file;
     }
 
+    /**
+     * 解压
+     *
+     * @param zipFile 压缩包
+     * @param outPath 解压目录
+     *
+     * @return 解压目录
+     * */
+    public static String unzip(File zipFile, String outPath) {
+        if (!FileUtil.isFile(zipFile)) {
+            throw new BaseException("not zipFile");
+        }
+        if (StringUtil.isEmpty(outPath)) {
+            throw new BaseException("outPath is null");
+        }
+        new Folder(outPath);
+        try (ZipFile zf = new ZipFile(zipFile, Charset.forName(System.getProperty("sun.jnu.encoding")))) {
+            Enumeration<?> enumeration = zf.entries();
+            while (enumeration.hasMoreElements()) {
+                ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();
+                if (zipEntry.isDirectory()) {
+                    new Folder(new File(outPath, zipEntry.getName()).getAbsolutePath());
+                } else {
+                    try (InputStream inputStream = zf.getInputStream(zipEntry)) {
+                        new com.codejune.core.os.File(new File(outPath, zipEntry.getName())).write(inputStream);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+        return outPath;
+    }
+
     private static void zip(ZipOutputStream zipOutputStream, File file, String path) {
         if (zipOutputStream == null) {
             return;
@@ -86,7 +120,7 @@ public final class ZipUtil {
         } else {
             File[] fileList = file.listFiles();
             if (fileList == null) {
-               return;
+                return;
             }
             try {
                 zipOutputStream.putNextEntry(new ZipEntry(path + file.getName() + "/"));
@@ -97,34 +131,6 @@ public final class ZipUtil {
             } catch (Exception e) {
                 throw new BaseException(e);
             }
-        }
-    }
-
-    /**
-     * 解压
-     *
-     * @param zipFile 压缩包
-     * @param outPath 解压目录
-     * */
-    public static void unzip(File zipFile, String outPath) {
-        if (zipFile == null || !zipFile.exists() || outPath == null) {
-            return;
-        }
-        new Folder(outPath);
-        try (ZipFile zf = new ZipFile(zipFile, Charset.forName(System.getProperty("sun.jnu.encoding")))) {
-            Enumeration<?> enumeration = zf.entries();
-            while (enumeration.hasMoreElements()) {
-                ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();
-                if (zipEntry.isDirectory()) {
-                    new Folder(new File(outPath, zipEntry.getName()).getAbsolutePath());
-                } else {
-                    try (InputStream inputStream = zf.getInputStream(zipEntry)) {
-                        new com.codejune.core.os.File(new File(outPath, zipEntry.getName())).write(inputStream);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new BaseException(e);
         }
     }
 
