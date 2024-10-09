@@ -5,20 +5,29 @@ import com.codejune.core.Closeable;
 import com.codejune.core.io.reader.TextInputStreamReader;
 import com.codejune.core.util.*;
 import com.codejune.http.*;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.Timeout;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 import java.io.InputStream;
+import java.net.Socket;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -133,31 +142,46 @@ public final class Http {
      *
      * @param listener listener
      * */
-    public void send(Consumer<HttpResponseResult<InputStream>> listener) {
-        Type type = this.config.getType();
-        if (type == null) {
-            throw new BaseException("type is null");
-        }
-        HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
-        HttpEntity httpEntity = null;
-        try (CloseableHttpClient closeableHttpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(new SSLContextBuilder().loadTrustMaterial(null, (chain, authType) -> true).build(), NoopHostnameVerifier.INSTANCE)).build()) {
-            HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = new HttpEntityEnclosingRequestBase() {
+    public void send(final Consumer<HttpResponseResult<InputStream>> listener) {
+        SSLContext sslContext;
+        try {
+            sslContext = SSLContexts.custom().build();
+            sslContext.init(null, new TrustManager[] {new X509ExtendedTrustManager() {
                 @Override
-                public String getMethod() {
-                    return type.name();
-                }
-            };
-            httpEntityEnclosingRequestBase.setURI(URI.create(Http.this.config.getUrl()));
-            int timeout = this.config.getTimeout();
-            httpEntityEnclosingRequestBase.setConfig(RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).setConnectionRequestTimeout(timeout).setRedirectsEnabled(false).build());
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {}
+                @Override
+                public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {}
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {return new X509Certificate[0];}
+                @Override
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s, Socket socket) {}
+                @Override
+                public void checkServerTrusted(X509Certificate[] x509Certificates, String s, Socket socket) {}
+                @Override
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) {}
+                @Override
+                public void checkServerTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) {}
+            }}, new SecureRandom());
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+        int timeout = this.config.getTimeout();
+        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(timeout > 0 ? Timeout.ofMilliseconds(timeout) : null).setResponseTimeout(timeout > 0 ? Timeout.ofMilliseconds(timeout) : null).setRedirectsEnabled(false).build();
+        HttpEntity httpEntity = null;
+        HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
+        try (
+                PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create().setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext)).build();
+                CloseableHttpClient closeableHttpClient = HttpClients.custom().setConnectionManager(poolingHttpClientConnectionManager).setDefaultRequestConfig(requestConfig).build()
+        ) {
+            BasicClassicHttpRequest basicClassicHttpRequest = new BasicClassicHttpRequest(this.config.getType().name(), URI.create(Http.this.config.getUrl()));
             for (Header header : this.config.getHeader()) {
-                httpEntityEnclosingRequestBase.setHeader(header.getKey(), header.getValue());
+                basicClassicHttpRequest.setHeader(header.getKey(), header.getValue());
             }
             Object body = this.config.getBody();
-            ContentType contentType = this.config.getContentType();
             if (body != null) {
+                ContentType contentType = this.config.getContentType();
                 if (contentType == ContentType.APPLICATION_JSON) {
-                    httpEntity = new StringEntity(Json.toString(body), "UTF-8");
+                    httpEntity = new StringEntity(Json.toString(body), StandardCharsets.UTF_8);
                 } else if (contentType == ContentType.FORM_DATA) {
                     FormData formData;
                     if (body instanceof FormData bodyFormData) {
@@ -166,10 +190,10 @@ public final class Http {
                         formData = ObjectUtil.parse(MapUtil.parse(body, String.class, Object.class), FormData.class);
                     }
                     if (formData != null) {
-                        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
+                        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
                         for (FormData.FormDataItem formDataItem : formData.getFormDataItem()) {
                             if (formDataItem.getContentType() == ContentType.DEFAULT_BINARY) {
-                                multipartEntityBuilder.addBinaryBody(formDataItem.getName(), ObjectUtil.parse(formDataItem.getData(), InputStream.class), org.apache.http.entity.ContentType.DEFAULT_BINARY, formDataItem.getFileName());
+                                multipartEntityBuilder.addBinaryBody(formDataItem.getName(), ObjectUtil.parse(formDataItem.getData(), InputStream.class), org.apache.hc.core5.http.ContentType.DEFAULT_BINARY, formDataItem.getFileName());
                             } else {
                                 multipartEntityBuilder.addTextBody(formDataItem.getName(), ObjectUtil.toString(formDataItem.getData()));
                             }
@@ -189,26 +213,27 @@ public final class Http {
                             }
                             return key + "=" + ObjectUtil.toString(value);
                         }, "&");
-                        httpEntity = new StringEntity(bodyString == null ? "" : bodyString, "UTF-8");
+                        httpEntity = new StringEntity(bodyString == null ? "" : bodyString, StandardCharsets.UTF_8);
                     } else {
-                        httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
+                        httpEntity = new StringEntity(ObjectUtil.toString(body), StandardCharsets.UTF_8);
                     }
                 } else {
-                    httpEntity = new StringEntity(ObjectUtil.toString(body), "UTF-8");
+                    httpEntity = new StringEntity(ObjectUtil.toString(body), StandardCharsets.UTF_8);
                 }
             }
-            httpEntityEnclosingRequestBase.setEntity(httpEntity);
-            try (CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpEntityEnclosingRequestBase)) {
-                httpResponseResult.setCode(closeableHttpResponse.getStatusLine().getStatusCode());
-                for (org.apache.http.Header header : closeableHttpResponse.getAllHeaders()) {
+            basicClassicHttpRequest.setEntity(httpEntity);
+            closeableHttpClient.execute(basicClassicHttpRequest, response -> {
+                if (listener == null) {
+                    return null;
+                }
+                httpResponseResult.setCode(response.getCode());
+                for (org.apache.hc.core5.http.Header header : response.getHeaders()) {
                     httpResponseResult.addHeader(header.getName(), header.getValue());
                 }
-                httpResponseResult.setBody(closeableHttpResponse.getEntity().getContent());
-                if (listener == null) {
-                    listener = data -> {};
-                }
+                httpResponseResult.setBody(response.getEntity().getContent());
                 listener.accept(httpResponseResult);
-            }
+                return null;
+            });
         } catch (Exception e) {
             if (this.config.isTimeoutResend() && this.timeoutResendNumber > 0) {
                 this.timeoutResendNumber = this.timeoutResendNumber - 1;
