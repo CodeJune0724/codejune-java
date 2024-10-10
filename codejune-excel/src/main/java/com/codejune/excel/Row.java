@@ -70,7 +70,11 @@ public final class Row implements Iterable<Cell> {
      * @return 最后的列号
      * */
     public int getCellSize() {
-        return this.row.getLastCellNum();
+        short result = this.row.getLastCellNum();
+        if (result < 0) {
+            result = 0;
+        }
+        return result;
     }
 
     /**
@@ -96,6 +100,15 @@ public final class Row implements Iterable<Cell> {
         for (Cell cell : this) {
             cell.copy(row.getCell(cell.getIndex()));
         }
+    }
+
+    /**
+     * 获取下一个cell
+     *
+     * @return 下一个cell
+     * */
+    public Cell getNextCell() {
+        return this.getCell(this.getCellSize());
     }
 
     @Override
