@@ -7,13 +7,16 @@ import com.codejune.core.util.StringUtil;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * class信息
@@ -343,5 +346,42 @@ public final class ClassInfo {
         Class<?> a = new ClassInfo(type).getJavaClass();
         return a == rawClass;
     }
+
+    /**
+     * 获取方法对应的字段名
+     *
+     * @param tClass tClass
+     * @param function function
+     * @param <T> T
+     *
+     * @return 字段名
+     * */
+    public static <T> String getFunctionColumnName(Class<T> tClass, Function<T, ?> function) {
+        if (tClass == null || function == null) {
+            throw new BaseException("getFieldName() param error");
+        }
+        String result;
+        try {
+            java.lang.reflect.Method method = function.getClass().getDeclaredMethod("writeReplace");
+            method.setAccessible(true);
+            result = ((SerializedLambda) method.invoke(function)).getImplMethodName();
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+        if (result.startsWith("is")) {
+            result = result.substring(2);
+        } else {
+            if (!result.startsWith("get") && !result.startsWith("set")) {
+                throw new BaseException("Error parsing property name '" + result + "'.  Didn't start with 'is', 'get' or 'set'.");
+            }
+            result = result.substring(3);
+        }
+        if (result.length() == 1 || result.length() > 1 && !Character.isUpperCase(result.charAt(1))) {
+            result = result.substring(0, 1).toLowerCase(Locale.ENGLISH) + result.substring(1);
+        }
+        return result;
+    }
+
+    public interface Function<T, R> extends java.util.function.Function<T,R>, Serializable {}
 
 }

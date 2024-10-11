@@ -11,6 +11,8 @@ import com.codejune.jdbc.mysql.MysqlJdbc;
 import com.codejune.jdbc.query.Filter;
 import com.codejune.jdbc.query.filter.Compare;
 import com.codejune.jdbc.query.filter.Expression;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 
@@ -266,6 +268,12 @@ public final class SqlBuilder {
                     return "'" + DateUtil.format((Date) value, DateUtil.DEFAULT_DATE_FORMAT) + "'";
                 }
                 return "TO_DATE('" + DateUtil.format(date, DateUtil.DEFAULT_DATE_FORMAT) + "', 'yyyy-mm-dd hh24:mi:ss')";
+            }
+            case LocalDateTime localDateTime -> {
+                return valueHandler(ObjectUtil.parse(localDateTime, Date.class));
+            }
+            case LocalDate localDate -> {
+                return valueHandler(ObjectUtil.parse(localDate, Date.class));
             }
             case Number number -> {
                 return ObjectUtil.toString(number);

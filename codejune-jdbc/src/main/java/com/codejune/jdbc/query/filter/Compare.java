@@ -2,13 +2,10 @@ package com.codejune.jdbc.query.filter;
 
 import com.codejune.core.Builder;
 import com.codejune.core.BaseException;
+import com.codejune.core.ClassInfo;
 import com.codejune.core.util.MapUtil;
 import com.codejune.core.util.ObjectUtil;
-import java.io.Serializable;
-import java.lang.invoke.SerializedLambda;
-import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -123,8 +120,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare gt(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return gt(getColumnName(tClass, Function), value);
+    public static <T> Compare gt(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return gt(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -149,8 +146,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare gte(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return gte(getColumnName(tClass, Function), value);
+    public static <T> Compare gte(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return gte(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -175,8 +172,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare lt(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return lt(getColumnName(tClass, Function), value);
+    public static <T> Compare lt(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return lt(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -201,8 +198,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare lte(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return lte(getColumnName(tClass, Function), value);
+    public static <T> Compare lte(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return lte(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -227,8 +224,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare equals(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return equals(getColumnName(tClass, Function), value);
+    public static <T> Compare equals(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return equals(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -253,8 +250,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare notEquals(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return notEquals(getColumnName(tClass, Function), value);
+    public static <T> Compare notEquals(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return notEquals(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -279,8 +276,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare in(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return in(getColumnName(tClass, Function), value);
+    public static <T> Compare in(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return in(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -305,8 +302,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare notIn(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return notIn(getColumnName(tClass, Function), value);
+    public static <T> Compare notIn(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return notIn(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -331,8 +328,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare contains(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return contains(getColumnName(tClass, Function), value);
+    public static <T> Compare contains(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return contains(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -357,8 +354,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare notContains(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return notContains(getColumnName(tClass, Function), value);
+    public static <T> Compare notContains(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return notContains(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -383,8 +380,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare startWith(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return startWith(getColumnName(tClass, Function), value);
+    public static <T> Compare startWith(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return startWith(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -409,8 +406,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare notStartWith(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return notStartWith(getColumnName(tClass, Function), value);
+    public static <T> Compare notStartWith(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return notStartWith(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -435,8 +432,8 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare endWith(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return endWith(getColumnName(tClass, Function), value);
+    public static <T> Compare endWith(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return endWith(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
     /**
@@ -461,35 +458,11 @@ public final class Compare implements Builder, Cloneable {
      *
      * @return Compare
      * */
-    public static <T> Compare notEndWith(Class<T> tClass, Function<T, ?> Function, Object value) {
-        return notEndWith(getColumnName(tClass, Function), value);
+    public static <T> Compare notEndWith(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return notEndWith(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
-    private static <T> String getColumnName(Class<T> tClass, Function<T, ?> function) {
-        if (tClass == null || function == null) {
-            throw new BaseException("getFieldName() param error");
-        }
-        String result;
-        try {
-            Method method = function.getClass().getDeclaredMethod("writeReplace");
-            method.setAccessible(true);
-            result = ((SerializedLambda) method.invoke(function)).getImplMethodName();
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
-        if (result.startsWith("is")) {
-            result = result.substring(2);
-        } else {
-            if (!result.startsWith("get") && !result.startsWith("set")) {
-                throw new BaseException("Error parsing property name '" + result + "'.  Didn't start with 'is', 'get' or 'set'.");
-            }
-            result = result.substring(3);
-        }
-        if (result.length() == 1 || result.length() > 1 && !Character.isUpperCase(result.charAt(1))) {
-            result = result.substring(0, 1).toLowerCase(Locale.ENGLISH) + result.substring(1);
-        }
-        return result;
-    }
+
 
     /**
      * 类型
@@ -542,7 +515,5 @@ public final class Compare implements Builder, Cloneable {
         }
 
     }
-
-    public interface Function<T, R> extends java.util.function.Function<T,R>, Serializable {}
 
 }
