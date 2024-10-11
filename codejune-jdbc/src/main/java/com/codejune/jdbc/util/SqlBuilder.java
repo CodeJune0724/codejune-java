@@ -169,7 +169,7 @@ public final class SqlBuilder {
             String key = compare.getKey();
             Object value = compare.getValue();
             switch (type) {
-                case GT -> result = key + " > " + (value);
+                case GT -> result = key + " > " + valueHandler(value);
                 case GTE -> result = key + " >= " + valueHandler(value);
                 case LT -> result = key + " < " + valueHandler(value);
                 case LTE -> result = key + " <= " + valueHandler(value);
