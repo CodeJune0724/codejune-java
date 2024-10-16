@@ -16,24 +16,19 @@ import java.util.List;
  *
  * @author ZJ
  * */
-public final class AccessDatabaseDatabase implements SqlDatabase {
+public final class AccessDatabaseDatabase extends SqlDatabase {
 
-    final AccessDatabaseJdbc accessDatabaseJdbc;
-
-    public AccessDatabaseDatabase(AccessDatabaseJdbc accessDatabaseJdbc) {
-        this.accessDatabaseJdbc = accessDatabaseJdbc;
+    AccessDatabaseDatabase(AccessDatabaseJdbc accessDatabaseJdbc) {
+        super(accessDatabaseJdbc, null);
     }
 
     @Override
-    public String getName() {
-        return null;
+    public AccessDatabaseJdbc getJdbc() {
+        return (AccessDatabaseJdbc) super.getJdbc();
     }
 
     @Override
     public AccessDatabaseTable getTable(String tableName) {
-        if (StringUtil.isEmpty(tableName)) {
-            throw new BaseException("tableName is null");
-        }
         return new AccessDatabaseTable(this, tableName);
     }
 
@@ -41,7 +36,7 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
     public List<AccessDatabaseTable> getTable() {
         try {
             List<AccessDatabaseTable> result = new ArrayList<>();
-            for (String tableName : this.accessDatabaseJdbc.database.getTableNames()) {
+            for (String tableName : this.getJdbc().database.getTableNames()) {
                 if (tableName.startsWith("~")) {
                     continue;
                 }
@@ -54,18 +49,12 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
     }
 
     @Override
-    public void deleteTable(String tableName) {
-        accessDatabaseJdbc.oracleJdbc.getDefaultDatabase().deleteTable(tableName);
-        accessDatabaseJdbc.reload(true);
-    }
-
-    @Override
     public void createTable(String tableName, String tableRemark, List<Column> columnList) {
         try {
             if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
                 throw new BaseException("建表参数缺失");
             }
-            com.healthmarketscience.jackcess.Table table = accessDatabaseJdbc.database.getTable(tableName);
+            com.healthmarketscience.jackcess.Table table = this.getJdbc().database.getTable(tableName);
             if (table != null) {
                 throw new BaseException(tableName + "表已存在");
             }
@@ -89,8 +78,8 @@ public final class AccessDatabaseDatabase implements SqlDatabase {
             for (ColumnBuilder columnBuilder : columnBuilderList) {
                 tableBuilder.addColumn(columnBuilder);
             }
-            tableBuilder.toTable(accessDatabaseJdbc.database);
-            accessDatabaseJdbc.reload(true);
+            tableBuilder.toTable(this.getJdbc().database);
+            this.getJdbc().reload(true);
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }

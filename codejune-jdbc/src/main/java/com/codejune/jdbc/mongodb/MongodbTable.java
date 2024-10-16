@@ -29,13 +29,16 @@ import java.util.regex.Pattern;
  * */
 public final class MongodbTable implements Table {
 
-    private final String tableName;
+    private final MongodbDatabase mongodbDatabase;
+
+    private final String name;
 
     private final MongoCollection<Document> mongoCollection;
 
-    MongodbTable(MongodbDatabase mongodbDatabase, String tableName) {
-        this.tableName = tableName;
-        mongoCollection = mongodbDatabase.mongoDatabase.getCollection(tableName);
+    MongodbTable(MongodbDatabase mongodbDatabase, String name) {
+        this.mongodbDatabase = mongodbDatabase;
+        this.name = name;
+        mongoCollection = mongodbDatabase.mongoDatabase.getCollection(name);
     }
 
     /**
@@ -77,8 +80,13 @@ public final class MongodbTable implements Table {
     }
 
     @Override
+    public MongodbDatabase getDatabase() {
+        return this.mongodbDatabase;
+    }
+
+    @Override
     public String getName() {
-        return this.tableName;
+        return this.name;
     }
 
     @Override

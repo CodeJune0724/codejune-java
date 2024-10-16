@@ -14,23 +14,32 @@ import java.util.List;
  * */
 public final class MongodbDatabase implements Database {
 
-    private final String databaseName;
+    private final MongodbJdbc mongodbJdbc;
+
+    private final String name;
 
     final MongoDatabase mongoDatabase;
 
     public MongodbDatabase(MongoDatabase mongoDatabase) {
+        this.name = mongoDatabase.getName();
+        this.mongodbJdbc = null;
         this.mongoDatabase = mongoDatabase;
-        this.databaseName = mongoDatabase.getName();
     }
 
-    public MongodbDatabase(MongodbJdbc mongodbJdbc, String databaseName) {
-        this.databaseName = databaseName;
-        this.mongoDatabase = mongodbJdbc.mongoClient.getDatabase(databaseName);
+    public MongodbDatabase(MongodbJdbc mongodbJdbc, String name) {
+        this.mongodbJdbc = mongodbJdbc;
+        this.name = name;
+        this.mongoDatabase = mongodbJdbc.mongoClient.getDatabase(name);
+    }
+
+    @Override
+    public MongodbJdbc getJdbc() {
+        return this.mongodbJdbc;
     }
 
     @Override
     public String getName() {
-        return databaseName;
+        return this.name;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.codejune.jdbc;
 
+import com.codejune.Jdbc;
 import com.codejune.core.util.StringUtil;
 import java.util.List;
 
@@ -9,6 +10,13 @@ import java.util.List;
  * @author ZJ
  * */
 public interface Database {
+
+    /**
+     * 获取jdbc
+     *
+     * @return Jdbc
+     * */
+    Jdbc getJdbc();
 
     /**
      * 获取名称
@@ -34,6 +42,13 @@ public interface Database {
     List<? extends Table> getTable();
 
     /**
+     * 删除表
+     *
+     * @param tableName 表名
+     * */
+    void deleteTable(String tableName);
+
+    /**
      * 表是否存在
      *
      * @param tableName 表名
@@ -52,12 +67,5 @@ public interface Database {
         }
         return false;
     }
-
-    /**
-     * 删除表
-     *
-     * @param tableName 表名
-     * */
-    void deleteTable(String tableName);
 
 }

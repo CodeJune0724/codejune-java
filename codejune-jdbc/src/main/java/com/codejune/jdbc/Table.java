@@ -14,6 +14,13 @@ import java.util.Map;
 public interface Table {
 
     /**
+     * 获取Database
+     *
+     * @return Database
+     * */
+    Database getDatabase();
+
+    /**
      * 获取表名
      *
      * @return 表名
