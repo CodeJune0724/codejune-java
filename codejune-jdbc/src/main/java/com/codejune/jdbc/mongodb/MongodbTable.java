@@ -212,8 +212,7 @@ public final class MongodbTable implements Table {
                     notContainsMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value))));
                     result.put("$not", notContainsMap);
                 }
-                case START_WITH ->
-                        result.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
+                case START_WITH -> result.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
                 case NOT_START_WITH -> {
                     Map<String, Object> notStartWithMap = new HashMap<>();
                     notStartWithMap.put("$regex", Pattern.compile("^" + RegexUtil.escape(ObjectUtil.toString(value))));
@@ -225,6 +224,7 @@ public final class MongodbTable implements Table {
                     notEndWithMap.put("$regex", Pattern.compile(RegexUtil.escape(ObjectUtil.toString(value)) + "$"));
                     result.put("$not", notEndWithMap);
                 }
+                case REGEX -> result.put("$regex", ObjectUtil.toString(value));
             }
             return result;
         };

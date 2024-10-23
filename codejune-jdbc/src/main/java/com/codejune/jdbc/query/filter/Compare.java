@@ -462,7 +462,31 @@ public final class Compare implements Builder, Cloneable {
         return notEndWith(ClassInfo.getFunctionColumnName(tClass, Function), value);
     }
 
+    /**
+     * 正则
+     *
+     * @param key key
+     * @param value value
+     *
+     * @return Compare
+     * */
+    public static Compare regex(Object key, Object value) {
+        return new Compare(Type.REGEX, key, value);
+    }
 
+    /**
+     * 正则
+     *
+     * @param tClass tClass
+     * @param Function Function
+     * @param value value
+     * @param <T> T
+     *
+     * @return Compare
+     * */
+    public static <T> Compare regex(Class<T> tClass, ClassInfo.Function<T, ?> Function, Object value) {
+        return regex(ClassInfo.getFunctionColumnName(tClass, Function), value);
+    }
 
     /**
      * 类型
@@ -497,7 +521,9 @@ public final class Compare implements Builder, Cloneable {
 
         END_WITH("$endWith"),
 
-        NOT_END_WITH("$!endWith");
+        NOT_END_WITH("$!endWith"),
+
+        REGEX("$regex");
 
         private final String value;
 
