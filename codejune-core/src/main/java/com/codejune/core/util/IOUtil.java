@@ -1,7 +1,6 @@
 package com.codejune.core.util;
 
 import com.codejune.core.BaseException;
-import com.codejune.core.io.reader.InputStreamReader;
 import java.io.*;
 import java.nio.file.Files;
 
@@ -85,17 +84,6 @@ public final class IOUtil {
      * */
     public static OutputStream getOutputStream(java.io.File file) {
         return getOutputStream(file, false);
-    }
-
-    /**
-     * 获取byte[]
-     *
-     * @param inputStream inputStream
-     *
-     * @return byte[]
-     * */
-    public static byte[] getByte(InputStream inputStream) {
-        return new InputStreamReader(inputStream).getByte();
     }
 
 }

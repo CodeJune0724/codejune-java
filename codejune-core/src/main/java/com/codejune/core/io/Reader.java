@@ -1,6 +1,7 @@
 package com.codejune.core.io;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.io.reader.InputStreamReader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -69,6 +70,17 @@ public abstract class Reader<T> {
         byte[] result = new byte[length];
         byteBuffer.get(result, byteBuffer.position(), length);
         return result;
+    }
+
+    /**
+     * 获取byte[]
+     *
+     * @param inputStream inputStream
+     *
+     * @return byte[]
+     * */
+    public static byte[] getByte(InputStream inputStream) {
+        return new InputStreamReader(inputStream).getByte();
     }
 
 }
