@@ -48,13 +48,13 @@ public abstract class DataPageExecutor<T> {
      *
      * @return 查询到的数据
      * */
-    public abstract List<T> query(int page, int size);
+    protected abstract List<T> query(int page, int size);
 
     /**
      * 数据处理
      *
      * @param data 数据
      * */
-    public abstract void handler(List<T> data);
+    protected abstract void handler(List<T> data);
 
 }
