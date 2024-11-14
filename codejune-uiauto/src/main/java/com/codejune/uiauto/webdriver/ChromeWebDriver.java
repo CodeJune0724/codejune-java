@@ -29,28 +29,28 @@ public final class ChromeWebDriver extends BaseWebDriver {
 
     private final Map<String, HttpResponse> httpResponseMap = new HashMap<>();
 
-    public ChromeWebDriver(File webDriverFile, boolean isShow) {
-        super(getWebDriver(webDriverFile, isShow));
+    public ChromeWebDriver(File webDriverFile, boolean show) {
+        super(getWebDriver(webDriverFile, show));
     }
 
     public ChromeWebDriver(File webDriverFile) {
         this(webDriverFile, false);
     }
 
-    public ChromeWebDriver(String webDriverFilePath, boolean isShow) {
-        this(new File(webDriverFilePath), isShow);
+    public ChromeWebDriver(String webDriverFilePath, boolean show) {
+        this(new File(webDriverFilePath), show);
     }
 
     public ChromeWebDriver(String webDriverFilePath) {
         this(webDriverFilePath, false);
     }
 
-    private static WebDriver getWebDriver(File webDriverFile, boolean isShow) {
+    private static WebDriver getWebDriver(File webDriverFile, boolean show) {
         if (webDriverFile == null) {
             throw new BaseException("文件不能为空");
         }
         System.setProperty("webdriver.chrome.driver", webDriverFile.getAbsolutePath());
-        ChromeOptions chromeOptions = (ChromeOptions) DriverType.CHROME.getMutableCapabilities(isShow);
+        ChromeOptions chromeOptions = (ChromeOptions) DriverType.CHROME.getMutableCapabilities(show);
         chromeOptions.setExperimentalOption("excludeSwitches", Arrays.asList("enable-automation", "enable-logging"));
         chromeOptions.setExperimentalOption("useAutomationExtension", false);
         ChromeDriver chromeDriver;
