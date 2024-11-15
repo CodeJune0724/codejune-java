@@ -11,7 +11,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
@@ -170,7 +170,7 @@ public final class Http {
         HttpEntity httpEntity = null;
         HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
         try (
-                PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create().setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext)).build();
+                PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create().setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext)).build();
                 CloseableHttpClient closeableHttpClient = HttpClients.custom().setConnectionManager(poolingHttpClientConnectionManager).setDefaultRequestConfig(requestConfig).build()
         ) {
             BasicClassicHttpRequest basicClassicHttpRequest = new BasicClassicHttpRequest(this.config.getType().name(), URI.create(Http.this.config.getUrl()));
@@ -239,7 +239,7 @@ public final class Http {
                 this.timeoutResendNumber = this.timeoutResendNumber - 1;
                 send(listener);
             } else {
-                throw new BaseException(e.getMessage());
+                throw new BaseException(e);
             }
         } finally {
             Closeable.closeNoError(httpResponseResult.getBody());
