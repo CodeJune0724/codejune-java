@@ -1,5 +1,6 @@
 package com.codejune.http;
 
+import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +107,26 @@ public final class Config {
             return this;
         }
         this.header.add(new Header(key, value));
+        return this;
+    }
+
+    /**
+     * 移除请求头
+     *
+     * @param key key
+     *
+     * @return this
+     * */
+    public Config deleteHeader(String key) {
+        if (StringUtil.isEmpty(key)) {
+            return this;
+        }
+        if (key.equalsIgnoreCase("content-length")) {
+            return this;
+        }
+        List<Header> newHeaderList = ArrayUtil.filter(this.header, header -> !key.equalsIgnoreCase(header.getKey()));
+        this.header.clear();
+        this.header.addAll(newHeaderList);
         return this;
     }
 
