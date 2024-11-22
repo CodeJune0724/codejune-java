@@ -13,9 +13,16 @@ import java.util.function.Function;
  * */
 public final class QueryResult<T> {
 
-    private Long count = 0L;
+    private Long count;
 
-    private List<T> data = new ArrayList<>();
+    private List<T> data;
+
+    public QueryResult() {}
+
+    public QueryResult(Long count, List<T> data) {
+        this.count = count;
+        this.data = data;
+    }
 
     public Long getCount() {
         return count;
