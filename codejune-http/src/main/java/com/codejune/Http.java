@@ -11,17 +11,14 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedTrustManager;
+import javax.net.ssl.*;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.URI;
@@ -177,12 +174,24 @@ public final class Http {
             throw new BaseException(e);
         }
         int timeout = this.config.getTimeout();
-        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(timeout > 0 ? Timeout.ofMilliseconds(timeout) : null).setResponseTimeout(timeout > 0 ? Timeout.ofMilliseconds(timeout) : null).setRedirectsEnabled(false).build();
+        RequestConfig requestConfig = RequestConfig.
+                custom()
+                .setConnectionRequestTimeout(timeout > 0 ? Timeout.ofMilliseconds(timeout) : null)
+                .setResponseTimeout(timeout > 0 ? Timeout.ofMilliseconds(timeout) : null)
+                .setRedirectsEnabled(false)
+                .build();
         HttpEntity httpEntity = null;
         HttpResponseResult<InputStream> httpResponseResult = new HttpResponseResult<>();
         try (
-                PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create().setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext)).build();
-                CloseableHttpClient closeableHttpClient = HttpClients.custom().setConnectionManager(poolingHttpClientConnectionManager).setDefaultRequestConfig(requestConfig).build()
+                PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder
+                        .create()
+                        .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext))
+                        .build();
+                CloseableHttpClient closeableHttpClient = HttpClients
+                        .custom()
+                        .setConnectionManager(poolingHttpClientConnectionManager)
+                        .setDefaultRequestConfig(requestConfig)
+                        .build()
         ) {
             BasicClassicHttpRequest basicClassicHttpRequest = new BasicClassicHttpRequest(this.config.getType().name(), URI.create(Http.this.config.getUrl()));
             for (Header header : this.config.getHeader()) {
