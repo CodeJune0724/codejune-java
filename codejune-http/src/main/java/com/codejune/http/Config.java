@@ -2,6 +2,8 @@ package com.codejune.http;
 
 import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.StringUtil;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -28,6 +30,8 @@ public final class Config {
     private Function<HttpResponseResult<String>, Boolean> resend = null;
 
     private boolean timeoutResend = false;
+
+    private Proxy proxy;
 
     public Config(String url, Type type) {
         this.url = url;
@@ -88,6 +92,15 @@ public final class Config {
 
     public Config setTimeoutResend(boolean timeoutResend) {
         this.timeoutResend = timeoutResend;
+        return this;
+    }
+
+    public Proxy getProxy() {
+        return proxy;
+    }
+
+    public Config setProxy(String host, int port) {
+        this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
         return this;
     }
 
