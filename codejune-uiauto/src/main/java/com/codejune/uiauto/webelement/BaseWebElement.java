@@ -104,7 +104,7 @@ public final class BaseWebElement implements WebElement {
 
     @Override
     public String getAttribute(String name) {
-        return this.seleniumElement.getAttribute(name);
+        return this.seleniumElement.getDomAttribute(name);
     }
 
     @Override
@@ -149,7 +149,7 @@ public final class BaseWebElement implements WebElement {
     @Override
     public String getText() {
         try {
-            return this.seleniumElement.getAttribute("innerText");
+            return this.seleniumElement.getDomAttribute("innerText");
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }

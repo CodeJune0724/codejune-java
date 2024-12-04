@@ -1,4 +1,4 @@
 dependencies {
     api(project(":codejune-core"))
-    api("org.seleniumhq.selenium:selenium-java:4.26.0")
+    api("org.seleniumhq.selenium:selenium-java:4.27.0")
 }
