@@ -304,7 +304,9 @@ public final class Http {
         HttpResponseResult<String> result = new HttpResponseResult<>();
         send(httpResponseResult -> {
             result.build(httpResponseResult);
-            result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
+            if (httpResponseResult.getBody() != null) {
+                result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
+            }
         });
         Function<HttpResponseResult<String>, Boolean> resend = this.config.getResend();
         if (resend != null && ObjectUtil.equals(true, resend.apply(result))) {
