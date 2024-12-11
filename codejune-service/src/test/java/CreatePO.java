@@ -80,7 +80,7 @@ public final class CreatePO {
                         "\r\n" +
                         "    @Override\r\n" +
                         "    public POService<" + BASE_PO_CLASS.getSimpleName() + ", " + idClass.getSimpleName() + "> getService() {\r\n" +
-                        "        return " + getFirstSmallLetter(getFileName("Service")) + ";\r\n" +
+                        "        return this." + getFirstSmallLetter(getFileName("Service")) + ";\r\n" +
                         "    }\r\n" +
                         "\r\n" +
                         "}");
