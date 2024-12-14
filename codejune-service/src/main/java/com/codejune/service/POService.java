@@ -113,7 +113,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return Object
      */
-    public Object getDetails(ID id) {
+    public Object getDetail(ID id) {
         return queryById(id);
     }
 

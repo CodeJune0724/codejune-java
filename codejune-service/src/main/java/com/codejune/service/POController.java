@@ -74,8 +74,8 @@ public abstract class POController<T extends BasePO<ID>, ID> {
     }
 
     @GetMapping("{id}")
-    public final ResponseResult getDetails(@PathVariable(name = "id", required = false) ID id) {
-        return ResponseResult.returnTrue(getService().getDetails(id));
+    public final ResponseResult getDetail(@PathVariable(name = "id", required = false) ID id) {
+        return ResponseResult.returnTrue(getService().getDetail(id));
     }
 
 }
