@@ -136,8 +136,8 @@ public final class File implements FileInfo<String> {
      * @param append 是否追加
      * */
     public void write(String data, boolean append) {
-        if (StringUtil.isEmpty(data)) {
-            return;
+        if (data == null) {
+            data = "";
         }
         try (InputStream inputStream = new ByteArrayInputStream(data.getBytes())) {
             write(inputStream, append);
