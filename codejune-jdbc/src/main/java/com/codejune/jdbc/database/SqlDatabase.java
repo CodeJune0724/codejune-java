@@ -62,7 +62,7 @@ public class SqlDatabase implements Database {
     }
 
     @Override
-    public final void deleteTable(String tableName) {
+    public void deleteTable(String tableName) {
         if (StringUtil.isEmpty(tableName)) {
             return;
         }

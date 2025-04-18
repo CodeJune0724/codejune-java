@@ -85,4 +85,10 @@ public final class AccessDatabaseDatabase extends SqlDatabase {
         }
     }
 
+    @Override
+    public void deleteTable(String tableName) {
+        super.deleteTable(tableName);
+        this.getJdbc().reload(true);
+    }
+
 }
