@@ -1,16 +1,14 @@
 package com.codejune.shell;
 
 import com.codejune.Shell;
-import com.codejune.core.Closeable;
 import com.codejune.core.ResponseResult;
 import com.codejune.core.BaseException;
 import com.codejune.core.SystemOS;
-import com.codejune.core.io.reader.TextInputStreamReader;
 import com.codejune.core.util.StringUtil;
+import java.io.BufferedReader;
 import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.InputStreamReader;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * WindowsShell
@@ -25,9 +23,8 @@ public final class LocalShell implements Shell {
             return null;
         }
         Process process = null;
-        InputStream inputStream = null;
-        InputStream errorStream = null;
         try {
+            StringBuilder result = new StringBuilder();
             ProcessBuilder processBuilder = new ProcessBuilder();
             if (SystemOS.getCurrentSystemOS() == SystemOS.WINDOWS) {
                 processBuilder.command("cmd.exe", "/c", command);
@@ -36,33 +33,28 @@ public final class LocalShell implements Shell {
             } else {
                 throw new BaseException("系统不支持");
             }
+            processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
-            Function<InputStream, String> readFunction = (inputStreamData) -> {
-                AtomicReference<String> result = new AtomicReference<>();
-                TextInputStreamReader successTextInputStreamReader = new TextInputStreamReader(inputStreamData);
-                successTextInputStreamReader.read(data -> {
-                    if (listener != null) {
-                        listener.accept(data);
-                    }
-                    result.set(result.get() + data);
-                });
-                return result.get();
-            };
-            inputStream = process.getInputStream();
-            String success = readFunction.apply(inputStream);
-            errorStream = process.getErrorStream();
-            String error = readFunction.apply(errorStream);
+            try (InputStream inputStream = process.getInputStream()) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, System.getProperties().get("sun.jnu.encoding").toString()));
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    result.append(line).append("\n");
+                }
+            }
             int i = process.waitFor();
+            String resultString = result.toString();
+            if (!StringUtil.isEmpty(resultString)) {
+                resultString = resultString.substring(0, resultString.length() - 1);
+            }
             if (i == 0) {
-                return ResponseResult.returnTrue(i, null, success);
+                return ResponseResult.returnTrue(i, null, resultString);
             } else {
-                return ResponseResult.returnFalse(i, null, error);
+                return ResponseResult.returnFalse(i, null, resultString);
             }
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         } finally {
-            Closeable.closeNoError(inputStream);
-            Closeable.closeNoError(errorStream);
             if (process != null) {
                 process.destroy();
             }
