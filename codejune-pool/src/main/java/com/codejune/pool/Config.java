@@ -19,6 +19,8 @@ public final class Config {
 
     private Duration whileCheckTime;
 
+    private boolean getCheck = false;
+
     public int getSize() {
         return size;
     }
@@ -62,6 +64,14 @@ public final class Config {
     public Config setWhileCheckTime(Duration whileCheckTime) {
         this.whileCheckTime = whileCheckTime;
         return this;
+    }
+
+    public boolean isGetCheck() {
+        return getCheck;
+    }
+
+    public void setGetCheck(boolean getCheck) {
+        this.getCheck = getCheck;
     }
 
 }

@@ -66,6 +66,7 @@ public abstract class Pool<T> implements Closeable {
         Duration whileCheckTime = config.getWhileCheckTime();
         genericObjectPoolConfig.setTestWhileIdle(whileCheckTime != null && whileCheckTime.toMillis() > 0);
         genericObjectPoolConfig.setTimeBetweenEvictionRuns(whileCheckTime);
+        genericObjectPoolConfig.setTestOnBorrow(config.isGetCheck());
         this.genericObjectPool = new GenericObjectPool<>(basePooledObjectFactory, genericObjectPoolConfig);
     }
 
@@ -98,8 +99,11 @@ public abstract class Pool<T> implements Closeable {
      * */
     public final T get() {
         try {
-            return genericObjectPool.borrowObject();
+            return this.genericObjectPool.borrowObject();
         } catch (Exception e) {
+            if (this.genericObjectPool.getTestOnBorrow()) {
+                return this.get();
+            }
             throw new BaseException(e);
         }
     }

@@ -29,8 +29,8 @@ import java.util.UUID;
 public class AccessDatabase extends Database {
 
     @SuppressWarnings("unchecked")
-    public AccessDatabase(File databaseFile, Class<? extends BasePO<?>> basePOClass) {
-        super(new Pool<>(new Config().setSize(10).setWhileCheckTime(Duration.ofSeconds(30))) {
+    public AccessDatabase(File databaseFile, Class<? extends BasePO<?>> basePOClass, Config config) {
+        super(new Pool<>(config) {
             @Override
             public Jdbc create() {
                 return new AccessDatabaseJdbc(databaseFile);
@@ -45,7 +45,6 @@ public class AccessDatabase extends Database {
                 }
             }
         });
-
         for (Class<?> c : PackageUtil.scan(basePOClass.getPackage().getName(), basePOClass)) {
             if (c.toString().startsWith("class") && new ClassInfo(c).isInstanceof(BasePO.class)) {
                 Class<? extends BasePO<?>> basePoC = (Class<? extends BasePO<?>>) c;
@@ -88,6 +87,10 @@ public class AccessDatabase extends Database {
                 }
             }
         }
+    }
+
+    public AccessDatabase(File databaseFile, Class<? extends BasePO<?>> basePOClass) {
+        this(databaseFile, basePOClass, new Config().setSize(10).setWhileCheckTime(Duration.ofSeconds(30)));
     }
 
     @Override
