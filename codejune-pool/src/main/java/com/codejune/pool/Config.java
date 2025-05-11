@@ -70,8 +70,9 @@ public final class Config {
         return getCheck;
     }
 
-    public void setGetCheck(boolean getCheck) {
+    public Config setGetCheck(boolean getCheck) {
         this.getCheck = getCheck;
+        return this;
     }
 
 }
