@@ -10,10 +10,11 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v85.network.Network;
-import org.openqa.selenium.devtools.v85.network.model.Request;
-import org.openqa.selenium.devtools.v85.network.model.RequestId;
-import org.openqa.selenium.devtools.v85.network.model.Response;
+import org.openqa.selenium.devtools.v137.network.Network;
+import org.openqa.selenium.devtools.v137.network.model.PostDataEntry;
+import org.openqa.selenium.devtools.v137.network.model.Request;
+import org.openqa.selenium.devtools.v137.network.model.RequestId;
+import org.openqa.selenium.devtools.v137.network.model.Response;
 import java.io.File;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -77,6 +78,12 @@ public final class ChromeWebDriver extends BaseWebDriver {
         devTools.addListener(Network.requestWillBeSent(), requestWillBeSent -> {
             synchronized (requestIdMap) {
                 Request request = requestWillBeSent.getRequest();
+                String body = null;
+                List<PostDataEntry> postDataEntryList = request.getPostDataEntries().isPresent() ? request.getPostDataEntries().get() : null;
+                if (postDataEntryList != null && !postDataEntryList.isEmpty()) {
+                    PostDataEntry postDataEntry = postDataEntryList.getFirst();
+                    body = postDataEntry.getBytes().isPresent() ? postDataEntry.getBytes().get() : null;
+                }
                 HttpRequest httpRequest = new HttpRequest(
                         request.getUrl(),
                         request.getMethod(),
@@ -87,7 +94,7 @@ public final class ChromeWebDriver extends BaseWebDriver {
                             }
                             return result;
                         }),
-                        request.getPostData().orElse(null)
+                        body
                 );
                 String requestId = requestWillBeSent.getRequestId().toString();
                 requestIdMap.put(requestId, httpRequest);
