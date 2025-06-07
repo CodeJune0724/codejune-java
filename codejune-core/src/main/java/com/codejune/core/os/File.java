@@ -137,10 +137,11 @@ public final class File implements FileInfo<String> {
      * */
     public void write(String data, boolean append) {
         if (data == null) {
-            data = "";
+            return;
         }
-        try (InputStream inputStream = new ByteArrayInputStream(data.getBytes())) {
-            write(inputStream, append);
+        try (OutputStream outputStream = IOUtil.getOutputStream(this.file, append)) {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+            outputStreamWriter.write(data.getBytes());
         } catch (Exception e) {
             throw new BaseException(e);
         }
@@ -164,7 +165,7 @@ public final class File implements FileInfo<String> {
         if (bytes == null) {
             return;
         }
-        try (InputStream inputStream = new ByteArrayInputStream(bytes);) {
+        try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
             write(inputStream);
         } catch (Exception e) {
             throw new BaseException(e);
