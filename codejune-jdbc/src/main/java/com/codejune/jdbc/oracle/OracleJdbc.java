@@ -25,8 +25,8 @@ public class OracleJdbc extends SqlJdbc {
         }
     }
 
-    public OracleJdbc(String host, int port, String sid, String username, String password) {
-        this(getConnection(host, port, sid, username, password));
+    public OracleJdbc(String type, String host, int port, String sid, String username, String password) {
+        this(getConnection(type, host, port, sid, username, password));
     }
 
     /**
@@ -83,9 +83,17 @@ public class OracleJdbc extends SqlJdbc {
         return getDatabase(this.defaultDatabase);
     }
 
-    private static Connection getConnection(String host, int port, String sid, String username, String password) {
+    private static Connection getConnection(String type, String host, int port, String sid, String username, String password) {
         try {
-            String url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + sid;
+            String url;
+            if ("SID".equals(type)) {
+                url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + sid;
+            }
+            else if ("NAME".equals(type)) {
+                url = "jdbc:oracle:thin:@//" + host + ":" + port + "/" + sid;
+            } else {
+                throw new BaseException("type error");
+            }
             Properties properties = new Properties();
             properties.put("user", username);
             properties.put("password", password);
