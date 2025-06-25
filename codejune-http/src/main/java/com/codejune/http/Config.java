@@ -116,9 +116,6 @@ public final class Config {
         if (StringUtil.isEmpty(key)) {
             return this;
         }
-        if (key.equalsIgnoreCase("content-length")) {
-            return this;
-        }
         this.header.add(new Header(key, value));
         return this;
     }
@@ -132,9 +129,6 @@ public final class Config {
      * */
     public Config deleteHeader(String key) {
         if (StringUtil.isEmpty(key)) {
-            return this;
-        }
-        if (key.equalsIgnoreCase("content-length")) {
             return this;
         }
         List<Header> newHeaderList = ArrayUtil.filter(this.header, header -> !key.equalsIgnoreCase(header.getKey()));
