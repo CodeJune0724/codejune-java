@@ -136,7 +136,7 @@ public final class Http {
      * @return this
      * */
     public Http setProxy(String host, int port) {
-        this.setProxy(host, port);
+        this.config.setProxy(host, port);
         return this;
     }
 
