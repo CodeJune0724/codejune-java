@@ -26,7 +26,7 @@ public abstract class POController<T extends BasePO<ID>, ID> {
     public abstract POService<T, ID> getService();
 
     @PostMapping()
-    public final ResponseResult save(@RequestBody(required = false) Map<String, Object> requestBody) {
+    public ResponseResult save(@RequestBody(required = false) Map<String, Object> requestBody) {
         if (requestBody != null) {
             requestBody.put("id", null);
         }
@@ -34,7 +34,7 @@ public abstract class POController<T extends BasePO<ID>, ID> {
     }
 
     @PostMapping("saveList")
-    public final ResponseResult saveList(@RequestBody(required = false) Map<String, Object> requestBody) {
+    public ResponseResult saveList(@RequestBody(required = false) Map<String, Object> requestBody) {
         return ResponseResult.returnTrue(getService().save(
                 ArrayUtil.parseList(MapUtil.get(requestBody, "data", List.class), getService().getPOClass()),
                 MapUtil.get(requestBody, "filter", Filter.class)
@@ -42,13 +42,13 @@ public abstract class POController<T extends BasePO<ID>, ID> {
     }
 
     @DeleteMapping("{id}")
-    public final ResponseResult delete(@PathVariable(name = "id", required = false) ID id) {
+    public ResponseResult delete(@PathVariable(name = "id", required = false) ID id) {
         getService().delete(id);
         return ResponseResult.returnTrue();
     }
 
     @DeleteMapping("deleteList")
-    public final ResponseResult deleteList(@RequestBody(required = false) List<ID> requestBody) {
+    public ResponseResult deleteList(@RequestBody(required = false) List<ID> requestBody) {
         if (requestBody != null) {
             for (ID id : requestBody) {
                 getService().delete(id);
@@ -58,7 +58,7 @@ public abstract class POController<T extends BasePO<ID>, ID> {
     }
 
     @PutMapping("{id}")
-    public final ResponseResult update(@PathVariable(name = "id", required = false) ID id, @RequestBody(required = false) Map<String, Object> requestBody) {
+    public ResponseResult update(@PathVariable(name = "id", required = false) ID id, @RequestBody(required = false) Map<String, Object> requestBody) {
         if (id == null) {
             throw new BaseException("参数缺失");
         }
@@ -74,7 +74,7 @@ public abstract class POController<T extends BasePO<ID>, ID> {
     }
 
     @GetMapping("{id}")
-    public final ResponseResult getDetail(@PathVariable(name = "id", required = false) ID id) {
+    public ResponseResult getDetail(@PathVariable(name = "id", required = false) ID id) {
         return ResponseResult.returnTrue(getService().getDetail(id));
     }
 
