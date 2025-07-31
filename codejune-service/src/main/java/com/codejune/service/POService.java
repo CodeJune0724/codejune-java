@@ -44,7 +44,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return POClass
      * */
-    public final Class<T> getPOClass() {
+    public Class<T> getPOClass() {
         return this.poClass;
     }
 
@@ -64,7 +64,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return QueryResult
      * */
-    public final QueryResult<T> query() {
+    public QueryResult<T> query() {
         return query(null);
     }
 
@@ -75,7 +75,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return count
      * */
-    public final long count(Filter filter) {
+    public long count(Filter filter) {
         return getTable().count(filter);
     }
 
@@ -84,7 +84,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return count
      * */
-    public final long count() {
+    public long count() {
         return getTable().count();
     }
 
@@ -139,7 +139,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return List
      * */
-    public final List<T> save(List<T> tList, Filter filter) {
+    public List<T> save(List<T> tList, Filter filter) {
         if (tList == null) {
             tList = new ArrayList<>();
         }
@@ -165,7 +165,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return List
      * */
-    public final List<T> save(List<T> tList) {
+    public List<T> save(List<T> tList) {
         return this.save(tList, null);
     }
 
@@ -238,7 +238,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @param t t
      * */
-    public final void delete(T t) {
+    public void delete(T t) {
         if (t == null) {
             return;
         }
@@ -250,7 +250,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @param tList tList
      * */
-    public final void delete(List<T> tList) {
+    public void delete(List<T> tList) {
         if (ObjectUtil.isEmpty(tList)) {
             return;
         }
@@ -262,7 +262,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
     /**
      * 删除
      * */
-    public final void delete() {
+    public void delete() {
         delete(query().getData());
     }
 
@@ -271,7 +271,7 @@ public abstract class POService<T extends BasePO<ID>, ID> {
      *
      * @return Database.Table
      * */
-    public final Database.Table<T, ID> getTable() {
+    public Database.Table<T, ID> getTable() {
         return getDatabase().getTable(this.poClass);
     }
 
