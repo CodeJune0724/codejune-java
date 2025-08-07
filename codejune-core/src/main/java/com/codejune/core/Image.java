@@ -106,9 +106,10 @@ public final class Image implements Closeable {
      * @return File
      * */
     public File save(File file) {
-        if (!FileUtil.isFile(file)) {
-            throw new BaseException("not file");
+        if (FileUtil.isFolder(file)) {
+            throw new BaseException("isFolder");
         }
+        new com.codejune.core.os.File(file);
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             ImageIO.write(this.bufferedImage, new com.codejune.core.os.File(file).getSuffix(), fileOutputStream);
             return file;
