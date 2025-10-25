@@ -92,14 +92,14 @@ public class Database {
      * @return T
      * */
     public <T extends BasePO<ID>, ID> T saveQuery(Jdbc jdbc, Table<T, ID> table, ID id) {
-        List<T> data = table.query(Query.and(Compare.equals(BasePO.getIdField().getName(), id))).getData();
+        List<Map<String, Object>> data = jdbc.getDefaultDatabase().getTable(table.getTableName()).query(Query.and(Compare.equals(BasePO.getIdField().getName(), id))).getData();
         if (ObjectUtil.isEmpty(data)) {
             return null;
         }
         if (data.size() != 1) {
             throw new BaseException("查询出错");
         }
-        return data.getFirst();
+        return ObjectUtil.parse(data.getFirst(), table.getBasePOClass());
     }
 
     /**

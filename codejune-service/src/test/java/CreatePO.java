@@ -14,9 +14,9 @@ public final class CreatePO {
 
     private static final Class<? extends BasePO<?>> BASE_PO_CLASS = null;
 
-    private static final String PACKAGE = "com.eputil";
+    private static final String PACKAGE = "com.codejune";
 
-    private static final String OUT_PATH = "C:\\application\\project\\ep-util";
+    private static final String OUT_PATH = "C:\\application\\code\\jskp-server";
 
     public static void main(String[] args) {
         if (BASE_PO_CLASS == null || StringUtil.isEmpty(PACKAGE) || StringUtil.isEmpty(OUT_PATH)) {
