@@ -99,7 +99,7 @@ public class Database {
         if (data.size() != 1) {
             throw new BaseException("查询出错");
         }
-        return ObjectUtil.parse(data.getFirst(), table.getBasePOClass());
+        return ObjectUtil.parse(MapUtil.keyHandler(data.getFirst(), this.columnToFieldHandlerBuffer.get(table.getBasePOClass())), table.getBasePOClass());
     }
 
     /**
