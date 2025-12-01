@@ -8,6 +8,7 @@ import com.codejune.core.io.writer.OutputStreamWriter;
 import com.codejune.core.util.*;
 import com.codejune.http.*;
 import javax.net.ssl.*;
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.zip.GZIPInputStream;
 
 /**
  * http组件
@@ -305,7 +307,28 @@ public final class Http {
         send(httpResponseResult -> {
             result.build(httpResponseResult);
             if (httpResponseResult.getBody() != null) {
-                result.setBody(new TextInputStreamReader(httpResponseResult.getBody()).getData());
+                String body;
+                Header header = httpResponseResult.getHeader("Content-Encoding");
+                if (header != null && "gzip".equals(header.getValue())) {
+                    try {
+                        GZIPInputStream gzipInputStream = new GZIPInputStream(httpResponseResult.getBody());
+                        BufferedReader bufferedReader = new BufferedReader(new java.io.InputStreamReader(gzipInputStream, StandardCharsets.UTF_8));
+                        StringBuilder stringBuilder = new StringBuilder();
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            if (line.contains("html>")) {
+                                continue;
+                            }
+                            stringBuilder.append(line).append("\n");
+                        }
+                        body = stringBuilder.toString();
+                    } catch (Exception e) {
+                        throw new BaseException(e);
+                    }
+                } else {
+                    body = new TextInputStreamReader(httpResponseResult.getBody()).getData();
+                }
+                result.setBody(body);
             }
         });
         Function<HttpResponseResult<String>, Boolean> resend = this.config.getResend();
