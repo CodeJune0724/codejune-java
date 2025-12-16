@@ -316,9 +316,6 @@ public final class Http {
                         StringBuilder stringBuilder = new StringBuilder();
                         String line;
                         while ((line = bufferedReader.readLine()) != null) {
-                            if (line.contains("html>")) {
-                                continue;
-                            }
                             stringBuilder.append(line).append("\n");
                         }
                         body = stringBuilder.toString();
