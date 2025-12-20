@@ -1,52 +1,37 @@
 package com.codejune.core;
 
 import com.codejune.core.util.ObjectUtil;
-import com.codejune.core.util.ThreadUtil;
 
 /**
  * 进度
  *
  * @author ZJ
  * */
-public abstract class Progress implements Closeable {
+public abstract class Progress {
 
     private long current = 0;
 
-    private final long total;
+    private final long count;
 
-    public Progress(long total, int listenInterval) {
-        if (total < 0) {
+    public Progress(long count) {
+        if (count < 0) {
             throw new BaseException("size is < 0");
         }
-        this.total = total;
-        Thread.ofVirtual().start(() -> {
-            while (true) {
-                listen();
-                ThreadUtil.sleep(listenInterval);
-                if (current >= total) {
-                    listen();
-                    break;
-                }
-            }
-        });
+        this.count = count;
     }
 
-    public Progress(long size) {
-        this(size, 1000);
-    }
-
-    public final long getTotal() {
-        return total;
+    public final long getCount() {
+        return this.count;
     }
 
     public final long getCurrent() {
-        return current;
+        return this.current;
     }
 
     /**
-     * 监听
+     * 处理
      * */
-    public abstract void listen();
+    public abstract void handler();
 
     /**
      * 推进进度
@@ -58,10 +43,14 @@ public abstract class Progress implements Closeable {
             if (size < 0) {
                 return;
             }
-            this.current = this.current + size;
-            if (this.current > this.total) {
-                this.current = this.total;
+            if (this.current >= this.count) {
+                return;
             }
+            this.current = this.current + size;
+            if (this.current > this.count) {
+                this.current = this.count;
+            }
+            this.handler();
         }
     }
 
@@ -69,7 +58,7 @@ public abstract class Progress implements Closeable {
      * 推进进度
      * */
     public final void countDown() {
-        countDown(1);
+        this.countDown(1);
     }
 
     /**
@@ -78,17 +67,12 @@ public abstract class Progress implements Closeable {
      * @return 百分比
      * */
     public final Double getPercentage() {
-        Double currentSizeDouble = ObjectUtil.parse(current, Double.class);
-        Double totalSizeDouble = ObjectUtil.parse(total, Double.class);
+        Double currentSizeDouble = ObjectUtil.parse(this.current, Double.class);
+        Double totalSizeDouble = ObjectUtil.parse(this.count, Double.class);
         if (totalSizeDouble == 0) {
             return totalSizeDouble;
         }
         return ObjectUtil.parse(String.format("%.2f", (currentSizeDouble / totalSizeDouble) * 100), Double.class);
-    }
-
-    @Override
-    public final void close() {
-        this.countDown(this.getTotal());
     }
 
 }
