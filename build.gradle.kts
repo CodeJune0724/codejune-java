@@ -7,7 +7,7 @@ plugins {
 subprojects {
     group = "com.codejune"
 
-    version = "1.10.82"
+    version = "1.11.0"
 
     apply {
         plugin("java")
@@ -21,7 +21,7 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
+            languageVersion = JavaLanguageVersion.of(25)
         }
         withSourcesJar()
     }
