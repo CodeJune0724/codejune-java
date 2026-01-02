@@ -42,16 +42,14 @@ public final class TextInputStreamReader extends Reader<String> {
             range = new Range(0L, null);
         }
         if (listener == null) {
-            listener = s -> {};
+            listener = _ -> {};
         }
         Long length = range.getEnd() == null ? null : range.getEnd() - range.getStart();
         if (length != null && length == 0) {
             return;
         }
-        try (
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, charset);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
-        ) {
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, charset));
             String line = bufferedReader.readLine();
             int lineNum = 0;
             while (line != null) {
