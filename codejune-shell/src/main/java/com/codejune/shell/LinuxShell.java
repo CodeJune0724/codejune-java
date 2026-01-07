@@ -3,25 +3,29 @@ package com.codejune.shell;
 import com.codejune.Shell;
 import com.codejune.core.BaseException;
 import com.codejune.core.Closeable;
-import com.codejune.core.ResponseResult;
-import com.codejune.core.io.reader.TextInputStreamReader;
-import com.codejune.core.util.StringUtil;
-import com.jcraft.jsch.ChannelExec;
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.ThreadUtil;
+import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import java.io.InputStream;
+import java.io.*;
+import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /**
  * LinuxShell
  *
  * @author ZJ
  * */
-public final class LinuxShell implements Shell, Closeable {
+public final class LinuxShell extends Shell {
 
     private final Session session;
+
+    private ChannelShell channelShell;
+
+    private InputStreamReader inputStreamReader;
+
+    private BufferedWriter bufferedWriter;
 
     public LinuxShell(String host, int port, String username, String password) {
         try {
@@ -35,53 +39,80 @@ public final class LinuxShell implements Shell, Closeable {
             this.session.setConfig(properties);
             this.session.connect();
         }catch (Exception e) {
-            throw new BaseException(host + ", 连接失败");
+            throw new BaseException(e);
         }
     }
 
     @Override
-    public ResponseResult command(String command, Consumer<String> listener) {
-        if (StringUtil.isEmpty(command)) {
-            return null;
-        }
-        ChannelExec channelExec = null;
+    public void open() {
         try {
-            channelExec = (ChannelExec) session.openChannel("exec");
-            channelExec.setCommand(command);
-            channelExec.connect();
-            InputStream inputStream = channelExec.getInputStream();
-            InputStream errStream = channelExec.getErrStream();
-            AtomicReference<String> result = new AtomicReference<>();
-            result.set("");
-            TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
-            textInputStreamReader.read(data -> {
-                if (listener != null) {
-                    listener.accept(data);
-                }
-                result.set(result.get() + data);
-            });
-            TextInputStreamReader errorTextInputStreamReader = new TextInputStreamReader(errStream);
-            errorTextInputStreamReader.read(data -> {
-                if (listener != null) {
-                    listener.accept(data);
-                }
-                result.set(result.get() + data);
-            });
-            return ResponseResult.returnTrue(channelExec.getExitStatus(), null, result.get());
-        }
-        catch (Exception e) {
+            this.channelShell = (ChannelShell) this.session.openChannel("shell");
+            this.channelShell.setPty(true);
+            this.channelShell.connect();
+            this.inputStreamReader = new InputStreamReader(this.channelShell.getInputStream());
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.channelShell.getOutputStream()));
+            this.getResponse();
+        }catch (Exception e) {
             throw new BaseException(e);
-        } finally {
-            if (channelExec != null) {
-                channelExec.disconnect();
+        }
+    }
+
+    @Override
+    public String command(String command) {
+        try {
+            this.bufferedWriter.write(command);
+            this.bufferedWriter.newLine();
+            this.bufferedWriter.flush();
+            List<String> result = ArrayUtil.asList(this.getResponse().split("\n"));
+            if (!result.isEmpty()) {
+                result.removeFirst();
             }
+            if (!result.isEmpty()) {
+                result.removeLast();
+            }
+            return ArrayUtil.toString(result, s -> s, "\n");
+        } catch (Exception e) {
+            throw new BaseException(e);
         }
     }
 
     @Override
     public void close() {
-        if (this.session != null) {
-            this.session.disconnect();
+        Closeable.closeNoError(this.inputStreamReader);
+        Closeable.closeNoError(this.bufferedWriter);
+        try {
+            if (this.channelShell != null) {
+                this.channelShell.disconnect();
+            }
+            if (this.session != null) {
+                this.session.disconnect();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private String getResponse() {
+        try {
+            StringBuilder result = new StringBuilder();
+            while (!this.inputStreamReader.ready()) {
+                ThreadUtil.sleep(100);
+            }
+            while (true) {
+                if (result.toString().endsWith("# ") && !this.inputStreamReader.ready()) {
+                    break;
+                }
+                int read = this.inputStreamReader.read();
+                if (read == -1) {
+                    break;
+                }
+                String item = String.valueOf((char) read);
+                if (this.listener != null) {
+                    this.listener.accept(item);
+                }
+                result.append(item);
+            }
+            return result.toString();
+        } catch (IOException e) {
+            throw new BaseException(e);
         }
     }
 

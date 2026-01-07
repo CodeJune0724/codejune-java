@@ -29,9 +29,11 @@ public abstract class Progress {
     }
 
     /**
-     * 处理
+     * 监听
+     *
+     * @param progress progress
      * */
-    public abstract void handler();
+    public abstract void listen(Progress progress);
 
     /**
      * 推进进度
@@ -50,7 +52,7 @@ public abstract class Progress {
             if (this.current > this.count) {
                 this.current = this.count;
             }
-            this.handler();
+            this.listen(this);
         }
     }
 

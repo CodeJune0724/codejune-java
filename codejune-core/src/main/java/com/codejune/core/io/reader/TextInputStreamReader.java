@@ -50,6 +50,7 @@ public final class TextInputStreamReader extends Reader<String> {
         }
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, charset));
+            while (!bufferedReader.ready()) {}
             String line = bufferedReader.readLine();
             int lineNum = 0;
             while (line != null) {

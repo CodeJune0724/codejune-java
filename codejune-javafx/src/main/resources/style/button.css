@@ -1,0 +1,166 @@
+.button {
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-border-width: 1;
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.button-default {
+    -fx-text-fill: rgba(0, 0, 0, 0.8);
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-border-color: -fx-base-border-color;
+}
+.button-default:hover {
+    -fx-text-fill: derive(rgba(0, 0, 0, 0.8), 20%);
+    -fx-background-color: derive(rgb(255, 255, 255), 20%);
+    -fx-border-color: derive(-fx-base-border-color, 20%);
+}
+.button-default:pressed {
+    -fx-text-fill: derive(rgba(0, 0, 0, 0.8), -20%);
+    -fx-background-color: derive(rgb(255, 255, 255), -5%);
+    -fx-border-color: derive(-fx-base-border-color, -20%);
+}
+
+.button-primary {
+    -fx-text-fill: white;
+    -fx-background-color: -fx-base-primary-color;
+    -fx-border-color: -fx-base-primary-color;
+}
+.button-primary:hover {
+    -fx-text-fill: derive(white, 20%);
+    -fx-background-color: derive(-fx-base-primary-color, 20%);
+    -fx-border-color: derive(-fx-base-primary-color, 20%);
+}
+.button-primary:pressed {
+    -fx-text-fill: derive(white, -20%);
+    -fx-background-color: derive(-fx-base-primary-color, -20%);
+    -fx-border-color: derive(-fx-base-primary-color, -20%);
+}
+
+.button-success {
+    -fx-text-fill: white;
+    -fx-background-color: -fx-base-success-color;
+    -fx-border-color: -fx-base-success-color;
+}
+.button-success:hover {
+    -fx-text-fill: derive(white, 20%);
+    -fx-background-color: derive(-fx-base-success-color, 20%);
+    -fx-border-color: derive(-fx-base-success-color, 20%);
+}
+.button-success:pressed {
+    -fx-text-fill: derive(white, -20%);
+    -fx-background-color: derive(-fx-base-success-color, -20%);
+    -fx-border-color: derive(-fx-base-success-color, -20%);
+}
+
+.button-warn {
+    -fx-text-fill: white;
+    -fx-background-color: -fx-base-warn-color;
+    -fx-border-color: -fx-base-warn-color;
+}
+.button-warn:hover {
+    -fx-text-fill: derive(white, 20%);
+    -fx-background-color: derive(-fx-base-warn-color, 20%);
+    -fx-border-color: derive(-fx-base-warn-color, 20%);
+}
+.button-warn:pressed {
+    -fx-text-fill: derive(white, -20%);
+    -fx-background-color: derive(-fx-base-warn-color, -20%);
+    -fx-border-color: derive(-fx-base-warn-color, -20%);
+}
+
+.button-error {
+    -fx-text-fill: white;
+    -fx-background-color: -fx-base-error-color;
+    -fx-border-color: -fx-base-error-color;
+}
+.button-error:hover {
+    -fx-text-fill: derive(white, 20%);
+    -fx-background-color: derive(-fx-base-error-color, 20%);
+    -fx-border-color: derive(-fx-base-error-color, 20%);
+}
+.button-error:pressed {
+    -fx-text-fill: derive(white, -20%);
+    -fx-background-color: derive(-fx-base-error-color, -20%);
+    -fx-border-color: derive(-fx-base-error-color, -20%);
+}
+
+.button-primary-plain {
+    -fx-text-fill: -fx-base-primary-color;
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-border-color: -fx-base-primary-color;
+}
+.button-primary-plain:hover {
+    -fx-text-fill: derive(-fx-base-primary-color, 20%);
+    -fx-background-color: derive(rgb(255, 255, 255), 20%);
+    -fx-border-color: derive(-fx-base-primary-color, 20%);
+}
+.button-primary-plain:pressed {
+    -fx-text-fill: derive(-fx-base-primary-color, -20%);
+    -fx-background-color: derive(rgb(255, 255, 255), -5%);
+    -fx-border-color: derive(-fx-base-primary-color, -20%);
+}
+
+.button-success-plain {
+    -fx-text-fill: -fx-base-success-color;
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-border-color: -fx-base-success-color;
+}
+.button-success-plain:hover {
+    -fx-text-fill: derive(-fx-base-success-color, 20%);
+    -fx-background-color: derive(rgb(255, 255, 255), 20%);
+    -fx-border-color: derive(-fx-base-success-color, 20%);
+}
+.button-success-plain:pressed {
+    -fx-text-fill: derive(-fx-base-success-color, -20%);
+    -fx-background-color: derive(rgb(255, 255, 255), -5%);
+    -fx-border-color: derive(-fx-base-success-color, -20%);
+}
+
+.button-warn-plain {
+    -fx-text-fill: -fx-base-warn-color;
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-border-color: -fx-base-warn-color;
+}
+.button-warn-plain:hover {
+    -fx-text-fill: derive(-fx-base-warn-color, 20%);
+    -fx-background-color: derive(rgb(255, 255, 255), 20%);
+    -fx-border-color: derive(-fx-base-warn-color, 20%);
+}
+.button-warn-plain:pressed {
+    -fx-text-fill: derive(-fx-base-warn-color, -20%);
+    -fx-background-color: derive(rgb(255, 255, 255), -5%);
+    -fx-border-color: derive(-fx-base-warn-color, -20%);
+}
+
+.button-error-plain {
+    -fx-text-fill: -fx-base-error-color;
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-border-color: -fx-base-error-color;
+}
+.button-error-plain:hover {
+    -fx-text-fill: derive(-fx-base-error-color, 20%);
+    -fx-background-color: derive(rgb(255, 255, 255), 20%);
+    -fx-border-color: derive(-fx-base-error-color, 20%);
+}
+.button-error-plain:pressed {
+    -fx-text-fill: derive(-fx-base-error-color, -20%);
+    -fx-background-color: derive(rgb(255, 255, 255), -5%);
+    -fx-border-color: derive(-fx-base-error-color, -20%);
+}
+
+.button-size-default {
+    -fx-font-size: 14px;
+    -fx-padding: 0 20px;
+    -fx-min-height: 30px;
+}
+.button-size-large {
+    -fx-font-size: 14px;
+    -fx-padding: 0 25px;
+    -fx-min-height: 35px;
+}
+.button-size-small {
+    -fx-padding: 0 15px;
+    -fx-min-height: 25px;
+}

@@ -1,0 +1,7 @@
+.root {
+    -fx-base-primary-color: #1677ff;
+    -fx-base-success-color: #389e0d;
+    -fx-base-warn-color: rgb(230, 162, 60);
+    -fx-base-error-color: #ff4d4f;
+    -fx-base-border-color: rgb(217, 217, 217);
+}

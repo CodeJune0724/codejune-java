@@ -1,0 +1,18 @@
+.input {
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-background-radius: 5;
+    -fx-border-color: -fx-base-border-color;
+    -fx-border-radius: 5;
+    -fx-border-width: 1px;
+    -fx-padding: 0 5px;
+    -fx-pref-height: 30px;
+    -fx-text-fill: rgba(0, 0, 0, 0.88);
+}
+
+.input:hover {
+    -fx-border-color: derive(-fx-base-border-color, -10%);
+}
+
+.input:focused {
+    -fx-border-color: -fx-base-primary-color;
+}

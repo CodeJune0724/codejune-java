@@ -1,0 +1,8 @@
+.cardHover {
+    -fx-cursor: hand;
+}
+
+.cardHover:hover {
+    -fx-background-color: rgb(230, 244, 255) !important;
+    -fx-border-color: rgb(145, 202, 255) !important;
+}

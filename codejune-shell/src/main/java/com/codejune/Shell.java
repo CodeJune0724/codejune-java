@@ -1,6 +1,6 @@
 package com.codejune;
 
-import com.codejune.core.ResponseResult;
+import java.io.Closeable;
 import java.util.function.Consumer;
 
 /**
@@ -8,20 +8,31 @@ import java.util.function.Consumer;
  *
  * @author ZJ
  * */
-public interface Shell {
+public abstract class Shell implements Closeable {
+
+    protected Consumer<String> listener;
+
+    /**
+     * 打开连接
+     * */
+    public abstract void open();
 
     /**
      * 发送指令
      *
      * @param command 指令
-     * @param listener listener
      *
-     * @return ResponseResult
+     * @return 输出
      * */
-    ResponseResult command(String command, Consumer<String> listener);
+    public abstract String command(String command);
 
-    default ResponseResult command(String command) {
-        return command(command, null);
+    /**
+     * setListener
+     *
+     * @param listener listener
+     * */
+    public final void setListener(Consumer<String> listener) {
+        this.listener = listener;
     }
 
 }

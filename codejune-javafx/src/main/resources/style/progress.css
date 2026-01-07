@@ -1,0 +1,8 @@
+.progress {
+    -fx-pref-height: 15px;
+    -fx-accent: -fx-base-primary-color;
+}
+
+.progress .bar {
+    -fx-background-radius: 5px;
+}
