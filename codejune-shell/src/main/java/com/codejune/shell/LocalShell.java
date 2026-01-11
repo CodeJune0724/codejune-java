@@ -60,7 +60,9 @@ public final class LocalShell extends Shell {
     public void close() {
         Closeable.closeNoError(this.inputStreamReader);
         Closeable.closeNoError(this.bufferedWriter);
-        this.process.destroy();
+        if (this.process != null) {
+            this.process.destroy();
+        }
     }
 
     private String getResponse() {
