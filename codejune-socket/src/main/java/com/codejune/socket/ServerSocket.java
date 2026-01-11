@@ -3,6 +3,7 @@ package com.codejune.socket;
 import com.codejune.core.BaseException;
 import com.codejune.core.Closeable;
 import com.codejune.core.io.writer.OutputStreamWriter;
+import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.core.util.ThreadUtil;
 import java.io.InputStream;
@@ -48,12 +49,10 @@ public abstract class ServerSocket implements AutoCloseable {
                     }
                     try {
                         OutputStream outputStream = socket.getOutputStream();
-                        if (response instanceof String responseString) {
-                            outputStream.write(responseString.getBytes(StandardCharsets.UTF_8));
-                        }
                         if (response instanceof InputStream responseInputStream) {
-                            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                            outputStreamWriter.write(responseInputStream);
+                            new OutputStreamWriter(outputStream).write(responseInputStream);
+                        } else {
+                            outputStream.write(ObjectUtil.toString(response).getBytes(StandardCharsets.UTF_8));
                         }
                         outputStream.flush();
                     } catch (Exception _) {}

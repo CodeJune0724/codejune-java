@@ -3,6 +3,7 @@ package com.codejune.socket;
 import com.codejune.core.BaseException;
 import com.codejune.core.Closeable;
 import com.codejune.core.io.writer.OutputStreamWriter;
+import com.codejune.core.util.ObjectUtil;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -30,12 +31,11 @@ public final class ClientSocket {
     public void send(Object request, Consumer<InputStream> response) {
         try {
             OutputStream outputStream = this.socket.getOutputStream();
-            if (request instanceof String requestString) {
-                outputStream.write(requestString.getBytes(StandardCharsets.UTF_8));
-            }
             if (request instanceof InputStream requestInputStream) {
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
                 outputStreamWriter.write(requestInputStream);
+            } else {
+                outputStream.write(ObjectUtil.toString(request).getBytes(StandardCharsets.UTF_8));
             }
             outputStream.flush();
             this.socket.shutdownOutput();
