@@ -69,6 +69,22 @@ public final class WindowsShell extends Shell {
         }
     }
 
+    /**
+     * 异步执行
+     *
+     * @param command command
+     * */
+    public void asyncCommand(String command) {
+        this.init();
+        try {
+            this.bufferedWriter.write(command);
+            this.bufferedWriter.newLine();
+            this.bufferedWriter.flush();
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+    }
+
     private String getResponse() {
         try {
             StringBuilder result = new StringBuilder();
