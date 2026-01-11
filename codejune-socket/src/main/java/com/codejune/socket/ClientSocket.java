@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
 
 public final class ClientSocket {
 
@@ -26,9 +25,10 @@ public final class ClientSocket {
      * 发送
      *
      * @param request request
-     * @param response response
+     *
+     * @return response
      * */
-    public void send(Object request, Consumer<InputStream> response) {
+    public InputStream send(Object request) {
         try {
             OutputStream outputStream = this.socket.getOutputStream();
             if (request instanceof InputStream requestInputStream) {
@@ -39,9 +39,7 @@ public final class ClientSocket {
             }
             outputStream.flush();
             this.socket.shutdownOutput();
-            if (response != null) {
-                response.accept(this.socket.getInputStream());
-            }
+            return this.socket.getInputStream();
         } catch (Throwable e) {
             throw new BaseException(e);
         } finally {
