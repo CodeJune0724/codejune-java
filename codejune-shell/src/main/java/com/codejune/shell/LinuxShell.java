@@ -44,7 +44,10 @@ public final class LinuxShell extends Shell {
     }
 
     @Override
-    public void open() {
+    public void init() {
+        if (this.channelShell != null) {
+            return;
+        }
         try {
             this.channelShell = (ChannelShell) this.session.openChannel("shell");
             this.channelShell.setPty(true);
@@ -58,7 +61,8 @@ public final class LinuxShell extends Shell {
     }
 
     @Override
-    public String command(String command) {
+    public synchronized String command(String command) {
+        this.init();
         try {
             this.bufferedWriter.write(command);
             this.bufferedWriter.newLine();

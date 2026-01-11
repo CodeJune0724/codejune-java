@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author ZJ
  * */
-public final class LocalShell extends Shell {
+public final class WindowsShell extends Shell {
 
     private Process process;
 
@@ -21,10 +21,13 @@ public final class LocalShell extends Shell {
 
     private BufferedWriter bufferedWriter;
 
-    public LocalShell() {}
+    public WindowsShell() {}
 
     @Override
-    public void open() {
+    public void init() {
+        if (this.process != null) {
+            return;
+        }
         ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe");
         processBuilder.redirectErrorStream(true);
         try {
@@ -38,7 +41,8 @@ public final class LocalShell extends Shell {
     }
 
     @Override
-    public String command(String command) {
+    public synchronized String command(String command) {
+        this.init();
         try {
             this.bufferedWriter.write(command);
             this.bufferedWriter.newLine();
