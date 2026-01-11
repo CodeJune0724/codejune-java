@@ -1,7 +1,6 @@
 package com.codejune.socket;
 
 import com.codejune.core.BaseException;
-import com.codejune.core.Closeable;
 import com.codejune.core.io.reader.TextInputStreamReader;
 import com.codejune.core.io.writer.OutputStreamWriter;
 import com.codejune.core.util.ObjectUtil;
@@ -14,14 +13,13 @@ import java.util.function.Consumer;
 
 public final class ClientSocket {
 
-    private final Socket socket;
+    private final String host;
+
+    private final int port;
 
     public ClientSocket(String host, int port) {
-        try {
-            this.socket = new Socket(host, port);
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
+        this.host = host;
+        this.port = port;
     }
 
     /**
@@ -31,23 +29,23 @@ public final class ClientSocket {
      * @param response response
      * */
     public void send(Object request, Consumer<InputStream> response) {
-        try {
-            OutputStream outputStream = this.socket.getOutputStream();
+        try (
+                Socket socket = new Socket(host, port);
+                InputStream inputStream = socket.getInputStream();
+                OutputStream outputStream = socket.getOutputStream();
+        ) {
             if (request instanceof InputStream requestInputStream) {
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                outputStreamWriter.write(requestInputStream);
+                new OutputStreamWriter(outputStream).write(requestInputStream);
             } else {
                 outputStream.write(ObjectUtil.toString(request).getBytes(StandardCharsets.UTF_8));
             }
             outputStream.flush();
-            this.socket.shutdownOutput();
+            socket.shutdownOutput();
             if (response != null) {
-                response.accept(this.socket.getInputStream());
+                response.accept(inputStream);
             }
         } catch (Throwable e) {
             throw new BaseException(e);
-        } finally {
-            Closeable.closeNoError(this.socket);
         }
     }
 

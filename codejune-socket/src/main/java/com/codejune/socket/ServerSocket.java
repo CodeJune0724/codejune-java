@@ -30,25 +30,22 @@ public abstract class ServerSocket implements AutoCloseable {
             if (this.serverSocket.isClosed()) {
                 break;
             }
-            Socket socket;
-            try {
-                socket = this.serverSocket.accept();
-            } catch (Throwable e) {
-                throw new BaseException(e);
-            }
             this.threadPoolExecutor.execute(() -> {
-                try {
+                try (
+                        Socket socket = this.serverSocket.accept();
+                        InputStream inputStream = socket.getInputStream();
+                        OutputStream outputStream = socket.getOutputStream()
+                ) {
                     Object response;
                     try {
-                        response = this.listen(socket.getInputStream());
-                    } catch (Exception e) {
+                        response = this.listen(inputStream);
+                    } catch (Throwable e) {
                         response = e.getMessage();
                     }
                     if (StringUtil.isEmpty(response)) {
                         response = " ";
                     }
                     try {
-                        OutputStream outputStream = socket.getOutputStream();
                         if (response instanceof InputStream responseInputStream) {
                             new OutputStreamWriter(outputStream).write(responseInputStream);
                         } else {
@@ -56,8 +53,8 @@ public abstract class ServerSocket implements AutoCloseable {
                         }
                         outputStream.flush();
                     } catch (Exception _) {}
-                } finally {
-                    Closeable.closeNoError(socket);
+                } catch (Throwable e) {
+                    throw new BaseException(e);
                 }
             });
         }
