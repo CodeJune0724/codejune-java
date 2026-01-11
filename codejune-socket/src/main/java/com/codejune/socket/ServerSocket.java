@@ -30,33 +30,34 @@ public abstract class ServerSocket implements AutoCloseable {
             if (this.serverSocket.isClosed()) {
                 break;
             }
-            this.threadPoolExecutor.execute(() -> {
-                try (
-                        Socket socket = this.serverSocket.accept();
-                        InputStream inputStream = socket.getInputStream();
-                        OutputStream outputStream = socket.getOutputStream()
-                ) {
-                    Object response;
-                    try {
-                        response = this.listen(inputStream);
-                    } catch (Throwable e) {
-                        response = e.getMessage();
-                    }
-                    if (StringUtil.isEmpty(response)) {
-                        response = " ";
-                    }
-                    try {
+            try {
+                Socket socket = this.serverSocket.accept();
+                this.threadPoolExecutor.execute(() -> {
+                    try (
+                            Socket threadSocket = socket;
+                            InputStream inputStream = threadSocket.getInputStream();
+                            OutputStream outputStream = threadSocket.getOutputStream()
+                    ) {
+                        Object response;
+                        try {
+                            response = this.listen(inputStream);
+                        } catch (Throwable e) {
+                            response = e.getMessage();
+                        }
+                        if (StringUtil.isEmpty(response)) {
+                            response = " ";
+                        }
                         if (response instanceof InputStream responseInputStream) {
                             new OutputStreamWriter(outputStream).write(responseInputStream);
                         } else {
                             outputStream.write(ObjectUtil.toString(response).getBytes(StandardCharsets.UTF_8));
                         }
                         outputStream.flush();
-                    } catch (Exception _) {}
-                } catch (Throwable e) {
-                    throw new BaseException(e);
-                }
-            });
+                    } catch (Throwable e) {
+                        throw new BaseException(e);
+                    }
+                });
+            } catch (Exception _) {}
         }
         this.close();
     }
