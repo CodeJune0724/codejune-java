@@ -24,6 +24,7 @@ public abstract class ServerSocket implements AutoCloseable {
             throw new BaseException(e);
         }
         this.threadPoolExecutor = ThreadUtil.getThreadPoolExecutor(threadNumber);
+        this.runHandler();
         while (true) {
             if (this.serverSocket.isClosed()) {
                 break;
