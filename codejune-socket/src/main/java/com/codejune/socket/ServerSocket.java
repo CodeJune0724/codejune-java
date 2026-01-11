@@ -80,6 +80,11 @@ public abstract class ServerSocket implements AutoCloseable {
     public abstract Object listen(InputStream inputStream);
 
     /**
+     * 运行后的处理
+     * */
+    public void runHandler() {}
+
+    /**
      * 获取端口
      *
      * @return 端口
