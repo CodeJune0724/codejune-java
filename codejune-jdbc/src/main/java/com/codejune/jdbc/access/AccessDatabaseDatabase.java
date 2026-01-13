@@ -5,8 +5,8 @@ import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.jdbc.Column;
 import com.codejune.jdbc.database.SqlDatabase;
-import com.healthmarketscience.jackcess.ColumnBuilder;
-import com.healthmarketscience.jackcess.TableBuilder;
+import io.github.spannm.jackcess.ColumnBuilder;
+import io.github.spannm.jackcess.TableBuilder;
 import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public final class AccessDatabaseDatabase extends SqlDatabase {
             if (StringUtil.isEmpty(tableName) || ObjectUtil.isEmpty(columnList)) {
                 throw new BaseException("建表参数缺失");
             }
-            com.healthmarketscience.jackcess.Table table = this.getJdbc().database.getTable(tableName);
+            io.github.spannm.jackcess.Table table = this.getJdbc().database.getTable(tableName);
             if (table != null) {
                 throw new BaseException(tableName + "表已存在");
             }
@@ -62,16 +62,16 @@ public final class AccessDatabaseDatabase extends SqlDatabase {
             List<ColumnBuilder> columnBuilderList = new ArrayList<>();
             for (Column column : columnList) {
                 ColumnBuilder columnBuilder = new ColumnBuilder(column.getName());
-                columnBuilder.setSQLType(column.getType().getVendorTypeNumber());
+                columnBuilder.withSqlType(column.getType().getVendorTypeNumber());
                 if (column.isPrimaryKey()) {
-                    tableBuilder.setPrimaryKey(column.getName());
+                    tableBuilder.withPrimaryKey(column.getName());
                 }
                 if (column.isAutoincrement()) {
-                    columnBuilder.setAutoNumber(true);
-                    columnBuilder.setSQLType(JDBCType.BIGINT.getVendorTypeNumber());
+                    columnBuilder.withAutoNumber(true);
+                    columnBuilder.withSqlType(JDBCType.BIGINT.getVendorTypeNumber());
                 }
                 if (column.getLength() > 0) {
-                    columnBuilder.setLength(column.getLength());
+                    columnBuilder.withLength(column.getLength());
                 }
                 columnBuilderList.add(columnBuilder);
             }

@@ -4,7 +4,7 @@ import com.codejune.core.BaseException;
 import com.codejune.core.os.File;
 import com.codejune.core.util.FileUtil;
 import com.codejune.jdbc.oracle.OracleJdbc;
-import com.healthmarketscience.jackcess.*;
+import io.github.spannm.jackcess.*;
 import com.codejune.jdbc.SqlJdbc;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -75,7 +75,7 @@ public class AccessDatabaseJdbc extends SqlJdbc {
             this.database.close();
         } catch (Exception ignored) {}
         try {
-            database = new DatabaseBuilder(file).open();
+            database = DatabaseBuilder.open(file);
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }

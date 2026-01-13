@@ -10,11 +10,11 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v137.network.Network;
-import org.openqa.selenium.devtools.v137.network.model.PostDataEntry;
-import org.openqa.selenium.devtools.v137.network.model.Request;
-import org.openqa.selenium.devtools.v137.network.model.RequestId;
-import org.openqa.selenium.devtools.v137.network.model.Response;
+import org.openqa.selenium.devtools.v143.network.Network;
+import org.openqa.selenium.devtools.v143.network.model.PostDataEntry;
+import org.openqa.selenium.devtools.v143.network.model.Request;
+import org.openqa.selenium.devtools.v143.network.model.RequestId;
+import org.openqa.selenium.devtools.v143.network.model.Response;
 import java.io.File;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -74,7 +74,13 @@ public final class ChromeWebDriver extends BaseWebDriver {
         }
         DevTools devTools = ((ChromeDriver) this.seleniumWebDriver).getDevTools();
         devTools.createSession();
-        devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
+        devTools.send(Network.enable(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty()
+        ));
         devTools.addListener(Network.requestWillBeSent(), requestWillBeSent -> {
             synchronized (requestIdMap) {
                 Request request = requestWillBeSent.getRequest();

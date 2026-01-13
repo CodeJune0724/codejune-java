@@ -33,7 +33,7 @@ public final class AccessDatabaseTable extends SqlTable {
             throw new BaseException("字段不能为空");
         }
         try {
-            com.healthmarketscience.jackcess.Table table = this.getDatabase().getJdbc().database.getTable(this.getName());
+            io.github.spannm.jackcess.Table table = this.getDatabase().getJdbc().database.getTable(this.getName());
             if (table != null) {
                 List<Column> columns = this.getColumn();
                 boolean exist = true;
@@ -77,20 +77,20 @@ public final class AccessDatabaseTable extends SqlTable {
     @Override
     public List<Column> getColumn() {
         List<Column> result = new ArrayList<>();
-        List<? extends com.healthmarketscience.jackcess.Column> columns;
+        List<? extends io.github.spannm.jackcess.Column> columns;
         try {
             columns = this.getDatabase().getJdbc().database.getTable(this.getName()).getColumns();
         } catch (Exception e) {
             throw new BaseException(e);
         }
-        for (com.healthmarketscience.jackcess.Column jackcessColumn : columns) {
+        for (io.github.spannm.jackcess.Column jackcessColumn : columns) {
             String name = jackcessColumn.getName();
             JDBCType jdbcType;
             int length = jackcessColumn.getLength();
             boolean isPrimaryKey = jackcessColumn.isAutoNumber();
             try {
                 jdbcType = JDBCType.valueOf(jackcessColumn.getSQLType());
-                if (jackcessColumn.getType() == com.healthmarketscience.jackcess.DataType.BOOLEAN) {
+                if (jackcessColumn.getType() == io.github.spannm.jackcess.DataType.BOOLEAN) {
                     jdbcType = JDBCType.BOOLEAN;
                 }
             } catch (Exception e) {
