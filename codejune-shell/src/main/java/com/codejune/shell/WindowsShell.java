@@ -35,8 +35,12 @@ public final class WindowsShell extends Shell {
         } catch (Exception e) {
             throw new BaseException(e);
         }
-        this.inputStreamReader = new InputStreamReader(process.getInputStream());
-        this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+        try {
+            this.inputStreamReader = new InputStreamReader(process.getInputStream(), System.getProperties().get("sun.jnu.encoding").toString());
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), System.getProperties().get("sun.jnu.encoding").toString()));
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
         this.getResponse();
     }
 
