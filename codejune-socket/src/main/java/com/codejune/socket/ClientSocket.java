@@ -17,9 +17,20 @@ public final class ClientSocket {
 
     private final int port;
 
+    private int timeout = 0;
+
     public ClientSocket(String host, int port) {
         this.host = host;
         this.port = port;
+    }
+
+    /**
+     * 设置超时时间
+     *
+     * @param timeout timeout
+     * */
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     /**
@@ -34,6 +45,9 @@ public final class ClientSocket {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream();
         ) {
+            if (this.timeout > 0) {
+                socket.setSoTimeout(this.timeout);
+            }
             if (request instanceof InputStream requestInputStream) {
                 new OutputStreamWriter(outputStream).write(requestInputStream);
             } else {
