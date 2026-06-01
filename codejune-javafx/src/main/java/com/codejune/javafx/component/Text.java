@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 
 public final class Text extends BaseComponent {
+
     private final Label label = new Label();
 
     public Text(String text) {

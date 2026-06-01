@@ -85,8 +85,8 @@ public abstract class BaseComponent {
             return;
         }
         Map<PropertyType, Runnable> bindMap = new HashMap<>();
-        bindMap.put(BasePropertyType.DISABLE, () -> this.getStyle().disable(ObjectUtil.parse(propertyBind.get(), boolean.class)));
-        bindMap.put(BasePropertyType.DISPLAY, () -> this.getStyle().display(ObjectUtil.parse(propertyBind.get(), boolean.class)));
+        bindMap.put(BasePropertyType.DISABLE, () -> this.getStyle().disable(propertyBind.get() != null && ObjectUtil.parse(propertyBind.get(), boolean.class)));
+        bindMap.put(BasePropertyType.DISPLAY, () -> this.getStyle().display(propertyBind.get() != null && ObjectUtil.parse(propertyBind.get(), boolean.class)));
         Runnable customBind = this.customPropertyBind(propertyType, propertyBind);
         if (customBind != null) {
             bindMap.put(propertyType, customBind);
@@ -108,6 +108,7 @@ public abstract class BaseComponent {
         this.eventMap.put(eventType, runnable);
         Map<EventType, Runnable> nestingEventMap = new HashMap<>();
         nestingEventMap.put(BaseEventType.CLICK, () -> this.getFxNode().setOnMouseClicked(_ -> asynchronousRun(asynchronous, runnable)));
+        nestingEventMap.put(BaseEventType.MOUSE_MOVE, () -> this.getFxNode().setOnMouseMoved(_ -> asynchronousRun(asynchronous, runnable)));
         Runnable customAction = this.customEventBind(eventType, runnable, asynchronous);
         if (customAction != null) {
             nestingEventMap.put(eventType, customAction);

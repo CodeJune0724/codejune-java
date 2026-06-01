@@ -2,9 +2,7 @@ package com.codejune.javafx.entity;
 
 import com.codejune.core.util.ObjectUtil;
 import javafx.application.Platform;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -12,7 +10,9 @@ public class PropertyBind<T> {
 
     private final AtomicReference<T> data = new AtomicReference<>();
 
-    private final List<Runnable> listenerList = new ArrayList<>();
+    private final Map<String, Runnable> listener = new LinkedHashMap<>();
+
+    private Map<String, Runnable> listenerCache = null;
 
     public PropertyBind(T data) {
         this.set(data);
@@ -26,13 +26,20 @@ public class PropertyBind<T> {
         return this.data.get();
     }
 
-    public final void set(T data) {
+    public synchronized final void set(T data) {
         if (ObjectUtil.equals(this.get(), data) && !(data instanceof Collection<?>)) {
             return;
         }
         this.data.set(data);
-        for (Runnable runnable : this.listenerList) {
-            runnable.run();
+        try {
+            this.listenerCache = new LinkedHashMap<>();
+            this.listener.values().forEach(Runnable::run);
+            for (Map.Entry<String, Runnable> entry : this.listenerCache.entrySet()) {
+                entry.getValue().run();
+                this.listener.put(entry.getKey(), entry.getValue());
+            }
+        } finally {
+            this.listenerCache = null;
         }
     }
 
@@ -41,21 +48,29 @@ public class PropertyBind<T> {
         this.set(ObjectUtil.parse(data, data == null ? null : (Class<? extends T>) data.getClass()));
     }
 
-    public final void addListener(Runnable runnable) {
+    public final void addListener(Runnable runnable, String id) {
         if (runnable == null) {
             return;
         }
-        this.listenerList.add(() -> Platform.runLater(runnable));
+        Objects.requireNonNullElse(this.listenerCache, this.listener).put(id, () -> Platform.runLater(runnable));
     }
 
-    public final <R> PropertyBind<R> parseBind(Function<T, R> function) {
+    public final void addListener(Runnable runnable) {
+        this.addListener(runnable, UUID.randomUUID().toString());
+    }
+
+    public final <R> PropertyBind<R> parseBind(Function<T, R> function, String id) {
         if (function == null) {
             function = _ -> null;
         }
         Function<T, R> finalFunction = function;
         PropertyBind<R> result = new PropertyBind<>(function.apply(this.get()));
-        this.addListener(() -> result.set(finalFunction.apply(this.get())));
+        this.addListener(() -> result.set(finalFunction.apply(this.get())), id);
         return result;
+    }
+
+    public final <R> PropertyBind<R> parseBind(Function<T, R> function) {
+        return this.parseBind(function, UUID.randomUUID().toString());
     }
 
 }

@@ -4,6 +4,8 @@ public enum BaseEventType implements EventType {
 
     CLICK,
 
-    VALUE
+    VALUE,
+
+    MOUSE_MOVE
 
 }

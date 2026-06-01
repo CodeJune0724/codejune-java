@@ -22,9 +22,7 @@ public final class List<T> extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
         if (propertyType == BasePropertyType.DATA) {
-            return () -> {
-                this.init((java.util.List<T>) propertyBind.get());
-            };
+            return () -> this.init((java.util.List<T>) propertyBind.get());
         }
         return super.customPropertyBind(propertyType, propertyBind);
     }

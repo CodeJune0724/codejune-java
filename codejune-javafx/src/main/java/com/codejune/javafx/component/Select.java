@@ -27,7 +27,13 @@ public final class Select<KEY, ITEM> extends BaseComponent {
         this.comboBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(ITEM item) {
-                return item == null ? null : Select.this.valueRender == null ? ObjectUtil.toString(item) : Select.this.valueRender.apply(item);
+                if (item == null) {
+                    return null;
+                }
+                if (Select.this.valueRender != null) {
+                    return Select.this.valueRender.apply(item);
+                }
+                return ObjectUtil.toString(item);
             }
             @Override
             public ITEM fromString(String value) {
@@ -108,13 +114,16 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     @SuppressWarnings("unchecked")
     public KEY getValue() {
         ITEM item = this.comboBox.getValue();
+        if (item == null) {
+            return null;
+        }
         return this.keyHandler == null ? (KEY) item : this.keyHandler.apply(item);
     }
 
     public void setData(List<ITEM> data) {
         this.comboBox.getItems().clear();
         this.comboBox.getItems().addAll(data);
-        this.setValue(this.getValue());
+//        this.setValue(this.getValue());
     }
 
     public void setKeyHandler(Function<ITEM, KEY> keyHandler) {

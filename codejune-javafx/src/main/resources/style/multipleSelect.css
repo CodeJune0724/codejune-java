@@ -1,0 +1,46 @@
+.combo-box-base {
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-border-color: -fx-base-border-color;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-text-fill: rgba(0, 0, 0, 0.88);
+    -fx-cursor: hand;
+    -fx-pref-height: 30px;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-background-radius: 5px;
+    -fx-border-color: -fx-base-border-color;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+}
+
+.combo-box-popup .list-cell {
+    -fx-cursor: hand;
+    -fx-text-fill: rgba(0, 0, 0, 0.88);
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px 5px;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: -fx-base-primary-color;
+    -fx-text-fill: white;
+}
+
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: -fx-base-primary-color;
+    -fx-text-fill: white;
+}
+
+.check-box .box {
+    -fx-background-color: white;
+    -fx-border-color: -fx-base-border-color;
+    -fx-border-radius: 5px;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: -fx-base-primary-color;
+}

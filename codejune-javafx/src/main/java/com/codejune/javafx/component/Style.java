@@ -233,7 +233,9 @@ public final class Style {
 
     public Style display(boolean display) {
         Node fxNode = this.baseComponent.getFxNode();
-        fxNode.setVisible(display);
+        try {
+            fxNode.setVisible(display);
+        } catch (Throwable _) {}
         fxNode.setManaged(display);
         return this;
     }
