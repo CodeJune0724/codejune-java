@@ -9,6 +9,7 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
@@ -33,7 +34,7 @@ public final class LinuxShell extends Shell {
             JSch.setConfig("server_host_key", JSch.getConfig("server_host_key") + ",ssh-rsa,ssh-dss");
             JSch jSch = new JSch();
             this.session = jSch.getSession(username, host, port);
-            this.session.setPassword(password);
+            this.session.setPassword(password.getBytes(StandardCharsets.UTF_8));
             Properties properties = new Properties();
             properties.put("StrictHostKeyChecking", "no");
             this.session.setConfig(properties);

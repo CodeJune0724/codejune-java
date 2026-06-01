@@ -1,5 +1,5 @@
 dependencies {
     api(project(":codejune-core"))
-    api("io.lettuce:lettuce-core:7.4.0.BETA1")
-    api("org.redisson:redisson:4.1.0")
+    api("io.lettuce:lettuce-core:7.6.0.RELEASE")
+    api("org.redisson:redisson:4.4.0")
 }

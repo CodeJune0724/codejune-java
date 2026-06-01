@@ -1,6 +1,5 @@
-.idea
-.git
-**/*.iml
-**/.*.xml
-.gradle
-build
+/.idea
+/.git
+/.gradle
+/build
+/**/build

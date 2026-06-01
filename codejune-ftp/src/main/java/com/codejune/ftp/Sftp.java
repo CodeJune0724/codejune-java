@@ -11,6 +11,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
@@ -99,7 +100,7 @@ public final class Sftp extends com.codejune.Ftp {
             throw new BaseException(filePath + " is not file");
         }
         if (listener == null) {
-            listener = data -> {};
+            listener = _ -> {};
         }
         try (InputStream inputStream = this.channelSftp.get(filePath)) {
             listener.accept(inputStream);
@@ -164,7 +165,7 @@ public final class Sftp extends com.codejune.Ftp {
             JSch.setConfig("server_host_key", JSch.getConfig("server_host_key") + ",ssh-rsa,ssh-dss");
             JSch jSch = new JSch();
             this.session = jSch.getSession(this.getUsername(), this.getHost(), this.getPort());
-            this.session.setPassword(this.getPassword());
+            this.session.setPassword(this.getPassword().getBytes(StandardCharsets.UTF_8));
             Properties properties = new Properties();
             properties.put("StrictHostKeyChecking", "no");
             this.session.setConfig(properties);
@@ -193,7 +194,7 @@ public final class Sftp extends com.codejune.Ftp {
                 LocalDateTime updateTime = DateUtil.parse(sftpATTRS.getMtimeString(), "EEE MMM dd HH:mm:ss zzz yyyy", LocalDateTime.class);
                 FileInfo<InputStream> fileInfo;
                 if (isFile) {
-                    fileInfo = new FileInfo<InputStream>() {
+                    fileInfo = new FileInfo<>() {
                         @Override
                         public String getName() {
                             return name;
