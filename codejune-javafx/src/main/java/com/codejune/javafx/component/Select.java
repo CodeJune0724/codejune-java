@@ -22,8 +22,8 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     private Function<ITEM, BaseComponent> cellRender = null;
 
     public Select() {
-        this.getStyle().addSheet("/style/select.css").addClass("select");
-        this.getStyle().addSheet("/style/scroll.css");
+        this.getStyle().addSheet("/javafx/style/select.css").addClass("select");
+        this.getStyle().addSheet("/javafx/style/scroll.css");
         this.comboBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(ITEM item) {
@@ -123,7 +123,6 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     public void setData(List<ITEM> data) {
         this.comboBox.getItems().clear();
         this.comboBox.getItems().addAll(data);
-//        this.setValue(this.getValue());
     }
 
     public void setKeyHandler(Function<ITEM, KEY> keyHandler) {

@@ -1,6 +1,5 @@
 package com.codejune.javafx.component;
 
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -28,7 +27,18 @@ public final class Grid extends BaseComponent {
         return this.gridPane;
     }
 
-    public <T extends BaseComponent> void add(int columIndex, T baseComponent, Consumer<T> action) {
+    public void setGap(int gap) {
+        this.gridPane.setHgap(gap);
+        this.gridPane.setVgap(gap);
+    }
+
+    public <T extends BaseComponent> void add(int rowIndex, int columIndex, T baseComponent, Consumer<T> action) {
+        if (rowIndex < 0) {
+            return;
+        }
+        if (columIndex < 0) {
+            return;
+        }
         if (baseComponent == null) {
             return;
         }
@@ -36,13 +46,8 @@ public final class Grid extends BaseComponent {
             action = _ -> {};
         }
         baseComponent.setParent(this);
+        this.gridPane.add(baseComponent.getFxNode(), columIndex, rowIndex);
         action.accept(baseComponent);
-        GridPane.setValignment(baseComponent.getFxNode(), VPos.CENTER);
-        this.gridPane.add(baseComponent.getFxNode(), columIndex, 0);
-    }
-
-    public <T extends BaseComponent> void add(int columIndex, T baseComponent) {
-        this.add(columIndex, baseComponent, null);
     }
 
 }

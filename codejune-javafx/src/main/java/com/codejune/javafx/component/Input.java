@@ -11,7 +11,7 @@ public final class Input extends BaseComponent {
 
     public Input(String value) {
         this.setValue(value);
-        this.getStyle().addSheet(getClass().getResource("/style/input.css")).addClass("input");
+        this.getStyle().addSheet(getClass().getResource("/javafx/style/input.css")).addClass("input");
     }
 
     public Input() {

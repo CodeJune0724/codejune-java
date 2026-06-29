@@ -125,24 +125,18 @@ public final class Style {
         return 0;
     }
 
-    public int getHeight() {
+    public Style setWidth(double width) {
         Node fxNode = this.baseComponent.getFxNode();
-        if (fxNode instanceof Region region) {
-            return (int) region.getPrefHeight();
+        if (fxNode instanceof Region fxNodeRegion) {
+            if (width >= 1) {
+                fxNodeRegion.setPrefWidth(width);
+            } else {
+                Parent parent = fxNode.getParent();
+                if (parent instanceof Region parentRegion) {
+                    fxNodeRegion.prefWidthProperty().bind(parentRegion.widthProperty().multiply(width));
+                }
+            }
         }
-        return 0;
-    }
-
-    public Style setWidth(int width) {
-        Node fxNode = this.baseComponent.getFxNode();
-        if (fxNode instanceof Region region) {
-            region.setPrefWidth(width);
-        }
-        return this;
-    }
-
-    public Style setHeight(int height) {
-        this.addCss("-fx-pref-height: " + height + "px");
         return this;
     }
 
@@ -150,14 +144,6 @@ public final class Style {
         Node fxNode = this.baseComponent.getFxNode();
         if (fxNode instanceof Region region) {
             region.setMaxWidth(width);
-        }
-        return this;
-    }
-
-    public Style setMaxHeight(int height) {
-        Node fxNode = this.baseComponent.getFxNode();
-        if (fxNode instanceof Region region) {
-            region.setMaxHeight(height);
         }
         return this;
     }
@@ -170,6 +156,54 @@ public final class Style {
         return this;
     }
 
+    public Style maxWidth() {
+        Node fxNode = this.baseComponent.getFxNode();
+        Parent parent = fxNode.getParent();
+        if (parent != null) {
+            if (parent instanceof VBox) {
+                VBox.setVgrow(fxNode, Priority.ALWAYS);
+            }
+            if (parent instanceof HBox) {
+                HBox.setHgrow(fxNode, Priority.ALWAYS);
+            }
+        }
+        if (fxNode instanceof Region region) {
+            region.setMaxWidth(Double.MAX_VALUE);
+        }
+        return this;
+    }
+
+    public int getHeight() {
+        Node fxNode = this.baseComponent.getFxNode();
+        if (fxNode instanceof Region region) {
+            return (int) region.getPrefHeight();
+        }
+        return 0;
+    }
+
+    public Style setHeight(double height) {
+        Node fxNode = this.baseComponent.getFxNode();
+        if (fxNode instanceof Region fxNodeRegion) {
+            if (height >= 1) {
+                fxNodeRegion.setPrefHeight(height);
+            } else {
+                Parent parent = fxNode.getParent();
+                if (parent instanceof Region parentRegion) {
+                    fxNodeRegion.prefHeightProperty().bind(parentRegion.heightProperty().multiply(height));
+                }
+            }
+        }
+        return this;
+    }
+
+    public Style setMaxHeight(int height) {
+        Node fxNode = this.baseComponent.getFxNode();
+        if (fxNode instanceof Region region) {
+            region.setMaxHeight(height);
+        }
+        return this;
+    }
+
     public Style setMinHeight(int height) {
         Node fxNode = this.baseComponent.getFxNode();
         if (fxNode instanceof Region region) {
@@ -178,35 +212,16 @@ public final class Style {
         return this;
     }
 
-    public Style maxWidth() {
-        Node fxNode = this.baseComponent.getFxNode();
-        Parent parent = fxNode.getParent();
-        if (parent == null) {
-            return this;
-        }
-        if (parent instanceof VBox) {
-            VBox.setVgrow(fxNode, Priority.ALWAYS);
-        }
-        if (parent instanceof HBox) {
-            HBox.setHgrow(fxNode, Priority.ALWAYS);
-        }
-        if (fxNode instanceof Region region) {
-            region.setMaxWidth(Double.MAX_VALUE);
-        }
-        return this;
-    }
-
     public Style maxHeight() {
         Node fxNode = this.baseComponent.getFxNode();
         Parent parent = fxNode.getParent();
-        if (parent == null) {
-            return this;
-        }
-        if (parent instanceof VBox) {
-            VBox.setVgrow(fxNode, Priority.ALWAYS);
-        }
-        if (parent instanceof HBox) {
-            HBox.setHgrow(fxNode, Priority.ALWAYS);
+        if (parent != null) {
+            if (parent instanceof VBox) {
+                VBox.setVgrow(fxNode, Priority.ALWAYS);
+            }
+            if (parent instanceof HBox) {
+                HBox.setHgrow(fxNode, Priority.ALWAYS);
+            }
         }
         if (fxNode instanceof Region region) {
             region.setMaxHeight(Double.MAX_VALUE);

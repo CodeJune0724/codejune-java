@@ -14,7 +14,7 @@ public final class Textarea extends BaseComponent {
     public Textarea(int row) {
         this.textArea.setPrefRowCount(row);
         this.textArea.setWrapText(true);
-        this.getStyle().addSheet(getClass().getResource("/style/textarea.css")).addClass("textarea");
+        this.getStyle().addSheet(getClass().getResource("/javafx/style/textarea.css")).addClass("textarea");
     }
 
     @Override

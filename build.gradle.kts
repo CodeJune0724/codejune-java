@@ -7,7 +7,7 @@ plugins {
 subprojects {
     group = "com.codejune"
 
-    version = "1.11.16"
+    version = "1.11.17"
 
     apply {
         plugin("java")
@@ -50,6 +50,7 @@ subprojects {
         repositories {
             maven {
                 setUrl("https://packages.aliyun.com/613c3cec03e1c17d57a76d2b/maven/codejune")
+//                setUrl("https://packages.aliyun.com/613c3cec03e1c17d57a76d2b/maven/repo-tjkkf")
                 credentials {
                     username = "613c3bc8a300e314f854bfd4"
                     password = "HNsb9RanXzmR"

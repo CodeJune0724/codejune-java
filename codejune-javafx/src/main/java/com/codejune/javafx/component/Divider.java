@@ -6,18 +6,18 @@ import javafx.scene.Node;
 
 public final class Divider extends BaseComponent {
 
-    private final Grid grid = new Grid(1, 9);
+    private final Div div = new Div(Div.Layout.CELL);
 
     private final Text textComponent = new Text();
 
     public Divider(String text) {
-        this.grid.getStyle().addSheet("/style/divider.css").addClass("divider");
-        this.grid.add(0, new Div(), div -> {
-            div.getStyle().alignment(Pos.CENTER_LEFT);
+        this.div.getStyle().addSheet("/javafx/style/divider.css").addClass("divider");
+        this.add(new Div(), div -> {
+            div.getStyle().alignment(Pos.CENTER_LEFT).setWidth(0.1);
             div.add(new Div(), divLine -> divLine.getStyle().addClass("divider-line"));
         });
-        this.grid.add(1, new Div(Div.Layout.CELL), div -> {
-            div.getStyle().alignment(Pos.CENTER_LEFT);
+        this.add(new Div(Div.Layout.CELL), div -> {
+            div.getStyle().alignment(Pos.CENTER_LEFT).setWidth(0.9);
 
             div.add(this.textComponent, textComponent -> {
                 textComponent.setText(text);
@@ -35,19 +35,11 @@ public final class Divider extends BaseComponent {
 
     @Override
     public Node getFxNode() {
-        return this.grid.getFxNode();
+        return this.div.getFxNode();
     }
 
-    public void setTextFontWeight(String fontWeight) {
-        this.textComponent.getStyle().setFontWeight(fontWeight);
-    }
-
-    public void setTextFontSize(int fontSize) {
-        this.textComponent.getStyle().setFontSize(fontSize);
-    }
-
-    public void setTextColor(String color) {
-        this.textComponent.getStyle().setColor(color);
+    public Text getTextComponent() {
+        return this.textComponent;
     }
 
 }

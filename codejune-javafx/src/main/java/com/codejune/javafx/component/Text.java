@@ -43,6 +43,9 @@ public final class Text extends BaseComponent {
 
     public void wrap(boolean wrap) {
         this.label.setWrapText(wrap);
+        if (!wrap) {
+            this.label.setMinWidth(Label.USE_PREF_SIZE);
+        }
     }
 
 }

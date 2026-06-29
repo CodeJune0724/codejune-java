@@ -17,7 +17,7 @@ public final class CheckBox extends BaseComponent {
     private final Icon icon = new Icon();
 
     public CheckBox(String text) {
-        this.getStyle().addSheet("/style/checkBox.css").addClass("checkBox");
+        this.getStyle().addSheet("/javafx/style/checkBox.css").addClass("checkBox");
         Div div = new Div(Div.Layout.CELL);
         div.getStyle().alignment(Pos.CENTER_LEFT);
         div.add(icon, _ -> this.initIcon());

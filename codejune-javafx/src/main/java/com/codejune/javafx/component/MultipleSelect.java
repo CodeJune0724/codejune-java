@@ -18,8 +18,8 @@ public final class MultipleSelect<KEY, ITEM> extends BaseComponent {
     private Function<ITEM, KEY> keyHandler = item -> (KEY) item;
 
     public MultipleSelect() {
-        this.getStyle().addSheet("/style/multipleSelect.css");
-        this.getStyle().addSheet("/style/scroll.css");
+        this.getStyle().addSheet("/javafx/style/multipleSelect.css");
+        this.getStyle().addSheet("/javafx/style/scroll.css");
     }
 
     @Override

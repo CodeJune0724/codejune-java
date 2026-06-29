@@ -1,5 +1,7 @@
 package com.codejune.javafx;
 
+import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.javafx.component.BaseComponent;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -11,6 +13,7 @@ import javafx.stage.Stage;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public final class Window {
 
@@ -24,7 +27,7 @@ public final class Window {
 
     private boolean resizable = true;
 
-    private BaseComponent baseComponent;
+    private Consumer<BaseComponent> render;
 
     private InputStream icon;
 
@@ -72,8 +75,8 @@ public final class Window {
         this.icon = icon;
     }
 
-    public void setBaseComponent(BaseComponent baseComponent) {
-        this.baseComponent = baseComponent;
+    public void render(Consumer<BaseComponent> render) {
+        this.render = render;
         if (this.stage != null) {
             this.open();
         }
@@ -91,37 +94,33 @@ public final class Window {
     public void open() {
         Platform.runLater(() -> {
             this.stage.setTitle(this.title);
-            if (this.width > 0) {
-                this.stage.setWidth(this.width);
-            } else {
-                this.stage.setMinWidth(0);
-            }
-            if (this.height > 0) {
-                this.stage.setHeight(this.height);
-            } else {
-                this.stage.setMinHeight(0);
-            }
             this.stage.setResizable(this.resizable);
-            this.stage.getIcons().add(new Image(Objects.requireNonNullElseGet(this.icon, () -> Objects.requireNonNull(getClass().getResourceAsStream(Application.getIcon())))));
+            if (!StringUtil.isEmpty(Application.getIcon())) {
+                this.stage.getIcons().add(new Image(Objects.requireNonNullElseGet(this.icon, () -> Objects.requireNonNull(getClass().getResourceAsStream(Application.getIcon())))));
+            }
             if (this.closeHandler != null) {
                 this.stage.setOnCloseRequest(_ -> this.closeHandler.run());
             }
             VBox vBox = new VBox();
-            Scene scene = new Scene(vBox);
+            BaseComponent vBoxBaseComponent = new BaseComponent() {
+                @Override
+                public Node getFxNode() {
+                    return vBox;
+                }
+            };
+            for (String sheet : ArrayUtil.asList("/javafx/style/base.css")) {
+                vBoxBaseComponent.getStyle().addSheet(sheet);
+            }
+            if (this.render != null) {
+                this.render.accept(vBoxBaseComponent);
+            }
+            Scene scene = new Scene(vBox, this.width, this.height);
             this.stage.setScene(scene);
             if (!this.resizable) {
                 this.autoSize(this.stage, vBox);
             }
-            for (String sheet : Application.getSheet()) {
-                new BaseComponent() {
-                    @Override
-                    public Node getFxNode() {
-                        return vBox;
-                    }
-                }.getStyle().addSheet(sheet);
-            }
-            vBox.getChildren().add(this.baseComponent.getFxNode());
             this.stage.show();
+            this.stage.sizeToScene();
         });
     }
 
