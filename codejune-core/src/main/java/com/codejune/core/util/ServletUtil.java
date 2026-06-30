@@ -9,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -34,12 +33,11 @@ public final class ServletUtil {
         if (StringUtil.isEmpty(fileName)) {
             fileName = "";
         }
-        try (OutputStream outputStream = httpServletResponse.getOutputStream()) {
+        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpServletResponse.getOutputStream())) {
             httpServletResponse.setContentType("application/x-download");
             httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
             httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             httpServletResponse.setHeader("Content-Length", String.valueOf(inputStream.available()));
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
             outputStreamWriter.write(inputStream);
         } catch (IOException e) {
             throw new BaseException(e.getMessage());
@@ -71,8 +69,7 @@ public final class ServletUtil {
      * @return 请求体数据
      * */
     public static String getRequestBody(HttpServletRequest httpServletRequest) {
-        try (InputStream inputStream = httpServletRequest.getInputStream()) {
-            TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
+        try (TextInputStreamReader textInputStreamReader = new TextInputStreamReader(httpServletRequest.getInputStream())) {
             return textInputStreamReader.getData();
         } catch (Exception e) {
             throw new BaseException(e.getMessage());

@@ -3,6 +3,7 @@ package com.codejune.shell;
 import com.codejune.Shell;
 import com.codejune.core.BaseException;
 import com.codejune.core.Closeable;
+import com.codejune.core.Encoding;
 import com.codejune.core.util.ArrayUtil;
 import com.codejune.core.util.ThreadUtil;
 import java.io.*;
@@ -36,8 +37,8 @@ public final class WindowsShell extends Shell {
             throw new BaseException(e);
         }
         try {
-            this.inputStreamReader = new InputStreamReader(process.getInputStream(), System.getProperties().get("sun.jnu.encoding").toString());
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), System.getProperties().get("sun.jnu.encoding").toString()));
+            this.inputStreamReader = new InputStreamReader(process.getInputStream(), Encoding.NATIVE);
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), Encoding.NATIVE));
         } catch (Exception e) {
             throw new BaseException(e);
         }

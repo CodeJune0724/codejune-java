@@ -2,7 +2,6 @@ package com.codejune.core.os;
 
 import com.codejune.core.BaseException;
 import com.codejune.core.io.reader.TextInputStreamReader;
-import com.codejune.core.io.writer.OutputStreamWriter;
 import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
@@ -74,11 +73,8 @@ public final class File implements FileInfo<String> {
      * */
     @Override
     public String getData() {
-        try (InputStream inputStream = IOUtil.getInputStream(this.file)) {
-            TextInputStreamReader textInputStreamReader = new TextInputStreamReader(inputStream);
+        try (TextInputStreamReader textInputStreamReader = new TextInputStreamReader(IOUtil.getInputStream(this.file))) {
             return textInputStreamReader.getData();
-        } catch (Exception e) {
-            throw new BaseException(e);
         }
     }
 
@@ -108,15 +104,33 @@ public final class File implements FileInfo<String> {
     /**
      * 写入数据
      *
+     * @param bytes bytes
+     * @param append 追加
+     * */
+    public void write(byte[] bytes, boolean append) {
+        try (com.codejune.core.io.writer.OutputStreamWriter outputStreamWriter = new com.codejune.core.io.writer.OutputStreamWriter(IOUtil.getOutputStream(this.file, append))) {
+            outputStreamWriter.write(bytes);
+        }
+    }
+
+    /**
+     * 写入数据
+     *
+     * @param bytes bytes
+     * */
+    public void write(byte[] bytes) {
+        this.write(bytes, false);
+    }
+
+    /**
+     * 写入数据
+     *
      * @param inputStream inputStream
-     * @param append 是否追加
+     * @param append 追加
      * */
     public void write(InputStream inputStream, boolean append) {
-        try (OutputStream outputStream = IOUtil.getOutputStream(file, append)) {
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream);
-            writer.write(inputStream);
-        } catch (Exception e) {
-            throw new BaseException(e);
+        try (com.codejune.core.io.writer.OutputStreamWriter outputStreamWriter = new com.codejune.core.io.writer.OutputStreamWriter(IOUtil.getOutputStream(this.file, append))) {
+            outputStreamWriter.write(inputStream);
         }
     }
 
@@ -126,24 +140,21 @@ public final class File implements FileInfo<String> {
      * @param inputStream inputStream
      * */
     public void write(InputStream inputStream) {
-        write(inputStream, false);
+        this.write(inputStream, false);
     }
 
     /**
      * 写入数据
      *
      * @param data data
-     * @param append 是否追加
+     * @param append 追加
      * */
     public void write(String data, boolean append) {
         if (data == null) {
             return;
         }
-        try (OutputStream outputStream = IOUtil.getOutputStream(this.file, append)) {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+        try (com.codejune.core.io.writer.OutputStreamWriter outputStreamWriter = new com.codejune.core.io.writer.OutputStreamWriter(IOUtil.getOutputStream(this.file, append))) {
             outputStreamWriter.write(data.getBytes());
-        } catch (Exception e) {
-            throw new BaseException(e);
         }
     }
 
@@ -153,23 +164,7 @@ public final class File implements FileInfo<String> {
      * @param data data
      * */
     public void write(String data) {
-        write(data, false);
-    }
-
-    /**
-     * 写入数据
-     *
-     * @param bytes bytes
-     * */
-    public void write(byte[] bytes) {
-        if (bytes == null) {
-            return;
-        }
-        try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-            write(inputStream);
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
+        this.write(data, false);
     }
 
     /**

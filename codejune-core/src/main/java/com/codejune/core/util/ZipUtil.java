@@ -1,10 +1,9 @@
 package com.codejune.core.util;
 
 import com.codejune.core.BaseException;
-import com.codejune.core.io.writer.OutputStreamWriter;
+import com.codejune.core.Encoding;
 import com.codejune.core.os.Folder;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -75,7 +74,7 @@ public final class ZipUtil {
             throw new BaseException("outPath is null");
         }
         new Folder(outPath);
-        try (ZipFile zf = new ZipFile(zipFile, Charset.forName(System.getProperty("sun.jnu.encoding")))) {
+        try (ZipFile zf = new ZipFile(zipFile, Encoding.NATIVE)) {
             Enumeration<?> enumeration = zf.entries();
             while (enumeration.hasMoreElements()) {
                 ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();
@@ -109,7 +108,7 @@ public final class ZipUtil {
         if (FileUtil.isFile(file)) {
             try {
                 zipOutputStream.putNextEntry(new ZipEntry(path + file.getName()));
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(zipOutputStream);
+                com.codejune.core.io.writer.OutputStreamWriter outputStreamWriter = new com.codejune.core.io.writer.OutputStreamWriter(zipOutputStream);
                 try (InputStream inputStream = IOUtil.getInputStream(file)) {
                     outputStreamWriter.write(inputStream);
                 }

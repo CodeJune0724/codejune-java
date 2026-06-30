@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 /**
@@ -16,40 +15,43 @@ import java.util.function.Consumer;
  *
  * @author ZJ
  * */
-public final class TextInputStreamReader extends Reader<String> {
+public final class TextInputStreamReader extends Reader {
 
-    private Charset charset = StandardCharsets.UTF_8;
+    private final Charset charset;
 
-    public TextInputStreamReader(InputStream inputStream) {
+    public TextInputStreamReader(InputStream inputStream, Charset charset) {
         super(inputStream);
-    }
-
-    public void setCharset(Charset charset) {
-        if (charset == null) {
-            return;
-        }
         this.charset = charset;
     }
 
+    public TextInputStreamReader(InputStream inputStream) {
+        this(inputStream, null);
+    }
+
     /**
-     * 读取
+     * 读取行
      *
+     * @param consumer consumer
      * @param range 读取范围
-     * @param listener listener
      * */
-    public void read(Range range, Consumer<String> listener) {
+    public void readLine(Consumer<String> consumer, Range range) {
         if (range == null) {
             range = new Range(0L, null);
         }
-        if (listener == null) {
-            listener = _ -> {};
+        if (consumer == null) {
+            consumer = _ -> {};
         }
         Long length = range.getEnd() == null ? null : range.getEnd() - range.getStart();
-        if (length != null && length == 0) {
+        if (length != null && length <= 0) {
             return;
         }
         try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, charset));
+            BufferedReader bufferedReader;
+            if (this.charset == null) {
+                bufferedReader = new BufferedReader(new InputStreamReader(this.inputStream));
+            } else {
+                bufferedReader = new BufferedReader(new InputStreamReader(this.inputStream, this.charset));
+            }
             String line = bufferedReader.readLine();
             int lineNum = 0;
             while (line != null) {
@@ -57,7 +59,7 @@ public final class TextInputStreamReader extends Reader<String> {
                     break;
                 }
                 if (lineNum >= range.getStart()) {
-                    listener.accept(line);
+                    consumer.accept(line);
                 }
                 line = bufferedReader.readLine();
                 lineNum = lineNum + 1;
@@ -68,20 +70,23 @@ public final class TextInputStreamReader extends Reader<String> {
     }
 
     /**
+     * 读取行
+     *
+     * @param consumer consumer
+     * */
+    public void readLine(Consumer<String> consumer) {
+        this.readLine(consumer, null);
+    }
+
+    /**
      * 获取文件数据
      *
      * @return 文件数据
      * */
     public String getData() {
         StringBuilder result = new StringBuilder();
-        TextInputStreamReader textInputStreamReader = new TextInputStreamReader(this.inputStream);
-        textInputStreamReader.read(data -> result.append(data).append("\n"));
+        this.readLine(line -> result.append(line).append("\n"));
         return ObjectUtil.toString(ObjectUtil.subString(result.toString(), result.length() - 1));
-    }
-
-    @Override
-    public void read(Consumer<String> listener) {
-        read(null, listener);
     }
 
 }

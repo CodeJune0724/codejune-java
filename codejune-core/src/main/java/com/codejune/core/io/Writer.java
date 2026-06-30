@@ -1,6 +1,7 @@
 package com.codejune.core.io;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.Closeable;
 import com.codejune.core.io.reader.InputStreamReader;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,11 +12,11 @@ import java.nio.ByteBuffer;
  *
  * @author ZJ
  * */
-public class Writer {
+public class Writer implements Closeable {
 
-    protected final OutputStream outputStream;
+    private final OutputStream outputStream;
 
-    protected int size = 1024;
+    private int writeSize = 1024;
 
     protected Writer(OutputStream outputStream) {
         if (outputStream == null) {
@@ -24,42 +25,30 @@ public class Writer {
         this.outputStream = outputStream;
     }
 
-    public final void setSize(int size) {
-        if (size <= 0) {
-            return;
-        }
-        this.size = size;
+    @Override
+    public void close() {
+        Closeable.closeNoError(this.outputStream);
     }
 
     /**
-     * 写入
+     * setWriteSize
      *
-     * @param byteBuffer byteBuffer
+     * @param writeSize writeSize
      * */
-    public final void write(ByteBuffer byteBuffer) {
-        if (byteBuffer == null) {
+    public final void setWriteSize(int writeSize) {
+        if (writeSize <= 0) {
             return;
         }
-        try {
-            this.outputStream.write(byteBuffer.array(), 0, byteBuffer.limit());
-            this.outputStream.flush();
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
+        this.writeSize = writeSize;
     }
 
     /**
-     * 写入
+     * getWriteSize
      *
-     * @param inputStream inputStream
+     * @return writeSize
      * */
-    public final void write(InputStream inputStream) {
-        if (inputStream == null) {
-            return;
-        }
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        inputStreamReader.setReadSize(size);
-        inputStreamReader.read(Writer.this::write);
+    public final int getWriteSize() {
+        return this.writeSize;
     }
 
     /**
@@ -71,7 +60,36 @@ public class Writer {
         if (bytes == null) {
             return;
         }
-        write(ByteBuffer.wrap(bytes, 0, bytes.length));
+        try {
+            this.outputStream.write(bytes);
+            this.outputStream.flush();
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+    }
+
+    /**
+     * 写入
+     *
+     * @param byteBuffer byteBuffer
+     * */
+    public final void write(ByteBuffer byteBuffer) {
+        this.write(Reader.getByte(byteBuffer));
+    }
+
+    /**
+     * 写入
+     *
+     * @param inputStream inputStream
+     * */
+    public final void write(InputStream inputStream) {
+        if (inputStream == null) {
+            return;
+        }
+        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {
+            inputStreamReader.setReadSize(this.writeSize);
+            inputStreamReader.read(Writer.this::write);
+        }
     }
 
 }

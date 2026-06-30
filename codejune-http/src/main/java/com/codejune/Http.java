@@ -218,8 +218,7 @@ public final class Http {
                                 }
                                 outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
                                 if (formDataItem.getContentType() == ContentType.DEFAULT_BINARY) {
-                                    try (InputStream inputStream = ObjectUtil.parse(formDataItem.getData(), InputStream.class)) {
-                                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                                    try (InputStreamReader inputStreamReader = new InputStreamReader(ObjectUtil.parse(formDataItem.getData(), InputStream.class))) {
                                         inputStreamReader.read(byteBuffer -> new OutputStreamWriter(outputStream).write(byteBuffer));
                                     }
                                 }

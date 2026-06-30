@@ -1,10 +1,9 @@
 package com.codejune.core.io.reader;
 
-import com.codejune.core.Closeable;
 import com.codejune.core.Range;
 import com.codejune.core.BaseException;
+import com.codejune.core.io.Reader;
 import com.codejune.core.util.IOUtil;
-import com.codejune.core.util.ObjectUtil;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -14,7 +13,7 @@ import java.util.function.Consumer;
  *
  * @author ZJ
  * */
-public final class FileReader extends InputStreamReader implements Closeable {
+public final class FileReader extends Reader {
 
     private final java.io.File file;
 
@@ -24,44 +23,27 @@ public final class FileReader extends InputStreamReader implements Closeable {
     }
 
     /**
-     * 读取
+     * 范围读取
      *
+     * @param consumer consumer
      * @param range 读取范围
-     * @param listener listener
      * */
-    public void read(Range range, Consumer<ByteBuffer> listener) {
-        if (range == null) {
-            range = new Range(0L, null);
+    public void read(Consumer<ByteBuffer> consumer, Range range) {
+        if (range == null || range.getStart() == null || range.getEnd() == null || range.getEnd() <= range.getStart()) {
+            throw new BaseException("range error");
         }
-        if (listener == null) {
-            listener = byteBuffer -> {};
+        if (consumer == null) {
+            consumer = _ -> {};
         }
-        Long length = range.getEnd() == null ? null : range.getEnd() - range.getStart();
-        if (length != null && length == 0) {
-            return;
-        }
-        if (length != null) {
-            this.setReadSize(ObjectUtil.parse(length, int.class));
-        }
+        this.setReadSize((int) (range.getEnd() - range.getStart()));
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(this.file, "r")) {
             randomAccessFile.seek(range.getStart());
             byte[] bytes = new byte[this.getReadSize()];
             int size = randomAccessFile.read(bytes);
-            while (size != -1) {
-                listener.accept(ByteBuffer.wrap(bytes, 0, size));
-                if (range.getEnd() != null && randomAccessFile.getFilePointer() >= range.getEnd()) {
-                    break;
-                }
-                size = randomAccessFile.read(bytes);
-            }
+            consumer.accept(ByteBuffer.wrap(bytes, 0, size));
         } catch (Exception e) {
             throw new BaseException(e);
         }
-    }
-
-    @Override
-    public void close() {
-        Closeable.closeNoError(this.inputStream);
     }
 
 }

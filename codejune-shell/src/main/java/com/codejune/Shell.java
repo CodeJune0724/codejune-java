@@ -1,6 +1,7 @@
 package com.codejune;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.Encoding;
 import com.codejune.core.SystemOS;
 import com.codejune.core.util.StringUtil;
 import java.io.BufferedReader;
@@ -68,7 +69,7 @@ public abstract class Shell implements Closeable {
             try (InputStream inputStream = process.getInputStream()) {
                 BufferedReader bufferedReader;
                 if (SystemOS.getCurrentSystemOS() == SystemOS.WINDOWS) {
-                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream, System.getProperties().get("sun.jnu.encoding").toString()));
+                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Encoding.NATIVE));
                 } else {
                     bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 }

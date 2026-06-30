@@ -4,13 +4,19 @@ import com.codejune.Http;
 import com.codejune.Javascript;
 import com.codejune.Json;
 import com.codejune.core.BaseException;
-import com.codejune.core.util.RegexUtil;
-import com.codejune.core.util.StringUtil;
+import com.codejune.core.Range;
+import com.codejune.core.io.Reader;
+import com.codejune.core.io.reader.FileReader;
+import com.codejune.core.io.writer.OutputStreamWriter;
+import com.codejune.core.util.*;
 import com.codejune.http.ContentType;
 import com.codejune.http.Header;
 import com.codejune.http.HttpResponseResult;
 import com.codejune.http.Type;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -103,6 +109,70 @@ public final class Lanzn {
             throw new BaseException("location is null");
         }
         return location.getValue();
+    }
+
+    /**
+     * 文件分割
+     *
+     * @param file file
+     * @param outPath 输出目录
+     *
+     * @return 分割后的文件
+     * */
+    public static List<File> fileSplit(File file, String outPath) {
+        if (!FileUtil.isFile(file)) {
+            throw new BaseException("文件不存在");
+        }
+        long splitSize = 90 * 1024 * 1024;
+        long size = new com.codejune.core.os.File(file).getSize();
+        String fileName = file.getName().substring(0, file.getName().lastIndexOf("."));
+        String suffix = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+        List<File> result = ArrayUtil.asList();
+        try (FileReader fileReader = new FileReader(file)) {
+            for (long i = 0; i < size; i = i + splitSize) {
+                long end = i + splitSize;
+                if (end > size) {
+                    end = size;
+                }
+                File spliFile = new File(outPath, fileName + "." + (i / splitSize) + "." + suffix);
+                fileReader.read(byteBuffer -> {
+                    byte[] aByte = Reader.getByte(byteBuffer);
+                    new com.codejune.core.os.File(spliFile).write(new ByteArrayInputStream(aByte), true);
+                }, new Range(i, end));
+                result.add(spliFile);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 文件合并
+     *
+     * @param fileList fileList
+     * @param outPath 输出目录
+     *
+     * @return 合并后的文件
+     * */
+    public static File fileMerge(List<File> fileList, String outPath) {
+        if (ObjectUtil.isEmpty(fileList)) {
+            return null;
+        }
+        String suffix = fileList.getFirst().getName().substring(fileList.getFirst().getName().lastIndexOf(".") + 1);
+        String fileName = fileList.getFirst().getName().substring(0, fileList.getFirst().getName().indexOf(".0." + suffix));
+        if (StringUtil.isEmpty(fileName)) {
+            throw new BaseException("文件错误");
+        }
+        File result = new File(outPath, fileName + "." + suffix);
+        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(IOUtil.getOutputStream(result, true))) {
+            for (File file : fileList) {
+                try (FileReader fileReader = new FileReader(file)) {
+                    fileReader.read(outputStreamWriter::write);
+                }
+            }
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+        return result;
     }
 
     private static String getDownloadCookie(HttpResponseResult<String> httpResponseResult) {
