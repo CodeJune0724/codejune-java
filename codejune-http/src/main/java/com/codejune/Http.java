@@ -34,10 +34,12 @@ public final class Http {
 
     public Http(String url, Type type) {
         this.config = new Config(url, type);
-        this.addHeader("accept", "*/*");
-        this.addHeader("accept-language", "zh-CN,zh;q=0.9,en;q=0.8");
-        this.addHeader("cache-control", "max-age=0");
-        this.addHeader("connection", "Keep-Alive");
+        this.addHeader("Accept", "*/*");
+        this.addHeader("Accept-Encoding", "gzip, deflate, br, zstd");
+        this.addHeader("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
+        this.addHeader("Cache-Control", "max-age=0");
+        this.addHeader("Connection", "Keep-Alive");
+        this.addHeader("Host", RegexUtil.find("//(.+?)/", url, 1));
     }
 
     public Config getConfig() {

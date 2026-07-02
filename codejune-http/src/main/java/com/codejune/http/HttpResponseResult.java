@@ -66,8 +66,11 @@ public final class HttpResponseResult<T> implements Builder {
      * */
     public List<Header> getHeaderList(String key) {
         List<Header> result = new ArrayList<>();
-        for (Header item : getHeaderList()) {
-            if (item.getKey().equals(key)) {
+        if (StringUtil.isEmpty(key)) {
+            return result;
+        }
+        for (Header item : this.getHeaderList()) {
+            if (item.getKey().equalsIgnoreCase(key)) {
                 result.add(item);
             }
         }
@@ -80,7 +83,7 @@ public final class HttpResponseResult<T> implements Builder {
      * @return Header
      * */
     public Header getHeader(String key) {
-        List<Header> headerList = getHeaderList(key);
+        List<Header> headerList = this.getHeaderList(key);
         if (!ObjectUtil.isEmpty(headerList)) {
             return headerList.getFirst();
         }
@@ -121,6 +124,19 @@ public final class HttpResponseResult<T> implements Builder {
             }
         }
         return result;
+    }
+
+    /**
+     * 获取长度
+     *
+     * @return 长度
+     * */
+    public Long getContentLength() {
+        Header header = this.getHeader("Content-Length");
+        if (header == null) {
+            return null;
+        }
+        return ObjectUtil.parse(header.getValue(), Long.class);
     }
 
     /**
