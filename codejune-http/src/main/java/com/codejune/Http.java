@@ -59,6 +59,16 @@ public final class Http {
     }
 
     /**
+     * 添加User-Agent
+     *
+     * @return this
+     * */
+    public Http addUserAgent() {
+        this.config.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36");
+        return this;
+    }
+
+    /**
      * 设置body
      *
      * @param body body

@@ -27,8 +27,6 @@ import java.util.Map;
  * */
 public final class LanznCloudStorageDownload extends CloudStorageDownload {
 
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36";
-
     @Override
     public String getDirectUrl(String url) {
         Exception error = null;
@@ -109,12 +107,12 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
     private String baseGetDirectUrl(String baseUrl) {
         // 获取cookie
         String baseCookie = this.getDownloadCookie(new Http(baseUrl, Type.GET)
-                .addHeader("user-agent", USER_AGENT)
+                .addUserAgent()
                 .send());
 
         // 获取第一层地址
         String srcUrl = new Http(baseUrl, Type.GET)
-                .addHeader("user-agent", USER_AGENT)
+                .addUserAgent()
                 .addHeader("cookie", baseCookie)
                 .send()
                 .getBody();
@@ -128,7 +126,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
 
         // 获取签名信息
         String signResult = new Http("https://wwvx.lanzoul.com" + srcUrl, Type.GET)
-                .addHeader("user-agent", USER_AGENT)
+                .addUserAgent()
                 .send()
                 .getBody();
         String wp_sign = RegexUtil.find("var wp_sign = '(.*?)';", signResult, 1);
@@ -143,7 +141,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         // 获取实际下载地址
         String originResult = new Http("https://wwvx.lanzoul.com" + url, Type.POST)
                 .setContentType(ContentType.FORM_URLENCODED)
-                .addHeader("user-agent", USER_AGENT)
+                .addUserAgent()
                 .addHeader("referer", "https://wwvx.lanzoul.com/fn?")
                 .setBody("action=downprocess&websignkey=" + ajaxdata + "&signs=" + ajaxdata + "&sign=" + wp_sign + "&websign=&kd=" + kdns + "&ves=1")
                 .send()
@@ -155,7 +153,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
 
         // 直接获取
         HttpResponseResult<String> httpResponseResult = new Http(downloadUrl, Type.GET)
-                .addHeader("user-agent", USER_AGENT)
+                .addUserAgent()
                 .send();
         if (httpResponseResult.getCode() == 302) {
             Header location = httpResponseResult.getHeader("Location");
@@ -167,7 +165,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         // 获取cookie
         String cookie = this.getDownloadCookie(httpResponseResult);
         httpResponseResult = new Http(downloadUrl, Type.GET)
-                .addHeader("user-agent", USER_AGENT)
+                .addUserAgent()
                 .addHeader("cookie", cookie)
                 .send();
 

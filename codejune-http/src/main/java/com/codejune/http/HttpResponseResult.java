@@ -111,9 +111,9 @@ public final class HttpResponseResult<T> implements Builder {
         }
         String result = null;
         if (!StringUtil.isEmpty(contentDisposition)) {
-            result = RegexUtil.find("filename=(.*?)$", contentDisposition, 1);
+            result = RegexUtil.find("filename\\*=UTF-8\\'\\'(.*?)$", contentDisposition, 1);
             if (StringUtil.isEmpty(result)) {
-                result = RegexUtil.find("filename\\*=UTF-8\\'\\'(.*?)$", contentDisposition, 1);
+                result = RegexUtil.find("filename=(.*?)$", contentDisposition, 1);
             }
             if (!StringUtil.isEmpty(result)) {
                 try {
