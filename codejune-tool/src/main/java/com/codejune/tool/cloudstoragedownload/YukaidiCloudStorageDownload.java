@@ -3,6 +3,7 @@ package com.codejune.tool.cloudstoragedownload;
 import com.codejune.Http;
 import com.codejune.Json;
 import com.codejune.core.BaseException;
+import com.codejune.core.util.RegexUtil;
 import com.codejune.http.ContentType;
 import com.codejune.http.Header;
 import com.codejune.http.Type;
@@ -26,9 +27,10 @@ public final class YukaidiCloudStorageDownload extends CloudStorageDownload {
                 if (locationHeader == null) {
                     throw new BaseException("重定向地址获取失败");
                 }
+                String host = RegexUtil.find("//(.+?)/", url, 1);
                 url = locationHeader.getValue();
                 if (url.startsWith("/")) {
-                    url = "https://silver.yukaidi.com" + url;
+                    url = "https://" + host + url;
                     continue;
                 }
                 if (url.startsWith("https://skip.yukaidi.top")) {
