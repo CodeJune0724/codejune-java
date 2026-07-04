@@ -41,7 +41,7 @@ public abstract class CloudStorageDownload {
      *
      * @return 下载的文件
      * */
-    public final File download(String url, String savePath, Consumer<Double> progress) {
+    public final File download(String url, String savePath, Consumer<Progress> progress) {
         if (StringUtil.isEmpty(savePath)) {
             throw new BaseException("savePath is null");
         }
@@ -54,7 +54,7 @@ public abstract class CloudStorageDownload {
                 progressEntity = new Progress(size == null ? 0 : size) {
                     @Override
                     public void listen(Progress progressEntity1) {
-                        progress.accept(progressEntity1.getPercentage());
+                        progress.accept(progressEntity1);
                     }
                 };
             } else {
