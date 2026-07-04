@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * 配置
+ * 请求
  *
  * @author ZJ
  * */
-public final class Config {
+public final class HttpRequest {
 
     private final String url;
 
@@ -27,13 +27,13 @@ public final class Config {
 
     private int timeout = -1;
 
-    private Function<HttpResponseResult<String>, Boolean> resend = null;
+    private Function<HttpResponse<String>, Boolean> resend = null;
 
     private boolean timeoutResend = false;
 
     private Proxy proxy;
 
-    public Config(String url, Type type) {
+    public HttpRequest(String url, Type type) {
         this.url = url;
         this.type = type;
     }
@@ -50,7 +50,7 @@ public final class Config {
         return contentType;
     }
 
-    public Config setContentType(ContentType contentType) {
+    public HttpRequest setContentType(ContentType contentType) {
         this.contentType = contentType;
         return this;
     }
@@ -63,7 +63,7 @@ public final class Config {
         return body;
     }
 
-    public Config setBody(Object body) {
+    public HttpRequest setBody(Object body) {
         this.body = body;
         return this;
     }
@@ -72,16 +72,16 @@ public final class Config {
         return timeout;
     }
 
-    public Config setTimeout(int timeout) {
+    public HttpRequest setTimeout(int timeout) {
         this.timeout = timeout;
         return this;
     }
 
-    public Function<HttpResponseResult<String>, Boolean> getResend() {
+    public Function<HttpResponse<String>, Boolean> getResend() {
         return resend;
     }
 
-    public Config setResend(Function<HttpResponseResult<String>, Boolean> resend) {
+    public HttpRequest setResend(Function<HttpResponse<String>, Boolean> resend) {
         this.resend = resend;
         return this;
     }
@@ -90,7 +90,7 @@ public final class Config {
         return timeoutResend;
     }
 
-    public Config setTimeoutResend(boolean timeoutResend) {
+    public HttpRequest setTimeoutResend(boolean timeoutResend) {
         this.timeoutResend = timeoutResend;
         return this;
     }
@@ -99,7 +99,7 @@ public final class Config {
         return proxy;
     }
 
-    public Config setProxy(String host, int port) {
+    public HttpRequest setProxy(String host, int port) {
         this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
         return this;
     }
@@ -112,7 +112,7 @@ public final class Config {
      *
      * @return this
      * */
-    public Config addHeader(String key, String value) {
+    public HttpRequest addHeader(String key, String value) {
         if (StringUtil.isEmpty(key)) {
             return this;
         }
@@ -127,7 +127,7 @@ public final class Config {
      *
      * @return this
      * */
-    public Config deleteHeader(String key) {
+    public HttpRequest deleteHeader(String key) {
         if (StringUtil.isEmpty(key)) {
             return this;
         }

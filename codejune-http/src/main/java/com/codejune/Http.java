@@ -28,12 +28,12 @@ import java.util.zip.GZIPInputStream;
  */
 public final class Http {
 
-    private Config config;
+    private HttpRequest httpRequest;
 
     private int timeoutResendNumber = 10;
 
     public Http(String url, Type type) {
-        this.config = new Config(url, type);
+        this.httpRequest = new HttpRequest(url, type);
         this.addHeader("Accept", "*/*");
         this.addHeader("Accept-Encoding", "gzip, deflate, br, zstd");
         this.addHeader("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
@@ -42,8 +42,13 @@ public final class Http {
         this.addHeader("Host", RegexUtil.find("//(.+?)/", url, 1));
     }
 
-    public Config getConfig() {
-        return this.config;
+    /**
+     * getHttpRequest
+     *
+     * @return httpRequest
+     * */
+    public HttpRequest getHttpRequest() {
+        return this.httpRequest;
     }
 
     /**
@@ -54,7 +59,7 @@ public final class Http {
      * @return this
      * */
     public Http setContentType(ContentType contentType) {
-        this.config.setContentType(contentType);
+        this.httpRequest.setContentType(contentType);
         return this;
     }
 
@@ -64,7 +69,7 @@ public final class Http {
      * @return this
      * */
     public Http addUserAgent() {
-        this.config.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36");
+        this.httpRequest.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36");
         return this;
     }
 
@@ -76,7 +81,7 @@ public final class Http {
      * @return this
      * */
     public Http setBody(Object body) {
-        this.config.setBody(body);
+        this.httpRequest.setBody(body);
         return this;
     }
 
@@ -89,7 +94,7 @@ public final class Http {
      * @return this
      * */
     public Http addHeader(String key, String value) {
-        this.config.addHeader(key, value);
+        this.httpRequest.addHeader(key, value);
         return this;
     }
 
@@ -101,7 +106,7 @@ public final class Http {
      * @return this
      * */
     public Http deleteHeader(String key) {
-        this.config.deleteHeader(key);
+        this.httpRequest.deleteHeader(key);
         return this;
     }
 
@@ -113,7 +118,7 @@ public final class Http {
      * @return this
      * */
     public Http setTimeout(int timeout) {
-        this.config.setTimeout(timeout);
+        this.httpRequest.setTimeout(timeout);
         return this;
     }
 
@@ -124,8 +129,8 @@ public final class Http {
      *
      * @return this
      * */
-    public Http setResend(Function<HttpResponseResult<String>, Boolean> resend) {
-        this.config.setResend(resend);
+    public Http setResend(Function<HttpResponse<String>, Boolean> resend) {
+        this.httpRequest.setResend(resend);
         return this;
     }
 
@@ -137,7 +142,7 @@ public final class Http {
      * @return this
      * */
     public Http setTimeoutResend(boolean timeoutResend) {
-        this.config.setTimeoutResend(timeoutResend);
+        this.httpRequest.setTimeoutResend(timeoutResend);
         return this;
     }
 
@@ -150,7 +155,7 @@ public final class Http {
      * @return this
      * */
     public Http setProxy(String host, int port) {
-        this.config.setProxy(host, port);
+        this.httpRequest.setProxy(host, port);
         return this;
     }
 
@@ -159,14 +164,14 @@ public final class Http {
      *
      * @param listener listener
      * */
-    public void send(Consumer<HttpResponseResult<InputStream>> listener) {
+    public void send(Consumer<HttpResponse<InputStream>> listener) {
         HttpURLConnection httpURLConnection = null;
         try {
-            Proxy proxy = this.config.getProxy();
+            Proxy proxy = this.httpRequest.getProxy();
             if (proxy == null) {
-                httpURLConnection = (HttpURLConnection) new URI(this.config.getUrl()).toURL().openConnection();
+                httpURLConnection = (HttpURLConnection) new URI(this.httpRequest.getUrl()).toURL().openConnection();
             } else {
-                httpURLConnection = (HttpURLConnection) new URI(this.config.getUrl()).toURL().openConnection(proxy);
+                httpURLConnection = (HttpURLConnection) new URI(this.httpRequest.getUrl()).toURL().openConnection(proxy);
             }
             if (httpURLConnection instanceof HttpsURLConnection httpsURLConnection) {
                 SSLContext sslContext = SSLContext.getInstance("SSL");
@@ -184,19 +189,19 @@ public final class Http {
                 httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
                 httpsURLConnection.setHostnameVerifier((s, sslSession) -> true);
             }
-            httpURLConnection.setRequestMethod(this.config.getType().name());
+            httpURLConnection.setRequestMethod(this.httpRequest.getType().name());
             httpURLConnection.setDoInput(true);
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setUseCaches(false);
             httpURLConnection.setInstanceFollowRedirects(false);
-            if (this.config.getTimeout() > 0) {
-                httpURLConnection.setConnectTimeout(this.config.getTimeout());
-                httpURLConnection.setReadTimeout(this.config.getTimeout());
+            if (this.httpRequest.getTimeout() > 0) {
+                httpURLConnection.setConnectTimeout(this.httpRequest.getTimeout());
+                httpURLConnection.setReadTimeout(this.httpRequest.getTimeout());
             }
-            for (Header header : this.config.getHeader()) {
+            for (Header header : this.httpRequest.getHeader()) {
                 httpURLConnection.addRequestProperty(header.getKey(), header.getValue());
             }
-            ContentType contentType = this.config.getContentType();
+            ContentType contentType = this.httpRequest.getContentType();
             String boundary = UUID.randomUUID().toString().replace("-", "");
             if (contentType != null) {
                 if (contentType == ContentType.FORM_DATA) {
@@ -206,7 +211,7 @@ public final class Http {
                 }
             }
             httpURLConnection.connect();
-            Object body = this.config.getBody();
+            Object body = this.httpRequest.getBody();
             if (body != null) {
                 if (contentType == ContentType.APPLICATION_JSON) {
                     try (OutputStream outputStream = httpURLConnection.getOutputStream()) {
@@ -271,7 +276,7 @@ public final class Http {
                     }
                 }
             }
-            HttpResponseResult<InputStream> result = new HttpResponseResult<>();
+            HttpResponse<InputStream> result = new HttpResponse<>();
             result.setCode(httpURLConnection.getResponseCode());
             Map<String, List<String>> responseHeader = httpURLConnection.getHeaderFields();
             for (String key : responseHeader.keySet()) {
@@ -287,6 +292,7 @@ public final class Http {
                 inputStream = httpURLConnection.getErrorStream();
             }
             result.setBody(inputStream);
+            result.setHttpRequest(this.httpRequest);
             try {
                 if (listener != null) {
                     listener.accept(result);
@@ -295,7 +301,7 @@ public final class Http {
                 Closeable.closeNoError(inputStream);
             }
         } catch (Exception e) {
-            if (this.config.isTimeoutResend() && this.timeoutResendNumber > 0) {
+            if (this.httpRequest.isTimeoutResend() && this.timeoutResendNumber > 0) {
                 this.timeoutResendNumber = this.timeoutResendNumber - 1;
                 send(listener);
             } else {
@@ -313,8 +319,8 @@ public final class Http {
      *
      * @return HttpResponseResult
      * */
-    public HttpResponseResult<String> send() {
-        HttpResponseResult<String> result = new HttpResponseResult<>();
+    public HttpResponse<String> send() {
+        HttpResponse<String> result = new HttpResponse<>();
         send(httpResponseResult -> {
             result.build(httpResponseResult);
             if (httpResponseResult.getBody() != null) {
@@ -339,7 +345,7 @@ public final class Http {
                 result.setBody(body);
             }
         });
-        Function<HttpResponseResult<String>, Boolean> resend = this.config.getResend();
+        Function<HttpResponse<String>, Boolean> resend = this.httpRequest.getResend();
         if (resend != null && ObjectUtil.equals(true, resend.apply(result))) {
             return send();
         }
@@ -349,16 +355,16 @@ public final class Http {
     /**
      * 发送json格式
      *
-     * @param config config
+     * @param httpRequest httpRequest
      *
      * @return Json
      * */
-    public static Json sendByJson(Config config) {
-        if (config == null) {
+    public static Json sendByJson(HttpRequest httpRequest) {
+        if (httpRequest == null) {
             throw new BaseException("config is null");
         }
-        Http http = new Http(config.getUrl(), config.getType());
-        http.config = config;
+        Http http = new Http(httpRequest.getUrl(), httpRequest.getType());
+        http.httpRequest = httpRequest;
         http.setContentType(ContentType.APPLICATION_JSON);
         return http.send().parse(Json.class).getBody();
     }

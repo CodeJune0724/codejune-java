@@ -11,7 +11,7 @@ import com.codejune.core.io.writer.OutputStreamWriter;
 import com.codejune.core.util.*;
 import com.codejune.http.ContentType;
 import com.codejune.http.Header;
-import com.codejune.http.HttpResponseResult;
+import com.codejune.http.HttpResponse;
 import com.codejune.http.Type;
 import com.codejune.tool.CloudStorageDownload;
 import java.io.ByteArrayInputStream;
@@ -152,7 +152,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         String downloadUrl = originResultJson.get("dom", String.class) + "/file/" + originResultJson.get("url", String.class);
 
         // 直接获取
-        HttpResponseResult<String> httpResponseResult = new Http(downloadUrl, Type.GET)
+        HttpResponse<String> httpResponseResult = new Http(downloadUrl, Type.GET)
                 .addUserAgent()
                 .send();
         if (httpResponseResult.getCode() == 302) {
@@ -180,7 +180,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         return location.getValue();
     }
 
-    private String getDownloadCookie(HttpResponseResult<String> httpResponseResult) {
+    private String getDownloadCookie(HttpResponse<String> httpResponseResult) {
         Map<String, String> cookie = new LinkedHashMap<>();
         for (Header header : httpResponseResult.getHeaderList("Set-Cookie")) {
             String value = header.getValue().split(";")[0];

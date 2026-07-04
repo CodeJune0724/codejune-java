@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author ZJ
  * */
-public final class HttpResponseResult<T> implements Builder {
+public final class HttpResponse<T> implements Builder {
 
     private boolean flag;
 
@@ -28,6 +28,8 @@ public final class HttpResponseResult<T> implements Builder {
     private final List<Header> headerList = new ArrayList<>();
 
     private T body;
+
+    private HttpRequest httpRequest;
 
     public boolean isFlag() {
         return flag;
@@ -44,6 +46,11 @@ public final class HttpResponseResult<T> implements Builder {
 
     public List<Header> getHeaderList() {
         return headerList;
+    }
+
+    @Override
+    public void build(Object object) {
+        ObjectUtil.assignment(this, ObjectUtil.parse(object, HttpResponse.class));
     }
 
     /**
@@ -104,13 +111,13 @@ public final class HttpResponseResult<T> implements Builder {
      * @return 下载的文件名
      * */
     public String getDownloadFileName() {
+        String result;
         Header header = getHeader("Content-Disposition");
-        String contentDisposition = null;
-        if (header != null) {
-            contentDisposition = header.getValue();
-        }
-        String result = null;
-        if (!StringUtil.isEmpty(contentDisposition)) {
+        if (header == null) {
+            String url = this.httpRequest.getUrl();
+            result = url.substring(url.lastIndexOf("/") + 1);
+        } else {
+            String contentDisposition = header.getValue();
             result = RegexUtil.find("filename\\*=UTF-8\\'\\'(.*?)$", contentDisposition, 1);
             if (StringUtil.isEmpty(result)) {
                 result = RegexUtil.find("filename=(.*?)$", contentDisposition, 1);
@@ -145,11 +152,11 @@ public final class HttpResponseResult<T> implements Builder {
      * @param tClass tClass
      * @param <E> T
      * */
-    public <E> HttpResponseResult<E> parse(Class<E> tClass) {
+    public <E> HttpResponse<E> parse(Class<E> tClass) {
         if (tClass == null) {
             throw new BaseException("class is null");
         }
-        HttpResponseResult<E> result = new HttpResponseResult<>();
+        HttpResponse<E> result = new HttpResponse<>();
         result.build(this);
         ClassInfo classInfo = new ClassInfo(tClass);
         if (classInfo.isInstanceof(Map.class) || classInfo.isInstanceof(Collection.class)) {
@@ -160,9 +167,22 @@ public final class HttpResponseResult<T> implements Builder {
         return result;
     }
 
-    @Override
-    public void build(Object object) {
-        ObjectUtil.assignment(this, ObjectUtil.parse(object, HttpResponseResult.class));
+    /**
+     * getHttpRequest
+     *
+     * @return httpRequest
+     * */
+    public HttpRequest getHttpRequest() {
+        return this.httpRequest;
+    }
+
+    /**
+     * getHttpRequest
+     *
+     * @param httpRequest httpRequest
+     * */
+    public void setHttpRequest(HttpRequest httpRequest) {
+        this.httpRequest = httpRequest;
     }
 
 }
