@@ -18,6 +18,18 @@ public final class YukaidiCloudStorageDownload extends CloudStorageDownload {
 
     @Override
     public String getDirectUrl(String url) {
+        Exception error = null;
+        for (int i = 0; i < 5; i++) {
+            try {
+                return this.baseGetDirectUrl(url);
+            } catch (Exception e) {
+                error = e;
+            }
+        }
+        throw new BaseException(error);
+    }
+
+    private String baseGetDirectUrl(String url) {
         if (url.startsWith("https://silver.yukaidi.com/f")) {
             while (true) {
                 Header locationHeader = new Http(url, Type.GET)

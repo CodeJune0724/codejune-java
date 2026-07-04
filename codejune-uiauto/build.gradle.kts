@@ -1,4 +1,5 @@
 dependencies {
     api(project(":codejune-core"))
-    api("org.seleniumhq.selenium:selenium-java:4.44.0")
+    compileOnly(fileTree("opencv").include("*.jar"))
+    implementation("net.java.dev.jna:jna-platform:5.19.1")
 }

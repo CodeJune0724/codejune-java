@@ -2,7 +2,7 @@ package com.codejune;
 
 import com.codejune.core.BaseException;
 import com.codejune.core.Encoding;
-import com.codejune.core.SystemOS;
+import com.codejune.core.os.OSType;
 import com.codejune.core.util.StringUtil;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -57,9 +57,9 @@ public abstract class Shell implements Closeable {
         try {
             StringBuilder stringBuilder = new StringBuilder();
             ProcessBuilder processBuilder = new ProcessBuilder();
-            if (SystemOS.getCurrentSystemOS() == SystemOS.WINDOWS) {
+            if (OSType.getCurrentOSType().isWindows()) {
                 processBuilder.command("cmd.exe", "/c", command);
-            } else if (SystemOS.getCurrentSystemOS() == SystemOS.LINUX) {
+            } else if (OSType.getCurrentOSType() == OSType.LINUX) {
                 processBuilder.command("/bin/bash", "-c", command);
             } else {
                 throw new BaseException("系统不支持");
@@ -68,7 +68,7 @@ public abstract class Shell implements Closeable {
             process = processBuilder.start();
             try (InputStream inputStream = process.getInputStream()) {
                 BufferedReader bufferedReader;
-                if (SystemOS.getCurrentSystemOS() == SystemOS.WINDOWS) {
+                if (OSType.getCurrentOSType().isWindows()) {
                     bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Encoding.NATIVE));
                 } else {
                     bufferedReader = new BufferedReader(new InputStreamReader(inputStream));

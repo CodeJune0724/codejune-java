@@ -119,7 +119,7 @@ public abstract class Progress {
         else if (this.speed < 1024 * 1024) {
             return (this.speed / 1024) + "KB/s";
         } else {
-            return (this.speed / 1024 / 1024) + "MB/s";
+            return new Calculator(this.speed).divide(1024, 1).divide(1024, 1).count() + "MB/s";
         }
     }
 
