@@ -1,4 +1,4 @@
-package com.codejune.javafx.entity;
+package com.codejune.javafx.bind;
 
 import com.codejune.core.util.ObjectUtil;
 import javafx.application.Platform;

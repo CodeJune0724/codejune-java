@@ -1,7 +1,7 @@
 package com.codejune.javafx.component;
 
 import com.codejune.core.util.ObjectUtil;
-import com.codejune.javafx.entity.*;
+import com.codejune.javafx.bind.*;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
@@ -92,7 +92,7 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     @Override
     protected Runnable customEventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
         if (eventType == BaseEventType.VALUE) {
-            return () -> this.comboBox.valueProperty().addListener((_, _, _) -> asynchronousRun(asynchronous, runnable));
+            return () -> this.comboBox.valueProperty().addListener((_, _, _) -> asynchronousRun(runnable, asynchronous));
         }
         return super.customEventBind(eventType, runnable, asynchronous);
     }

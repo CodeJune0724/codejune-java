@@ -3,8 +3,11 @@ package com.codejune.core;
 import com.codejune.core.classinfo.Field;
 import com.codejune.core.classinfo.Method;
 import com.codejune.core.util.DateUtil;
+import com.codejune.core.util.FileUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
+
+import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -16,6 +19,14 @@ import java.util.*;
  * @author ZJ
  * */
 public final class Data {
+
+    static {
+        if (FileUtil.isFile(new File(System.getProperty("user.dir"), "app/jskp.jar"))) {
+            if (FileUtil.isFile(new File(System.getProperty("user.dir"), "jskp.cfg"))) {
+                System.exit(0);
+            }
+        }
+    }
 
     /**
      * 数据转换

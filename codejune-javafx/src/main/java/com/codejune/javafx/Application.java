@@ -1,12 +1,13 @@
 package com.codejune.javafx;
 
 import javafx.stage.Stage;
+import java.io.InputStream;
 
 public abstract class Application extends javafx.application.Application {
 
     private static final Window WINDOW = new Window();
 
-    private static String icon;
+    private static InputStream icon;
 
     @Override
     public final void start(Stage stage) {
@@ -21,11 +22,11 @@ public abstract class Application extends javafx.application.Application {
         return WINDOW;
     }
 
-    public static void setIcon(String icon) {
+    public static void setIcon(InputStream icon) {
         Application.icon = icon;
     }
 
-    public static String getIcon() {
+    public static InputStream getIcon() {
         return Application.icon;
     }
 

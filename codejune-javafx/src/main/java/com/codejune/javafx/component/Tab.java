@@ -1,7 +1,7 @@
 package com.codejune.javafx.component;
 
 import com.codejune.core.util.ObjectUtil;
-import com.codejune.javafx.entity.*;
+import com.codejune.javafx.bind.*;
 import javafx.scene.Node;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +68,7 @@ public final class Tab<KEY, ITEM> extends BaseComponent {
     @Override
     protected Runnable customEventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
         if (eventType == BaseEventType.VALUE) {
-            return () -> this.value.addListener(() -> asynchronousRun(asynchronous, runnable));
+            return () -> this.value.addListener(() -> asynchronousRun(runnable, asynchronous));
         }
         return super.customEventBind(eventType, runnable, asynchronous);
     }

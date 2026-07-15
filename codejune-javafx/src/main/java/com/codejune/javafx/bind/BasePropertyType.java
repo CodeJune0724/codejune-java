@@ -1,4 +1,4 @@
-package com.codejune.javafx.entity;
+package com.codejune.javafx.bind;
 
 public enum BasePropertyType implements PropertyType {
 

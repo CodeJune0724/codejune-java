@@ -1,7 +1,7 @@
 package com.codejune.javafx.component;
 
 import com.codejune.core.util.ObjectUtil;
-import com.codejune.javafx.entity.*;
+import com.codejune.javafx.bind.*;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
@@ -107,8 +107,8 @@ public abstract class BaseComponent {
         }
         this.eventMap.put(eventType, runnable);
         Map<EventType, Runnable> nestingEventMap = new HashMap<>();
-        nestingEventMap.put(BaseEventType.CLICK, () -> this.getFxNode().setOnMouseClicked(_ -> asynchronousRun(asynchronous, runnable)));
-        nestingEventMap.put(BaseEventType.MOUSE_MOVE, () -> this.getFxNode().setOnMouseMoved(_ -> asynchronousRun(asynchronous, runnable)));
+        nestingEventMap.put(BaseEventType.CLICK, () -> this.getFxNode().setOnMouseClicked(_ -> asynchronousRun(runnable, asynchronous)));
+        nestingEventMap.put(BaseEventType.MOUSE_MOVE, () -> this.getFxNode().setOnMouseMoved(_ -> asynchronousRun(runnable, asynchronous)));
         Runnable customAction = this.customEventBind(eventType, runnable, asynchronous);
         if (customAction != null) {
             nestingEventMap.put(eventType, customAction);
@@ -139,15 +139,23 @@ public abstract class BaseComponent {
         }
     }
 
-    public static void asynchronousRun(boolean asynchronous, Runnable runnable) {
+    public static void asynchronousRun(Runnable runnable, boolean asynchronous, boolean runLater) {
         if (runnable == null) {
             return;
         }
         if (asynchronous) {
-            Thread.startVirtualThread(runnable);
+            if (runLater) {
+                Thread.startVirtualThread(() -> Platform.runLater(runnable));
+            } else {
+                Thread.startVirtualThread(runnable);
+            }
         } else {
             runnable.run();
         }
+    }
+
+    public static void asynchronousRun(Runnable runnable, boolean asynchronous) {
+        asynchronousRun(runnable, asynchronous, false);
     }
 
 }

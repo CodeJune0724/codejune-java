@@ -1,7 +1,6 @@
 package com.codejune.javafx;
 
 import com.codejune.core.util.ArrayUtil;
-import com.codejune.core.util.StringUtil;
 import com.codejune.javafx.component.BaseComponent;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -11,7 +10,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.InputStream;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -55,6 +53,10 @@ public final class Window {
         this.stage = stage;
     }
 
+    public Stage getStage() {
+        return this.stage;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -77,9 +79,6 @@ public final class Window {
 
     public void render(Consumer<BaseComponent> render) {
         this.render = render;
-        if (this.stage != null) {
-            this.open();
-        }
     }
 
     public void setCloseHandler(Runnable closeHandler) {
@@ -95,8 +94,10 @@ public final class Window {
         Platform.runLater(() -> {
             this.stage.setTitle(this.title);
             this.stage.setResizable(this.resizable);
-            if (!StringUtil.isEmpty(Application.getIcon())) {
-                this.stage.getIcons().add(new Image(Objects.requireNonNullElseGet(this.icon, () -> Objects.requireNonNull(getClass().getResourceAsStream(Application.getIcon())))));
+            if (this.icon != null) {
+                this.stage.getIcons().add(new Image(this.icon));
+            } else if (Application.getIcon() != null) {
+                this.stage.getIcons().add(new Image(Application.getIcon()));
             }
             if (this.closeHandler != null) {
                 this.stage.setOnCloseRequest(_ -> this.closeHandler.run());
@@ -111,10 +112,16 @@ public final class Window {
             for (String sheet : ArrayUtil.asList("/javafx/style/base.css")) {
                 vBoxBaseComponent.getStyle().addSheet(sheet);
             }
+            if (this.width > 0) {
+                vBoxBaseComponent.getStyle().setWidth(this.width);
+            }
+            if (this.height > 0) {
+                vBoxBaseComponent.getStyle().setHeight(this.height);
+            }
             if (this.render != null) {
                 this.render.accept(vBoxBaseComponent);
             }
-            Scene scene = new Scene(vBox, this.width, this.height);
+            Scene scene = new Scene(vBox);
             this.stage.setScene(scene);
             if (!this.resizable) {
                 this.autoSize(this.stage, vBox);

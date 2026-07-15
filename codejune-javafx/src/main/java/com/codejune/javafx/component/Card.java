@@ -2,9 +2,9 @@ package com.codejune.javafx.component;
 
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
-import com.codejune.javafx.entity.BasePropertyType;
-import com.codejune.javafx.entity.PropertyBind;
-import com.codejune.javafx.entity.PropertyType;
+import com.codejune.javafx.bind.BasePropertyType;
+import com.codejune.javafx.bind.PropertyBind;
+import com.codejune.javafx.bind.PropertyType;
 import javafx.scene.Node;
 
 public final class Card extends BaseComponent {

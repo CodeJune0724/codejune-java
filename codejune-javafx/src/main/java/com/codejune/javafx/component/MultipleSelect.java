@@ -1,7 +1,7 @@
 package com.codejune.javafx.component;
 
-import com.codejune.javafx.entity.BaseEventType;
-import com.codejune.javafx.entity.EventType;
+import com.codejune.javafx.bind.BaseEventType;
+import com.codejune.javafx.bind.EventType;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
