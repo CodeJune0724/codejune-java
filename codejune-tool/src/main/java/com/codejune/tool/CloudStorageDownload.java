@@ -46,7 +46,7 @@ public abstract class CloudStorageDownload {
             throw new BaseException("savePath is null");
         }
         AtomicReference<File> result = new AtomicReference<>();
-        new Http(this.getDirectUrl(url), Type.GET).addUserAgent().send(httpResponseResult -> {
+        new Http(this.getDirectUrl(url), Type.GET).addUserAgent().setRedirect(true).send(httpResponseResult -> {
             result.set(new File(savePath, httpResponseResult.getDownloadFileName()));
             Long size = httpResponseResult.getContentLength();
             Progress progressEntity;

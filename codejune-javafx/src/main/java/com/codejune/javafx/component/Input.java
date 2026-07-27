@@ -4,6 +4,7 @@ import com.codejune.core.util.ObjectUtil;
 import com.codejune.javafx.bind.*;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
+import java.util.function.Supplier;
 
 public final class Input extends BaseComponent {
 
@@ -24,12 +25,12 @@ public final class Input extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
             this.textField.textProperty().addListener((_, _, _) -> propertyBind.setObject(this.getValue()));
-            return () -> this.setValue(ObjectUtil.toString(propertyBind.get()));
+            return () -> this.setValue(ObjectUtil.toString(getValue.get()));
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     @Override

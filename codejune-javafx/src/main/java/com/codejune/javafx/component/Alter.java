@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class Alter {
 
@@ -16,7 +17,7 @@ public final class Alter {
         baseAlter(Alert.AlertType.ERROR, "错误", message, window);
     }
 
-    public static void confirm(String message, Runnable confirm, Window window) {
+    public static void confirm(String message, Consumer<Boolean> confirm, Window window) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("提示");
@@ -28,11 +29,10 @@ public final class Alter {
             alert.getButtonTypes().setAll(yesButton, noButton);
             Optional<ButtonType> buttonTypeOptional = alert.showAndWait();
             buttonTypeOptional.ifPresent(buttonType -> {
-                if (buttonType == yesButton) {
-                    if (confirm != null) {
-                        confirm.run();
-                    }
+                if (confirm == null) {
+                    return;
                 }
+                confirm.accept(buttonType == yesButton);
             });
         });
     }

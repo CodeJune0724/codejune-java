@@ -7,8 +7,6 @@ public class Flow extends BaseComponent {
 
     private final FlowPane flowPane = new FlowPane();
 
-    public Flow() {}
-
     @Override
     public Node getFxNode() {
         return this.flowPane;

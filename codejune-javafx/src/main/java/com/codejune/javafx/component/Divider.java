@@ -11,6 +11,10 @@ public final class Divider extends BaseComponent {
     private final Text textComponent = new Text();
 
     public Divider(String text) {
+        this.textComponent.setText(text);
+        if (!StringUtil.isEmpty(text)) {
+            this.textComponent.getStyle().setMargin(0, 10, 0, 10);
+        }
         this.div.getStyle().addSheet("/javafx/style/divider.css").addClass("divider");
         this.add(new Div(), div -> {
             div.getStyle().alignment(Pos.CENTER_LEFT).setWidth(0.1);
@@ -18,14 +22,7 @@ public final class Divider extends BaseComponent {
         });
         this.add(new Div(Div.Layout.CELL), div -> {
             div.getStyle().alignment(Pos.CENTER_LEFT).setWidth(0.9);
-
-            div.add(this.textComponent, textComponent -> {
-                textComponent.setText(text);
-                if (!StringUtil.isEmpty(text)) {
-                    textComponent.getStyle().setMargin(0, 10, 0, 10);
-                }
-            });
-
+            div.add(this.textComponent);
             div.add(new Div(), divLineMain -> {
                 divLineMain.getStyle().maxWidth().alignment(Pos.CENTER_LEFT);
                 divLineMain.add(new Div(), divLine -> divLine.getStyle().addClass("divider-line"));

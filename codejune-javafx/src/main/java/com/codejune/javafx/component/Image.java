@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import java.io.File;
 import java.io.InputStream;
+import java.util.function.Supplier;
 
 public class Image extends BaseComponent {
 
@@ -27,11 +28,11 @@ public class Image extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == ImagePropertyType.IMAGE) {
-            return () -> this.setImage(propertyBind.get());
+            return () -> this.setImage(getValue.get());
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     public void autoSize() {

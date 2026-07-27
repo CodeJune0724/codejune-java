@@ -6,6 +6,7 @@ import com.codejune.javafx.bind.PropertyBind;
 import com.codejune.javafx.bind.PropertyType;
 import javafx.scene.Node;
 import javafx.scene.control.TextArea;
+import java.util.function.Supplier;
 
 public final class Textarea extends BaseComponent {
 
@@ -23,12 +24,12 @@ public final class Textarea extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
             this.textArea.textProperty().addListener((_, _, _) -> propertyBind.setObject(this.getValue()));
-            return () -> this.setValue(ObjectUtil.toString(propertyBind.get()));
+            return () -> this.setValue(ObjectUtil.toString(getValue.get()));
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     public void setPlaceholder(String placeholder) {

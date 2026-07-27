@@ -6,6 +6,7 @@ import com.codejune.javafx.bind.PropertyBind;
 import com.codejune.javafx.bind.PropertyType;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import java.util.function.Supplier;
 
 public final class Text extends BaseComponent {
 
@@ -26,11 +27,11 @@ public final class Text extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.TEXT) {
-            return () -> this.setText(ObjectUtil.toString(propertyBind.get()));
+            return () -> this.setText(ObjectUtil.toString(getValue.get()));
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     public void setColor(int red, int green, int blue) {

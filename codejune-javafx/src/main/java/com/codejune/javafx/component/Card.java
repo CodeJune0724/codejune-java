@@ -6,6 +6,7 @@ import com.codejune.javafx.bind.BasePropertyType;
 import com.codejune.javafx.bind.PropertyBind;
 import com.codejune.javafx.bind.PropertyType;
 import javafx.scene.Node;
+import java.util.function.Supplier;
 
 public final class Card extends BaseComponent {
 
@@ -21,7 +22,7 @@ public final class Card extends BaseComponent {
         this.add(new Text(), text -> {
             text.getStyle().setMargin(0, 0, 10, 0).display(false).setFontSize(14).setFontWeight("bold");
             text.propertyBind(BasePropertyType.TEXT, this.title);
-            text.propertyBind(BasePropertyType.DISPLAY, this.title, () -> !StringUtil.isEmpty(this.title));
+            text.propertyBind(BasePropertyType.DISPLAY, this.title, () -> !StringUtil.isEmpty(this.title.get()));
         });
 
         this.setType(Type.DEFAULT);
@@ -34,14 +35,14 @@ public final class Card extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == CardPropertyType.TITLE) {
-            return () -> this.setTitle(ObjectUtil.toString(propertyBind.get()));
+            return () -> this.setTitle(ObjectUtil.toString(getValue.get()));
         }
         if (propertyType == CardPropertyType.TYPE) {
-            return () -> this.setType(ObjectUtil.parse(propertyBind.get(), Type.class));
+            return () -> this.setType(ObjectUtil.parse(getValue.get(), Type.class));
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     public void hover(boolean hover) {

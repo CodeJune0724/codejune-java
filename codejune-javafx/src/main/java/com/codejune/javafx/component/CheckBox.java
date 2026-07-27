@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import org.kordamp.ikonli.fontawesome.FontAwesome;
+import java.util.function.Supplier;
 
 public final class CheckBox extends BaseComponent {
 
@@ -43,12 +44,12 @@ public final class CheckBox extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
             this.value.addListener(() -> propertyBind.setObject(this.value.get()));
-            return () -> this.setValue(ObjectUtil.parse(propertyBind.get(), Boolean.class));
+            return () -> this.setValue(ObjectUtil.parse(getValue.get(), Boolean.class));
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     @Override

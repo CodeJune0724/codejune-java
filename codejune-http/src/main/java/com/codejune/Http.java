@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -123,18 +123,6 @@ public final class Http {
     }
 
     /**
-     * 设置重连补偿
-     *
-     * @param resend resend
-     *
-     * @return this
-     * */
-    public Http setResend(Function<HttpResponse<String>, Boolean> resend) {
-        this.httpRequest.setResend(resend);
-        return this;
-    }
-
-    /**
      * 连接失败自动重连
      *
      * @param timeoutResend timeoutResend
@@ -160,11 +148,24 @@ public final class Http {
     }
 
     /**
+     * 设置重新向
+     *
+     * @param redirect redirect
+     * */
+    public Http setRedirect(boolean redirect) {
+        this.httpRequest.setRedirect(redirect);
+        return this;
+    }
+
+    /**
      * 发送
      *
      * @param listener listener
      * */
     public void send(Consumer<HttpResponse<InputStream>> listener) {
+        if (listener == null) {
+            listener = (_) -> {};
+        }
         HttpURLConnection httpURLConnection = null;
         try {
             Proxy proxy = this.httpRequest.getProxy();
@@ -294,7 +295,28 @@ public final class Http {
             result.setBody(inputStream);
             result.setHttpRequest(this.httpRequest);
             try {
-                if (listener != null) {
+                if (this.httpRequest.isRedirect() && result.getCode() == 302) {
+                    AtomicReference<HttpResponse<InputStream>> redirectHttpResponse = new AtomicReference<>(result);
+                    Consumer<HttpResponse<InputStream>> finalListener = listener;
+                    while (redirectHttpResponse.get().getCode() == 302) {
+                        Header locationHeader = redirectHttpResponse.get().getHeader("Location");
+                        if (locationHeader == null) {
+                            throw new BaseException("Location is null");
+                        }
+                        String location = locationHeader.getValue();
+                        if (location.startsWith("/")) {
+                            location = RegexUtil.find("^(https?://)?[^/?#]+", redirectHttpResponse.get().getHttpRequest().getUrl(), 0) + location;
+                        }
+                        new Http(location, Type.GET)
+                                .addUserAgent()
+                                .send((httpResponse) -> {
+                                    redirectHttpResponse.set(httpResponse);
+                                    if (httpResponse.getCode() != 302) {
+                                        finalListener.accept(httpResponse);
+                                    }
+                                });
+                    }
+                } else {
                     listener.accept(result);
                 }
             } finally {
@@ -345,10 +367,6 @@ public final class Http {
                 result.setBody(body);
             }
         });
-        Function<HttpResponse<String>, Boolean> resend = this.httpRequest.getResend();
-        if (resend != null && ObjectUtil.equals(true, resend.apply(result))) {
-            return send();
-        }
         return result;
     }
 

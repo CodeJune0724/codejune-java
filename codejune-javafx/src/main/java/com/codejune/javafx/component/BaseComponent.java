@@ -32,7 +32,7 @@ public abstract class BaseComponent {
         return this.getFxNode();
     }
 
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         return null;
     }
 
@@ -110,7 +110,7 @@ public abstract class BaseComponent {
      * @param propertyBind propertyBind
      * @param getValue 获取值
      * */
-    public final void propertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<Object> getValue) {
+    public final void propertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == null) {
             return;
         }
@@ -123,7 +123,7 @@ public abstract class BaseComponent {
         Map<PropertyType, Runnable> bindMap = new HashMap<>();
         bindMap.put(BasePropertyType.DISABLE, () -> this.getStyle().disable(getValue.get() != null && ObjectUtil.parse(getValue.get(), boolean.class)));
         bindMap.put(BasePropertyType.DISPLAY, () -> this.getStyle().display(getValue.get() != null && ObjectUtil.parse(getValue.get(), boolean.class)));
-        Runnable customBind = this.customPropertyBind(propertyType, propertyBind);
+        Runnable customBind = this.customPropertyBind(propertyType, propertyBind, getValue);
         if (customBind != null) {
             bindMap.put(propertyType, customBind);
         }

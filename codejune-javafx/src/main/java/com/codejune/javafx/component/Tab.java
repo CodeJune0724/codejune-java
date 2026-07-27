@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class Tab<KEY, ITEM> extends BaseComponent {
 
@@ -54,15 +55,15 @@ public final class Tab<KEY, ITEM> extends BaseComponent {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
             this.value.addListener(() -> propertyBind.setObject(this.value.get()));
-            return () -> this.setValue((KEY) propertyBind.get());
+            return () -> this.setValue((KEY) getValue.get());
         }
         if (propertyType == BasePropertyType.DATA) {
-            return () -> this.setData((List<ITEM>) propertyBind.get());
+            return () -> this.setData((List<ITEM>) getValue.get());
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     @Override

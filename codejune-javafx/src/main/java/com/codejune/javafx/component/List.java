@@ -6,6 +6,7 @@ import com.codejune.javafx.bind.PropertyType;
 import javafx.scene.Node;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public final class List<T> extends BaseComponent {
 
@@ -20,11 +21,11 @@ public final class List<T> extends BaseComponent {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.DATA) {
-            return () -> this.init((java.util.List<T>) propertyBind.get());
+            return () -> this.init((java.util.List<T>) getValue.get());
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     private synchronized void init(java.util.List<T> data) {

@@ -6,7 +6,6 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * 请求
@@ -27,11 +26,11 @@ public final class HttpRequest {
 
     private int timeout = -1;
 
-    private Function<HttpResponse<String>, Boolean> resend = null;
-
     private boolean timeoutResend = false;
 
     private Proxy proxy;
+
+    private boolean redirect = false;
 
     public HttpRequest(String url, Type type) {
         this.url = url;
@@ -77,15 +76,6 @@ public final class HttpRequest {
         return this;
     }
 
-    public Function<HttpResponse<String>, Boolean> getResend() {
-        return resend;
-    }
-
-    public HttpRequest setResend(Function<HttpResponse<String>, Boolean> resend) {
-        this.resend = resend;
-        return this;
-    }
-
     public boolean isTimeoutResend() {
         return timeoutResend;
     }
@@ -101,6 +91,15 @@ public final class HttpRequest {
 
     public HttpRequest setProxy(String host, int port) {
         this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
+        return this;
+    }
+
+    public boolean isRedirect() {
+        return this.redirect;
+    }
+
+    public HttpRequest setRedirect(boolean redirect) {
+        this.redirect = redirect;
         return this;
     }
 

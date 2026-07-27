@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Paint;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.javafx.FontIcon;
+import java.util.function.Supplier;
 
 public final class Icon extends BaseComponent {
 
@@ -25,11 +26,11 @@ public final class Icon extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.COLOR) {
-            return () -> this.setColor(ObjectUtil.parse(propertyBind.get(), String.class));
+            return () -> this.setColor(ObjectUtil.parse(getValue.get(), String.class));
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     public void setIcon(Ikon ikon) {

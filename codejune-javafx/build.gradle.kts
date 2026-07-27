@@ -7,5 +7,5 @@ dependencies {
 }
 
 tasks.withType<JavaExec> {
-    jvmArgs = listOf("--module-path", "javafx\\lib", "--add-modules=javafx.controls,javafx.fxml")
+    jvmArgs = listOf("--module-path=javafx/lib", "--add-modules=javafx.controls,javafx.fxml")
 }

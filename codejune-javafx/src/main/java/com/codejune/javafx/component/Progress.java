@@ -6,6 +6,7 @@ import com.codejune.javafx.bind.PropertyBind;
 import com.codejune.javafx.bind.PropertyType;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressBar;
+import java.util.function.Supplier;
 
 public final class Progress extends BaseComponent {
 
@@ -21,11 +22,11 @@ public final class Progress extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            return () -> this.setProgress(propertyBind.get() == null ? 0 : ObjectUtil.parse(propertyBind.get(), double.class));
+            return () -> this.setProgress(getValue.get() == null ? 0 : ObjectUtil.parse(getValue.get(), double.class));
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     public void setProgress(double progress) {

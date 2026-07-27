@@ -5,6 +5,7 @@ import com.codejune.javafx.bind.BasePropertyType;
 import com.codejune.javafx.bind.PropertyBind;
 import com.codejune.javafx.bind.PropertyType;
 import javafx.scene.Node;
+import java.util.function.Supplier;
 
 public final class Button extends BaseComponent {
 
@@ -24,14 +25,14 @@ public final class Button extends BaseComponent {
     }
 
     @Override
-    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind) {
+    protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == ButtonPropertyType.TYPE) {
-            return () -> this.setType(ObjectUtil.parse(propertyBind.get(), Type.class));
+            return () -> this.setType(ObjectUtil.parse(getValue.get(), Type.class));
         }
         if (propertyType == BasePropertyType.TEXT) {
-            return () -> this.setText(ObjectUtil.parse(propertyBind.get(), String.class));
+            return () -> this.setText(ObjectUtil.parse(getValue.get(), String.class));
         }
-        return super.customPropertyBind(propertyType, propertyBind);
+        return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
     public void setSize(Size size) {
