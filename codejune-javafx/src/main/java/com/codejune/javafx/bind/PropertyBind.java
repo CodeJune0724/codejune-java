@@ -1,18 +1,17 @@
 package com.codejune.javafx.bind;
 
 import com.codejune.core.util.ObjectUtil;
-import javafx.application.Platform;
+import com.codejune.javafx.component.BaseComponent;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 public class PropertyBind<T> {
 
     private final AtomicReference<T> data = new AtomicReference<>();
 
-    private final Map<String, Runnable> listener = new LinkedHashMap<>();
+    private final Map<Object, List<Runnable>> listener = new LinkedHashMap<>();
 
-    private Map<String, Runnable> listenerCache = null;
+    private Map<Object, List<Runnable>> listenerCache = null;
 
     public PropertyBind(T data) {
         this.set(data);
@@ -33,10 +32,21 @@ public class PropertyBind<T> {
         this.data.set(data);
         try {
             this.listenerCache = new LinkedHashMap<>();
-            this.listener.values().forEach(Runnable::run);
-            for (Map.Entry<String, Runnable> entry : this.listenerCache.entrySet()) {
-                entry.getValue().run();
-                this.listener.put(entry.getKey(), entry.getValue());
+            this.listener.values().forEach((runnableList) -> {
+                for (Runnable runnable : runnableList) {
+                    BaseComponent.asynchronousRun(runnable, false, true);
+                }
+            });
+            for (Map.Entry<Object, List<Runnable>> entry : this.listenerCache.entrySet()) {
+                for (Runnable runnable : entry.getValue()) {
+                    BaseComponent.asynchronousRun(runnable, false, true);
+                }
+                List<Runnable> runnableList = this.listener.get(entry.getKey());
+                if (runnableList == null) {
+                    runnableList = new ArrayList<>();
+                }
+                runnableList.addAll(entry.getValue());
+                this.listener.put(entry.getKey(), runnableList);
             }
         } finally {
             this.listenerCache = null;
@@ -48,29 +58,38 @@ public class PropertyBind<T> {
         this.set(ObjectUtil.parse(data, data == null ? null : (Class<? extends T>) data.getClass()));
     }
 
-    public final void addListener(Runnable runnable, String id) {
+    public final void addListener(Object id, Runnable runnable) {
+        if (id == null) {
+            id = "DEFAULT";
+        }
         if (runnable == null) {
             return;
         }
-        Objects.requireNonNullElse(this.listenerCache, this.listener).put(id, () -> Platform.runLater(runnable));
+        Map<Object, List<Runnable>> addListener;
+        if (!ObjectUtil.isEmpty(this.listenerCache)) {
+            addListener = listenerCache;
+        } else {
+            addListener = this.listener;
+        }
+        List<Runnable> runnableList = addListener.get(id);
+        if (runnableList == null) {
+            runnableList = new ArrayList<>();
+        }
+        runnableList.add(runnable);
+        this.listener.put(id, runnableList);
     }
 
     public final void addListener(Runnable runnable) {
-        this.addListener(runnable, UUID.randomUUID().toString());
+        this.addListener(null, runnable);
     }
 
-    public final <R> PropertyBind<R> parseBind(Function<T, R> function, String id) {
-        if (function == null) {
-            function = _ -> null;
-        }
-        Function<T, R> finalFunction = function;
-        PropertyBind<R> result = new PropertyBind<>(function.apply(this.get()));
-        this.addListener(() -> result.set(finalFunction.apply(this.get())), id);
-        return result;
-    }
-
-    public final <R> PropertyBind<R> parseBind(Function<T, R> function) {
-        return this.parseBind(function, UUID.randomUUID().toString());
+    /**
+     * 删除监听
+     *
+     * @param id id
+     * */
+    public final void deleteListener(Object id) {
+        this.listener.remove(id);
     }
 
 }

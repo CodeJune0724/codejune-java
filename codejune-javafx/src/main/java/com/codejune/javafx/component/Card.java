@@ -21,7 +21,7 @@ public final class Card extends BaseComponent {
         this.add(new Text(), text -> {
             text.getStyle().setMargin(0, 0, 10, 0).display(false).setFontSize(14).setFontWeight("bold");
             text.propertyBind(BasePropertyType.TEXT, this.title);
-            text.propertyBind(BasePropertyType.DISPLAY, this.title.parseBind(s -> !StringUtil.isEmpty(s)));
+            text.propertyBind(BasePropertyType.DISPLAY, this.title, () -> !StringUtil.isEmpty(this.title));
         });
 
         this.setType(Type.DEFAULT);
