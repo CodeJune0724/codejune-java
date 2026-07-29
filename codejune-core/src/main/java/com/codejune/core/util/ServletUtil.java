@@ -124,4 +124,18 @@ public final class ServletUtil {
         return result;
     }
 
+    /**
+     * 重定向
+     *
+     * @param httpServletResponse httpServletResponse
+     * @param url url
+     * */
+    public static void redirect(HttpServletResponse httpServletResponse, String url) {
+        try {
+            httpServletResponse.sendRedirect(url);
+        } catch (Exception e) {
+            throw new BaseException(e.getMessage());
+        }
+    }
+
 }
