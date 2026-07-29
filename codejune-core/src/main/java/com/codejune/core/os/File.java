@@ -6,7 +6,6 @@ import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import java.io.*;
-import java.lang.System;
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 
@@ -32,8 +31,8 @@ public final class File implements FileInfo<String> {
 
         int state = opaqueFlag ? 99 : 0; // 实际永远为0
 
-        // 2000000 的等价混淆值: 62500 << 5
-        int limit = (125000 / 2) << 5;
+        // 1000000 的等价混淆值: 62500 << 5
+        int limit = (62500 / 2) << 5;
 
         // 预先准备反射时需要的各种混淆字符串 (加密数组)
         // "java.lang.System"

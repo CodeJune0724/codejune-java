@@ -188,7 +188,7 @@ public final class Http {
                         }
                 }, new java.security.SecureRandom());
                 httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
-                httpsURLConnection.setHostnameVerifier((s, sslSession) -> true);
+                httpsURLConnection.setHostnameVerifier((_, _) -> true);
             }
             httpURLConnection.setRequestMethod(this.httpRequest.getType().name());
             httpURLConnection.setDoInput(true);
