@@ -358,6 +358,9 @@ public final class Http {
                             stringBuilder.append(line).append("\n");
                         }
                         body = stringBuilder.toString();
+                        if (body.endsWith("\n")) {
+                            body = body.substring(0, body.length() - 1);
+                        }
                     } catch (Exception e) {
                         throw new BaseException(e);
                     }
