@@ -7,7 +7,7 @@ import java.util.function.Function;
  *
  * @author ZJ
  * */
-public final class String2Util {
+public final class String3Util {
 
     /**
      * 是否为空

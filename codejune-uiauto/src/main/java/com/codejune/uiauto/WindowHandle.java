@@ -1,6 +1,10 @@
 package com.codejune.uiauto;
 
+import com.codejune.Shell;
 import com.codejune.core.BaseException;
+import com.codejune.core.os.OSType;
+import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.core.util.ThreadUtil;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -261,7 +265,48 @@ public final class WindowHandle {
      *
      * @return List<WindowHandle>
      * */
-    public static List<WindowHandle> getAll() {
+    public static List<WindowHandle> get() {
+        return baseGet(null, null, null);
+    }
+
+    /**
+     * 通过pid获取窗口句柄
+     *
+     * @param pid pid
+     *
+     * @return WindowHandle
+     * */
+    public static WindowHandle getByPid(int pid) {
+        List<WindowHandle> windowHandleList = baseGet(pid, null, null);
+        if (ObjectUtil.isEmpty(windowHandleList)) {
+            return null;
+        }
+        return windowHandleList.getFirst();
+    }
+
+    /**
+     * 通过name获取窗口句柄
+     *
+     * @param name name
+     *
+     * @return WindowHandle
+     * */
+    public static List<WindowHandle> getByName(String name) {
+        return baseGet(null, name, null);
+    }
+
+    /**
+     * 通过processName获取窗口句柄
+     *
+     * @param processName processName
+     *
+     * @return WindowHandle
+     * */
+    public static List<WindowHandle> getByProcessName(String processName) {
+        return baseGet(null, null, processName);
+    }
+
+    private static List<WindowHandle> baseGet(Integer queryPid, String queryName, String queryProcessName) {
         List<WindowHandle> result = new ArrayList<>();
         USER_32.EnumWindows((hwnd, _) -> {
             if (!USER_32.IsWindowVisible(hwnd)) {
@@ -269,17 +314,59 @@ public final class WindowHandle {
             }
             IntByReference intByReference = new IntByReference();
             USER_32.GetWindowThreadProcessId(hwnd, intByReference);
-            int id = intByReference.getValue();
+            int pid = intByReference.getValue();
+            if (queryPid != null && pid != queryPid) {
+                return true;
+            }
             char[] titleBuffer = new char[1024];
             USER_32.GetWindowText(hwnd, titleBuffer, titleBuffer.length);
             String name = Native.toString(titleBuffer);
-            result.add(new WindowHandle(id, name, getProcess(id), hwnd));
+            if (StringUtil.isEmpty(name)) {
+                return true;
+            }
+            if (!StringUtil.isEmpty(queryName) && !ObjectUtil.equals(name, queryName)) {
+                return true;
+            }
+            if (!StringUtil.isEmpty(queryProcessName) && !ObjectUtil.equals(getProcessName(pid), queryProcessName)) {
+                return true;
+            }
+            result.add(new WindowHandle(pid, name, getProcess(pid), hwnd));
             return true;
         }, null);
         return result;
     }
 
-    private static String getProcess(int id) {
+    private static String getProcess(int pid) {
+        if (OSType.getCurrentOSType() == OSType.WINDOWS_7) {
+            String commandResult = Shell.fastCommand("wmic process get ProcessId,CommandLine /format:csv | findstr " + pid);
+            if (commandResult == null) {
+                return null;
+            }
+            for (String item : commandResult.split("\n")) {
+                if (!item.endsWith("," + pid)) {
+                    continue;
+                }
+                return item.replace("," + pid, "");
+            }
+            return null;
+        } else {
+            String commandResult = Shell.fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter ProcessId=" + pid + " | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
+            if (commandResult == null) {
+                return null;
+            }
+            commandResult = commandResult.replace("\n         ", "");
+            for (String item : commandResult.split("\n")) {
+                item = item.trim();
+                if (!item.startsWith(pid + "")) {
+                    continue;
+                }
+                return item.replace(pid + " ", "");
+            }
+            return null;
+        }
+    }
+
+    private static String getProcessName(int pid) {
         WinNT.HANDLE snapshot = Kernel32.INSTANCE.CreateToolhelp32Snapshot(Tlhelp32.TH32CS_SNAPPROCESS, new WinDef.DWORD(0));
         if (snapshot == WinNT.INVALID_HANDLE_VALUE) {
             return null;
@@ -288,7 +375,7 @@ public final class WindowHandle {
             Tlhelp32.PROCESSENTRY32.ByReference processEntry = new Tlhelp32.PROCESSENTRY32.ByReference();
             if (Kernel32.INSTANCE.Process32First(snapshot, processEntry)) {
                 do {
-                    if (processEntry.th32ProcessID.intValue() == id) {
+                    if (processEntry.th32ProcessID.intValue() == pid) {
                         return Native.toString(processEntry.szExeFile);
                     }
                 } while (Kernel32.INSTANCE.Process32Next(snapshot, processEntry));

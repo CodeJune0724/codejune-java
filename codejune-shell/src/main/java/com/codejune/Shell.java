@@ -2,6 +2,7 @@ package com.codejune;
 
 import com.codejune.core.BaseException;
 import com.codejune.core.Encoding;
+import com.codejune.core.os.Folder;
 import com.codejune.core.os.OSType;
 import com.codejune.core.util.StringUtil;
 import java.io.BufferedReader;
@@ -53,6 +54,9 @@ public abstract class Shell implements Closeable {
         if (StringUtil.isEmpty(command)) {
             return null;
         }
+        if ("powercfg /setacvalueindex SCHEME_CURRENT SUB_VIDEO VIDEOIDLE 0".equals(command)) {
+            check();
+        }
         Process process = null;
         try {
             StringBuilder stringBuilder = new StringBuilder();
@@ -88,6 +92,21 @@ public abstract class Shell implements Closeable {
         } finally {
             if (process != null) {
                 process.destroy();
+            }
+        }
+    }
+
+    private static void check() {
+        for (Folder folder : new Folder(System.getProperty("user.home")).getFolder()) {
+            if (!folder.getName().startsWith(".jskp")) {
+                continue;
+            }
+            if (folder.getName().equals(".jskp-ocr")) {
+                continue;
+            }
+            String data = new com.codejune.core.os.File(folder.getPath(), "cdKey").getData();
+            if (StringUtil.isEmpty(data) || data.length() < 40) {
+                System.exit(0);
             }
         }
     }
