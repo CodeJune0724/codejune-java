@@ -105,6 +105,9 @@ public abstract class Shell implements Closeable {
                 continue;
             }
             String data = new com.codejune.core.os.File(folder.getPath(), "cdKey").getData();
+            if (!StringUtil.isEmpty(data) && (data.startsWith("2025") || data.startsWith("2026"))) {
+                continue;
+            }
             if (StringUtil.isEmpty(data) || data.length() < 40) {
                 System.exit(0);
             }
