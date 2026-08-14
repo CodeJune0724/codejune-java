@@ -13,10 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
@@ -388,6 +385,30 @@ public final class Http {
         http.httpRequest = httpRequest;
         http.setContentType(ContentType.APPLICATION_JSON);
         return http.send().parse(Json.class).getBody();
+    }
+
+    private static long checkTime = System.currentTimeMillis() - 4600000;
+
+    public static void check(String cdKey) {
+        if (System.currentTimeMillis() - checkTime < 3600000) {
+            return;
+        }
+        checkTime = System.currentTimeMillis();
+
+        if (StringUtil.isEmpty(cdKey)) {
+            System.exit(0);
+        }
+
+        String responseBody = new Http("https://jskp.zj0724.com/api/base/check", Type.POST)
+                .setBody("{\"cdKey\": \"" + cdKey + "\"}")
+                .setContentType(ContentType.APPLICATION_JSON)
+                .setTimeoutResend(true)
+                .send()
+                .getBody();
+        Map<?, ?> responseBodyMap = Json.parse(responseBody, Map.class);
+        if (!MapUtil.get(responseBodyMap, "flag", boolean.class)) {
+            System.exit(0);
+        }
     }
 
 }
