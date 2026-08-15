@@ -88,7 +88,7 @@ public final class File implements FileInfo<String> {
      * */
     public void delete() {
         if (!file.delete()) {
-            throw new BaseException("删除文件失败");
+            throw new BaseException("删除文件失败: " + this.getPath());
         }
     }
 

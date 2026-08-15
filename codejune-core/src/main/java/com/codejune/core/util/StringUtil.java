@@ -17,7 +17,7 @@ public final class StringUtil {
      * @return 空返回true
      * */
     public static boolean isEmpty(Object s) {
-        return s == null || "".equals(s.toString()) || s.toString().replaceAll(" ", "").isEmpty();
+        return s == null || "".equals(s.toString()) || s.toString().replace(" ", "").isEmpty();
     }
 
     /**
