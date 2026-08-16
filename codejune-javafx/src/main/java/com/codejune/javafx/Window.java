@@ -83,6 +83,9 @@ public final class Window {
 
     public void setCloseHandler(Runnable closeHandler) {
         this.closeHandler = closeHandler;
+        if (this.stage != null) {
+            this.stage.setOnCloseRequest(_ -> this.closeHandler.run());
+        }
     }
 
     public void setPosition(double x, double y) {

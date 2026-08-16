@@ -1,13 +1,9 @@
 package com.codejune.core.os;
 
-import com.codejune.core.BaseException;
-import com.codejune.core.Encoding;
 import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.ShellUtil;
 import com.codejune.core.util.StringUtil;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -63,7 +59,7 @@ public final class Process {
     public String getArgument() {
         int pid = this.getPid();
         if (OSType.getCurrentOSType() == OSType.WINDOWS_7) {
-            String commandResult = fastCommand("wmic process get ProcessId,CommandLine /format:csv | findstr " + pid);
+            String commandResult = ShellUtil.fastCommand("wmic process get ProcessId,CommandLine /format:csv | findstr " + pid);
             if (commandResult == null) {
                 return null;
             }
@@ -75,7 +71,7 @@ public final class Process {
             }
             return null;
         } else {
-            String commandResult = fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter ProcessId=" + pid + " | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
+            String commandResult = ShellUtil.fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter ProcessId=" + pid + " | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
             if (commandResult == null) {
                 return null;
             }
@@ -158,49 +154,6 @@ public final class Process {
             }
         });
         return result;
-    }
-
-    private static String fastCommand(String command) {
-        if (StringUtil.isEmpty(command)) {
-            return null;
-        }
-        java.lang.Process process = null;
-        try {
-            StringBuilder stringBuilder = new StringBuilder();
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            if (OSType.getCurrentOSType().isWindows()) {
-                processBuilder.command("cmd.exe", "/c", command);
-            } else if (OSType.getCurrentOSType() == OSType.LINUX) {
-                processBuilder.command("/bin/bash", "-c", command);
-            } else {
-                throw new BaseException("系统不支持");
-            }
-            processBuilder.redirectErrorStream(true);
-            process = processBuilder.start();
-            try (InputStream inputStream = process.getInputStream()) {
-                BufferedReader bufferedReader;
-                if (OSType.getCurrentOSType().isWindows()) {
-                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Encoding.NATIVE));
-                } else {
-                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                }
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    stringBuilder.append(line).append("\n");
-                }
-            }
-            String result = stringBuilder.toString();
-            if (!StringUtil.isEmpty(result)) {
-                result = result.substring(0, result.length() - 1);
-            }
-            return result;
-        } catch (Exception e) {
-            throw new BaseException(e.getMessage());
-        } finally {
-            if (process != null) {
-                process.destroy();
-            }
-        }
     }
 
 }
