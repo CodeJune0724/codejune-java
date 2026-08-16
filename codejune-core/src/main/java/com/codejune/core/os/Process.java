@@ -92,6 +92,16 @@ public final class Process {
     }
 
     /**
+     * 获取父级进程
+     *
+     * @return Process
+     * */
+    public Process getParent() {
+        Optional<ProcessHandle> parent = this.processHandle.parent();
+        return parent.map(Process::new).orElse(null);
+    }
+
+    /**
      * 获取子进程
      *
      * @return 子进程
