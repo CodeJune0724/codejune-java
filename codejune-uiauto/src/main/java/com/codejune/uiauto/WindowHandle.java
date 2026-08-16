@@ -261,6 +261,18 @@ public final class WindowHandle {
     }
 
     /**
+     * 关闭窗口
+     * */
+    public void close() {
+        User32.INSTANCE.PostMessage(
+                this.hwnd,
+                WinUser.WM_CLOSE,
+                new WinDef.WPARAM(0),
+                new WinDef.LPARAM(0)
+        );
+    }
+
+    /**
      * 获取所有窗口句柄
      *
      * @return List<WindowHandle>
