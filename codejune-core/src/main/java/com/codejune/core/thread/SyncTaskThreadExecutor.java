@@ -21,6 +21,7 @@ public abstract class SyncTaskThreadExecutor {
         if (this.status) {
             return;
         }
+        this.status = true;
         Thread.startVirtualThread(() -> {
             try {
                 this.handler();
