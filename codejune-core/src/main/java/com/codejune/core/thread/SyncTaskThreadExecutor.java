@@ -38,4 +38,13 @@ public abstract class SyncTaskThreadExecutor {
         this.status = false;
     }
 
+    /**
+     * 是否在运行
+     *
+     * @return 是否在运行
+     * */
+    public final boolean isRun() {
+        return this.status;
+    }
+
 }
