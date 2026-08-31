@@ -4,9 +4,7 @@ import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.ShellUtil;
 import com.codejune.core.util.StringUtil;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -58,33 +56,11 @@ public final class Process {
      * */
     public String getArgument() {
         int pid = this.getPid();
-        if (OSType.getCurrentOSType() == OSType.WINDOWS_7) {
-            String commandResult = ShellUtil.fastCommand("wmic process get ProcessId,CommandLine /format:csv | findstr " + pid);
-            if (commandResult == null) {
-                return null;
-            }
-            for (String item : commandResult.split("\n")) {
-                if (!item.endsWith("," + pid)) {
-                    continue;
-                }
-                return item.replace("," + pid, "");
-            }
-            return null;
-        } else {
-            String commandResult = ShellUtil.fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter ProcessId=" + pid + " | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
-            if (commandResult == null) {
-                return null;
-            }
-            commandResult = commandResult.replace("\n         ", "");
-            for (String item : commandResult.split("\n")) {
-                item = item.trim();
-                if (!item.startsWith(pid + "")) {
-                    continue;
-                }
-                return item.replace(pid + " ", "");
-            }
+        List<String> argumentList = getArgument(pid);
+        if (ObjectUtil.isEmpty(argumentList)) {
             return null;
         }
+        return argumentList.getFirst();
     }
 
     /**
@@ -153,6 +129,62 @@ public final class Process {
                 result.add(new Process(processHandle));
             }
         });
+        return result;
+    }
+
+    /**
+     * 获取参数
+     *
+     * @param query query
+     *
+     * @return 参数
+     * */
+    public static List<String> getArgument(Object query) {
+        List<String> result = new ArrayList<>();
+        if (query == null) {
+            return result;
+        }
+        if (OSType.getCurrentOSType() == OSType.WINDOWS_7) {
+            String commandResult = ShellUtil.fastCommand("wmic process get ProcessId,CommandLine /format:csv | findstr " + query);
+            if (commandResult == null) {
+                return result;
+            }
+            commandResult = commandResult.replace("\r", "");
+            for (String item : commandResult.split("\n")) {
+                if (query instanceof Integer) {
+                    if (item.endsWith("," + query)) {
+                        result.add(item.replace("," + query, ""));
+                    }
+                } else {
+                    if (item.contains(query + "")) {
+                        result.add(item);
+                    }
+                }
+            }
+        } else {
+            String commandResult;
+            if (query instanceof Integer) {
+                commandResult = ShellUtil.fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter ProcessId=" + query + " | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
+            } else {
+                commandResult = ShellUtil.fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\"Name='" + query + "'\\\" | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
+            }
+            if (commandResult == null) {
+                return result;
+            }
+            commandResult = commandResult.replace("\r", "").replace("\n         ", "");
+            for (String item : commandResult.split("\n")) {
+                item = item.trim();
+                if (query instanceof Integer) {
+                    if (item.startsWith(query + "")) {
+                        result.add(item.replace(query + " ", ""));
+                    }
+                } else {
+                    if (item.contains(query + "")) {
+                        result.add(item);
+                    }
+                }
+            }
+        }
         return result;
     }
 
