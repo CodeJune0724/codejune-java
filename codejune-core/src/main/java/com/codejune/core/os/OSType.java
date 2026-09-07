@@ -1,6 +1,9 @@
 package com.codejune.core.os;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.util.ShellUtil;
+import com.codejune.core.util.StringUtil;
+
 import java.lang.System;
 
 /**
@@ -50,6 +53,10 @@ public enum OSType {
         }
         if (osName.contains("Linux")) {
             return LINUX;
+        }
+        String ver = ShellUtil.fastCommand("ver");
+        if (!StringUtil.isEmpty(ver) && ver.contains("Windows")) {
+            return WINDOWS_11;
         }
         throw new BaseException("未找到系统类型");
     }
