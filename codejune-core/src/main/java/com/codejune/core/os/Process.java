@@ -171,7 +171,7 @@ public final class Process {
             if (commandResult == null) {
                 return result;
             }
-            commandResult = commandResult.replace("\r", "").replace("\n         ", "");
+            commandResult = commandResult.replace("\r", "").replace("\n          ", "");
             for (String item : commandResult.split("\n")) {
                 item = item.trim();
                 if (query instanceof Integer) {
