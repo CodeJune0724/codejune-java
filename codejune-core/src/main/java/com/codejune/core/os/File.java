@@ -2,10 +2,10 @@ package com.codejune.core.os;
 
 import com.codejune.core.BaseException;
 import com.codejune.core.io.reader.TextInputStreamReader;
-import com.codejune.core.util.IOUtil;
-import com.codejune.core.util.ObjectUtil;
-import com.codejune.core.util.StringUtil;
+import com.codejune.core.util.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 /**
@@ -87,8 +87,13 @@ public final class File implements FileInfo<String> {
      * 删除
      * */
     public void delete() {
-        if (!file.delete()) {
-            throw new BaseException("删除文件失败: " + this.getPath());
+        try {
+            Files.delete(Path.of(this.file.getAbsolutePath()));
+        } catch (Exception e) {
+            ShellUtil.fastCommand("del /f /q /a \"" + this.file.getAbsolutePath() + "\"");
+            if (FileUtil.exist(this.file)) {
+                throw new BaseException(e);
+            }
         }
     }
 
