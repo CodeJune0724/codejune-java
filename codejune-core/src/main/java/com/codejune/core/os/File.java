@@ -1,6 +1,7 @@
 package com.codejune.core.os;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.Encoding;
 import com.codejune.core.io.reader.TextInputStreamReader;
 import com.codejune.core.util.*;
 import java.io.*;
@@ -159,7 +160,7 @@ public final class File implements FileInfo<String> {
             return;
         }
         try (com.codejune.core.io.writer.OutputStreamWriter outputStreamWriter = new com.codejune.core.io.writer.OutputStreamWriter(IOUtil.getOutputStream(this.file, append))) {
-            outputStreamWriter.write(data.getBytes());
+            outputStreamWriter.write(data.getBytes(Encoding.NATIVE));
         }
     }
 
