@@ -96,6 +96,15 @@ public final class Process {
     }
 
     /**
+     * 是否有效
+     *
+     * @return 是否有效
+     * */
+    public boolean isAlive() {
+        return this.processHandle.isAlive();
+    }
+
+    /**
      * 通过pid获取
      *
      * @param pid pid
