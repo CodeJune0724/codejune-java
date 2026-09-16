@@ -2,6 +2,7 @@ package com.codejune.core.util;
 
 import com.codejune.core.BaseException;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +37,12 @@ public final class ThreadUtil {
         if (num <= 0) {
             throw new BaseException("线程数 <= 0");
         }
-        return new ThreadPoolExecutor(num, num, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>());
+        ThreadFactory threadFactory = runnable -> {
+            Thread result = new Thread(runnable);
+            result.setDaemon(true);
+            return result;
+        };
+        return new ThreadPoolExecutor(num, num, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>(), threadFactory);
     }
 
     /**
