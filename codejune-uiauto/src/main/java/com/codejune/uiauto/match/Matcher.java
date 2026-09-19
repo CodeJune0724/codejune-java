@@ -12,6 +12,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
@@ -70,30 +71,24 @@ public final class Matcher {
         } finally {
             originBufferedImage.flush();
         }
+        Mat resultMat = new Mat();
         try {
             for (BufferedImage bufferedImage : templateBufferedImage) {
                 Mat templateMat = bufferedImageToMat(bufferedImage, matchConfig.isCvtColor());
                 try {
-                    Mat resultMat = null;
-                    try {
-                        resultMat = new Mat(originMat.cols() - templateMat.cols() + 1, originMat.rows() - templateMat.rows() + 1, CvType.CV_32FC1);
-                        Imgproc.matchTemplate(originMat, templateMat, resultMat, Imgproc.TM_CCOEFF_NORMED);
-                        Core.MinMaxLocResult minMaxLocResult = Core.minMaxLoc(resultMat);
-                        if (minMaxLocResult.maxVal >= matchConfig.getSimilar()) {
-                            int x = (int) minMaxLocResult.maxLoc.x;
-                            int y = (int) minMaxLocResult.maxLoc.y;
-                            x = x + templateMat.width() / 2;
-                            y = y + templateMat.height() / 2;
-                            return new MatchResult(
-                                    range != null ? range.getX() + x : x,
-                                    range != null ? range.getY() + y : y,
-                                    minMaxLocResult.maxVal
-                            );
-                        }
-                    } finally {
-                        if (resultMat != null) {
-                            resultMat.release();
-                        }
+                    resultMat.create(originMat.cols() - templateMat.cols() + 1, originMat.rows() - templateMat.rows() + 1, CvType.CV_32FC1);
+                    Imgproc.matchTemplate(originMat, templateMat, resultMat, Imgproc.TM_CCOEFF_NORMED);
+                    Core.MinMaxLocResult minMaxLocResult = Core.minMaxLoc(resultMat);
+                    if (minMaxLocResult.maxVal >= matchConfig.getSimilar()) {
+                        int x = (int) minMaxLocResult.maxLoc.x;
+                        int y = (int) minMaxLocResult.maxLoc.y;
+                        x = x + templateMat.width() / 2;
+                        y = y + templateMat.height() / 2;
+                        return new MatchResult(
+                                range != null ? range.getX() + x : x,
+                                range != null ? range.getY() + y : y,
+                                minMaxLocResult.maxVal
+                        );
                     }
                 } finally {
                     templateMat.release();
@@ -102,6 +97,7 @@ public final class Matcher {
             return null;
         } finally {
             originMat.release();
+            resultMat.release();
         }
     }
 
@@ -197,9 +193,11 @@ public final class Matcher {
      * */
     private static Mat bufferedImageToMat(BufferedImage bufferedImage, boolean cvtColor) {
         Mat mat = new Mat(bufferedImage.getHeight(), bufferedImage.getWidth(), CvType.CV_8UC3);
+        Graphics graphics = null;
         try {
             BufferedImage newBufferedImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-            newBufferedImage.getGraphics().drawImage(bufferedImage, 0, 0, null);
+            graphics = newBufferedImage.getGraphics();
+            graphics.drawImage(bufferedImage, 0, 0, null);
             byte[] newBufferedImageByte = ((DataBufferByte) newBufferedImage.getRaster().getDataBuffer()).getData();
             mat.put(0, 0, newBufferedImageByte);
             if (cvtColor) {
@@ -212,6 +210,9 @@ public final class Matcher {
         } finally {
             if (cvtColor) {
                 mat.release();
+            }
+            if (graphics != null) {
+                graphics.dispose();
             }
         }
     }

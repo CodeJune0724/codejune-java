@@ -49,4 +49,8 @@ public final class Text extends BaseComponent {
         }
     }
 
+    public void setLineSpacing(int spacing) {
+        this.label.setLineSpacing(spacing);
+    }
+
 }

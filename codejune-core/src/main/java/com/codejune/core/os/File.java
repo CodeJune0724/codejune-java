@@ -193,8 +193,13 @@ public final class File implements FileInfo<String> {
             new File(copyFile).delete();
         }
         File result = new File(copyFile);
-        try (InputStream inputStream = IOUtil.getInputStream(file)) {
+        try (InputStream inputStream = IOUtil.getInputStream(this.file)) {
             result.write(inputStream);
+        } catch (Exception e) {
+            throw new BaseException(e);
+        }
+        try {
+            Files.setLastModifiedTime(new java.io.File(result.getPath()).toPath(), Files.getLastModifiedTime(this.file.toPath()));
         } catch (Exception e) {
             throw new BaseException(e);
         }

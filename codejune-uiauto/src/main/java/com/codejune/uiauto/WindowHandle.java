@@ -11,8 +11,9 @@ import com.sun.jna.Native;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.ptr.IntByReference;
 import java.awt.*;
-import java.awt.image.BufferedImage;
+import java.awt.image.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -97,7 +98,7 @@ public final class WindowHandle {
      * */
     public BufferedImage capture(int cutTop, int cutLeft) {
         WinDef.RECT rect = new WinDef.RECT();
-        USER_32.GetWindowRect(this.hwnd, rect);
+        USER_32.GetClientRect(this.hwnd, rect);
         int width = rect.right - rect.left;
         int height = rect.bottom - rect.top;
         WinDef.HDC screenDC = USER_32.GetDC(null);
@@ -120,9 +121,7 @@ public final class WindowHandle {
             if (oldBitmap == null) {
                 throw new BaseException("SelectObject失败");
             }
-            int flags = 0;
-            flags |= 0x00000002;
-            boolean printSuccess = USER32_EXTRA.PrintWindow(hwnd, memDC, flags);
+            boolean printSuccess = USER32_EXTRA.PrintWindow(hwnd, memDC, 3);
             if (!printSuccess) {
                 WinDef.HDC windowDC = USER_32.GetDC(hwnd);
                 if (windowDC != null) {
@@ -149,27 +148,9 @@ public final class WindowHandle {
                 BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                 int[] pixels = new int[width * height];
                 memory.read(0, pixels, 0, pixels.length);
-                bufferedImage.setRGB(0, 0, width, height, pixels, 0, width);
-                if (cutTop != 0 || cutLeft != 0) {
-                    BufferedImage newBufferedImage = new BufferedImage(bufferedImage.getWidth() + cutLeft, bufferedImage.getHeight() + cutTop, BufferedImage.TYPE_INT_ARGB);
-                    Graphics2D graphics2D = null;
-                    try {
-                        graphics2D = newBufferedImage.createGraphics();
-                        graphics2D.setColor(new Color(0, 255, 0, 255));
-                        graphics2D.fillRect(0, 0, newBufferedImage.getWidth(), newBufferedImage.getHeight());
-                        graphics2D.drawImage(bufferedImage,
-                                Math.max(cutLeft, 0), Math.max(cutTop, 0), newBufferedImage.getWidth(), newBufferedImage.getHeight(),
-                                cutLeft > 0 ? 0 : -cutLeft, cutTop > 0 ? 0 : -cutTop, bufferedImage.getWidth(), bufferedImage.getHeight(),
-                                null
-                        );
-                    } finally {
-                        if (graphics2D != null) {
-                            graphics2D.dispose();
-                        }
-                    }
-                    bufferedImage = newBufferedImage;
-                }
-                return bufferedImage;
+                int[] dataBuffer = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
+                System.arraycopy(pixels, 0, dataBuffer, 0, pixels.length);
+                return cutBufferedImage(bufferedImage, cutTop, cutLeft);
             }
         } finally {
             if (oldBitmap != null) {
@@ -208,7 +189,7 @@ public final class WindowHandle {
         if (delay < 0) {
             delay = 0;
         }
-        WinDef.POINT point = new WinDef.POINT(x - 8, y);
+        WinDef.POINT point = new WinDef.POINT(x, y);
         int lParam = (point.y << 16) | (point.x & 0xFFFF);
         USER_32.SendMessage(this.hwnd, 0x0201, new WinDef.WPARAM(1), new WinDef.LPARAM(lParam));
         if (delay > 0) {
@@ -396,6 +377,64 @@ public final class WindowHandle {
             Kernel32.INSTANCE.CloseHandle(snapshot);
         }
         return null;
+    }
+
+    private static BufferedImage cutBufferedImage(BufferedImage bufferedImage, int cutTop, int cutLeft) {
+        if (cutTop == 0 && cutLeft == 0) {
+            return bufferedImage;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int newWidth = width + cutLeft;
+        int newHeight = height + cutTop;
+        BufferedImage dstImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+        int[] dst = ((DataBufferInt) dstImage.getRaster().getDataBuffer()).getData();
+        int srcX = cutLeft < 0 ? - cutLeft : 0;
+        int srcY = cutTop < 0 ? - cutTop : 0;
+        int dstX = Math.max(cutLeft, 0);
+        int dstY = Math.max(cutTop, 0);
+        int copyW = Math.min(width - srcX, newWidth - dstX);
+        int copyH = Math.min(height - srcY, newHeight - dstY);
+        if (cutTop > 0) {
+            Arrays.fill(dst, 0, cutTop * newWidth, 0xFF00FF00);
+        }
+        if (cutLeft > 0) {
+            int startY = Math.max(cutTop, 0);
+            for (int y = startY; y < newHeight; y++) {
+                int rowStart = y * newWidth;
+                Arrays.fill(dst, rowStart, rowStart + cutLeft, 0xFF00FF00);
+            }
+        }
+        if (bufferedImage.getType() == BufferedImage.TYPE_INT_ARGB) {
+            Raster raster = bufferedImage.getRaster();
+            DataBufferInt db = (DataBufferInt) raster.getDataBuffer();
+            int[] srcData = db.getData();
+            int srcOffset = db.getOffset();
+            int srcStride = getScanlineStride(raster.getSampleModel(), width);
+            for (int y = 0; y < copyH; y++) {
+                int srcRow = srcOffset + (srcY + y) * srcStride + srcX;
+                int dstRow = (dstY + y) * newWidth + dstX;
+                System.arraycopy(srcData, srcRow, dst, dstRow, copyW);
+            }
+        } else {
+            int[] srcData = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+            for (int y = 0; y < copyH; y++) {
+                int srcRow = (srcY + y) * width + srcX;
+                int dstRow = (dstY + y) * newWidth + dstX;
+                System.arraycopy(srcData, srcRow, dst, dstRow, copyW);
+            }
+        }
+        return dstImage;
+    }
+    private static int getScanlineStride(SampleModel sm, int fallbackWidth) {
+        if (sm instanceof ComponentSampleModel) {
+            return ((ComponentSampleModel) sm).getScanlineStride();
+        } else if (sm instanceof SinglePixelPackedSampleModel) {
+            return ((SinglePixelPackedSampleModel) sm).getScanlineStride();
+        } else if (sm instanceof MultiPixelPackedSampleModel) {
+            return ((MultiPixelPackedSampleModel) sm).getScanlineStride();
+        }
+        return fallbackWidth;
     }
 
     private interface User32Extra extends User32 {
