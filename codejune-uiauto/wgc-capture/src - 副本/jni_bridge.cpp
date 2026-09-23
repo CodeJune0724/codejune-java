@@ -8,8 +8,6 @@
 #include <objbase.h>
 #include <queue>
 #include <condition_variable>
-#include <atomic>
-#include <thread>
 
 static void ThrowJavaException(JNIEnv* env, const char* msg) {
     jclass cls = env->FindClass("java/lang/RuntimeException");
@@ -41,9 +39,6 @@ struct Task {
     TaskType type;
     HWND hwnd{nullptr};
     jlong sessionId{0};
-
-    // ===== 新增：是否应用 WS_EX_NOACTIVATE =====
-    bool applyNoActivate{false};
 
     bool boolRet{false};
     jlong longRet{0};
@@ -126,7 +121,7 @@ static void WorkerThreadMain()
                 case TASK_START:
                 {
                     auto capture = std::make_unique<WGCCapture>();
-                    bool ok = capture->Init(task->hwnd, task->applyNoActivate);
+                    bool ok = capture->Init(task->hwnd);
                     if(!ok)
                     {
                         task->longRet = 0;
@@ -268,12 +263,9 @@ static void TryShutdownWorkerIfNoSessions()
     }
 }
 
-// ============================================================
-// nativeStartCapture 新增参数：applyNoActivate
-// ============================================================
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_codejune_uiauto_WGCCapture_nativeStartCapture(
-        JNIEnv* env, jclass, jlong hwnd, jboolean applyNoActivate)
+        JNIEnv* env, jclass, jlong hwnd)
 {
     try
     {
@@ -298,7 +290,6 @@ Java_com_codejune_uiauto_WGCCapture_nativeStartCapture(
         auto task = std::make_shared<Task>();
         task->type = TASK_START;
         task->hwnd = hWndRaw;
-        task->applyNoActivate = (applyNoActivate == JNI_TRUE);
         auto resTask = PostTask(task);
         if(!resTask)
         {

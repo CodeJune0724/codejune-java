@@ -18,19 +18,12 @@ using namespace winrt::Windows::Graphics::Capture;
 
 class WGCCapture {
 public:
-    /**
-     * @param hwnd            目标窗口句柄
-     * @param applyNoActivate 是否在创建捕获项后给窗口加上 WS_EX_NOACTIVATE
-     * @return true 表示初始化成功
-     */
-    bool Init(HWND hwnd, bool applyNoActivate);
-
+    bool Init(HWND hwnd);
     bool GetFrame(int& outWidth, int& outHeight, void** outData);
     int  GetWidth();
     int  GetHeight();
     void Stop();
     ~WGCCapture();
-
 private:
     HWND m_hwnd = nullptr;
     ComPtr<ID3D11Device> m_d3dDevice;
@@ -63,10 +56,6 @@ private:
 
     std::atomic<bool> m_stopping{ false };
     std::atomic<int>  m_callbackCount{ 0 };
-
-    // 记录窗口原始样式，便于 Stop 时恢复
-    LONG_PTR m_originalExStyle = 0;
-    bool     m_styleModified   = false;
 
     void OnFrameArrived(Direct3D11CaptureFramePool const& sender);
 };

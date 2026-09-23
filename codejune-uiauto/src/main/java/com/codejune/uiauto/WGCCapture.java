@@ -9,11 +9,11 @@ import java.io.File;
 import java.nio.ByteBuffer;
 
 /**
- * WGCapture
+ * WGCCapture
  *
  * @author ZJ
  * */
-public class WGCapture implements AutoCloseable {
+public class WGCCapture implements AutoCloseable {
 
     private final WinDef.HWND hwnd;
 
@@ -27,9 +27,13 @@ public class WGCapture implements AutoCloseable {
 
     private int cachedHeight = 0;
 
-    public WGCapture(WinDef.HWND hwnd) {
+    public WGCCapture(WinDef.HWND hwnd, boolean applyNoActivate) {
         this.hwnd = hwnd;
-        this.init();
+        long pointer = Pointer.nativeValue(this.hwnd.getPointer());
+        this.sessionId = nativeStartCapture(pointer, applyNoActivate);
+        if (this.sessionId == 0) {
+            throw new RuntimeException("WGC初始化失败，请确认系统为 Win10 1903+ 且句柄有效");
+        }
     }
 
     @Override
@@ -48,17 +52,6 @@ public class WGCapture implements AutoCloseable {
     }
 
     /**
-     * 初始化
-     * */
-    private void init() {
-        long pointer = Pointer.nativeValue(hwnd.getPointer());
-        this.sessionId = nativeStartCapture(pointer);
-        if (this.sessionId == 0) {
-            throw new RuntimeException("WGC初始化失败，请确认系统为 Win10 1903+ 且句柄有效");
-        }
-    }
-
-    /**
      * 截图
      *
      * @return BufferedImage
@@ -67,24 +60,27 @@ public class WGCapture implements AutoCloseable {
         if (this.sessionId == 0) {
             throw new BaseException("WGCapture");
         }
+
         ByteBuffer byteBuffer = nativeGetFrameBuffer(this.sessionId);
         if (byteBuffer == null) return null;
+
         int w = nativeGetWidth(this.sessionId);
         int h = nativeGetHeight(this.sessionId);
         if (w <= 0 || h <= 0) return null;
-        if (this.reusableImage == null || this.cachedWidth != w || this.cachedHeight != h) {
-            if (this.cachedWidth == 0 || this.cachedHeight == 0) {
-                this.reusableImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-                this.imageData = ((DataBufferInt) this.reusableImage.getRaster().getDataBuffer()).getData();
-                this.cachedWidth = w;
-                this.cachedHeight = h;
-            } else {
-                this.close();
-                this.init();
-                return this.capture();
-            }
-        }
+
         final int pixelCount = w * h;
+        if (byteBuffer.capacity() < pixelCount * 4) return null;
+
+        if (this.reusableImage == null
+                || this.cachedWidth != w
+                || this.cachedHeight != h) {
+            this.reusableImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            this.imageData = ((DataBufferInt) this.reusableImage
+                    .getRaster().getDataBuffer()).getData();
+            this.cachedWidth = w;
+            this.cachedHeight = h;
+        }
+
         byteBuffer.rewind();
         for (int i = 0; i < pixelCount; i++) {
             int b = byteBuffer.get() & 0xFF;
@@ -104,7 +100,10 @@ public class WGCapture implements AutoCloseable {
     public BufferedImage captureCopy() {
         BufferedImage bufferedImage = this.capture();
         if (bufferedImage == null) return null;
-        BufferedImage result = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage result = new BufferedImage(
+                bufferedImage.getWidth(),
+                bufferedImage.getHeight(),
+                BufferedImage.TYPE_INT_RGB);
         result.getGraphics().drawImage(bufferedImage, 0, 0, null);
         return result;
     }
@@ -127,7 +126,7 @@ public class WGCapture implements AutoCloseable {
         System.load(dllFile.getAbsolutePath());
     }
 
-    private static native long nativeStartCapture(long hwnd);
+    public static native long nativeStartCapture(long hwnd, boolean applyNoActivate);
 
     private static native ByteBuffer nativeGetFrameBuffer(long sessionId);
 

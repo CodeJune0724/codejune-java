@@ -15,12 +15,10 @@ static winrt::com_ptr<T> GetDXGIInterfaceFromObject(
     return result;
 }
 
-bool WGCCapture::Init(HWND hwnd, bool applyNoActivate)
+bool WGCCapture::Init(HWND hwnd)
 {
     m_hwnd = hwnd;
     m_stopping = false;
-    m_styleModified = false;
-    m_originalExStyle = 0;
 
     D3D_FEATURE_LEVEL featureLevels[] = {
         D3D_FEATURE_LEVEL_11_1,
@@ -78,9 +76,6 @@ bool WGCCapture::Init(HWND hwnd, bool applyNoActivate)
 
     auto interopFactory = winrt::get_activation_factory<GraphicsCaptureItem, IGraphicsCaptureItemInterop>();
 
-    // ==========================================================
-    // 1. 先创建捕获项（此时窗口仍处于原始样式）
-    // ==========================================================
     hr = interopFactory->CreateForWindow(
         hwnd,
         winrt::guid_of<GraphicsCaptureItem>(),
@@ -90,20 +85,6 @@ bool WGCCapture::Init(HWND hwnd, bool applyNoActivate)
         return false;
     }
 
-    // ==========================================================
-    // 2. 根据入参决定是否加上 WS_EX_NOACTIVATE
-    //    注意：不加 SetWindowPos 等任何刷新操作
-    // ==========================================================
-    if (applyNoActivate)
-    {
-        m_originalExStyle = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
-        SetWindowLongPtrW(hwnd, GWL_EXSTYLE, m_originalExStyle | WS_EX_NOACTIVATE);
-        m_styleModified = true;
-    }
-
-    // ==========================================================
-    // 3. 继续原有的捕获流程（FramePool / Session）
-    // ==========================================================
     auto size = m_captureItem.Size();
     m_poolWidth  = size.Width;
     m_poolHeight = size.Height;
@@ -140,12 +121,6 @@ bool WGCCapture::Init(HWND hwnd, bool applyNoActivate)
     }
     catch (...)
     {
-        // 启动失败时回滚窗口样式
-        if (m_styleModified && IsWindow(m_hwnd))
-        {
-            SetWindowLongPtrW(m_hwnd, GWL_EXSTYLE, m_originalExStyle);
-            m_styleModified = false;
-        }
         return false;
     }
 
@@ -348,13 +323,6 @@ void WGCCapture::Stop()
     m_stagingTexture.Reset();
     m_d3dContext.Reset();
     m_d3dDevice.Reset();
-
-    // 恢复窗口原始扩展样式
-    if (m_styleModified && IsWindow(m_hwnd))
-    {
-        SetWindowLongPtrW(m_hwnd, GWL_EXSTYLE, m_originalExStyle);
-        m_styleModified = false;
-    }
 
     std::lock_guard<std::mutex> lock(m_frameMutex);
     m_latestFrame.clear();
