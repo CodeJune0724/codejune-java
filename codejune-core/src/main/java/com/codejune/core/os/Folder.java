@@ -1,7 +1,9 @@
 package com.codejune.core.os;
 
 import com.codejune.core.BaseException;
+import com.codejune.core.util.FileUtil;
 import com.codejune.core.util.ObjectUtil;
+import com.codejune.core.util.ShellUtil;
 import com.codejune.core.util.StringUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -131,7 +133,10 @@ public final class Folder implements FileInfo<String> {
             folder.delete();
         }
         if (!new java.io.File(this.path).delete()) {
-            throw new BaseException("删除文件夹失败");
+            ShellUtil.fastCommand("rd /s /q \"" + this.getPath() + "\"");
+            if (FileUtil.isFolder(new java.io.File(this.path))) {
+                throw new BaseException("删除文件夹失败");
+            }
         }
     }
 
