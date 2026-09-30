@@ -22,15 +22,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
 
     @Override
     public String getDirectUrl(String url) {
-        Exception error = null;
-        for (int i = 0; i < 5; i++) {
-            try {
-                return this.baseGetDirectUrl(url);
-            } catch (Exception e) {
-                error = e;
-            }
-        }
-        throw new BaseException(error);
+        return this.baseGetDirectUrl(url);
     }
 
     private String baseGetDirectUrl(String baseUrl) {
@@ -61,7 +53,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         String wp_sign = RegexUtil.find("var wp_sign = '(.*?)';", signResult, 1);
         String ajaxdata = RegexUtil.find("var ajaxdata = '(.*?)';", signResult, 1);
         String kdns = RegexUtil.find("var kdns =(.*?);", signResult, 1);
-        String url = RegexUtil.find("url : '(.*?)',", signResult, 1);
+        String url = RegexUtil.find("var domain2 = '(.*?)';", signResult, 1);
 
         if (StringUtil.isEmpty(url)) {
             throw new BaseException("获取失败，请重试");
