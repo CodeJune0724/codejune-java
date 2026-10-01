@@ -22,7 +22,15 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
 
     @Override
     public String getDirectUrl(String url) {
-        return this.baseGetDirectUrl(url);
+        Exception error = null;
+        for (int i = 0; i < 5; i++) {
+            try {
+                return this.baseGetDirectUrl(url);
+            } catch (Exception e) {
+                error = e;
+            }
+        }
+        throw new BaseException(error);
     }
 
     private String baseGetDirectUrl(String baseUrl) {
@@ -53,8 +61,15 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         String wp_sign = RegexUtil.find("var wp_sign = '(.*?)';", signResult, 1);
         String ajaxdata = RegexUtil.find("var ajaxdata = '(.*?)';", signResult, 1);
         String kdns = RegexUtil.find("var kdns =(.*?);", signResult, 1);
-        String url = RegexUtil.find("var domain2 = '(.*?)';", signResult, 1);
-
+        if (!new Http("https://developer4.lanrar.com/file/kdns.js", Type.GET).send().getBody().contains("true")) {
+            kdns = "0";
+        }
+        String url;
+        if (new Http("https://apifile.woozooo.com/killdnsweb.js", Type.GET).send().getBody().contains("var killdnsweb")) {
+            url = RegexUtil.find("var domain1 = '(.*?)';", signResult, 1);
+        } else {
+            url = RegexUtil.find("var domain2 = '(.*?)';", signResult, 1);
+        }
         if (StringUtil.isEmpty(url)) {
             throw new BaseException("获取失败，请重试");
         }
