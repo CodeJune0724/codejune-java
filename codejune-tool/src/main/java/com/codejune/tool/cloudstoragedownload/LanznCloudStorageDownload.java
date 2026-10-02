@@ -40,12 +40,11 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
                 .send());
 
         // 获取第一层地址
-        String srcUrl = new Http(baseUrl, Type.GET)
+        HttpResponse<String> httpResponse = new Http(baseUrl, Type.GET)
                 .addUserAgent()
                 .addHeader("cookie", baseCookie)
-                .send()
-                .getBody();
-
+                .send();
+        String srcUrl = httpResponse.getBody();
         for (String item : RegexUtil.find("src=\"(.*?)\"", srcUrl)) {
             if (item.startsWith("/fn")) {
                 srcUrl = item;
@@ -53,9 +52,13 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
             }
         }
 
+        // 另外2个cookie
+        baseCookie = baseCookie + "; " + ArrayUtil.toString(httpResponse.getHeaderList("set-cookie"), header -> header.getValue().split("; ")[0], "; ");
+
         // 获取签名信息
-        String signResult = new Http("https://wwvx.lanzoul.com" + srcUrl, Type.GET)
+        String signResult = new Http("https://wwbij.lanzn.com" + srcUrl, Type.GET)
                 .addUserAgent()
+                .addHeader("cookie", baseCookie)
                 .send()
                 .getBody();
         String wp_sign = RegexUtil.find("var wp_sign = '(.*?)';", signResult, 1);
