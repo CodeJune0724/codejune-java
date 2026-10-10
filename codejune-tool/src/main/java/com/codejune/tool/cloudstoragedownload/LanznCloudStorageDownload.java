@@ -56,7 +56,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         baseCookie = baseCookie + "; " + ArrayUtil.toString(httpResponse.getHeaderList("set-cookie"), header -> header.getValue().split("; ")[0], "; ");
 
         // 获取签名信息
-        String signResult = new Http("https://wwbij.lanzn.com" + srcUrl, Type.GET)
+        String signResult = new Http(baseUrl.split("\\.com")[0] + ".com" + srcUrl, Type.GET)
                 .addUserAgent()
                 .addHeader("cookie", baseCookie)
                 .send()
