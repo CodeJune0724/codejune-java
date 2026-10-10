@@ -144,11 +144,10 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
                 "    return document.cookie;\n" +
                 "};");
         String execute = javascript.execute("test");
-        if (execute == null) {
-            execute = "";
+        if (!StringUtil.isEmpty(execute)) {
+            execute = execute.split(";")[0];
+            cookie.put(execute.split("=")[0], execute.split("=")[1]);
         }
-        execute = execute.split(";")[0];
-        cookie.put(execute.split("=")[0], execute.split("=")[1]);
         String result = "";
         for (String key : cookie.keySet()) {
             result = StringUtil.append(result, key, "=", cookie.get(key), "; ");
