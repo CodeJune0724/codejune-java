@@ -1,11 +1,10 @@
 package com.codejune.uiauto;
 
-import com.codejune.Shell;
 import com.codejune.core.BaseException;
-import com.codejune.core.os.OSType;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.core.util.ThreadUtil;
+import com.codejune.system.Process;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.*;
@@ -27,7 +26,7 @@ public final class WindowHandle {
 
     private final String name;
 
-    private final String process;
+    private final Process process;
 
     private final WinDef.HWND hwnd;
 
@@ -35,7 +34,7 @@ public final class WindowHandle {
 
     private static final User32Extra USER32_EXTRA = Native.load("user32", User32Extra.class);
 
-    private WindowHandle(int id, String name, String process, WinDef.HWND hwnd) {
+    private WindowHandle(int id, String name, Process process, WinDef.HWND hwnd) {
         this.id = id;
         this.name = name;
         this.process = process;
@@ -50,7 +49,7 @@ public final class WindowHandle {
         return this.name;
     }
 
-    public String getProcess() {
+    public Process getProcess() {
         return this.process;
     }
 
@@ -320,43 +319,14 @@ public final class WindowHandle {
             if (!StringUtil.isEmpty(queryName) && !ObjectUtil.equals(name, queryName)) {
                 return true;
             }
-            if (!StringUtil.isEmpty(queryProcessName) && !ObjectUtil.equals(getProcessName(pid), queryProcessName)) {
+            Process process = Process.getByPid(pid);
+            if (!StringUtil.isEmpty(queryProcessName) && !ObjectUtil.equals(process.getName(), queryProcessName)) {
                 return true;
             }
-            result.add(new WindowHandle(pid, name, getProcess(pid), hwnd));
+            result.add(new WindowHandle(pid, name, process, hwnd));
             return true;
         }, null);
         return result;
-    }
-
-    private static String getProcess(int pid) {
-        if (OSType.getCurrentOSType() == OSType.WINDOWS_7) {
-            String commandResult = Shell.fastCommand("wmic process get ProcessId,CommandLine /format:csv | findstr " + pid);
-            if (commandResult == null) {
-                return null;
-            }
-            for (String item : commandResult.split("\n")) {
-                if (!item.endsWith("," + pid)) {
-                    continue;
-                }
-                return item.replace("," + pid, "");
-            }
-            return null;
-        } else {
-            String commandResult = Shell.fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter ProcessId=" + pid + " | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
-            if (commandResult == null) {
-                return null;
-            }
-            commandResult = commandResult.replace("\n         ", "");
-            for (String item : commandResult.split("\n")) {
-                item = item.trim();
-                if (!item.startsWith(pid + "")) {
-                    continue;
-                }
-                return item.replace(pid + " ", "");
-            }
-            return null;
-        }
     }
 
     private static String getProcessName(int pid) {

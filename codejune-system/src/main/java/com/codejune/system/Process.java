@@ -1,8 +1,9 @@
-package com.codejune.core.os;
+package com.codejune.system;
 
 import com.codejune.core.util.ObjectUtil;
-import com.codejune.core.util.ShellUtil;
 import com.codejune.core.util.StringUtil;
+import oshi.software.os.OSProcess;
+import oshi.software.os.OperatingSystem;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Stream;
@@ -15,6 +16,8 @@ import java.util.stream.Stream;
 public final class Process {
 
     private final ProcessHandle processHandle;
+
+    private static final OperatingSystem OPERATING_SYSTEM = new oshi.nativefree.SystemInfo().getOperatingSystem();
 
     private Process(ProcessHandle processHandle) {
         this.processHandle = processHandle;
@@ -150,47 +153,16 @@ public final class Process {
      * */
     public static List<String> getArgument(Object query) {
         List<String> result = new ArrayList<>();
-        if (query == null) {
-            return result;
+        if (query instanceof Integer integer) {
+            OSProcess osProcess = OPERATING_SYSTEM.getProcess(integer);
+            if (osProcess != null) {
+                result.add(osProcess.getCommandLine());
+            }
         }
-        if (OSType.getCurrentOSType() == OSType.WINDOWS_7) {
-            String commandResult = ShellUtil.fastCommand("wmic process get ProcessId,CommandLine /format:csv | findstr " + query);
-            if (commandResult == null) {
-                return result;
-            }
-            commandResult = commandResult.replace("\r", "");
-            for (String item : commandResult.split("\n")) {
-                if (query instanceof Integer) {
-                    if (item.endsWith("," + query)) {
-                        result.add(item.replace("," + query, ""));
-                    }
-                } else {
-                    if (item.contains(query + "")) {
-                        result.add(item);
-                    }
-                }
-            }
-        } else {
-            String commandResult;
-            if (query instanceof Integer) {
-                commandResult = ShellUtil.fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter ProcessId=" + query + " | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
-            } else {
-                commandResult = ShellUtil.fastCommand("powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\"Name='" + query + "'\\\" | Select-Object ProcessId, CommandLine | Format-Table -Wrap -AutoSize\"");
-            }
-            if (commandResult == null) {
-                return result;
-            }
-            commandResult = commandResult.replace("\r", "").replace("\n          ", "");
-            for (String item : commandResult.split("\n")) {
-                item = item.trim();
-                if (query instanceof Integer) {
-                    if (item.startsWith(query + "")) {
-                        result.add(item.replace(query + " ", ""));
-                    }
-                } else {
-                    if (item.contains(query + "")) {
-                        result.add(item);
-                    }
+        if (query instanceof String string) {
+            for (OSProcess osProcess : OPERATING_SYSTEM.getProcesses()) {
+                if (string.equalsIgnoreCase(osProcess.getName() + ".exe")) {
+                    result.add(osProcess.getCommandLine());
                 }
             }
         }

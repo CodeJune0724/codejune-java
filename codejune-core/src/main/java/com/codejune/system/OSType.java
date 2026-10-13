@@ -1,4 +1,4 @@
-package com.codejune.core.os;
+package com.codejune.system;
 
 import com.codejune.core.BaseException;
 import java.lang.System;

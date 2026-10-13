@@ -2,7 +2,7 @@ package com.codejune.core.util;
 
 import com.codejune.core.BaseException;
 import com.codejune.core.Encoding;
-import com.codejune.core.os.OSType;
+import com.codejune.system.OSType;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;

@@ -1,4 +1,4 @@
-package com.codejune.core.os;
+package com.codejune.system;
 
 import com.codejune.core.BaseException;
 import java.awt.*;
@@ -8,11 +8,11 @@ import java.awt.datatransfer.StringSelection;
 import java.net.URI;
 
 /**
- * 系统
+ * 系统操作
  *
  * @author ZJ
  * */
-public final class System {
+public final class SystemOperation {
 
     /**
      * 打开网址
@@ -57,15 +57,6 @@ public final class System {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         StringSelection selection = new StringSelection(value);
         clipboard.setContents(selection, null);
-    }
-
-    /**
-     * 获取屏幕宽高
-     *
-     * @return DisplayMode
-     * */
-    public static DisplayMode getScreen() {
-        return GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
     }
 
 }

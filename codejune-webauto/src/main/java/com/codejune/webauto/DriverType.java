@@ -1,6 +1,6 @@
 package com.codejune.webauto;
 
-import com.codejune.core.os.OSType;
+import com.codejune.system.OSType;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
