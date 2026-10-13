@@ -2,6 +2,7 @@ package com.codejune.system;
 
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.core.util.StringUtil;
+import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 import java.io.File;
@@ -17,7 +18,7 @@ public final class Process {
 
     private final ProcessHandle processHandle;
 
-    private static final OperatingSystem OPERATING_SYSTEM = new oshi.nativefree.SystemInfo().getOperatingSystem();
+    private static final OperatingSystem OPERATING_SYSTEM = new SystemInfo().getOperatingSystem();
 
     private Process(ProcessHandle processHandle) {
         this.processHandle = processHandle;
