@@ -162,7 +162,7 @@ public final class Process {
         if (query instanceof String string) {
             for (OSProcess osProcess : OPERATING_SYSTEM.getProcesses()) {
                 if (string.equalsIgnoreCase(osProcess.getName() + ".exe")) {
-                    result.add(osProcess.getCommandLine());
+                    result.add(osProcess.getProcessID() + "\t" + osProcess.getCommandLine());
                 }
             }
         }
