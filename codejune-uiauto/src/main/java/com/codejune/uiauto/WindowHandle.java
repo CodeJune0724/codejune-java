@@ -253,6 +253,13 @@ public final class WindowHandle {
     }
 
     /**
+     * 取消最大化
+     * */
+    public void restore() {
+        User32.INSTANCE.ShowWindow(this.hwnd, WinUser.SW_RESTORE);
+    }
+
+    /**
      * 获取所有窗口句柄
      *
      * @return List<WindowHandle>
@@ -320,6 +327,9 @@ public final class WindowHandle {
                 return true;
             }
             Process process = Process.getByPid(pid);
+            if (process == null) {
+                return true;
+            }
             if (!StringUtil.isEmpty(queryProcessName) && !ObjectUtil.equals(process.getName(), queryProcessName)) {
                 return true;
             }
