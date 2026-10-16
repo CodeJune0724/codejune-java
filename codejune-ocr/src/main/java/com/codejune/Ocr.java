@@ -20,7 +20,7 @@ public final class Ocr {
         try {
             System.load(dll.getAbsolutePath());
             this.ocrEngine = new OcrEngine();
-            this.ocrEngine.setNumThread(1);
+            this.setNumThread(1);
             this.ocrEngine.initModels(
                     path,
                     det,
@@ -34,13 +34,22 @@ public final class Ocr {
     }
 
     /**
+     * 设置线程
+     *
+     * @param numThread numThread
+     * */
+    public void setNumThread(int numThread) {
+        this.ocrEngine.setNumThread(numThread);
+    }
+
+    /**
      * 识别
      *
      * @param file file
      *
      * @return List<OcrResult>
      * */
-    public synchronized List<OcrResult> ocr(File file) {
+    public List<OcrResult> ocr(File file) {
         if (!FileUtil.isFile(file)) {
             return null;
         }
