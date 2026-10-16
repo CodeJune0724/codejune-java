@@ -16,20 +16,17 @@ public final class Ocr {
 
     private final OcrEngine ocrEngine;
 
-    public Ocr(String ncnnPath) {
-        if (!FileUtil.isFolder(new File(ncnnPath))) {
-            throw new BaseException("ncnnPath is null");
-        }
+    public Ocr(File dll, String path, String det, String cls, String rec, String keys) {
         try {
-            System.load(new File(ncnnPath, "RapidOcrNcnn.dll").getAbsolutePath());
+            System.load(dll.getAbsolutePath());
             this.ocrEngine = new OcrEngine();
             this.ocrEngine.setNumThread(1);
             this.ocrEngine.initModels(
-                    ncnnPath,
-                    "det",
-                    "ch_ppocr_mobile_v2.0_cls_infer",
-                    "rec",
-                    "ppocr_keys_v1.txt"
+                    path,
+                    det,
+                    cls,
+                    rec,
+                    keys
             );
         } catch (Throwable e) {
             throw new BaseException(e);
