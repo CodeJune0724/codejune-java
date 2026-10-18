@@ -4,13 +4,16 @@ import com.benjaminwan.ocrlibrary.OcrEngine;
 import com.benjaminwan.ocrlibrary.Point;
 import com.benjaminwan.ocrlibrary.TextBlock;
 import com.codejune.core.BaseException;
+import com.codejune.core.Image;
 import com.codejune.core.util.FileUtil;
 import com.codejune.core.util.StringUtil;
 import com.codejune.ocr.OcrResult;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
 public final class Ocr {
 
@@ -46,15 +49,31 @@ public final class Ocr {
      * 识别
      *
      * @param file file
+     * @param colorHandler 颜色处理
+     * @param colorHandlerFile 颜色处理后的文件
      *
      * @return List<OcrResult>
      * */
-    public List<OcrResult> ocr(File file) {
+    public List<OcrResult> ocr(File file, Function<Integer, Integer> colorHandler, File colorHandlerFile) {
         if (!FileUtil.isFile(file)) {
             return null;
         }
+        if (colorHandler != null) {
+            try (Image image = new Image(file)) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    for (int y = 0; y < image.getHeight(); y++) {
+                        Integer newRGB = colorHandler.apply(image.getRGB(x, y));
+                        if (newRGB == null) {
+                            continue;
+                        }
+                        image.setRGB(x, y, newRGB);
+                    }
+                }
+                image.save(colorHandlerFile);
+            }
+        }
         com.benjaminwan.ocrlibrary.OcrResult ocrResult = this.ocrEngine.detect(
-                file.getAbsolutePath(),
+                colorHandler != null ? colorHandlerFile.getAbsolutePath() : file.getAbsolutePath(),
                 50,
                 0,
                 0.5f,
@@ -83,5 +102,10 @@ public final class Ocr {
         result.sort(Comparator.comparingInt(OcrResult::getY));
         return result;
     }
+
+    public List<OcrResult> ocr(File file) {
+        return this.ocr(file, null, null);
+    }
+
 
 }

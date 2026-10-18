@@ -131,6 +131,29 @@ public final class Image implements Closeable {
         }
     }
 
+    /**
+     * 获取RGB
+     *
+     * @param x x
+     * @param y y
+     *
+     * @return 获取RGB
+     * */
+    public int getRGB(int x, int y) {
+        return this.bufferedImage.getRGB(x, y);
+    }
+
+    /**
+     * 获取RGB
+     *
+     * @param x x
+     * @param y y
+     * @param RGB RGB
+     * */
+    public void setRGB(int x, int y, int RGB) {
+        this.bufferedImage.setRGB(x, y, RGB);
+    }
+
     @Override
     public void close() {
         try {
