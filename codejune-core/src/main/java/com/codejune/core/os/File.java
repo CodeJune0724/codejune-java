@@ -4,9 +4,12 @@ import com.codejune.core.BaseException;
 import com.codejune.core.io.reader.TextInputStreamReader;
 import com.codejune.core.util.*;
 import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.function.Consumer;
 
 /**
  * 文件
@@ -240,6 +243,22 @@ public final class File implements FileInfo<String> {
      * */
     public String getSuffix() {
         return this.getName().split("\\.")[1];
+    }
+
+    /**
+     * 获取锁
+     *
+     * @param consumer 回调
+     * */
+    public void tryLock(Consumer<Boolean> consumer) {
+        if (consumer == null) {
+            return;
+        }
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(this.file, "rw");
+             FileChannel fileChannel = randomAccessFile.getChannel()) {
+            FileLock fileLock = fileChannel.tryLock(0, 1, false);
+            consumer.accept(fileLock != null);
+        } catch (Exception _) {}
     }
 
 }
