@@ -5,6 +5,7 @@ import com.codejune.core.BaseException;
 import com.codejune.core.Closeable;
 import com.codejune.core.Encoding;
 import com.codejune.core.util.ArrayUtil;
+import com.codejune.core.util.StringUtil;
 import com.codejune.core.util.ThreadUtil;
 import java.io.*;
 import java.util.List;
@@ -16,13 +17,21 @@ import java.util.List;
  * */
 public final class WindowsShell extends Shell {
 
+    private final String intDirectory;
+
     private Process process;
 
     private InputStreamReader inputStreamReader;
 
     private BufferedWriter bufferedWriter;
 
-    public WindowsShell() {}
+    public WindowsShell(String intDirectory) {
+        this.intDirectory = intDirectory;
+    }
+
+    public WindowsShell() {
+        this(null);
+    }
 
     @Override
     public void init() {
@@ -31,6 +40,9 @@ public final class WindowsShell extends Shell {
         }
         ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe");
         processBuilder.redirectErrorStream(true);
+        if (!StringUtil.isEmpty(this.intDirectory)) {
+            processBuilder.directory(new File(this.intDirectory));
+        }
         try {
             this.process = processBuilder.start();
         } catch (Exception e) {
