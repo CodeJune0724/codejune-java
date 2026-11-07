@@ -82,9 +82,18 @@ public final class Window {
     }
 
     public void setCloseHandler(Runnable closeHandler) {
+        if (closeHandler == null) {
+            return;
+        }
         this.closeHandler = closeHandler;
         if (this.stage != null) {
-            this.stage.setOnCloseRequest(_ -> this.closeHandler.run());
+            this.stage.setOnCloseRequest(windowEvent -> {
+                try {
+                    this.closeHandler.run();
+                } catch (Throwable e) {
+                    windowEvent.consume();
+                }
+            });
         }
     }
 
@@ -135,6 +144,13 @@ public final class Window {
     }
 
     public void close() {
+        if (this.closeHandler != null) {
+            try {
+                this.closeHandler.run();
+            } catch (Throwable e) {
+                return;
+            }
+        }
         this.stage.close();
     }
 

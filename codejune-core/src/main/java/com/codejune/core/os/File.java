@@ -254,11 +254,18 @@ public final class File implements FileInfo<String> {
         if (consumer == null) {
             return;
         }
+        FileLock fileLock = null;
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(this.file, "rw");
              FileChannel fileChannel = randomAccessFile.getChannel()) {
-            FileLock fileLock = fileChannel.tryLock(0, 1, false);
+            fileLock = fileChannel.tryLock(0, 1, false);
             consumer.accept(fileLock != null);
-        } catch (Exception _) {}
+        } catch (Exception _) {} finally {
+            if (fileLock != null) {
+                try {
+                    fileLock.release();
+                } catch (Exception _) {}
+            }
+        }
     }
 
 }
