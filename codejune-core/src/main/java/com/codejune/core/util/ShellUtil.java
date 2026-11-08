@@ -30,7 +30,7 @@ public final class ShellUtil {
             StringBuilder stringBuilder = new StringBuilder();
             ProcessBuilder processBuilder = new ProcessBuilder();
             if (OSType.getCurrentOSType().isWindows()) {
-                processBuilder.command("cmd.exe", "/c", command);
+                processBuilder.command("cmd.exe", "/c", "\"" + command + "\"");
             } else if (OSType.getCurrentOSType() == OSType.LINUX) {
                 processBuilder.command("/bin/bash", "-c", command);
             } else {
