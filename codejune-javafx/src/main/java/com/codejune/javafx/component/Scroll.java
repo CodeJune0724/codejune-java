@@ -2,6 +2,7 @@ package com.codejune.javafx.component;
 
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Region;
 
 public final class Scroll extends BaseComponent {
 
@@ -24,6 +25,12 @@ public final class Scroll extends BaseComponent {
     @Override
     protected Node getAddFxNode() {
         return this.div.getFxNode();
+    }
+
+    public void autoScroll() {
+        if (this.div.getFxNode() instanceof Region region) {
+            region.heightProperty().addListener((_, _, _) -> scrollPane.setVvalue(1.0));
+        }
     }
 
 }

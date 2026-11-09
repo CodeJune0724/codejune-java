@@ -7,6 +7,7 @@ import com.codejune.core.util.ThreadUtil;
 import com.codejune.system.Process;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.ptr.IntByReference;
 import java.awt.*;
@@ -22,7 +23,9 @@ import java.util.List;
  * */
 public final class WindowHandle {
 
-    private final int id;
+    private final int pid;
+
+    private final long pointerId;
 
     private final String name;
 
@@ -34,15 +37,20 @@ public final class WindowHandle {
 
     private static final User32Extra USER32_EXTRA = Native.load("user32", User32Extra.class);
 
-    private WindowHandle(int id, String name, Process process, WinDef.HWND hwnd) {
-        this.id = id;
+    private WindowHandle(int pid, long pointerId, String name, Process process, WinDef.HWND hwnd) {
+        this.pid = pid;
+        this.pointerId = pointerId;
         this.name = name;
         this.process = process;
         this.hwnd = hwnd;
     }
 
-    public int getId() {
-        return this.id;
+    public int getPid() {
+        return this.pid;
+    }
+
+    public long getPointerId() {
+        return this.pointerId;
     }
 
     public String getName() {
@@ -84,18 +92,15 @@ public final class WindowHandle {
      * @return 是否有效
      * */
     public boolean effective() {
-        return USER_32.IsWindowVisible(this.hwnd);
+        return USER_32.IsWindowVisible(this.hwnd) && USER_32.IsWindow(this.hwnd);
     }
 
     /**
      * 截图
      *
-     * @param cutTop 裁剪上面
-     * @param cutLeft 裁剪左边
-     *
      * @return BufferedImage
      * */
-    public BufferedImage capture(int cutTop, int cutLeft) {
+    public BufferedImage capture() {
         WinDef.RECT rect = new WinDef.RECT();
         USER_32.GetClientRect(this.hwnd, rect);
         int width = rect.right - rect.left;
@@ -149,7 +154,7 @@ public final class WindowHandle {
                 memory.read(0, pixels, 0, pixels.length);
                 int[] dataBuffer = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
                 System.arraycopy(pixels, 0, dataBuffer, 0, pixels.length);
-                return cutBufferedImage(bufferedImage, cutTop, cutLeft);
+                return bufferedImage;
             }
         } finally {
             if (oldBitmap != null) {
@@ -163,15 +168,6 @@ public final class WindowHandle {
             }
             USER_32.ReleaseDC(null, screenDC);
         }
-    }
-
-    /**
-     * 截图
-     *
-     * @return BufferedImage
-     * */
-    public BufferedImage capture() {
-        return this.capture(0, 0);
     }
 
     /**
@@ -333,7 +329,7 @@ public final class WindowHandle {
             if (!StringUtil.isEmpty(queryProcessName) && !ObjectUtil.equals(process.getName(), queryProcessName)) {
                 return true;
             }
-            result.add(new WindowHandle(pid, name, process, hwnd));
+            result.add(new WindowHandle(pid, Pointer.nativeValue(hwnd.getPointer()), name, process, hwnd));
             return true;
         }, null);
         return result;
@@ -406,6 +402,7 @@ public final class WindowHandle {
         }
         return dstImage;
     }
+
     private static int getScanlineStride(SampleModel sm, int fallbackWidth) {
         if (sm instanceof ComponentSampleModel) {
             return ((ComponentSampleModel) sm).getScanlineStride();

@@ -229,6 +229,14 @@ public final class Style {
         return this;
     }
 
+    public Style minHeight() {
+        Node fxNode = this.baseComponent.getFxNode();
+        if (fxNode instanceof Region region) {
+            region.setMinHeight(Region.USE_PREF_SIZE);
+        }
+        return this;
+    }
+
     public Style alignment(Pos pos) {
         Node fxNode = this.baseComponent.getFxNode();
         if (fxNode instanceof VBox vBox) {

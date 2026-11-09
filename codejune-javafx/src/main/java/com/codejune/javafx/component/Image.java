@@ -30,7 +30,7 @@ public class Image extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == ImagePropertyType.IMAGE) {
-            return () -> this.setImage(getValue.get());
+            return () -> this.setImage(getPropertyBindValue(propertyBind, getValue));
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }

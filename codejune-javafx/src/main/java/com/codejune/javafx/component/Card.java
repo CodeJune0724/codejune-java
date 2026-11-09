@@ -37,10 +37,10 @@ public final class Card extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == CardPropertyType.TITLE) {
-            return () -> this.setTitle(ObjectUtil.toString(getValue.get()));
+            return () -> this.setTitle(ObjectUtil.toString(getPropertyBindValue(propertyBind, getValue)));
         }
         if (propertyType == CardPropertyType.TYPE) {
-            return () -> this.setType(ObjectUtil.parse(getValue.get(), Type.class));
+            return () -> this.setType(ObjectUtil.parse(getPropertyBindValue(propertyBind, getValue), Type.class));
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }

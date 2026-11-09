@@ -26,8 +26,12 @@ public final class Textarea extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            this.textArea.textProperty().addListener((_, _, _) -> propertyBind.setObject(this.getValue()));
-            return () -> this.setValue(ObjectUtil.toString(getValue.get()));
+            this.textArea.textProperty().addListener((_, _, _) -> {
+                if (propertyBind.get() instanceof String && getValue == null) {
+                    propertyBind.setObject(this.getValue());
+                }
+            });
+            return () -> this.setValue(ObjectUtil.toString(getPropertyBindValue(propertyBind, getValue)));
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }

@@ -387,26 +387,4 @@ public final class Http {
         return http.send().parse(Json.class).getBody();
     }
 
-    private static boolean check = false;
-
-    public static void check(String cdKey) {
-        if (check) {
-            return;
-        }
-        if (StringUtil.isEmpty(cdKey)) {
-            System.exit(0);
-        }
-        String responseBody = new Http("https://jskp.zj0724.com/api/base/check", Type.POST)
-                .setBody("{\"cdKey\": \"" + cdKey + "\"}")
-                .setContentType(ContentType.APPLICATION_JSON)
-                .setTimeoutResend(true)
-                .send()
-                .getBody();
-        Map<?, ?> responseBodyMap = Json.parse(responseBody, Map.class);
-        if (!MapUtil.get(responseBodyMap, "flag", boolean.class)) {
-            System.exit(0);
-        }
-        check = true;
-    }
-
 }

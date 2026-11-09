@@ -58,10 +58,10 @@ public final class Tab<KEY, ITEM> extends BaseComponent {
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
             this.value.addListener(() -> propertyBind.setObject(this.value.get()));
-            return () -> this.setValue((KEY) getValue.get());
+            return () -> this.setValue((KEY) getPropertyBindValue(propertyBind, getValue));
         }
         if (propertyType == BasePropertyType.DATA) {
-            return () -> this.setData((List<ITEM>) getValue.get());
+            return () -> this.setData((List<ITEM>) getPropertyBindValue(propertyBind, getValue));
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }

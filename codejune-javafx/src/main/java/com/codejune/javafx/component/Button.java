@@ -5,6 +5,7 @@ import com.codejune.javafx.bind.BasePropertyType;
 import com.codejune.javafx.bind.PropertyBind;
 import com.codejune.javafx.bind.PropertyType;
 import javafx.scene.Node;
+import javafx.scene.layout.Region;
 import java.util.function.Supplier;
 
 public final class Button extends BaseComponent {
@@ -17,6 +18,7 @@ public final class Button extends BaseComponent {
         this.getStyle().addClass("button");
         this.setType(Type.DEFAULT);
         this.setSize(Size.DEFAULT);
+        this.button.setMinWidth(Region.USE_PREF_SIZE);
     }
 
     @Override
@@ -27,10 +29,10 @@ public final class Button extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == ButtonPropertyType.TYPE) {
-            return () -> this.setType(ObjectUtil.parse(getValue.get(), Type.class));
+            return () -> this.setType(ObjectUtil.parse(getPropertyBindValue(propertyBind, getValue), Type.class));
         }
         if (propertyType == BasePropertyType.TEXT) {
-            return () -> this.setText(ObjectUtil.parse(getValue.get(), String.class));
+            return () -> this.setText(ObjectUtil.parse(getPropertyBindValue(propertyBind, getValue), String.class));
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
@@ -57,6 +59,10 @@ public final class Button extends BaseComponent {
 
     public void setText(String text) {
         this.button.setText(text);
+    }
+
+    public String getText() {
+        return this.button.getText();
     }
 
     public enum Type {

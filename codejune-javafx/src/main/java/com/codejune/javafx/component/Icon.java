@@ -28,7 +28,7 @@ public final class Icon extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.COLOR) {
-            return () -> this.setColor(ObjectUtil.parse(getValue.get(), String.class));
+            return () -> this.setColor(ObjectUtil.parse(getPropertyBindValue(propertyBind, getValue), String.class));
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }

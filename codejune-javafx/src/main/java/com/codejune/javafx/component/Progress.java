@@ -24,7 +24,10 @@ public final class Progress extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            return () -> this.setProgress(getValue.get() == null ? 0 : ObjectUtil.parse(getValue.get(), double.class));
+            return () -> {
+                Object propertyBindValue = getPropertyBindValue(propertyBind, getValue);
+                this.setProgress(propertyBindValue == null ? 0 : ObjectUtil.parse(propertyBindValue, double.class));
+            };
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }

@@ -22,8 +22,6 @@ public final class Select<KEY, ITEM> extends BaseComponent {
 
     private Function<ITEM, BaseComponent> cellRender = null;
 
-    private boolean customEventBindValue = false;
-
     public Select() {
         this.getStyle().addSheet("/javafx/style/select.css").addClass("select");
         this.getStyle().addSheet("/javafx/style/scroll.css");
@@ -83,8 +81,12 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     @SuppressWarnings("unchecked")
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            this.comboBox.valueProperty().addListener((_, _, _) -> propertyBind.setObject(this.getValue()));
-            return () -> this.setValue((KEY) getValue.get());
+            this.comboBox.valueProperty().addListener((_, _, _) -> {
+                if (getValue == null) {
+                    propertyBind.setObject(this.getValue());
+                }
+            });
+            return () -> this.setValue((KEY) getPropertyBindValue(propertyBind, getValue));
         }
         if (propertyType == BasePropertyType.DATA) {
             return () -> this.setData((List<ITEM>) getValue.get());
@@ -95,13 +97,7 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     @Override
     protected Runnable customEventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
         if (eventType == BaseEventType.VALUE) {
-            return () -> this.comboBox.valueProperty().addListener((_, _, _) -> {
-                if (!this.customEventBindValue) {
-                    this.customEventBindValue = true;
-                    return;
-                }
-                asynchronousRun(runnable, asynchronous);
-            });
+            return () -> this.comboBox.valueProperty().addListener((_, _, _) -> asynchronousRun(runnable, asynchronous));
         }
         return super.customEventBind(eventType, runnable, asynchronous);
     }

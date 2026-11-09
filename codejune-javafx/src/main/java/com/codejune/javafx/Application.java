@@ -12,9 +12,9 @@ public abstract class Application extends javafx.application.Application {
 
     @Override
     public final void start(Stage stage) {
-        WINDOW = new Window();
+        WINDOW = new Window(stage);
         this.initWindow(WINDOW);
-        WINDOW.setStage(stage);
+        WINDOW.setIcon(Application.getIcon());
         WINDOW.open();
     }
 
@@ -28,11 +28,8 @@ public abstract class Application extends javafx.application.Application {
         Application.icon = icon;
     }
 
-    public static InputStream getIcon() {
-        if (Application.icon == null) {
-            return null;
-        }
-        return Application.icon.get();
+    public static Supplier<InputStream> getIcon() {
+        return Application.icon;
     }
 
 }

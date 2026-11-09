@@ -1,6 +1,7 @@
 package com.codejune.javafx.component;
 
 import com.codejune.core.util.ObjectUtil;
+import com.codejune.javafx.Window;
 import com.codejune.javafx.bind.*;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -15,6 +16,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class BaseComponent {
+
+    private Window window;
 
     private BaseComponent parent = null;
 
@@ -40,11 +43,19 @@ public abstract class BaseComponent {
         return null;
     }
 
+    public final Window getWindow() {
+        return this.window;
+    }
+
+    public final void setWindow(Window window) {
+        this.window = window;
+    }
+
     public final BaseComponent getParent() {
         return this.parent;
     }
 
-    public List<BaseComponent> getChildList() {
+    public final List<BaseComponent> getChildList() {
         return this.childList;
     }
 
@@ -62,6 +73,7 @@ public abstract class BaseComponent {
         Node fxNode = this.getAddFxNode();
         if (fxNode instanceof Pane pane) {
             pane.getChildren().add(baseComponent.getFxNode());
+            baseComponent.setWindow(this.getWindow());
             baseComponent.setParent(this);
             this.childList.add(baseComponent);
             action.accept(baseComponent);
@@ -77,7 +89,7 @@ public abstract class BaseComponent {
         return this.style;
     }
 
-    public void delete() {
+    public final void delete() {
         if (this.getFxNode() instanceof Parent parentItem) {
             deleteNode(parentItem);
         }
@@ -97,7 +109,7 @@ public abstract class BaseComponent {
         }
     }
 
-    public void deleteChild() {
+    public final void deleteChild() {
         for (BaseComponent baseComponent : this.childList) {
             baseComponent.delete();
         }
@@ -117,12 +129,15 @@ public abstract class BaseComponent {
         if (propertyBind == null) {
             return;
         }
-        if (getValue == null) {
-            return;
-        }
         Map<PropertyType, Runnable> bindMap = new HashMap<>();
-        bindMap.put(BasePropertyType.DISABLE, () -> this.getStyle().disable(getValue.get() != null && ObjectUtil.parse(getValue.get(), boolean.class)));
-        bindMap.put(BasePropertyType.DISPLAY, () -> this.getStyle().display(getValue.get() != null && ObjectUtil.parse(getValue.get(), boolean.class)));
+        bindMap.put(BasePropertyType.DISABLE, () -> {
+            Object propertyBindValue = getPropertyBindValue(propertyBind, getValue);
+            this.getStyle().disable(propertyBindValue != null && ObjectUtil.parse(propertyBindValue, boolean.class));
+        });
+        bindMap.put(BasePropertyType.DISPLAY, () -> {
+            Object propertyBindValue = getPropertyBindValue(propertyBind, getValue);
+            this.getStyle().display(propertyBindValue != null && ObjectUtil.parse(propertyBindValue, boolean.class));
+        });
         Runnable customBind = this.customPropertyBind(propertyType, propertyBind, getValue);
         if (customBind != null) {
             bindMap.put(propertyType, customBind);
@@ -145,7 +160,7 @@ public abstract class BaseComponent {
         if (propertyBind == null) {
             return;
         }
-        this.propertyBind(propertyType, propertyBind, propertyBind::get);
+        this.propertyBind(propertyType, propertyBind, null);
     }
 
     public final void eventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
@@ -210,6 +225,16 @@ public abstract class BaseComponent {
 
     public static void asynchronousRun(Runnable runnable, boolean asynchronous) {
         asynchronousRun(runnable, asynchronous, false);
+    }
+
+    public static Object getPropertyBindValue(PropertyBind<?> propertyBind, Supplier<?> getValue) {
+        Object result = null;
+        if (getValue != null) {
+            result = getValue.get();
+        } else {
+            result = propertyBind.get();
+        }
+        return result;
     }
 
     private static void deleteNode(Parent parent) {

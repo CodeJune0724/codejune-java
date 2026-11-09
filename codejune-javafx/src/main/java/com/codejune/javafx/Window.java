@@ -2,6 +2,7 @@ package com.codejune.javafx;
 
 import com.codejune.core.util.ArrayUtil;
 import com.codejune.javafx.component.BaseComponent;
+import com.codejune.javafx.component.Tray;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -12,10 +13,13 @@ import javafx.stage.Stage;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public final class Window {
 
-    private Stage stage;
+    private final Stage stage;
+
+    private Supplier<InputStream> icon;
 
     private String title;
 
@@ -27,12 +31,13 @@ public final class Window {
 
     private Consumer<BaseComponent> render;
 
-    private InputStream icon;
-
     private Runnable closeHandler = null;
+
+    private Tray tray = null;
 
     public Window(Stage stage) {
         this.stage = stage;
+        this.setIcon(Application.getIcon());
     }
 
     public Window() {
@@ -49,20 +54,27 @@ public final class Window {
         return this.stage.getY();
     }
 
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
-
     public Stage getStage() {
         return this.stage;
     }
 
     public void setTitle(String title) {
         this.title = title;
+        if (this.stage != null) {
+            Platform.runLater(() -> this.stage.setTitle(this.title));
+        }
+    }
+
+    public double getWidth() {
+        return this.stage.getWidth();
     }
 
     public void setWidth(int width) {
         this.width = width;
+    }
+
+    public double getHeight() {
+        return this.stage.getHeight();
     }
 
     public void setHeight(int height) {
@@ -73,7 +85,11 @@ public final class Window {
         this.resizable = resizable;
     }
 
-    public void setIcon(InputStream icon) {
+    public Supplier<InputStream> getIcon() {
+        return this.icon;
+    }
+
+    public void setIcon(Supplier<InputStream> icon) {
         this.icon = icon;
     }
 
@@ -107,37 +123,18 @@ public final class Window {
             this.stage.setTitle(this.title);
             this.stage.setResizable(this.resizable);
             if (this.icon != null) {
-                this.stage.getIcons().add(new Image(this.icon));
-            } else if (Application.getIcon() != null) {
-                this.stage.getIcons().add(new Image(Application.getIcon()));
+                this.stage.getIcons().add(new Image(this.icon.get()));
             }
             if (this.closeHandler != null) {
-                this.stage.setOnCloseRequest(_ -> this.closeHandler.run());
+                this.stage.setOnCloseRequest(windowEvent -> {
+                    try {
+                        this.closeHandler.run();
+                    } catch (Throwable e) {
+                        windowEvent.consume();
+                    }
+                });
             }
-            VBox vBox = new VBox();
-            BaseComponent vBoxBaseComponent = new BaseComponent() {
-                @Override
-                public Node getFxNode() {
-                    return vBox;
-                }
-            };
-            for (String sheet : ArrayUtil.asList("/javafx/style/base.css")) {
-                vBoxBaseComponent.getStyle().addSheet(sheet);
-            }
-            if (this.width > 0) {
-                vBoxBaseComponent.getStyle().setWidth(this.width);
-            }
-            if (this.height > 0) {
-                vBoxBaseComponent.getStyle().setHeight(this.height);
-            }
-            if (this.render != null) {
-                this.render.accept(vBoxBaseComponent);
-            }
-            Scene scene = new Scene(vBox);
-            this.stage.setScene(scene);
-            if (!this.resizable) {
-                this.autoSize(this.stage, vBox);
-            }
+            this.renderBaseComponent(this.render, false);
             this.stage.show();
             this.stage.sizeToScene();
         });
@@ -152,6 +149,34 @@ public final class Window {
             }
         }
         this.stage.close();
+    }
+
+    public void hide() {
+        Platform.runLater(() -> {
+            if (this.stage.isIconified()) {
+                this.stage.setIconified(false);
+            }
+            this.stage.hide();
+        });
+    }
+
+    public void show() {
+        Platform.runLater(() -> {
+            this.stage.show();
+            this.stage.toFront();
+            this.stage.requestFocus();
+        });
+    }
+
+    public Tray tray() {
+        if (this.tray == null) {
+            this.tray = new Tray(this);
+        }
+        return this.tray;
+    }
+
+    public void reRender(Consumer<BaseComponent> render) {
+        Platform.runLater(() -> renderBaseComponent(render, true));
     }
 
     private void autoSize(Stage stage, VBox rootNode) {
@@ -179,6 +204,38 @@ public final class Window {
             }
         });
         rootNode.layoutBoundsProperty().addListener((_, _, _) -> autoSizeTask.run());
+    }
+
+    private void renderBaseComponent(Consumer<BaseComponent> render, boolean reload) {
+        VBox vBox = new VBox();
+        BaseComponent baseComponent = new BaseComponent() {
+            @Override
+            public Node getFxNode() {
+                return vBox;
+            }
+        };
+        baseComponent.setWindow(this);
+        for (String sheet : ArrayUtil.asList("/javafx/style/base.css")) {
+            baseComponent.getStyle().addSheet(sheet);
+        }
+        if (this.width > 0) {
+            baseComponent.getStyle().setWidth(this.width);
+        }
+        if (this.height > 0) {
+            baseComponent.getStyle().setHeight(this.height);
+        }
+        if (render != null) {
+            render.accept(baseComponent);
+        }
+        if (!reload) {
+            Scene scene = new Scene(vBox);
+            this.stage.setScene(scene);
+        } else {
+            this.stage.getScene().setRoot(vBox);
+        }
+        if (!this.resizable) {
+            this.autoSize(this.stage, vBox);
+        }
     }
 
 }

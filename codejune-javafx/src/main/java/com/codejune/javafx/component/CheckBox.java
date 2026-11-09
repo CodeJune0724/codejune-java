@@ -46,8 +46,12 @@ public final class CheckBox extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            this.value.addListener(() -> propertyBind.setObject(this.value.get()));
-            return () -> this.setValue(ObjectUtil.parse(getValue.get(), Boolean.class));
+            this.value.addListener(() -> {
+                if (propertyBind.get() instanceof Boolean && getValue == null) {
+                    propertyBind.setObject(this.getValue());
+                }
+            });
+            return () -> this.setValue(ObjectUtil.parse(getPropertyBindValue(propertyBind, getValue), Boolean.class));
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
