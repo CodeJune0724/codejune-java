@@ -202,4 +202,31 @@ public final class Folder implements FileInfo<String> {
         this.path = newFile.getAbsolutePath();
     }
 
+    /**
+     * 当前用户目录
+     *
+     * @return Folder
+     * */
+    public static Folder userHome() {
+        return new Folder(System.getProperty("user.home"));
+    }
+
+    /**
+     * 工作目录
+     *
+     * @return Folder
+     * */
+    public static Folder rootPath() {
+        return new Folder(System.getProperty("user.dir"));
+    }
+
+    /**
+     * cmd目录
+     *
+     * @return Folder
+     * */
+    public static Folder cmdPath() {
+        return new Folder(System.getProperty("cmd.dir"));
+    }
+
 }
