@@ -1,9 +1,9 @@
 package com.codejune.javafx.component;
 
 import com.codejune.core.util.ObjectUtil;
+import com.codejune.javafx.Application;
 import com.codejune.javafx.Window;
 import com.codejune.javafx.bind.*;
-import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -144,7 +144,7 @@ public abstract class BaseComponent {
         }
         Runnable runnable = bindMap.get(propertyType);
         if (runnable != null) {
-            asynchronousRun(runnable, false, true);
+            Application.asynchronousRun(runnable, false, true);
             propertyBind.addListener(this, runnable);
             this.propertyBindList.add(propertyBind);
         }
@@ -172,8 +172,8 @@ public abstract class BaseComponent {
         }
         this.eventMap.put(eventType, runnable);
         Map<EventType, Runnable> nestingEventMap = new HashMap<>();
-        nestingEventMap.put(BaseEventType.CLICK, () -> this.getFxNode().setOnMouseClicked(_ -> asynchronousRun(runnable, asynchronous)));
-        nestingEventMap.put(BaseEventType.MOUSE_MOVE, () -> this.getFxNode().setOnMouseMoved(_ -> asynchronousRun(runnable, asynchronous)));
+        nestingEventMap.put(BaseEventType.CLICK, () -> this.getFxNode().setOnMouseClicked(_ -> Application.asynchronousRun(runnable, asynchronous)));
+        nestingEventMap.put(BaseEventType.MOUSE_MOVE, () -> this.getFxNode().setOnMouseMoved(_ -> Application.asynchronousRun(runnable, asynchronous)));
         Runnable customAction = this.customEventBind(eventType, runnable, asynchronous);
         if (customAction != null) {
             nestingEventMap.put(eventType, customAction);
@@ -202,29 +202,6 @@ public abstract class BaseComponent {
             tooltip.setWrapText(true);
             control.setTooltip(tooltip);
         }
-    }
-
-    public static void asynchronousRun(Runnable runnable, boolean asynchronous, boolean runLater) {
-        if (runnable == null) {
-            return;
-        }
-        if (asynchronous) {
-            if (runLater) {
-                Thread.startVirtualThread(() -> Platform.runLater(runnable));
-            } else {
-                Thread.startVirtualThread(runnable);
-            }
-        } else {
-            if (runLater) {
-                Platform.runLater(runnable);
-            } else {
-                runnable.run();
-            }
-        }
-    }
-
-    public static void asynchronousRun(Runnable runnable, boolean asynchronous) {
-        asynchronousRun(runnable, asynchronous, false);
     }
 
     public static Object getPropertyBindValue(PropertyBind<?> propertyBind, Supplier<?> getValue) {

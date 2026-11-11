@@ -1,6 +1,7 @@
 package com.codejune.javafx.component;
 
 import com.codejune.core.util.ObjectUtil;
+import com.codejune.javafx.Application;
 import com.codejune.javafx.bind.*;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
@@ -41,7 +42,7 @@ public final class Input extends BaseComponent {
     @Override
     protected Runnable customEventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
         if (eventType == BaseEventType.VALUE) {
-            this.textField.textProperty().addListener((_, _, _) -> asynchronousRun(runnable, asynchronous));
+            this.textField.textProperty().addListener((_, _, _) -> Application.asynchronousRun(runnable, asynchronous));
             return () -> {};
         }
         return super.customEventBind(eventType, runnable, asynchronous);

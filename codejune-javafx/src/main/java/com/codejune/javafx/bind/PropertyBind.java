@@ -1,7 +1,7 @@
 package com.codejune.javafx.bind;
 
 import com.codejune.core.util.ObjectUtil;
-import com.codejune.javafx.component.BaseComponent;
+import com.codejune.javafx.Application;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,12 +34,12 @@ public class PropertyBind<T> {
             this.listenerCache = new LinkedHashMap<>();
             this.listener.values().forEach((runnableList) -> {
                 for (Runnable runnable : runnableList) {
-                    BaseComponent.asynchronousRun(runnable, false, true);
+                    Application.asynchronousRun(runnable, false, true);
                 }
             });
             for (Map.Entry<Object, List<Runnable>> entry : this.listenerCache.entrySet()) {
                 for (Runnable runnable : entry.getValue()) {
-                    BaseComponent.asynchronousRun(runnable, false, true);
+                    Application.asynchronousRun(runnable, false, true);
                 }
                 List<Runnable> runnableList = this.listener.get(entry.getKey());
                 if (runnableList == null) {

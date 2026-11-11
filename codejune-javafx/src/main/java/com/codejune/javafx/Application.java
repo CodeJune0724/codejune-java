@@ -1,5 +1,6 @@
 package com.codejune.javafx;
 
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import java.io.InputStream;
 import java.util.function.Supplier;
@@ -30,6 +31,37 @@ public abstract class Application extends javafx.application.Application {
 
     public static Supplier<InputStream> getIcon() {
         return Application.icon;
+    }
+
+    public static void runLater(Runnable runnable) {
+        if (runnable == null) {
+            return;
+        }
+        if (Platform.isFxApplicationThread()) runnable.run();
+        else Platform.runLater(runnable);
+    }
+
+    public static void asynchronousRun(Runnable runnable, boolean asynchronous, boolean runLater) {
+        if (runnable == null) {
+            return;
+        }
+        if (asynchronous) {
+            if (runLater) {
+                Thread.startVirtualThread(() -> Platform.runLater(runnable));
+            } else {
+                Thread.startVirtualThread(runnable);
+            }
+        } else {
+            if (runLater) {
+                Platform.runLater(runnable);
+            } else {
+                runnable.run();
+            }
+        }
+    }
+
+    public static void asynchronousRun(Runnable runnable, boolean asynchronous) {
+        asynchronousRun(runnable, asynchronous, false);
     }
 
 }
