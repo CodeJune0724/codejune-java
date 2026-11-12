@@ -16,15 +16,11 @@ public final class Card extends BaseComponent {
 
     public Card() {
         this.div.getStyle().setPadding(10, 10, 10, 10);
-
-        this.getStyle().addSheet("/javafx/style/card.css");
-
         this.add(new Text(), text -> {
             text.getStyle().setMargin(0, 0, 10, 0).display(false).setFontSize(14).setFontWeight("bold");
             text.propertyBind(BasePropertyType.TEXT, this.title);
             text.propertyBind(BasePropertyType.DISPLAY, this.title, () -> !StringUtil.isEmpty(this.title.get()));
         });
-
         this.setType(Type.DEFAULT);
         this.setTitle(null);
     }

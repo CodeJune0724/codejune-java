@@ -3,6 +3,7 @@ package com.codejune.javafx.component;
 import com.codejune.core.util.ObjectUtil;
 import com.codejune.javafx.Application;
 import com.codejune.javafx.bind.*;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
@@ -10,6 +11,10 @@ import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -23,9 +28,17 @@ public final class Select<KEY, ITEM> extends BaseComponent {
 
     private Function<ITEM, BaseComponent> cellRender = null;
 
+    private final ReadOnlyObjectWrapper<KEY> selectedKey = new ReadOnlyObjectWrapper<>();
+
+    private boolean updatingItems;
+
+    private final Set<RenderedCell> cells = Collections.newSetFromMap(new WeakHashMap<>());
+
     public Select() {
-        this.getStyle().addSheet("/javafx/style/select.css").addClass("select");
-        this.getStyle().addSheet("/javafx/style/scroll.css");
+        this.getStyle().addClass("select");
+        this.observe(this.comboBox.valueProperty(), (_, _, _) -> {
+            if (!this.updatingItems) this.selectedKey.set(this.getValue());
+        });
         this.comboBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(ITEM item) {
@@ -50,27 +63,50 @@ public final class Select<KEY, ITEM> extends BaseComponent {
         this.comboBox.setCellFactory(new Callback<>() {
             @Override
             public ListCell<ITEM> call(ListView<ITEM> itemListView) {
-                return new ListCell<>() {
-                    @Override
-                    protected void updateItem(ITEM item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty || item == null) {
-                            this.setText(null);
-                            this.setGraphic(null);
-                            this.setDisable(false);
-                        } else {
-                            if (Select.this.cellRender == null) {
-                                this.setText(ObjectUtil.toString(item));
-                            } else {
-                                Node fxNode = Select.this.cellRender.apply(item).getFxNode();
-                                this.setDisable(fxNode.isDisable());
-                                this.setGraphic(fxNode);
-                            }
-                        }
-                    }
-                };
+                RenderedCell cell = new RenderedCell();
+                Select.this.cells.add(cell);
+                return cell;
             }
         });
+    }
+
+    private final class RenderedCell extends ListCell<ITEM> {
+        private BaseComponent component;
+
+        private void clearComponent() {
+            this.setGraphic(null);
+            if (this.component != null) {
+                this.component.delete();
+                this.component = null;
+            }
+        }
+
+        @Override
+        protected void updateItem(ITEM item, boolean empty) {
+            super.updateItem(item, empty);
+            this.clearComponent();
+            this.setText(null);
+            this.setDisable(false);
+            if (empty || item == null || Select.this.isDeleted()) return;
+            if (Select.this.cellRender == null) {
+                this.setText(ObjectUtil.toString(item));
+            } else {
+                this.component = Select.this.cellRender.apply(item);
+                if (this.component != null) {
+                    Select.this.registerChild(this.component);
+                    this.setDisable(this.component.getFxNode().isDisable());
+                    this.setGraphic(this.component.getFxNode());
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onDelete() {
+        this.comboBox.hide();
+        for (RenderedCell cell : new ArrayList<>(this.cells)) cell.clearComponent();
+        this.cells.clear();
+        this.cellRender = null;
     }
 
     @Override
@@ -82,15 +118,15 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     @SuppressWarnings("unchecked")
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            this.comboBox.valueProperty().addListener((_, _, _) -> {
+            this.observe(this.selectedKey, (_, _, newValue) -> {
                 if (getValue == null) {
-                    propertyBind.setObject(this.getValue());
+                    propertyBind.setObject(newValue);
                 }
             });
             return () -> this.setValue((KEY) getPropertyBindValue(propertyBind, getValue));
         }
         if (propertyType == BasePropertyType.DATA) {
-            return () -> this.setData((List<ITEM>) getValue.get());
+            return () -> this.setData((List<ITEM>) getPropertyBindValue(propertyBind, getValue));
         }
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
@@ -98,7 +134,7 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     @Override
     protected Runnable customEventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
         if (eventType == BaseEventType.VALUE) {
-            return () -> this.comboBox.valueProperty().addListener((_, _, _) -> Application.asynchronousRun(runnable, asynchronous));
+            return () -> this.observe(this.selectedKey, (_, _, _) -> Application.asynchronousRun(runnable, asynchronous));
         }
         return super.customEventBind(eventType, runnable, asynchronous);
     }
@@ -127,12 +163,21 @@ public final class Select<KEY, ITEM> extends BaseComponent {
     }
 
     public void setData(List<ITEM> data) {
-        this.comboBox.getItems().clear();
-        this.comboBox.getItems().addAll(data);
+        List<ITEM> snapshot = data == null ? List.of() : new ArrayList<>(data);
+        KEY previousKey = this.getValue();
+        this.updatingItems = true;
+        try {
+            this.comboBox.getItems().setAll(snapshot);
+            this.setValue(previousKey);
+        } finally {
+            this.updatingItems = false;
+        }
+        this.selectedKey.set(this.getValue());
     }
 
     public void setKeyHandler(Function<ITEM, KEY> keyHandler) {
         this.keyHandler = keyHandler;
+        this.selectedKey.set(this.getValue());
     }
 
     public void setValueRender(Function<ITEM, String> valueRender) {

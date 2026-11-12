@@ -9,6 +9,7 @@ import com.codejune.core.io.reader.FileReader;
 import com.codejune.core.io.reader.InputStreamReader;
 import com.codejune.core.io.writer.OutputStreamWriter;
 import com.codejune.core.util.*;
+import com.codejune.http.HttpRequest;
 import com.codejune.http.Type;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -46,7 +47,7 @@ public abstract class CloudStorageDownload {
             throw new BaseException("savePath is null");
         }
         AtomicReference<File> result = new AtomicReference<>();
-        new Http(this.getDirectUrl(url), Type.GET).addUserAgent().setRedirect(true).send(httpResponseResult -> {
+        new Http(new HttpRequest(this.getDirectUrl(url), Type.GET).setRedirect(true).addUserAgent()).send(httpResponseResult -> {
             result.set(new File(savePath, httpResponseResult.getDownloadFileName()));
             Long size = httpResponseResult.getContentLength();
             Progress progressEntity;

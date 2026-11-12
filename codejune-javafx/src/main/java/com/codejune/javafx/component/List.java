@@ -19,6 +19,11 @@ public final class List<T> extends BaseComponent {
         return this.div.getFxNode();
     }
 
+    @Override
+    protected boolean coalesceProperty(PropertyType propertyType) {
+        return propertyType == BasePropertyType.DATA;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
@@ -28,15 +33,18 @@ public final class List<T> extends BaseComponent {
         return super.customPropertyBind(propertyType, propertyBind, getValue);
     }
 
-    private synchronized void init(java.util.List<T> data) {
-        if (data == null) {
-            data = new ArrayList<>();
-        }
+    private void init(java.util.List<T> data) {
+        data = data == null ? new ArrayList<>() : new ArrayList<>(data);
         this.deleteChild();
         for (int i = 0; i < data.size(); i++) {
             T t = data.get(i);
             this.render.accept(i, t);
         }
+    }
+
+    @Override
+    protected void onDelete() {
+        this.render = null;
     }
 
     public void setRender(BiConsumer<Integer, T> render) {

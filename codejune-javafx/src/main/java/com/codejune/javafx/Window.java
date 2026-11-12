@@ -1,8 +1,8 @@
 package com.codejune.javafx;
 
 import com.codejune.core.BaseException;
-import com.codejune.core.util.ArrayUtil;
 import com.codejune.javafx.component.BaseComponent;
+import com.codejune.javafx.component.StyleSheets;
 import com.codejune.javafx.component.Tray;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -28,9 +28,9 @@ public final class Window {
 
     private double y;
 
-    private int width;
+    private double width;
 
-    private int height;
+    private double height;
 
     private boolean resizable = true;
 
@@ -45,6 +45,8 @@ public final class Window {
     private Tray tray = null;
 
     private VBox autoSizeRoot;
+
+    private BaseComponent rootComponent;
 
     private ChangeListener<Boolean> autoSizeNeedsLayoutListener;
 
@@ -95,15 +97,15 @@ public final class Window {
         return this.width;
     }
 
-    public void setWidth(int width) {
+    public void setWidth(double width) {
         Application.runLater(() -> this.stage.setWidth(width));
     }
 
-    public void setMaxWidth(int width) {
+    public void setMaxWidth(double width) {
         Application.runLater(() -> this.stage.setMaxWidth(width >= 0 ? width : Double.MAX_VALUE));
     }
 
-    public void setMinWidth(int width) {
+    public void setMinWidth(double width) {
         Application.runLater(() -> this.stage.setMinWidth(Math.max(width, 0)));
     }
 
@@ -111,15 +113,15 @@ public final class Window {
         return this.height;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(double height) {
         Application.runLater(() -> this.stage.setHeight(height));
     }
 
-    public void setMaxHeight(int height) {
+    public void setMaxHeight(double height) {
         Application.runLater(() -> this.stage.setMaxHeight(height >= 0 ? height : Double.MAX_VALUE));
     }
 
-    public void setMinHeight(int height) {
+    public void setMinHeight(double height) {
         Application.runLater(() -> this.stage.setMinHeight(Math.max(height, 0)));
     }
 
@@ -138,7 +140,7 @@ public final class Window {
                 if (scene != null && scene.getRoot() instanceof VBox vbox) {
                     this.autoSize(this.stage, vbox);
                     if (this.stage.isShowing()) {
-                        this.stage.sizeToScene();
+                        this.sizeToScene();
                     }
                 }
             }
@@ -179,6 +181,9 @@ public final class Window {
 
     public void render(Consumer<BaseComponent> render) {
         Application.runLater(() -> {
+            if (this.rootComponent != null) {
+                this.rootComponent.delete();
+            }
             VBox vBox = new VBox();
             BaseComponent baseComponent = new BaseComponent() {
                 @Override
@@ -187,11 +192,10 @@ public final class Window {
                 }
             };
             baseComponent.setWindow(this);
-            for (String sheet : ArrayUtil.asList("/javafx/style/base.css")) {
-                baseComponent.getStyle().addSheet(sheet);
-            }
+            this.rootComponent = baseComponent;
             if (this.stage.getScene() == null) {
                 Scene scene = new Scene(vBox);
+                StyleSheets.install(scene);
                 this.stage.setScene(scene);
             } else {
                 this.stage.getScene().setRoot(vBox);
@@ -269,7 +273,7 @@ public final class Window {
     }
 
     public void sizeToScene() {
-        this.stage.sizeToScene();
+        Application.runLater(this.stage::sizeToScene);
     }
 
     public synchronized Tray tray() {

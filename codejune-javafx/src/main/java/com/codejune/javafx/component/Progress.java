@@ -13,7 +13,7 @@ public final class Progress extends BaseComponent {
     private final ProgressBar progressBar = new ProgressBar(0.5);
 
     public Progress() {
-        this.getStyle().addSheet("/javafx/style/progress.css").addClass("progress");
+        this.getStyle().addClass("progress");
     }
 
     @Override

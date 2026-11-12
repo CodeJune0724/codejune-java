@@ -15,7 +15,7 @@ public final class Divider extends BaseComponent {
         if (!StringUtil.isEmpty(text)) {
             this.textComponent.getStyle().setMargin(0, 10, 0, 10);
         }
-        this.div.getStyle().addSheet("/javafx/style/divider.css").addClass("divider");
+        this.div.getStyle().addClass("divider");
         this.add(new Div(), div -> {
             div.getStyle().alignment(Pos.CENTER_LEFT).setWidth(0.1);
             div.add(new Div(), divLine -> divLine.getStyle().addClass("divider-line"));

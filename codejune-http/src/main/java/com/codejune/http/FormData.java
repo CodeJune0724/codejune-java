@@ -3,7 +3,6 @@ package com.codejune.http;
 import com.codejune.core.BaseException;
 import com.codejune.core.Builder;
 import com.codejune.core.util.FileUtil;
-import com.codejune.core.util.IOUtil;
 import com.codejune.core.util.ObjectUtil;
 import java.io.File;
 import java.io.InputStream;
@@ -46,8 +45,25 @@ public final class FormData implements Builder {
         FormDataItem formDataItem = new FormDataItem();
         formDataItem.setName(name);
         formDataItem.setFileName(fileName);
-        formDataItem.setContentType(ContentType.DEFAULT_BINARY);
+        formDataItem.setContentType(ContentType.BINARY);
         formDataItem.setData(inputStream);
+        this.formDataItemList.add(formDataItem);
+        return this;
+    }
+
+    /**
+     * 添加文件
+     *
+     * @param name name
+     * @param fileName fileName
+     * @param bytes bytes
+     * */
+    public FormData addFile(String name, String fileName, byte[] bytes) {
+        FormDataItem formDataItem = new FormDataItem();
+        formDataItem.setName(name);
+        formDataItem.setFileName(fileName);
+        formDataItem.setContentType(ContentType.BINARY);
+        formDataItem.setData(bytes);
         this.formDataItemList.add(formDataItem);
         return this;
     }
@@ -62,7 +78,13 @@ public final class FormData implements Builder {
         if (!FileUtil.isFile(file)) {
             throw new BaseException("not file");
         }
-        return this.addFile(name, file.getName(), IOUtil.getInputStream(file));
+        FormDataItem formDataItem = new FormDataItem();
+        formDataItem.setName(name);
+        formDataItem.setFileName(file.getName());
+        formDataItem.setContentType(ContentType.BINARY);
+        formDataItem.setData(file);
+        this.formDataItemList.add(formDataItem);
+        return this;
     }
 
     /**
@@ -84,15 +106,18 @@ public final class FormData implements Builder {
             }
             case Map<?, ?> map -> {
                 this.formDataItemList.clear();
-                for (Object key : map.keySet()) {
-                    String keyString = ObjectUtil.toString(key);
-                    Object value = map.get(key);
-                    if (value instanceof File file) {
-                        this.addFile(keyString, file);
-                    } else if (value instanceof InputStream inputStream) {
-                        this.addFile(keyString, null, inputStream);
-                    } else {
-                        this.addText(keyString, ObjectUtil.toString(value));
+                for (Map.Entry<?, ?> entry : map.entrySet()) {
+                    if (entry.getKey() == null) {
+                        continue;
+                    }
+                    String keyString = ObjectUtil.toString(entry.getKey());
+                    Object value = entry.getValue();
+                    switch (value) {
+                        case File file -> this.addFile(keyString, file);
+                        case InputStream inputStream -> this.addFile(keyString, null, inputStream);
+                        case byte[] bytes -> this.addFile(keyString, null, bytes);
+                        case null -> this.addText(keyString, null);
+                        default -> this.addText(keyString, ObjectUtil.toString(value));
                     }
                 }
             }

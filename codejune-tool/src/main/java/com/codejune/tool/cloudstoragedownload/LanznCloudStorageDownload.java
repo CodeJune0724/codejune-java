@@ -5,10 +5,7 @@ import com.codejune.Javascript;
 import com.codejune.Json;
 import com.codejune.core.BaseException;
 import com.codejune.core.util.*;
-import com.codejune.http.ContentType;
-import com.codejune.http.Header;
-import com.codejune.http.HttpResponse;
-import com.codejune.http.Type;
+import com.codejune.http.*;
 import com.codejune.tool.CloudStorageDownload;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -35,15 +32,10 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
 
     private String baseGetDirectUrl(String baseUrl) {
         // 获取cookie
-        String baseCookie = this.getDownloadCookie(new Http(baseUrl, Type.GET)
-                .addUserAgent()
-                .send());
+        String baseCookie = this.getDownloadCookie(new Http(new HttpRequest(baseUrl, Type.GET).addUserAgent()).send());
 
         // 获取第一层地址
-        HttpResponse<String> httpResponse = new Http(baseUrl, Type.GET)
-                .addUserAgent()
-                .addHeader("cookie", baseCookie)
-                .send();
+        HttpResponse<String> httpResponse = new Http(new HttpRequest(baseUrl, Type.GET).addHeader("cookie", baseCookie).addUserAgent()).send();
         String srcUrl = httpResponse.getBody();
         for (String item : RegexUtil.find("src=\"(.*?)\"", srcUrl)) {
             if (item.startsWith("/fn")) {
@@ -56,9 +48,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         baseCookie = baseCookie + "; " + ArrayUtil.toString(httpResponse.getHeaderList("set-cookie"), header -> header.getValue().split("; ")[0], "; ");
 
         // 获取签名信息
-        String signResult = new Http(baseUrl.split("\\.com")[0] + ".com" + srcUrl, Type.GET)
-                .addUserAgent()
-                .addHeader("cookie", baseCookie)
+        String signResult = new Http(new HttpRequest(baseUrl.split("\\.com")[0] + ".com" + srcUrl, Type.GET).addHeader("cookie", baseCookie).addUserAgent())
                 .send()
                 .getBody();
         String wp_sign = RegexUtil.find("var wp_sign = '(.*?)';", signResult, 1);
@@ -78,11 +68,12 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         }
 
         // 获取实际下载地址
-        String originResult = new Http(url, Type.POST)
+        String originResult = new Http(new HttpRequest(url, Type.POST)
                 .setContentType(ContentType.FORM_URLENCODED)
-                .addUserAgent()
                 .addHeader("referer", "https://wwvx.lanzoul.com/fn?")
                 .setBody("action=downprocess&websignkey=" + ajaxdata + "&signs=" + ajaxdata + "&sign=" + wp_sign + "&websign=&kd=" + kdns + "&ves=1")
+                .addUserAgent()
+        )
                 .send()
                 .getBody();
         Json originResultJson = Json.parse(originResult);
@@ -91,8 +82,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         String downloadUrl = originResultJson.get("dom", String.class) + "/file/" + originResultJson.get("url", String.class);
 
         // 直接获取
-        HttpResponse<String> httpResponseResult = new Http(downloadUrl, Type.GET)
-                .addUserAgent()
+        HttpResponse<String> httpResponseResult = new Http(new HttpRequest(downloadUrl, Type.GET).addUserAgent())
                 .send();
         if (httpResponseResult.getCode() == 302) {
             Header location = httpResponseResult.getHeader("Location");
@@ -103,10 +93,7 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
 
         // 获取cookie
         String cookie = this.getDownloadCookie(httpResponseResult);
-        httpResponseResult = new Http(downloadUrl, Type.GET)
-                .addUserAgent()
-                .addHeader("cookie", cookie)
-                .send();
+        httpResponseResult = new Http(new HttpRequest(downloadUrl, Type.GET).addHeader("cookie", cookie).addUserAgent()).send();
 
         if (httpResponseResult.getCode() != 302) {
             throw new BaseException("获取失败");

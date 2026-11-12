@@ -7,7 +7,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.*;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,21 +16,6 @@ public final class Style {
 
     public Style(BaseComponent baseComponent) {
         this.baseComponent = baseComponent;
-    }
-
-    public Style addSheet(URL url) {
-        if (url == null) {
-            return this;
-        }
-        Node fxNode = this.baseComponent.getFxNode();
-        if (fxNode instanceof Parent parent) {
-            parent.getStylesheets().add(url.toExternalForm());
-        }
-        return this;
-    }
-
-    public Style addSheet(String path) {
-        return this.addSheet(getClass().getResource(path));
     }
 
     public Style addClass(String className) {
@@ -128,6 +112,7 @@ public final class Style {
     public Style setWidth(double width) {
         Node fxNode = this.baseComponent.getFxNode();
         if (fxNode instanceof Region fxNodeRegion) {
+            fxNodeRegion.prefWidthProperty().unbind();
             if (width >= 1) {
                 fxNodeRegion.setPrefWidth(width);
             } else {
@@ -184,6 +169,7 @@ public final class Style {
     public Style setHeight(double height) {
         Node fxNode = this.baseComponent.getFxNode();
         if (fxNode instanceof Region fxNodeRegion) {
+            fxNodeRegion.prefHeightProperty().unbind();
             if (height >= 1) {
                 fxNodeRegion.setPrefHeight(height);
             } else {

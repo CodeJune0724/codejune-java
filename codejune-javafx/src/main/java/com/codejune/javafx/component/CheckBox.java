@@ -19,7 +19,7 @@ public final class CheckBox extends BaseComponent {
     private final Icon icon = new Icon();
 
     public CheckBox(String text) {
-        this.getStyle().addSheet("/javafx/style/checkBox.css").addClass("checkBox");
+        this.getStyle().addClass("checkBox");
         Div div = new Div(Div.Layout.CELL);
         div.getStyle().alignment(Pos.CENTER_LEFT);
         div.add(icon, _ -> this.initIcon());
@@ -47,8 +47,8 @@ public final class CheckBox extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            this.value.addListener(() -> {
-                if (propertyBind.get() instanceof Boolean && getValue == null) {
+            this.listenerBind(this.value, () -> {
+                if (getValue == null) {
                     propertyBind.setObject(this.getValue());
                 }
             });
@@ -60,7 +60,7 @@ public final class CheckBox extends BaseComponent {
     @Override
     protected Runnable customEventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
         if (eventType == BaseEventType.VALUE) {
-            return () -> this.value.addListener(() -> Application.asynchronousRun(runnable, asynchronous));
+            return () -> this.listenerBind(this.value, () -> Application.asynchronousRun(runnable, asynchronous));
         }
         return super.customEventBind(eventType, runnable, asynchronous);
     }

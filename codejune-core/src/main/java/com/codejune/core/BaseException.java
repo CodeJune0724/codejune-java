@@ -15,6 +15,7 @@ public final class BaseException extends RuntimeException {
 
     public BaseException(Exception exception) {
         super(exception.getMessage());
+        this.initCause(exception);
     }
 
 }

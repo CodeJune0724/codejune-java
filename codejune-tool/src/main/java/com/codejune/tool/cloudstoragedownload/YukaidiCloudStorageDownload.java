@@ -4,6 +4,7 @@ import com.codejune.Http;
 import com.codejune.Json;
 import com.codejune.core.BaseException;
 import com.codejune.http.ContentType;
+import com.codejune.http.HttpRequest;
 import com.codejune.http.Type;
 import com.codejune.tool.CloudStorageDownload;
 
@@ -37,15 +38,16 @@ public final class YukaidiCloudStorageDownload extends CloudStorageDownload {
         }
         String id = split[0];
         String fileName = split[1];
-        return new Http("https://silver.yukaidi.com/api/v4/file/url", Type.POST)
+        return new Http(new HttpRequest("https://silver.yukaidi.com/api/v4/file/url", Type.POST)
                 .setContentType(ContentType.APPLICATION_JSON)
-                .addUserAgent()
                 .setBody("{\n" +
                         "    \"uris\": [\n" +
                         "        \"cloudreve://" + id + "@share/" + fileName + "\"\n" +
                         "    ],\n" +
                         "    \"download\": true\n" +
                         "}")
+                .addUserAgent()
+        )
                 .send()
                 .parse(Json.class)
                 .getBody()

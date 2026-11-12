@@ -13,7 +13,7 @@ public final class Input extends BaseComponent {
 
     public Input(String value) {
         this.setValue(value);
-        this.getStyle().addSheet(getClass().getResource("/javafx/style/input.css")).addClass("input");
+        this.getStyle().addClass("input");
         this.getStyle().setMinHeight(30);
     }
 
@@ -29,8 +29,8 @@ public final class Input extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            this.textField.textProperty().addListener((_, _, _) -> {
-                if (propertyBind.get() instanceof String && getValue == null) {
+            this.observe(this.textField.textProperty(), (_, _, _) -> {
+                if (getValue == null) {
                     propertyBind.setObject(this.getValue());
                 }
             });
@@ -42,7 +42,7 @@ public final class Input extends BaseComponent {
     @Override
     protected Runnable customEventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
         if (eventType == BaseEventType.VALUE) {
-            this.textField.textProperty().addListener((_, _, _) -> Application.asynchronousRun(runnable, asynchronous));
+            this.observe(this.textField.textProperty(), (_, _, _) -> Application.asynchronousRun(runnable, asynchronous));
             return () -> {};
         }
         return super.customEventBind(eventType, runnable, asynchronous);

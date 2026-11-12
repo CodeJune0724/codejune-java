@@ -14,7 +14,6 @@ public final class Button extends BaseComponent {
 
     public Button(String text) {
         this.setText(text);
-        this.getStyle().addSheet(getClass().getResource("/javafx/style/button.css"));
         this.getStyle().addClass("button");
         this.setType(Type.DEFAULT);
         this.setSize(Size.DEFAULT);

@@ -11,7 +11,7 @@ public final class Scroll extends BaseComponent {
     private final Div div = new Div();
 
     public Scroll() {
-        this.getStyle().addSheet("/javafx/style/scroll.css").addClass("scroll");
+        this.getStyle().addClass("scroll");
         this.scrollPane.setFitToWidth(true);
         this.scrollPane.setFitToHeight(true);
         this.scrollPane.setContent(this.div.getFxNode());

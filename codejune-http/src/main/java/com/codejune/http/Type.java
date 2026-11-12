@@ -1,7 +1,7 @@
 package com.codejune.http;
 
 /**
- * 类型
+ * 请求类型
  *
  * @author ZJ
  * */
@@ -13,6 +13,24 @@ public enum Type {
 
     PUT,
 
-    DELETE
+    DELETE,
+
+    HEAD,
+
+    OPTIONS,
+
+    PATCH;
+
+    /**
+     * 是否是幂等方法
+     *
+     * @return boolean
+     * */
+    public boolean isIdempotent() {
+        return switch (this) {
+            case GET, HEAD, PUT, DELETE, OPTIONS -> true;
+            case POST, PATCH -> false;
+        };
+    }
 
 }

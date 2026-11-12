@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
 
 # --- JNI 手动指定（按你的实际 JDK 路径改） ---
-set(JAVA_HOME "C:/Program Files/jdk-25.0.3")
+set(JAVA_HOME "C:/application/jdk-25.0.3")
 set(JNI_INCLUDE_DIRS
     "${JAVA_HOME}/include"
     "${JAVA_HOME}/include/win32"

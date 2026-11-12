@@ -15,7 +15,7 @@ public final class Textarea extends BaseComponent {
     public Textarea(int row) {
         this.textArea.setPrefRowCount(row);
         this.textArea.setWrapText(true);
-        this.getStyle().addSheet(getClass().getResource("/javafx/style/textarea.css")).addClass("textarea");
+        this.getStyle().addClass("textarea");
     }
 
     @Override
@@ -26,8 +26,8 @@ public final class Textarea extends BaseComponent {
     @Override
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            this.textArea.textProperty().addListener((_, _, _) -> {
-                if (propertyBind.get() instanceof String && getValue == null) {
+            this.observe(this.textArea.textProperty(), (_, _, _) -> {
+                if (getValue == null) {
                     propertyBind.setObject(this.getValue());
                 }
             });

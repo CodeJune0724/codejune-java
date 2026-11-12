@@ -19,7 +19,7 @@ public enum ContentType {
 
     FORM_URLENCODED("application/x-www-form-urlencoded"),
 
-    DEFAULT_BINARY("default/binary");
+    BINARY("application/octet-stream");
 
     private final String contentType;
 
@@ -28,7 +28,7 @@ public enum ContentType {
     }
 
     public String getContentType() {
-        return contentType;
+        return this.contentType;
     }
 
 }

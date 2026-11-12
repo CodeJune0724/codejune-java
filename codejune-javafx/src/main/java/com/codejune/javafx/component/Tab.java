@@ -32,21 +32,9 @@ public final class Tab<KEY, ITEM> extends BaseComponent {
 
     public Tab() {
         this.main.getStyle().setGap(10);
-        this.main.add(tab);
-        this.main.add(body);
-        this.value.addListener(() -> {
-            for (KEY key : this.tabButtonMap.keySet()) {
-                Button button = this.tabButtonMap.get(key);
-                Div bodyDiv = this.bodyItemMap.get(key);
-                if (ObjectUtil.equals(key, this.value.get())) {
-                    button.getStyle().addCss("-fx-border-color: -fx-base-border-color -fx-base-border-color transparent -fx-base-border-color").setColor("-fx-base-primary-color");
-                    bodyDiv.getStyle().display(true);
-                } else {
-                    button.getStyle().addCss("-fx-border-color: -fx-base-border-color -fx-base-border-color -fx-base-border-color -fx-base-border-color").setColor("rgba(0, 0, 0, 0.8)");
-                    bodyDiv.getStyle().display(false);
-                }
-            }
-        });
+        this.add(this.tab);
+        this.add(this.body);
+        this.listenerBind(this.value, this::applySelection);
     }
 
     @Override
@@ -58,7 +46,9 @@ public final class Tab<KEY, ITEM> extends BaseComponent {
     @SuppressWarnings("unchecked")
     protected Runnable customPropertyBind(PropertyType propertyType, PropertyBind<?> propertyBind, Supplier<?> getValue) {
         if (propertyType == BasePropertyType.VALUE) {
-            this.value.addListener(() -> propertyBind.setObject(this.value.get()));
+            if (getValue == null) {
+                this.listenerBind(this.value, () -> propertyBind.setObject(this.value.get()));
+            }
             return () -> this.setValue((KEY) getPropertyBindValue(propertyBind, getValue));
         }
         if (propertyType == BasePropertyType.DATA) {
@@ -70,9 +60,15 @@ public final class Tab<KEY, ITEM> extends BaseComponent {
     @Override
     protected Runnable customEventBind(EventType eventType, Runnable runnable, boolean asynchronous) {
         if (eventType == BaseEventType.VALUE) {
-            return () -> this.value.addListener(() -> Application.asynchronousRun(runnable, asynchronous));
+            return () -> this.listenerBind(this.value, () -> Application.asynchronousRun(runnable, asynchronous));
         }
         return super.customEventBind(eventType, runnable, asynchronous);
+    }
+
+    @Override
+    protected void onDelete() {
+        this.tabButtonMap.clear();
+        this.bodyItemMap.clear();
     }
 
     public void setValue(KEY key) {
@@ -101,6 +97,7 @@ public final class Tab<KEY, ITEM> extends BaseComponent {
                 this.bodyItemMap.put(key, div);
             });
         }
+        this.applySelection();
     }
 
     public void setKeyHandler(Function<ITEM, KEY> keyHandler) {
@@ -113,6 +110,19 @@ public final class Tab<KEY, ITEM> extends BaseComponent {
 
     public void setBodyRender(Function<ITEM, BaseComponent> bodyRender) {
         this.bodyRender = bodyRender;
+    }
+
+    private void applySelection() {
+        for (KEY key : this.tabButtonMap.keySet()) {
+            Button button = this.tabButtonMap.get(key);
+            Div bodyDiv = this.bodyItemMap.get(key);
+            boolean selected = ObjectUtil.equals(key, this.value.get());
+            button.getStyle().addCss(selected
+                            ? "-fx-border-color: -fx-base-border-color -fx-base-border-color transparent -fx-base-border-color"
+                            : "-fx-border-color: -fx-base-border-color -fx-base-border-color -fx-base-border-color -fx-base-border-color")
+                    .setColor(selected ? "-fx-base-primary-color" : "rgba(0, 0, 0, 0.8)");
+            bodyDiv.getStyle().display(selected);
+        }
     }
 
 }

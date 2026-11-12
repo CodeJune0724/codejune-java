@@ -45,9 +45,9 @@ public final class Grid extends BaseComponent {
         if (action == null) {
             action = _ -> {};
         }
-        baseComponent.setParent(this);
-        this.gridPane.add(baseComponent.getFxNode(), columIndex, rowIndex);
-        action.accept(baseComponent);
+        GridPane.setRowIndex(baseComponent.getFxNode(), rowIndex);
+        GridPane.setColumnIndex(baseComponent.getFxNode(), columIndex);
+        this.add(baseComponent, action);
     }
 
 }
