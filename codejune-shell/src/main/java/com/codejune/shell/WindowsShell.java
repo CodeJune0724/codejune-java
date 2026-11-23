@@ -25,6 +25,12 @@ public final class WindowsShell extends Shell {
 
     private final String promptId = UUID.randomUUID().toString();
 
+    private final String promptMarker = "\033" + this.promptId;
+
+    private static final String NEW_LINE = "\r\n";
+
+    private static final String CONTINUATION_PROMPT = "More? ";
+
     public WindowsShell(String intDirectory) {
         this.intDirectory = intDirectory;
     }
@@ -47,14 +53,10 @@ public final class WindowsShell extends Shell {
         }
         try {
             this.process = processBuilder.start();
-            this.inputStreamReader = new BufferedReader(new InputStreamReader(process.getInputStream(), Encoding.NATIVE));
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), Encoding.NATIVE));
-        } catch (Exception e) {
-            throw new BaseException(e);
-        }
-        try {
-            this.readUntilPromptMarker(null);
-            this.readUntilPromptMarker(null);
+            this.inputStreamReader = new BufferedReader(new InputStreamReader(this.process.getInputStream(), Encoding.NATIVE));
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.process.getOutputStream(), Encoding.NATIVE));
+            this.readThroughPromptMarker(true);
+            this.readThroughPromptMarker(true);
         } catch (IOException e) {
             throw new BaseException(e);
         }
@@ -63,37 +65,46 @@ public final class WindowsShell extends Shell {
     @Override
     public synchronized String command(String command) {
         this.init();
+        String[] lines = command.split("\\r\\n|\\r|\\n", -1);
+        StringBuilder result = new StringBuilder();
         try {
-            String[] inputLines = command.split("\\r\\n|\\r|\\n", -1);
-            this.asyncCommand(String.join("\r\n", inputLines));
-            StringBuilder result = new StringBuilder();
-            int nextInput = 0;
-            while (nextInput < inputLines.length) {
-                StringBuilder response = new StringBuilder();
-                boolean atPrompt = this.readUntilPromptMarker(response);
-                if (atPrompt) {
-                    this.readUntilPromptMarker(null);
-                    if (response.length() >= 2 && response.substring(response.length() - 2).equals("\r\n")) {
-                        response.setLength(response.length() - 2);
+            int nextLine = 0;
+            while (nextLine < lines.length && this.process.isAlive()) {
+                String firstLine = lines[nextLine++];
+                String id = UUID.randomUUID().toString();
+                String start = "__CMD_START_" + id + "__";
+                String end = "__CMD_END_" + id + "__";
+                String body = firstLine.isBlank() || firstLine.stripLeading().startsWith(":") ? "rem" : firstLine;
+                String wrapped = "for %# in (start run end) do @if %#==start (echo(" + start
+                        + ") else if %#==end (echo(" + end + ") else " + body;
+                this.writeLine(wrapped);
+                this.awaitEcho(wrapped, firstLine);
+                String startLine = start + NEW_LINE;
+                String chunk;
+                while ((chunk = this.readChunk(true)) != null && !chunk.equals(startLine)) {
+                    if (this.isPrompt(chunk)) {
+                        this.publish(chunk);
+                        this.readThroughPromptMarker(true);
+                        break;
+                    }
+                    if (chunk.equals(CONTINUATION_PROMPT)) {
+                        this.publish(chunk);
+                        if (nextLine < lines.length) {
+                            this.writeLine(lines[nextLine++]);
+                        }
+                        String echo = this.readChunk(false);
+                        if (echo != null) {
+                            this.publish(echo);
+                        }
+                    } else {
+                        this.append(result, chunk);
                     }
                 }
-                String text = response.toString().replace("\r\n", "\n");
-                String echo = inputLines[nextInput] + "\n";
-                if (text.startsWith(echo) || text.equals(inputLines[nextInput])) {
-                    nextInput++;
-                    int offset = Math.min(echo.length(), text.length());
-                    while (nextInput < inputLines.length &&
-                            text.startsWith("More? " + inputLines[nextInput] + "\n", offset)) {
-                        offset += "More? ".length() + inputLines[nextInput].length() + 1;
-                        nextInput++;
-                    }
-                    result.append(text, offset, text.length());
-                }
-                if (!atPrompt) {
-                    break;
+                if (startLine.equals(chunk) && this.readCommandOutput(result, end + NEW_LINE)) {
+                    this.finishCommand(id);
                 }
             }
-            return result.toString();
+            return result.toString().replace(NEW_LINE, "\n");
         } catch (IOException e) {
             throw new BaseException(e);
         }
@@ -116,42 +127,104 @@ public final class WindowsShell extends Shell {
     public void asyncCommand(String command) {
         this.init();
         try {
-            this.bufferedWriter.write(command);
-            this.bufferedWriter.newLine();
-            this.bufferedWriter.flush();
-        } catch (Exception e) {
+            this.writeLine(command);
+        } catch (IOException e) {
             throw new BaseException(e);
         }
     }
 
-    private boolean readUntilPromptMarker(StringBuilder output) throws IOException {
-        String marker = "\033" + this.promptId;
-        StringBuilder line = new StringBuilder();
-        int c;
-        while ((c = this.inputStreamReader.read()) != -1) {
-            line.append((char) c);
-            if (c == '\n') {
-                this.publish(line, output);
-            } else if (line.length() >= marker.length() &&
-                    line.indexOf(marker, line.length() - marker.length()) >= 0) {
-                line.setLength(line.length() - marker.length());
-                this.publish(line, output);
+    private boolean readCommandOutput(StringBuilder result, String end) throws IOException {
+        String chunk;
+        while ((chunk = this.readChunk(false)) != null) {
+            if (chunk.endsWith(end)) {
+                this.append(result, chunk.substring(0, chunk.length() - end.length()));
                 return true;
             }
+            this.append(result, chunk);
         }
-        this.publish(line, output);
         return false;
     }
 
-    private void publish(StringBuilder line, StringBuilder output) {
-        if (!line.isEmpty()) {
-            if (this.listener != null) {
-                this.listener.accept(line.toString());
+    private void finishCommand(String id) throws IOException {
+        String probe = "@rem " + id;
+        this.writeLine(probe);
+        if (this.awaitEcho(probe, null)) {
+            this.readThroughPromptMarker(false);
+            this.readThroughPromptMarker(false);
+        }
+    }
+
+    private boolean awaitEcho(String input, String replacement) throws IOException {
+        String echo = input + NEW_LINE;
+        boolean insidePrompt = false;
+        boolean promptEnded = false;
+        String chunk;
+        while ((chunk = this.readChunk(false)) != null) {
+            if (chunk.endsWith(echo)) {
+                this.publish(chunk.substring(0, chunk.length() - echo.length()));
+                if (replacement != null) {
+                    this.publish(replacement + NEW_LINE);
+                }
+                return promptEnded;
             }
-            if (output != null) {
-                output.append(line);
+            if (this.isPrompt(chunk)) {
+                insidePrompt = !insidePrompt;
+                promptEnded = !insidePrompt;
+            } else {
+                promptEnded = false;
             }
-            line.setLength(0);
+            this.publish(chunk);
+        }
+        return false;
+    }
+
+    private void readThroughPromptMarker(boolean publish) throws IOException {
+        String chunk;
+        while ((chunk = this.readChunk(false)) != null) {
+            if (publish) {
+                this.publish(chunk);
+            }
+            if (this.isPrompt(chunk)) {
+                return;
+            }
+        }
+    }
+
+    private String readChunk(boolean readingInput) throws IOException {
+        StringBuilder chunk = new StringBuilder();
+        int c;
+        while ((c = this.inputStreamReader.read()) != -1) {
+            chunk.append((char) c);
+            if (c == '\n' || chunk.indexOf(this.promptMarker, chunk.length() - this.promptMarker.length()) >= 0
+                    || (readingInput && CONTINUATION_PROMPT.contentEquals(chunk))) {
+                break;
+            }
+        }
+        return chunk.isEmpty() ? null : chunk.toString();
+    }
+
+    private boolean isPrompt(String chunk) {
+        return chunk.endsWith(this.promptMarker);
+    }
+
+    private void append(StringBuilder result, String chunk) {
+        String visible = chunk.replace(this.promptMarker, "");
+        result.append(visible);
+        this.publish(visible);
+    }
+
+    private void publish(String text) {
+        String visible = text.replace(this.promptMarker, "");
+        if (this.listener != null && !visible.isEmpty()) {
+            this.listener.accept(visible);
+        }
+    }
+
+    private void writeLine(String command) throws IOException {
+        synchronized (this) {
+            this.bufferedWriter.write(command);
+            this.bufferedWriter.write(NEW_LINE);
+            this.bufferedWriter.flush();
         }
     }
 
