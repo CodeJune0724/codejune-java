@@ -59,9 +59,10 @@ public final class LanznCloudStorageDownload extends CloudStorageDownload {
         // 获取实际下载地址
         String originResult = new Http(new HttpRequest("https://" + host + url, Type.POST)
                 .setContentType(ContentType.FORM_URLENCODED)
-                .addHeader("referer", "https://wwvx.lanzoul.com/fn?")
+                .addHeader("referer", "https://" + host + "/fn?")
                 .setBody("action=downprocess&websignkey=" + ajaxdata + "&signs=" + ajaxdata + "&sign=" + wp_sign + "&websign=&kd=" + kdns + "&ves=1")
                 .addUserAgent()
+                .addHeader("cookie", baseCookie)
         )
                 .send()
                 .getBody();
